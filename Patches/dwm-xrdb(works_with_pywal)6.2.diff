@@ -26,16 +26,16 @@ index 1c0b587..5db7d05 100644
 +       [SchemeNorm] = { normfgcolor, normbgcolor, normbordercolor },
 +       [SchemeSel]  = { selfgcolor,  selbgcolor,  selbordercolor  },
  };
- 
+
  /* tagging */
 @@ -56,7 +57,7 @@ static const Layout layouts[] = {
- 
+
  /* commands */
  static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 -static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
 +static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
  static const char *termcmd[]  = { "st", NULL };
- 
+
  static Key keys[] = {
 @@ -84,6 +85,7 @@ static Key keys[] = {
  	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
@@ -63,12 +63,12 @@ index 4bcd5ad..42b04ce 100644
 --- a/drw.h
 +++ b/drw.h
 @@ -39,7 +39,7 @@ void drw_font_getexts(Fnt *font, const char *text, unsigned int len, unsigned in
- 
+
  /* Colorscheme abstraction */
  void drw_clr_create(Drw *drw, Clr *dest, const char *clrname);
 -Clr *drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount);
 +Clr *drw_scm_create(Drw *drw, char *clrnames[], size_t clrcount);
- 
+
  /* Cursor abstraction */
  Cur *drw_cur_create(Drw *drw, int shape);
 diff --git a/dwm.c b/dwm.c
@@ -102,7 +102,7 @@ index 4465af1..7fa45c5 100644
 +                                    } \
 +                                  } \
 +                                }
- 
+
  /* enums */
  enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 @@ -177,6 +193,7 @@ static void grabkeys(void);
@@ -119,12 +119,12 @@ index 4465af1..7fa45c5 100644
  static int xerrorstart(Display *dpy, XErrorEvent *ee);
 +static void xrdb(const Arg *arg);
  static void zoom(const Arg *arg);
- 
+
  /* variables */
 @@ -1014,6 +1032,37 @@ killclient(const Arg *arg)
  	}
  }
- 
+
 +void
 +loadxrdb()
 +{
@@ -143,12 +143,12 @@ index 4465af1..7fa45c5 100644
 +      xrdb = XrmGetStringDatabase(resm);
 +
 +      if (xrdb != NULL) {
-+        XRDB_LOAD_COLOR("dwm.normbordercolor", normbordercolor);
-+        XRDB_LOAD_COLOR("dwm.normbgcolor", normbgcolor);
-+        XRDB_LOAD_COLOR("dwm.normfgcolor", normfgcolor);
-+        XRDB_LOAD_COLOR("dwm.selbordercolor", selbordercolor);
-+        XRDB_LOAD_COLOR("dwm.selbgcolor", selbgcolor);
-+        XRDB_LOAD_COLOR("dwm.selfgcolor", selfgcolor);
++        XRDB_LOAD_COLOR("dwm.color0", normbordercolor);
++        XRDB_LOAD_COLOR("dwm.color8", selbordercolor);
++        XRDB_LOAD_COLOR("dwm.color0", normbgcolor);
++        XRDB_LOAD_COLOR("dwm.color4", normfgcolor);
++        XRDB_LOAD_COLOR("dwm.color0", selfgcolor);
++        XRDB_LOAD_COLOR("dwm.color4", selbgcolor);
 +      }
 +    }
 +  }
@@ -162,7 +162,7 @@ index 4465af1..7fa45c5 100644
 @@ -2110,6 +2159,17 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
  	return -1;
  }
- 
+
 +void
 +xrdb(const Arg *arg)
 +{
