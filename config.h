@@ -83,16 +83,16 @@ static const Layout layouts[] = {
  	{ "🧐",		monocle },		/* All windows on top of eachother */
 	{ ">M>",	centeredfloatingmaster },	/* Same but master floats */
 //	{ "TTT",	bstack },		/* Master on top, slaves on bottom */
-	//{ "🐚",	spiral },		/* Fibonacci spiral */
-	//{ "[\\]",	dwindle },		/* Decreasing in size right and leftward */
-	//{ "[D]",	deck },			/* Master on left, slaves in monocle-like mode on right */
-	//{ "|M|",	centeredmaster },		/* Master in middle, slaves on sides */
-	//{ "===",      bstackhoriz },
-	//{ "HHH",      grid },
-	//{ "###",      nrowgrid },
-	//{ "---",      horizgrid },
-	//{ ":::",      gaplessgrid },
-	//{ "🥏",	NULL },			/* no layout function means floating behavior */
+//	{ "🐚",		spiral },		/* Fibonacci spiral */
+//	{ "[\\]",	dwindle },		/* Decreasing in size right and leftward */
+//	{ "[D]",	deck },			/* Master on left, slaves in monocle-like mode on right */
+//	{ "|M|",	centeredmaster },	/* Master in middle, slaves on sides */
+//	{ "===",	bstackhoriz },
+//	{ "HHH",	grid },
+//	{ "###",	nrowgrid },
+//	{ "---",	horizgrid },
+//	{ ":::",	gaplessgrid },
+//	{ "🥏",		NULL },			/* no layout function means floating behavior */
 	{ NULL,		NULL },
 };
 
@@ -114,6 +114,44 @@ static const char *syncthing[] = { "surf", "127.0.0.1:1210" };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
+				/* Navigation */
+	{ MODKEY,                      XK_j,    focusstack,     {.i = +1 } },
+	{ MODKEY,                      XK_k,    focusstack,     {.i = -1 } },
+	{ MODKEY|ShiftMask,            XK_j,    tagtoleft,      {0} },
+	{ MODKEY|ShiftMask,            XK_k,    tagtoright,     {0} },
+	{ MODKEY,                      XK_h,     setmfact,      {.f = -0.05} },
+	{ MODKEY,                      XK_l,     setmfact,      {.f = +0.05} },
+	{ MODKEY|ShiftMask,            XK_h,     setcfact,      {.f = +0.25} },
+	{ MODKEY|ShiftMask,            XK_l,     setcfact,      {.f = -0.25} },
+//	{ MODKEY,                      XK_k,	shiftview,      {.i = +1 } },
+//	{ MODKEY,                      XK_j,	shiftview,      {.i = -1 } },
+//	{ MODKEY,                 XK_backslash,    focusstack,  {.i = +1 } },
+//	{ MODKEY|ShiftMask,       XK_backslash,    focusstack,  {.i = -1 } },
+	{ MODKEY,                      XK_o,     shiftview,     {.i = +1 } },
+	{ MODKEY,	               XK_i,     shiftview,     {.i = -1 } },
+	{ MODKEY,	               XK_Tab,      view,       {0} },
+	{ MODKEY,	               XK_space,    view,       {0} },
+	{ MODKEY,		XK_semicolon,    incnmaster,    {.i = -1 } },
+	{ MODKEY|ShiftMask,	XK_semicolon,    incnmaster,    {.i = +1 } },
+	{ MODKEY,                      XK_w,        zoom,       {0} },
+	TAGKEYS(                       XK_1,                     0)
+	TAGKEYS(                       XK_2,                     1)
+	TAGKEYS(                       XK_3,                     2)
+	TAGKEYS(                       XK_4,                     3)
+	TAGKEYS(                       XK_5,                     4)
+	TAGKEYS(                       XK_6,                     5)
+	TAGKEYS(                       XK_7,                     6)
+	TAGKEYS(                       XK_8,                     7)
+	TAGKEYS(                       XK_9,                     8)
+	{ MODKEY,                      XK_0,      view,         {.ui = ~0 } },
+	{ MODKEY|ShiftMask,            XK_0,      tag,          {.ui = ~0 } },
+	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
+	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
+	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
+	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
+//	{ MODKEY|ShiftMask,             XK_c,      quit,          {0} },
+
+				/* Scripts */
 	{ MODKEY,                       XK_d,      spawn,         {.v = dmenucmd } },
 	{ MODKEY,	                XK_Return, spawn,         {.v = termcmd } },
 //	{ MODKEY|ShiftMask,             XK_Return, spawn,         SHCMD("samedir &") },
@@ -140,36 +178,11 @@ static Key keys[] = {
 	{ MODKEY,		XK_Escape,	   spawn,	  SHCMD("Sysfunctions001") },
 //	{ MODKEY,		XK_Caps_Lock,	   spawn,	  SHCMD("xdotool key Caps_Lock") },
 	//{ MODKEY|ShiftMask,		XK_f,      spawn,	  SHCMD("thunar") },
-//	{ MODKEY,                 XK_backslash,    focusstack,     {.i = +1 } },
-//	{ MODKEY|ShiftMask,       XK_backslash,    focusstack,     {.i = -1 } },
-	{ MODKEY,		XK_semicolon,      incnmaster,     {.i = -1 } },
-	{ MODKEY|ShiftMask,	XK_semicolon,      incnmaster,     {.i = +1 } },
-	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
-	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
-	{ MODKEY|ShiftMask,             XK_h,      setcfact,       {.f = +0.25} },
-	{ MODKEY|ShiftMask,             XK_l,      setcfact,       {.f = -0.25} },
-	{ MODKEY,                       XK_w,        zoom,         {0} },
-	{ MODKEY,	                XK_Tab,      view,         {0} },
-	{ MODKEY,	                XK_space,    view,         {0} },
 { MODKEY,	XK_e,	spawn,	SHCMD("st -t NewsBoat -e newsboat -q; sleep 4 && pkill -RTMIN+6 dwmblocks || sleep 10 && pkill -RTMIN+6 dwmblocks") },
 { MODKEY,	XK_x,	spawn,	SHCMD("st -t Notes -e nvim -c 'startinsert' ~/Docs/testi/pre-Uni.txt") },
 { MODKEY|ShiftMask,	XK_x, spawn,  SHCMD("st -t Notes -e nvim -c 'startinsert' ~/Docs/testi/Music") },
 	{ MODKEY,	                XK_q,      killclient,     {0} },
-	{ MODKEY,                 XK_o,    shiftview,     {.i = +1 } },
-	{ MODKEY,	          XK_i,    shiftview,     {.i = -1 } },
-	{ MODKEY,                 XK_j,    focusstack,     {.i = +1 } },
-	{ MODKEY,                 XK_k,    focusstack,     {.i = -1 } },
-//	{ MODKEY|ControlMask,     XK_k,    cyclelayout,     {.i = +1 } },
-//	{ MODKEY|ControlMask,     XK_j,    cyclelayout,     {.i = -1 } },
-	{ MODKEY,		XK_backslash,    cyclelayout,     {.i = +1 } },
-	{ MODKEY|ShiftMask,	XK_backslash,    cyclelayout,     {.i = -1 } },
 	{ MODKEY|ShiftMask,         XK_space,  togglefloating,	{0} },
-	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
-	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
-//	{ MODKEY,                       XK_k,	shiftview,         {.i = +1 } },
-//	{ MODKEY,                       XK_j,	shiftview,         {.i = -1 } },
-	{ MODKEY|ShiftMask,             XK_j,   tagtoleft,         {0} },
-	{ MODKEY|ShiftMask,             XK_k,  tagtoright,         {0} },
 	{ MODKEY,                       XK_F1,	togglefullscreen, {0} },
 	{ MODKEY|ControlMask,        	XK_F1,	togglefakefullscreen, {0} },
 	{ MODKEY,	         	XK_F3,      spawn,	SHCMD("dmenumount") },
@@ -177,13 +190,17 @@ static Key keys[] = {
 	{ MODKEY,			XK_F2,      spawn,	SHCMD("dmenu_man") },
 	{ MODKEY,			XK_F5,      quit,       {1} },
 	{ MODKEY,	 		XK_F7,      spawn,	SHCMD("st -e nvim -c VimwikiIndex") },
-	{ MODKEY,		 	XK_F8,   spawn,	SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
+	{ MODKEY,		 	XK_F8,      spawn,      SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
 { MODKEY,	XK_F9,	spawn,	SHCMD("setkeys001 & notify-send 'Keyboard⌨️ ' 'Keyboard remapping...\nRerunning customs shorcuts...'") },
 { MODKEY,	XK_F10,	spawn,	SHCMD("setxkbmap -layout us -variant altgr-intl -option nodeadkeys & notify-send 'Keyboard⌨️ ' 'Keyboard remapping...\nRunning keyboard defaults, US altgr-intl variant with nodeadkeys...'") },
 	{ MODKEY,		XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
 	{ MODKEY,                       XK_F12,     xrdb,           {.v = NULL } },
 { 0, XK_Print,	spawn,	SHCMD("scrot -u -se 'mv $f ~/Downloads && magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
 	{ ShiftMask,			XK_Print,	spawn,		SHCMD("scrot") },
+
+				/* Layouts */
+	{ MODKEY,		XK_backslash,    cyclelayout,     {.i = +1 } },
+	{ MODKEY|ShiftMask,	XK_backslash,    cyclelayout,     {.i = -1 } },
 //	{ MODKEY,			XK_t,		setlayout,	{.v = &layouts[0]} }, //monocle
 //	{ MODKEY|ShiftMask,		XK_t,		setlayout,	{.v = &layouts[1]} }, //tile
 //	{ MODKEY,			XK_n,		setlayout,	{.v = &layouts[2]} }, //bstack
@@ -191,6 +208,8 @@ static Key keys[] = {
 //	{ MODKEY,			XK_i,		setlayout,	{.v = &layouts[4]} }, //dwindle
 //	{ MODKEY|ShiftMask,		XK_f,		setlayout,	{.v = &layouts[5]} }, //deck
 //{ MODKEY,			XK_f,		setlayout,	{.v = &layouts[6]} }, //centeredmaster
+//	{ MODKEY|ControlMask,     XK_k,    cyclelayout,     {.i = +1 } },
+//	{ MODKEY|ControlMask,     XK_j,    cyclelayout,     {.i = -1 } },
 
 				/* Audio */
 //	{ 0,            XF86XK_AudioLowerVolume,   spawn,         {.v = downvol } },
@@ -217,22 +236,8 @@ static Key keys[] = {
 	{ MODKEY,	XK_bracketleft,		spawn,	SHCMD("mpc prev; kill -45 $(pidof dwmblocks)") },
 	{ MODKEY,	XK_bracketright,	spawn,	SHCMD("mpc next; kill -45 $(pidof dwmblocks)") },
 	{ MODKEY,		XK_p,		spawn,	SHCMD("mpc toggle; kill -45 $(pidof dwmblocks)") },
-//	{ MODKEY|ShiftMask,	XK_p,		spawn,	SHCMD("mpdnoti") },
 	{ MODKEY|ControlMask,	XK_p,		spawn,	SHCMD("mpdnoti") },
-	TAGKEYS(                        XK_1,                      0)
-	TAGKEYS(                        XK_2,                      1)
-	TAGKEYS(                        XK_3,                      2)
-	TAGKEYS(                        XK_4,                      3)
-	TAGKEYS(                        XK_5,                      4)
-	TAGKEYS(                        XK_6,                      5)
-	TAGKEYS(                        XK_7,                      6)
-	TAGKEYS(                        XK_8,                      7)
-	TAGKEYS(                        XK_9,                      8)
-	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
-	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
-	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
-	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
-//	{ MODKEY|ShiftMask,             XK_c,      quit,          {0} },
+//	{ MODKEY|ShiftMask,	XK_p,		spawn,	SHCMD("mpdnoti") },
 
 				/* GAPS */
 	{ MODKEY,			XK_f,      incrgaps,       {.i = +3 } },
