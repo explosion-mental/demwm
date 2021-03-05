@@ -41,7 +41,7 @@ index 1c0b587..5db7d05 100644
  	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
  	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
  	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
-+	{ MODKEY,                       XK_F5,     xrdb,           {.v = NULL } },
++	{ MODKEY,                       XK_12,     xrdb,           {.v = NULL } },
  	TAGKEYS(                        XK_1,                      0)
  	TAGKEYS(                        XK_2,                      1)
  	TAGKEYS(                        XK_3,                      2)
@@ -143,12 +143,12 @@ index 4465af1..7fa45c5 100644
 +      xrdb = XrmGetStringDatabase(resm);
 +
 +      if (xrdb != NULL) {
-+        XRDB_LOAD_COLOR("dwm.color0", normbordercolor);
-+        XRDB_LOAD_COLOR("dwm.color8", selbordercolor);
-+        XRDB_LOAD_COLOR("dwm.color0", normbgcolor);
-+        XRDB_LOAD_COLOR("dwm.color4", normfgcolor);
-+        XRDB_LOAD_COLOR("dwm.color0", selfgcolor);
-+        XRDB_LOAD_COLOR("dwm.color4", selbgcolor);
++        XRDB_LOAD_COLOR("dwm.color0", normbordercolor); //borders(don't use them)
++        XRDB_LOAD_COLOR("dwm.color8", selbordercolor);	//borders(don't use them)
++        XRDB_LOAD_COLOR("dwm.color0", normbgcolor);	//bar(transparent or default color)
++        XRDB_LOAD_COLOR("dwm.color4", normfgcolor);	//bartext(light)
++        XRDB_LOAD_COLOR("dwm.color0", selfgcolor);	//titlefont(same as bar)
++        XRDB_LOAD_COLOR("dwm.color4", selbgcolor);	//selected(most prominent color on the wall)
 +      }
 +    }
 +  }
