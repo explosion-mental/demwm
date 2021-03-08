@@ -169,6 +169,8 @@ index 4465af1..7fa45c5 100644
 +  loadxrdb();
 +  int i;
 +  for (i = 0; i < LENGTH(colors); i++)
++		//uncomment and delete the other one if you have alpha patch
++		//scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
 +                scheme[i] = drw_scm_create(drw, colors[i], 3);
 +  focus(NULL);
 +  arrange(NULL);

@@ -107,6 +107,7 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
+static const char *clip[] = { "clipmenu", "-i", "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
 static const char *termcmd[]  = { "st", NULL };
 static const char *web[] = { "surf", "start.duckduckgo.com" };
 static const char *syncthing[] = { "surf", "127.0.0.1:1210" };
@@ -162,7 +163,8 @@ static Key keys[] = {
 	{ MODKEY,		    XK_grave,      spawn,	  SHCMD("dmenuunicode") },
 	{ MODKEY|ControlMask,	    XK_grave,	togglebar,	  {0} },
 	//{ MODKEY,	       XK_semicolon,	   spawn,	  SHCMD("dmenu_mpc") },
-	{ MODKEY,		XK_apostrophe,	    spawn,	  SHCMD("clipmenu") },
+//	{ MODKEY,		XK_apostrophe,	    spawn,	  SHCMD("clipmenu") },
+	{ MODKEY,		XK_apostrophe,	    spawn,	  {.v = clip } },
 	{ MODKEY,			XK_b,	   spawn,	  SHCMD("Books001") },
 	{ MODKEY|ShiftMask,		XK_b,	   spawn,	  SHCMD("Boletin001") },
 	{ MODKEY,			XK_y,	   spawn,	  SHCMD("termyt -r") },
