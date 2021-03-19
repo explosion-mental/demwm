@@ -20,11 +20,8 @@ static char selfgcolor[]            = "#eeeeee";
 static char selbordercolor[]        = "#770000";
 static char selbgcolor[]            = "#005577";
 static char *fonts[]          = {
-//	"monospace:size=10",
-	"Hack Nerd Font:pixelsize=14:antialias=true:autohint=true", // Powerline
-//	"SauceCodePro Nerd Font:pixelsize=14:antialias=true:autohint=true",
-//	"SauceCodePro Nerd Font: style=Mono Regular:size=14",
-	"Noto Color Emoji:pixelsize=17:antialias=true:autohint=true: style=Regular" //emojis
+	"Hack Nerd Font:pixelsize=14:antialias=true:autohint=true", /* Powerline */
+	"Noto Color Emoji:pixelsize=17:antialias=true:autohint=true: style=Regular" /* Emojis */
 };
 static char *colors[][3] = {
        /*               fg           bg           border   */
@@ -72,13 +69,12 @@ static const Rule rules[] = {
 };
 
 /* layout(s) */
-static float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
-static int nmaster     = 1;    /* number of clients in master area */
-static int resizehints = 0;    /* 1 means respect size hints in tiled resizals */
-#define FORCE_VSPLIT 1  /* nrowgrid layout: force two clients to always split vertically */
+static float mfact     = 0.55;	/* factor of master area size [0.05..0.95] */
+static int nmaster     = 1;	/* number of clients in master area */
+static int resizehints = 0;	/* 1 means respect size hints in tiled resizals */
+#define FORCE_VSPLIT 1		/* nrowgrid layout: force two clients to always split vertically */
 #include "vanitygaps.c"
 #include <X11/XF86keysym.h>
-#include "shiftview.c"
 
 static const Layout layouts[] = {
 	/* symbol     arrange function */
@@ -89,7 +85,7 @@ static const Layout layouts[] = {
 	//{ "🐚",	spiral },		/* Fibonacci spiral */
 	//{ "[\\]",	dwindle },		/* Decreasing in size right and leftward */
 	//{ "[D]",	deck },			/* Master on left, slaves in monocle-like mode on right */
-	//{ "|M|",	centeredmaster },		/* Master in middle, slaves on sides */
+	//{ "|M|",	centeredmaster },	/* Master in middle, slaves on sides */
 	//{ "===",      bstackhoriz },
 	//{ "HHH",      grid },
 	//{ "###",      nrowgrid },
@@ -106,12 +102,7 @@ static const Layout layouts[] = {
 	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
 	{ MODKEY|ShiftMask,             KEY,      tag,            {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
-/* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
-//Better way to do cmds?
-//#define CMD(KEY,SHCMD)
-//	{ MODKEY,                       KEY,      SHCMD, {.ui = 1 << TAG} },
-//CMD(                            XK_d,                   "dmenu_run")
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
@@ -145,7 +136,7 @@ static Key keys[] = {
 	{ MODKEY,		    XK_slash,	   spawn,	  SHCMD("dmenu_browser") },
 	{ MODKEY|ShiftMask,	    XK_slash,	   spawn,	  SHCMD("tuxi -q") },
 	//{ MODKEY,		XK_m,	   spawn,	  SHCMD("st -t 'FileManager🗄️' -e vifmrun") },
-	{ MODKEY,		XK_m,	   spawn,	  {.v = vifm} },
+	{ MODKEY,			XK_m,	   spawn,	  {.v = vifm} },
 //	{ MODKEY|ShiftMask,	XK_m,	   spawn,	  SHCMD("samedir") },
 	{ MODKEY|ShiftMask,	        XK_n,      spawn,	  SHCMD("xdotool click 1") },
 	{ MODKEY,			XK_v,	   spawn,	  SHCMD("st -e ncmpcpp -q") },
@@ -263,8 +254,6 @@ static Key keys[] = {
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static Button buttons[] = {
 	/* click                event mask      button          function        argument */
-//	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
-//	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
 	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
 	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
 	{ ClkWinTitle,          0,              Button1,  	spawn,	SHCMD("Screenshots001") },
