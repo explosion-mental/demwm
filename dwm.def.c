@@ -177,6 +177,19 @@ typedef struct {
 	int monitor;
 } Rule;
 
+///* Xresources preferences */
+//enum resource_type {
+//	STRING = 0,
+//	INTEGER = 1,
+//	FLOAT = 2
+//};
+
+//typedef struct {
+//	char *name;
+//	enum resource_type type;
+//	void *dst;
+//} ResourcePref;
+
 /* function declarations */
 static void applyrules(Client *c);
 static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
@@ -273,6 +286,8 @@ static void updatetitle(Client *c);
 static void updatewindowtype(Client *c);
 static void updatewmhints(Client *c);
 static void view(const Arg *arg);
+//static void viewtoleft(const Arg *arg);
+//static void viewtoright(const Arg *arg);
 static Client *wintoclient(Window w);
 static Monitor *wintomon(Window w);
 static int xerror(Display *dpy, XErrorEvent *ee);
@@ -281,6 +296,8 @@ static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void xrdb(const Arg *arg);
 static void xinitvisual();
 static void zoom(const Arg *arg);
+//static void load_xresources(void);
+//static void resource_load(XrmDatabase db, char *name, enum resource_type rtype, void *dst);
 
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
@@ -493,8 +510,8 @@ swallow(Client *p, Client *c)
 {
 	if (c->noswallow || c->isterminal)
 		return;
-	if (c->noswallow && !swallowfloating && c->isfloating)
-	//if (!swallowfloating && c->isfloating)
+	//if (c->noswallow && !swallowfloating && c->isfloating)
+	if (!swallowfloating && c->isfloating)
 		return;
 
 	detach(c);
@@ -510,6 +527,7 @@ swallow(Client *p, Client *c)
 	p->win = c->win;
 	c->win = w;
 	updatetitle(p);
+//	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
 	XWindowChanges wc;
 	wc.border_width = p->bw;
 	XConfigureWindow(dpy, p->win, CWBorderWidth, &wc);
@@ -1235,12 +1253,12 @@ loadxrdb()
       xrdb = XrmGetStringDatabase(resm);
 
       if (xrdb != NULL) {
-        XRDB_LOAD_COLOR("dwm.color0", normbordercolor);	/*borders(don't use them)*/
-        XRDB_LOAD_COLOR("dwm.color4", selbordercolor);	/*borders(don't use them)*/
-        XRDB_LOAD_COLOR("dwm.color0", normbgcolor);	/*bar(transparent or default color)*/
-        XRDB_LOAD_COLOR("dwm.color8", normfgcolor);	/*bartext(light)*/
-        XRDB_LOAD_COLOR("dwm.color0", selfgcolor);	/*titlefont(same as bar)*/
-        XRDB_LOAD_COLOR("dwm.color2", selbgcolor);	/*selected(most prominent color on the wall)*/
+        XRDB_LOAD_COLOR("dwm.color0", normbordercolor);	//borders(don't use them)
+        XRDB_LOAD_COLOR("dwm.color4", selbordercolor);	//borders(don't use them)
+        XRDB_LOAD_COLOR("dwm.color0", normbgcolor);	//bar(transparent or default color)
+        XRDB_LOAD_COLOR("dwm.color8", normfgcolor);	//bartext(light)
+        XRDB_LOAD_COLOR("dwm.color0", selfgcolor);	//titlefont(same as bar)
+        XRDB_LOAD_COLOR("dwm.color2", selbgcolor);	//selected(most prominent color on the wall)
       }
     }
   }
@@ -1349,9 +1367,13 @@ monocle(Monitor *m)
 
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
 
+//	for (c = m->clients; c; c = c->next)
+//		if (ISVISIBLE(c))
+//			n++;
 	if (n > 0) /* override layout symbol */
 		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
 	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
+		//resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
 		resize(c, m->wx + ov, m->wy + oh, m->ww - 2 * c->bw - 2 * ov, m->wh - 2 * c->bw - 2 * oh, 0);
 }
 
@@ -1747,12 +1769,26 @@ setfullscreen(Client *c, int fullscreen)
 {
 	int savestate = 0, restorestate = 0, restorefakefullscreen = 0;
 
-		if ((c->fakefullscreen == 0 && fullscreen && !c->isfullscreen) /* normal fullscreen */
-			|| (c->fakefullscreen == 2 && fullscreen)) /* fake fullscreen --> actual fullscreen */
-		savestate = 1; /* go actual fullscreen */
-	else if ((c->fakefullscreen == 0 && !fullscreen && c->isfullscreen) /* normal fullscreen exit */
-			|| (c->fakefullscreen >= 2 && !fullscreen)) /* fullscreen exit --> fake fullscreen */
-		restorestate = 1; /* go back into tiled */
+		if ((c->fakefullscreen == 0 && fullscreen && !c->isfullscreen) // normal fullscreen
+			|| (c->fakefullscreen == 2 && fullscreen)) // fake fullscreen --> actual fullscreen
+		savestate = 1; // go actual fullscreen
+	else if ((c->fakefullscreen == 0 && !fullscreen && c->isfullscreen) // normal fullscreen exit
+			|| (c->fakefullscreen >= 2 && !fullscreen)) // fullscreen exit --> fake fullscreen
+		restorestate = 1; // go back into tiled
+
+//		if ((c->fakefullscreen == 0 && fullscreen && !c->isfullscreen) // normal fullscreen
+//			|| (c->fakefullscreen == 2 && fullscreen)) // fake fullscreen --> actual fullscreen
+//		savestate = 1; // go actual fullscreen
+//	else if ((c->fakefullscreen == 0 && !fullscreen && c->isfullscreen) // normal fullscreen exit
+//			|| (c->fakefullscreen >= 2 && !fullscreen)) // fullscreen exit --> fake fullscreen
+
+//	if ((c->fakefullscreen == 0 && !fullscreen) // Start with ff
+//		|| (c->fakefullscreen == 2 && fullscreen && !c->isfullscreen)) // fake fullscreen --> actual fullscreen
+//		savestate = 1; // go actual fullscreen
+//	else if ((c->fakefullscreen == 0 && !fullscreen && c->isfullscreen) // normal fullscreen exit
+//			|| (c->fakefullscreen >= 2 && !fullscreen)) // fullscreen exit --> fake fullscreen
+//		restorestate = 1; // go back into tiled
+
 	/* If leaving fullscreen and the window was previously fake fullscreen (2), then restore
 	 * that while staying in fullscreen. The exception to this is if we are in said state, but
 	 * the client itself disables fullscreen (3) then we let the client go out of fullscreen
@@ -1764,7 +1800,7 @@ setfullscreen(Client *c, int fullscreen)
 		fullscreen = 1;
 	}
 
-	if (fullscreen != c->isfullscreen) { /* only send property change if necessary */
+	if (fullscreen != c->isfullscreen) { // only send property change if necessary
 		if (fullscreen)
 			XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
 				PropModeReplace, (unsigned char*)&netatom[NetWMFullscreen], 1);
@@ -2062,7 +2098,7 @@ togglefakefullscreen(const Arg *arg)
 	if (!c)
 		return;
 
-	if (c->fakefullscreen != 1 && c->isfullscreen) { /* exit fullscreen --> fake fullscreen */
+	if (c->fakefullscreen != 1 && c->isfullscreen) { // exit fullscreen --> fake fullscreen
 		c->fakefullscreen = 2;
 		setfullscreen(c, 0);
 	} else if (c->fakefullscreen == 1) {
@@ -2095,7 +2131,7 @@ togglefullscreen(const Arg *arg)
 	if (!c)
 		return;
 
-	if (c->fakefullscreen == 1) { /* fake fullscreen --> fullscreen */
+	if (c->fakefullscreen == 1) { // fake fullscreen --> fullscreen
 		c->fakefullscreen = 2;
 		setfullscreen(c, 1);
 	} else
@@ -2632,6 +2668,28 @@ isdescprocess(pid_t p, pid_t c)
 
 	return (int)c;
 }
+//
+//void
+//viewtoleft(const Arg *arg) {
+//	if(__builtin_popcount(selmon->tagset[selmon->seltags] & TAGMASK) == 1
+//	&& selmon->tagset[selmon->seltags] > 1) {
+//		selmon->seltags ^= 1; /* toggle sel tagset */
+//		selmon->tagset[selmon->seltags] = selmon->tagset[selmon->seltags ^ 1] >> 1;
+//		focus(NULL);
+//		arrange(selmon);
+//	}
+//}
+//
+//void
+//viewtoright(const Arg *arg) {
+//	if(__builtin_popcount(selmon->tagset[selmon->seltags] & TAGMASK) == 1
+//	&& selmon->tagset[selmon->seltags] & (TAGMASK >> 1)) {
+//		selmon->seltags ^= 1; /* toggle sel tagset */
+//		selmon->tagset[selmon->seltags] = selmon->tagset[selmon->seltags ^ 1] << 1;
+//		focus(NULL);
+//		arrange(selmon);
+//	}
+//}
 
 Client *
 termforwin(const Client *w)
@@ -2740,7 +2798,8 @@ xrdb(const Arg *arg)
   loadxrdb();
   int i;
   for (i = 0; i < LENGTH(colors); i++)
-  	scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+               // scheme[i] = drw_scm_create(drw, colors[i], 3);
+  		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
   focus(NULL);
   arrange(NULL);
 }
@@ -2759,6 +2818,60 @@ zoom(const Arg *arg)
 	pop(c);
 }
 
+//void
+//resource_load(XrmDatabase db, char *name, enum resource_type rtype, void *dst)
+//{
+//	char *sdst = NULL;
+//	int *idst = NULL;
+//	float *fdst = NULL;
+//
+//	sdst = dst;
+//	idst = dst;
+//	fdst = dst;
+//
+//	char fullname[256];
+//	char *type;
+//	XrmValue ret;
+//
+//	snprintf(fullname, sizeof(fullname), "%s.%s", "dwm", name);
+//	fullname[sizeof(fullname) - 1] = '\0';
+//
+//	XrmGetResource(db, fullname, "*", &type, &ret);
+//	if (!(ret.addr == NULL || strncmp("String", type, 64)))
+//	{
+//		switch (rtype) {
+//		case STRING:
+//			strcpy(sdst, ret.addr);
+//			break;
+//		case INTEGER:
+//			*idst = strtoul(ret.addr, NULL, 10);
+//			break;
+//		case FLOAT:
+//			*fdst = strtof(ret.addr, NULL);
+//			break;
+//		}
+//	}
+//}
+
+//void
+//load_xresources(void)
+//{
+//	Display *display;
+//	char *resm;
+//	XrmDatabase db;
+//	ResourcePref *p;
+//
+//	display = XOpenDisplay(NULL);
+//	resm = XResourceManagerString(display);
+//	if (!resm)
+//		return;
+//
+//	db = XrmGetStringDatabase(resm);
+//	for (p = resources; p < resources + LENGTH(resources); p++)
+//		resource_load(db, p->name, p->type, p->dst);
+//	XCloseDisplay(display);
+//}
+
 int
 main(int argc, char *argv[])
 {
@@ -2775,6 +2888,7 @@ main(int argc, char *argv[])
 	checkotherwm();
 	XrmInitialize();
         loadxrdb();
+//	load_xresources();
 	setup();
 #ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1)
