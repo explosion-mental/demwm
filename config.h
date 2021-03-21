@@ -196,7 +196,7 @@ static Key keys[] = {
 //	{ MODKEY|ShiftMask,		XK_i,		setlayout,	{.v = &layouts[3]} }, //spiral
 //	{ MODKEY,			XK_i,		setlayout,	{.v = &layouts[4]} }, //dwindle
 //	{ MODKEY|ShiftMask,		XK_f,		setlayout,	{.v = &layouts[5]} }, //deck
-//{ MODKEY,			XK_f,		setlayout,	{.v = &layouts[6]} }, //centeredmaster
+//	{ MODKEY,			XK_f,		setlayout,	{.v = &layouts[6]} }, //centeredmaster
 
 				/* Audio */
 //	{ 0,            XF86XK_AudioLowerVolume,   spawn,         {.v = downvol } },
