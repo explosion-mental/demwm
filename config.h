@@ -1,6 +1,6 @@
 /* See LICENSE file for copyright and license details. */
 
-/* appearance */
+/* Appearance: colors on here are not used, see loadxrdb function on dwm.c */
 static unsigned int borderpx  = 0;        /* border pixel of windows */
 static unsigned int snap      = 32;       /* snap pixel */
 static unsigned int gappih    = 15;       /* horiz inner gap between windows */
@@ -11,20 +11,21 @@ static int swallowfloating    = 0;        /* 1 means swallow floating windows by
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int showbar            = 1;        /* 0 means no bar */
 static int topbar             = 1;        /* 0 means bottom bar */
-static const unsigned int baralpha = 185;
-static const unsigned int borderalpha = OPAQUE;
-static char normbgcolor[]           = "#222222";
-static char normbordercolor[]       = "#444444";
-static char normfgcolor[]           = "#bbbbbb";
-static char selfgcolor[]            = "#eeeeee";
-static char selbordercolor[]        = "#770000";
-static char selbgcolor[]            = "#005577";
-static char *fonts[]          = {
-	"Hack Nerd Font:pixelsize=14:antialias=true:autohint=true", /* Powerline */
-	"Noto Color Emoji:pixelsize=17:antialias=true:autohint=true: style=Regular" /* Emojis */
+static char normbgcolor[]     = "#222222";	/*borders(don't use them)*/
+static char normbordercolor[] = "#444444";	/*borders(don't use them)*/
+static char normfgcolor[]     = "#bbbbbb";	/*bar(transparent or default color)*/
+static char selfgcolor[]      = "#eeeeee";	/*bartext(light)*/
+static char selbordercolor[]  = "#770000";	/*titlefont(same as bar)*/
+static char selbgcolor[]      = "#005577";	/*selected(most prominent color on the wallpaper)*/
+static const unsigned int baralpha    = 185;	/* Bar opcaity (0-255) */
+static const unsigned int borderalpha = OPAQUE;	/* Borders */
+static char *fonts[] = {
+	"Hack Nerd Font:pixelsize=14:antialias=true:autohint=true", // Powerline
+//	"SauceCodePro Nerd Font:pixelsize=14:antialias=true:autohint=true",
+	"Noto Color Emoji:pixelsize=17:antialias=true:autohint=true: style=Regular" // Emojis
 };
 static char *colors[][3] = {
-       /*               fg           bg           border   */
+       /*               fg           bg           border	 */
        [SchemeNorm] = { normfgcolor, normbgcolor, normbordercolor },
        [SchemeSel]  = { selfgcolor,  selbgcolor,  selbordercolor  },
 };
@@ -34,7 +35,7 @@ static const unsigned int alphas[][3]      = {
 	[SchemeSel]  = { OPAQUE, baralpha, borderalpha },
 };
 
-/* tagging */
+/* tags */
 static const char *tags[] = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
 //some icons嗢📊
 
@@ -72,9 +73,9 @@ static const Rule rules[] = {
 static float mfact     = 0.55;	/* factor of master area size [0.05..0.95] */
 static int nmaster     = 1;	/* number of clients in master area */
 static int resizehints = 0;	/* 1 means respect size hints in tiled resizals */
-#define FORCE_VSPLIT 1		/* nrowgrid layout: force two clients to always split vertically */
-#include "vanitygaps.c"
-#include <X11/XF86keysym.h>
+//#define FORCE_VSPLIT 1		/* nrowgrid layout: force two clients to always split vertically */
+#include "vanitygaps.c"		/* Gaps */
+#include <X11/XF86keysym.h>	/* XF86 Keys */
 
 static const Layout layouts[] = {
 	/* symbol     arrange function */
@@ -102,7 +103,12 @@ static const Layout layouts[] = {
 	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
 	{ MODKEY|ShiftMask,             KEY,      tag,            {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
+/* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd?*/
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+//Better way to do cmds?
+//#define CMD(KEY,SHCMD)
+//	{ MODKEY,                       KEY,      SHCMD, {.ui = 1 << TAG} },
+//CMD(                            XK_d,                   "dmenu_run")
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
@@ -136,7 +142,7 @@ static Key keys[] = {
 	{ MODKEY,		    XK_slash,	   spawn,	  SHCMD("dmenu_browser") },
 	{ MODKEY|ShiftMask,	    XK_slash,	   spawn,	  SHCMD("tuxi -q") },
 	//{ MODKEY,		XK_m,	   spawn,	  SHCMD("st -t 'FileManager🗄️' -e vifmrun") },
-	{ MODKEY,			XK_m,	   spawn,	  {.v = vifm} },
+	{ MODKEY,		XK_m,	   spawn,	  {.v = vifm} },
 //	{ MODKEY|ShiftMask,	XK_m,	   spawn,	  SHCMD("samedir") },
 	{ MODKEY|ShiftMask,	        XK_n,      spawn,	  SHCMD("xdotool click 1") },
 	{ MODKEY,			XK_v,	   spawn,	  SHCMD("st -e ncmpcpp -q") },
@@ -189,6 +195,7 @@ static Key keys[] = {
 	{ MODKEY,		XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
 	{ MODKEY,                       XK_F12,     xrdb,           {.v = NULL } },
 { 0, XK_Print,	spawn,	SHCMD("scrot -u -se 'mv $f ~/Downloads && magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
+	{ MODKEY,			XK_Print,	spawn,		SHCMD("dmenurecord") },
 	{ ShiftMask,			XK_Print,	spawn,		SHCMD("scrot") },
 //	{ MODKEY,			XK_t,		setlayout,	{.v = &layouts[0]} }, //monocle
 //	{ MODKEY|ShiftMask,		XK_t,		setlayout,	{.v = &layouts[1]} }, //tile
@@ -196,7 +203,7 @@ static Key keys[] = {
 //	{ MODKEY|ShiftMask,		XK_i,		setlayout,	{.v = &layouts[3]} }, //spiral
 //	{ MODKEY,			XK_i,		setlayout,	{.v = &layouts[4]} }, //dwindle
 //	{ MODKEY|ShiftMask,		XK_f,		setlayout,	{.v = &layouts[5]} }, //deck
-//	{ MODKEY,			XK_f,		setlayout,	{.v = &layouts[6]} }, //centeredmaster
+//{ MODKEY,			XK_f,		setlayout,	{.v = &layouts[6]} }, //centeredmaster
 
 				/* Audio */
 //	{ 0,            XF86XK_AudioLowerVolume,   spawn,         {.v = downvol } },
@@ -214,9 +221,9 @@ static Key keys[] = {
 { MODKEY|ShiftMask,  XK_equal,	spawn,	SHCMD("mpc volume +3") },
 { MODKEY|ShiftMask,	XK_bracketleft,		spawn,	SHCMD("mpc seek -10") },
 { MODKEY|ShiftMask,	XK_bracketright,	spawn,	SHCMD("mpc seek +10") },
+{ 0,	XF86XK_Calculator,	spawn,	SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 	{ 0,	XF86XK_AudioPrev,		spawn,	SHCMD("mpc volume -3") },
 	{ 0,	XF86XK_AudioNext,		spawn,	SHCMD("mpc volume +3") },
-	{ 0,	XF86XK_Calculator,		spawn,	SHCMD("Screenshots001") },
 	{ 0,	XF86XK_Sleep,			spawn,	SHCMD("sudo zzz") },
 	{ 0,	XF86XK_ScreenSaver,		spawn,	SHCMD("xset dpms force off") },
 //{ 0, XF86XK_ScreenSaver,	spawn,	SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
@@ -250,13 +257,15 @@ static Key keys[] = {
 //	{ MODKEY|ControlMask,           XK_o,	setcfact,       {.f =  0.00} },
 };
 
-/* button definitions */
-/* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
+/* button definitions
+ * click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static Button buttons[] = {
 	/* click                event mask      button          function        argument */
+//	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
+//	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
 	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
 	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
-	{ ClkWinTitle,          0,              Button1,  	spawn,	SHCMD("Screenshots001") },
+	{ ClkWinTitle,          0,              Button1,  	spawn,	SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
 	{ ClkWinTitle,	0,	Button3,  	spawn,	SHCMD("scrot -u -se 'mv $f ~/Downloads'") },
 	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1} },
