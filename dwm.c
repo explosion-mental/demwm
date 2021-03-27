@@ -276,6 +276,7 @@ static int xerror(Display *dpy, XErrorEvent *ee);
 static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void xrdb(const Arg *arg);
+static void random_wall(const Arg *arg);
 static void xinitvisual();
 static void zoom(const Arg *arg);
 
@@ -2721,6 +2722,36 @@ xrdb(const Arg *arg)
   	scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
   focus(NULL);
   arrange(NULL);
+}
+
+void
+random_wall(const Arg *arg)//How to run this simultaneos, asyncronwhatever, to run them on the background
+{
+	/* Daemonize, I'm guessing... */
+//	if (fork() != 0){
+//		fork();
+//		wait(NULL);
+//		xrdb(NULL); }
+	if (fork() == 0) {
+		if (dpy)
+			close(ConnectionNumber(dpy));
+		setsid();
+		//system("dwm_random_wall001");
+		execlp("dwm_random_wall001", "dwm_random_wall001", NULL);
+		//exit(EXIT_SUCCESS);
+//		if (fork() == 0) {
+//			wait(NULL);
+//			xrdb(NULL); }
+	} else {
+//	/* Parent */
+	wait(NULL);
+	xrdb(NULL);
+//	//exit(EXIT_SUCCESS);
+	}
+//	if (fork() != 0){
+//		fork();
+//		wait(NULL);
+//
 }
 
 void

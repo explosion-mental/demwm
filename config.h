@@ -11,12 +11,12 @@ static int swallowfloating    = 0;        /* 1 means swallow floating windows by
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int showbar            = 1;        /* 0 means no bar */
 static int topbar             = 1;        /* 0 means bottom bar */
-static char normbgcolor[]     = "#222222";	/*borders(don't use them)*/
-static char normbordercolor[] = "#444444";	/*borders(don't use them)*/
-static char normfgcolor[]     = "#bbbbbb";	/*bar(transparent or default color)*/
-static char selfgcolor[]      = "#eeeeee";	/*bartext(light)*/
-static char selbordercolor[]  = "#770000";	/*titlefont(same as bar)*/
-static char selbgcolor[]      = "#005577";	/*selected(most prominent color on the wallpaper)*/
+static char normbgcolor[]     = "#222222";	/* borders */
+static char normbordercolor[] = "#444444";	/* borders */
+static char normfgcolor[]     = "#bbbbbb";	/* bar */
+static char selfgcolor[]      = "#eeeeee";	/* bartext */
+static char selbordercolor[]  = "#770000";	/* titlefont */
+static char selbgcolor[]      = "#005577";	/* selected */
 static const unsigned int baralpha    = 185;	/* Bar opcaity (0-255) */
 static const unsigned int borderalpha = OPAQUE;	/* Borders */
 static char *fonts[] = {
@@ -82,7 +82,7 @@ static const Layout layouts[] = {
  	{ "[]=",	tile },			/* Default: Master on left, slaves on right */
  	{ "🧐",		monocle },		/* All windows on top of eachother */
 	{ ">M>",	centeredfloatingmaster },	/* Same but master floats */
-//	{ "TTT",	bstack },		/* Master on top, slaves on bottom */
+	//{ "TTT",	bstack },		/* Master on top, slaves on bottom */
 	//{ "🐚",	spiral },		/* Fibonacci spiral */
 	//{ "[\\]",	dwindle },		/* Decreasing in size right and leftward */
 	//{ "[D]",	deck },			/* Master on left, slaves in monocle-like mode on right */
@@ -105,10 +105,6 @@ static const Layout layouts[] = {
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
 /* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd?*/
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
-//Better way to do cmds?
-//#define CMD(KEY,SHCMD)
-//	{ MODKEY,                       KEY,      SHCMD, {.ui = 1 << TAG} },
-//CMD(                            XK_d,                   "dmenu_run")
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
@@ -150,7 +146,6 @@ static Key keys[] = {
 //	{ MODKEY,		XK_BackSpace,	   spawn,	  SHCMD("Sysfunctions001") },
 	{ MODKEY,		XK_Escape,	   spawn,	  SHCMD("Sysfunctions001") },
 //	{ MODKEY,		XK_Caps_Lock,	   spawn,	  SHCMD("xdotool key Caps_Lock") },
-	//{ MODKEY|ShiftMask,		XK_f,      spawn,	  SHCMD("thunar") },
 //	{ MODKEY,                 XK_backslash,    focusstack,     {.i = +1 } },
 //	{ MODKEY|ShiftMask,       XK_backslash,    focusstack,     {.i = -1 } },
 	{ MODKEY,		XK_semicolon,      incnmaster,     {.i = +1 } },
@@ -194,6 +189,7 @@ static Key keys[] = {
 { MODKEY,	XK_F10,	spawn,	SHCMD("setxkbmap -layout us -variant altgr-intl -option nodeadkeys & notify-send 'Keyboard⌨️ ' 'Keyboard remapping...\nRunning keyboard defaults, US altgr-intl variant with nodeadkeys...'") },
 	{ MODKEY,		XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
 	{ MODKEY,                       XK_F12,     xrdb,           {.v = NULL } },
+	{ MODKEY,                       XK_F11,    random_wall,     {.v = NULL } },
 { 0, XK_Print,	spawn,	SHCMD("scrot -u -se 'mv $f ~/Downloads && magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
 	{ MODKEY,			XK_Print,	spawn,		SHCMD("dmenurecord") },
 	{ ShiftMask,			XK_Print,	spawn,		SHCMD("scrot") },
@@ -248,7 +244,7 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
 //	{ MODKEY|ShiftMask,             XK_c,      quit,          {0} },
 
-			/* GAPS (see config.def.h for all the bindings)*/
+				/* GAPS */
 	{ MODKEY,			XK_f,      incrgaps,       {.i = +3 } },
 	{ MODKEY,			XK_g,      incrgaps,       {.i = -3 } },
 	{ MODKEY,			XK_n,	  togglegaps,	   {0} },
@@ -265,7 +261,7 @@ static Button buttons[] = {
 //	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
 	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
 	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
-	{ ClkWinTitle,          0,              Button1,  	spawn,	SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
+	{ ClkWinTitle,          0, Button1, spawn, SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
 	{ ClkWinTitle,	0,	Button3,  	spawn,	SHCMD("scrot -u -se 'mv $f ~/Downloads'") },
 	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1} },
