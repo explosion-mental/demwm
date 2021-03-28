@@ -2727,31 +2727,18 @@ xrdb(const Arg *arg)
 void
 random_wall(const Arg *arg)//How to run this simultaneos, asyncronwhatever, to run them on the background
 {
-	/* Daemonize, I'm guessing... */
-//	if (fork() != 0){
-//		fork();
-//		wait(NULL);
-//		xrdb(NULL); }
 	if (fork() == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
 		setsid();
 		//system("dwm_random_wall001");
 		execlp("dwm_random_wall001", "dwm_random_wall001", NULL);
-		//exit(EXIT_SUCCESS);
-//		if (fork() == 0) {
-//			wait(NULL);
-//			xrdb(NULL); }
+		exit(EXIT_SUCCESS);
 	} else {
-//	/* Parent */
+	/* Parent */
 	wait(NULL);
 	xrdb(NULL);
-//	//exit(EXIT_SUCCESS);
 	}
-//	if (fork() != 0){
-//		fork();
-//		wait(NULL);
-//
 }
 
 void
