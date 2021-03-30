@@ -29,7 +29,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/wait.h>	/* dwm doesn't use wait? */
+#include <sys/wait.h>
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
@@ -55,32 +55,28 @@
 #define ISVISIBLE(C)            ((C->tags & C->mon->tagset[C->mon->seltags]))
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
-#define OPAQUE                  0xffU	/* Borders */
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
-/* scratchpad */
-#define NUMTAGS			(LENGTH(tags) + LENGTH(scratchpads))
-#define TAGMASK     		((1 << NUMTAGS) - 1)
-#define SPTAG(i) 		((1 << LENGTH(tags)) << (i))
-#define SPTAGMASK   		(((1 << LENGTH(scratchpads))-1) << LENGTH(tags))
-//#define TAGMASK		((1 << LENGTH(tags)) - 1)
+#define TAGMASK                 ((1 << LENGTH(tags)) - 1)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
-#define XRDB_LOAD_COLOR(R,V) \
-	if (XrmGetResource(xrdb, R, NULL, &type, &value) == True) { \
-		if (value.addr != NULL && strnlen(value.addr, 8) == 7 && value.addr[0] == '#') { \
-                	int i = 1; \
-                        for (; i <= 6; i++) { \
-                                if (value.addr[i] < 48) break; \
-                                if (value.addr[i] > 57 && value.addr[i] < 65) break; \
-                                if (value.addr[i] > 70 && value.addr[i] < 97) break; \
-                                if (value.addr[i] > 102) break; \
-                        } \
-                        if (i == 7) { \
-                        strncpy(V, value.addr, 7); \
-                        V[7] = '\0'; \
-                        } \
-                } \
-        }
+#define XRDB_LOAD_COLOR(R,V)    if (XrmGetResource(xrdb, R, NULL, &type, &value) == True) { \
+                                  if (value.addr != NULL && strnlen(value.addr, 8) == 7 && value.addr[0] == '#') { \
+                                    int i = 1; \
+                                    for (; i <= 6; i++) { \
+                                      if (value.addr[i] < 48) break; \
+                                      if (value.addr[i] > 57 && value.addr[i] < 65) break; \
+                                      if (value.addr[i] > 70 && value.addr[i] < 97) break; \
+                                      if (value.addr[i] > 102) break; \
+                                    } \
+                                    if (i == 7) { \
+                                      strncpy(V, value.addr, 7); \
+                                      V[7] = '\0'; \
+                                    } \
+                                  } \
+                                }
+
+#define OPAQUE                  0xffU
+
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel }; /* color schemes */
@@ -177,12 +173,6 @@ typedef struct {
 	int monitor;
 } Rule;
 
-/* scratchpads */
-typedef struct {
-	const char *name;
-	const void *cmd;
-} Sp;
-
 /* function declarations */
 static void applyrules(Client *c);
 static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
@@ -250,7 +240,6 @@ static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
 static void shiftview(const Arg *arg);
-static void shiftviewactive(const Arg *arg);
 static void showhide(Client *c);
 static void sigchld(int unused);
 static void sighup(int unused);
@@ -265,7 +254,6 @@ static void togglebar(const Arg *arg);
 static void togglefakefullscreen(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void togglefullscreen(const Arg *arg);
-static void togglescratch(const Arg *arg);
 static void toggletag(const Arg *arg);
 static void toggleview(const Arg *arg);
 static void unfocus(Client *c, int setfocus, Client *nextfocus);
@@ -288,10 +276,9 @@ static int xerror(Display *dpy, XErrorEvent *ee);
 static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void xrdb(const Arg *arg);
+static void random_wall(const Arg *arg);
 static void xinitvisual();
 static void zoom(const Arg *arg);
-static void random_wall(const Arg *arg);
-//static void loadrandom_wall(const Arg *arg);
 
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
@@ -346,26 +333,13 @@ static Colormap cmap;
 /* configuration, allows nested code to access above variables */
 #include "config.h"
 
-/* scratchpads */
-static Sp scratchpads[] = {
-	/* name          cmd  */
-	{"notes",    spcmd1},
-	{"calc",     spcmd2},
-	{"pre",      spcmd3},
-	{"diary",    spcmd4},
-	{"music",    spcmd5},
-};
-
-/* Pertag */
 struct Pertag {
 	unsigned int curtag, prevtag; /* current and previous tag */
 	int nmasters[LENGTH(tags) + 1]; /* number of windows in master area */
 	float mfacts[LENGTH(tags) + 1]; /* mfacts per tag */
 	unsigned int sellts[LENGTH(tags) + 1]; /* selected layouts */
 	const Layout *ltidxs[LENGTH(tags) + 1][2]; /* matrix of tags and layouts indexes  */
-	Bool showbars[LENGTH(tags) + 1]; /* display bar for the current tag */
-	Client *prevzooms[LENGTH(tags) + 1]; /* store zoom information */
-	//int enablegaps[LENGTH(tags) + 1];
+	int showbars[LENGTH(tags) + 1]; /* display bar for the current tag */
 };
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
@@ -398,11 +372,6 @@ applyrules(Client *c)
 			c->noswallow  = r->noswallow;
 			c->isfloating = r->isfloating;
 			c->tags |= r->tags;
-			if ((r->tags & SPTAGMASK) && r->isfloating) {
-				c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
-				c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
-			}
-
 			for (m = mons; m && m->num != r->monitor; m = m->next);
 			if (m)
 				c->mon = m;
@@ -412,8 +381,7 @@ applyrules(Client *c)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
-	//c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
-	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (c->mon->tagset[c->mon->seltags] & ~SPTAGMASK);
+	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
 }
 
 int
@@ -845,32 +813,20 @@ createmon(void)
 	m->lt[0] = &layouts[0];
 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
 	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
+	m->pertag = ecalloc(1, sizeof(Pertag));
+	m->pertag->curtag = m->pertag->prevtag = 1;
 
-	if (pertag) {
-		if (!(m->pertag = (Pertag *)calloc(1, sizeof(Pertag))))
-			die("fatal: could not malloc() %u bytes\n", sizeof(Pertag));
-		m->pertag->curtag = m->pertag->prevtag = 1;
-		for(i=0; i <= LENGTH(tags); i++) {
-			/* init nmaster */
-			m->pertag->nmasters[i] = m->nmaster;
+	for (i = 0; i <= LENGTH(tags); i++) {
+		m->pertag->nmasters[i] = m->nmaster;
+		m->pertag->mfacts[i] = m->mfact;
 
-			/* init mfacts */
-			m->pertag->mfacts[i] = m->mfact;
+		m->pertag->ltidxs[i][0] = m->lt[0];
+		m->pertag->ltidxs[i][1] = m->lt[1];
+		m->pertag->sellts[i] = m->sellt;
 
-			/* init layouts */
-			m->pertag->ltidxs[i][0] = m->lt[0];
-			m->pertag->ltidxs[i][1] = m->lt[1];
-			m->pertag->sellts[i] = m->sellt;
-
-			if (pertagbar) {
-				/* init showbar */
-				m->pertag->showbars[i] = m->showbar;
-
-				/* swap focus and zoomswap*/
-				m->pertag->prevzooms[i] = NULL;
-			}
-		}
+		m->pertag->showbars[i] = m->showbar;
 	}
+
 	return m;
 }
 
@@ -1211,10 +1167,7 @@ grabkeys(void)
 void
 incnmaster(const Arg *arg)
 {
-	if (pertag)
-		selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag] = MAX(selmon->nmaster + arg->i, 0);
-	else
-		selmon->nmaster = MAX(selmon->nmaster + arg->i, 0);
+	selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag] = MAX(selmon->nmaster + arg->i, 0);
 	arrange(selmon);
 }
 
@@ -1265,29 +1218,32 @@ killclient(const Arg *arg)
 void
 loadxrdb()
 {
-	Display *display;
-	char * resm;
-	XrmDatabase xrdb;
-	char *type;
-	XrmValue value;
+  Display *display;
+  char * resm;
+  XrmDatabase xrdb;
+  char *type;
+  XrmValue value;
 
-	display = XOpenDisplay(NULL);
+  display = XOpenDisplay(NULL);
 
-	if (display != NULL) {
-	resm = XResourceManagerString(display);
-		if (resm != NULL) {
-		xrdb = XrmGetStringDatabase(resm);
-			if (xrdb != NULL) {
-		        XRDB_LOAD_COLOR("dwm.color0", normbordercolor);	/*borders(don't use them)*/
-		        XRDB_LOAD_COLOR("dwm.color4", selbordercolor);	/*borders(don't use them)*/
-		        XRDB_LOAD_COLOR("dwm.color0", normbgcolor);	/*bar(default color)*/
-		        XRDB_LOAD_COLOR("dwm.color8", normfgcolor);	/*bartext(light)*/
-		        XRDB_LOAD_COLOR("dwm.color0", selfgcolor);	/*titlefont(same as bar)*/
-		        XRDB_LOAD_COLOR("dwm.color2", selbgcolor);	/*selected(most prominent color)*/
-			}
-		}
-	}
-XCloseDisplay(display);
+  if (display != NULL) {
+    resm = XResourceManagerString(display);
+
+    if (resm != NULL) {
+      xrdb = XrmGetStringDatabase(resm);
+
+      if (xrdb != NULL) {
+        XRDB_LOAD_COLOR("dwm.color0", normbordercolor);	/*borders(don't use them)*/
+        XRDB_LOAD_COLOR("dwm.color4", selbordercolor);	/*borders(don't use them)*/
+        XRDB_LOAD_COLOR("dwm.color0", normbgcolor);	/*bar(transparent or default color)*/
+        XRDB_LOAD_COLOR("dwm.color8", normfgcolor);	/*bartext(light)*/
+        XRDB_LOAD_COLOR("dwm.color0", selfgcolor);	/*titlefont(same as bar)*/
+        XRDB_LOAD_COLOR("dwm.color2", selbgcolor);	/*selected(most prominent color on the wall)*/
+      }
+    }
+  }
+
+  XCloseDisplay(display);
 }
 
 void
@@ -1856,23 +1812,10 @@ setfullscreen(Client *c, int fullscreen)
 void
 setlayout(const Arg *arg)
 {
-	if (!arg || !arg->v || arg->v != selmon->lt[selmon->sellt]) {
-		if (pertag) {
-			selmon->pertag->sellts[selmon->pertag->curtag] ^= 1;
-			selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
-		} else {
-			selmon->sellt ^= 1;
-		}
-	}
-	if (pertag) {
-		if (arg && arg->v)
-			selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt] = (Layout *)arg->v;
-		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
-	} else {
-		if (arg && arg->v)
-			selmon->lt[selmon->sellt] = (Layout *)arg->v;
-	}
-
+	if (!arg || !arg->v || arg->v != selmon->lt[selmon->sellt])
+		selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag] ^= 1;
+	if (arg && arg->v)
+		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt] = (Layout *)arg->v;
 	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
 	if (selmon->sel)
 		arrange(selmon);
@@ -1906,20 +1849,16 @@ setmfact(const Arg *arg)
 	if (!arg || !selmon->lt[selmon->sellt]->arrange)
 		return;
 	f = arg->f < 1.0 ? arg->f + selmon->mfact : arg->f - 1.0;
-//	if (f < 0.1 || f > 0.9)
-	if(f < 0.05 || f > 0.95)
+	if (f < 0.1 || f > 0.9)
 		return;
-	if (pertag)
-		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag] = f;
-	else
-		selmon->mfact = f;
+	selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag] = f;
 	arrange(selmon);
 }
 
 void
 setup(void)
 {
-	//int i;
+	int i;
 	XSetWindowAttributes wa;
 	Atom utf8string;
 
@@ -1939,8 +1878,7 @@ setup(void)
 	if (!drw_fontset_create(drw, fonts, LENGTH(fonts)))
 		die("no fonts could be loaded.");
 	lrpad = drw->fonts->h;
-	bh = drw->fonts->h;
-	//bh = drw->fonts->h + 2;
+	bh = drw->fonts->h + 2;
 	updategeom();
 	/* init atoms */
 	utf8string = XInternAtom(dpy, "UTF8_STRING", False);
@@ -1963,11 +1901,8 @@ setup(void)
 	cursor[CurMove] = drw_cur_create(drw, XC_fleur);
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
-	//random_wall(NULL);
-	system("dwm_random_wall001");
-	xrdb(NULL);	/* How to start pywal before this? */
-//	for (i = 0; i < LENGTH(colors); i++)
-//		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+	for (i = 0; i < LENGTH(colors); i++)
+		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
 	/* init bars */
 	updatebars();
 	updatestatus();
@@ -2009,48 +1944,18 @@ seturgent(Client *c, int urg)
 }
 
 void
-shiftviewactive(const Arg *arg)
-{
-	Arg shifted;
-	Client *c;
-	unsigned int tagmask = 0;
-
-	for (c = selmon->clients; c; c = c->next)
-		if (!(c->tags & SPTAGMASK))
-			tagmask = tagmask | c->tags;
-
-	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
-	if (arg->i > 0) // left circular shift
-		do {
-			shifted.ui = (shifted.ui << arg->i)
-			   | (shifted.ui >> (LENGTH(tags) - arg->i));
-			shifted.ui &= ~SPTAGMASK;
-		} while (tagmask && !(shifted.ui & tagmask));
-	else // right circular shift
-		do {
-			shifted.ui = (shifted.ui >> (- arg->i)
-			   | shifted.ui << (LENGTH(tags) + arg->i));
-			shifted.ui &= ~SPTAGMASK;
-		} while (tagmask && !(shifted.ui & tagmask));
-
-	view(&shifted);
-}
-
-
-void
 shiftview(const Arg *arg)
 {
 	Arg shifted;
 
-	if(arg->i > 0) { /* left circular shift */
+	if(arg->i > 0) /* left circular shift */
 		shifted.ui = (selmon->tagset[selmon->seltags] << arg->i)
 		   | (selmon->tagset[selmon->seltags] >> (LENGTH(tags) - arg->i));
-      		shifted.ui &= ~SPTAGMASK;
-	} else {/* right circular shift */
+
+	else /* right circular shift */
 		shifted.ui = selmon->tagset[selmon->seltags] >> (- arg->i)
 		   | selmon->tagset[selmon->seltags] << (LENGTH(tags) + arg->i);
-      		shifted.ui &= ~SPTAGMASK;
-	}
+
 	view(&shifted);
 }
 
@@ -2060,10 +1965,6 @@ showhide(Client *c)
 	if (!c)
 		return;
 	if (ISVISIBLE(c)) {
-		if ((c->tags & SPTAGMASK) && c->isfloating) {
-			c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
-			c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
-		}
 		/* show clients top down */
 		XMoveWindow(dpy, c->win, c->x, c->y);
 		if ((!c->mon->lt[c->mon->sellt]->arrange || c->isfloating) && !c->isfullscreen)
@@ -2118,7 +2019,7 @@ sigdwmblocks(const Arg *arg)
 void
 spawn(const Arg *arg)
 {
-	if (arg->v == dmenucmd || arg->v == clip)
+	if (arg->v == dmenucmd)
 		dmenumon[0] = '0' + selmon->num;
 	if (fork() == 0) {
 		if (dpy)
@@ -2162,10 +2063,7 @@ tagmon(const Arg *arg)
 void
 togglebar(const Arg *arg)
 {
-	if (pertag && pertagbar)
-		selmon->showbar = selmon->pertag->showbars[selmon->pertag->curtag] = !selmon->showbar;
-	else
-		selmon->showbar = !selmon->showbar;
+	selmon->showbar = selmon->pertag->showbars[selmon->pertag->curtag] = !selmon->showbar;
 	updatebarpos(selmon);
 	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
 	arrange(selmon);
@@ -2219,32 +2117,6 @@ togglefullscreen(const Arg *arg)
 }
 
 void
-togglescratch(const Arg *arg)
-{
-	Client *c;
-	unsigned int found = 0;
-	unsigned int scratchtag = SPTAG(arg->ui);
-	Arg sparg = {.v = scratchpads[arg->ui].cmd};
-
-	for (c = selmon->clients; c && !(found = c->tags & scratchtag); c = c->next);
-	if (found) {
-		unsigned int newtagset = selmon->tagset[selmon->seltags] ^ scratchtag;
-		if (newtagset) {
-			selmon->tagset[selmon->seltags] = newtagset;
-			focus(NULL);
-			arrange(selmon);
-		}
-		if (ISVISIBLE(c)) {
-			focus(c);
-			restack(selmon);
-		}
-	} else {
-		selmon->tagset[selmon->seltags] |= scratchtag;
-		spawn(&sparg);
-	}
-}
-
-void
 toggletag(const Arg *arg)
 {
 	unsigned int newtags;
@@ -2268,27 +2140,27 @@ toggleview(const Arg *arg)
 	if (newtagset) {
 		selmon->tagset[selmon->seltags] = newtagset;
 
-		if (pertag) {
-			if (newtagset == ~0) {
-				selmon->pertag->prevtag = selmon->pertag->curtag;
-				selmon->pertag->curtag = 0;
-			}
-			/* test if the user did not select the same tag */
-			if (!(newtagset & 1 << (selmon->pertag->curtag - 1))) {
-				selmon->pertag->prevtag = selmon->pertag->curtag;
-				for (i=0; !(newtagset & 1 << i); i++) ;
-				selmon->pertag->curtag = i + 1;
-			}
-
-			/* apply settings for this view */
-			selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
-			selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
-			selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
-			selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
-			selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
-			if (pertagbar && selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
-				togglebar(NULL);
+		if (newtagset == ~0) {
+			selmon->pertag->prevtag = selmon->pertag->curtag;
+			selmon->pertag->curtag = 0;
 		}
+
+		/* test if the user did not select the same tag */
+		if (!(newtagset & 1 << (selmon->pertag->curtag - 1))) {
+			selmon->pertag->prevtag = selmon->pertag->curtag;
+			for (i = 0; !(newtagset & 1 << i); i++) ;
+			selmon->pertag->curtag = i + 1;
+		}
+
+		/* apply settings for this view */
+		selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
+		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
+		selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
+		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
+		selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
+
+		if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
+			togglebar(NULL);
 
 		focus(NULL);
 		arrange(selmon);
@@ -2559,7 +2431,8 @@ void
 updatestatus(void)
 {
 	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
-		strcpy(stext, " Welcome! :)");
+		strcpy(stext, "Welcome! :)");
+		//strcpy(stext, "dwm-"VERSION);
 	else
 		copyvalidchars(stext, rawstext);
 	drawbar(selmon);
@@ -2651,32 +2524,31 @@ view(const Arg *arg)
 	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
 		return;
 	selmon->seltags ^= 1; /* toggle sel tagset */
-
-	if (pertag) {
-		if (arg->ui & TAGMASK) {
-			selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
-			selmon->pertag->prevtag = selmon->pertag->curtag;
-
-			if (arg->ui == ~0)
-				selmon->pertag->curtag = 0;
-			else {
-				for (i=0; !(arg->ui & 1 << i); i++) ;
-				selmon->pertag->curtag = i + 1;
-			}
-		} else {
-			tmptag = selmon->pertag->prevtag;
-			selmon->pertag->prevtag = selmon->pertag->curtag;
-			selmon->pertag->curtag = tmptag;
-		}
-		selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
-		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
-		selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
-		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
-		selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
-		if (pertagbar && selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
-			togglebar(NULL);
-	} else if (arg->ui & TAGMASK)
+	if (arg->ui & TAGMASK) {
 		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
+		selmon->pertag->prevtag = selmon->pertag->curtag;
+
+		if (arg->ui == ~0)
+			selmon->pertag->curtag = 0;
+		else {
+			for (i = 0; !(arg->ui & 1 << i); i++) ;
+			selmon->pertag->curtag = i + 1;
+		}
+	} else {
+		tmptag = selmon->pertag->prevtag;
+		selmon->pertag->prevtag = selmon->pertag->curtag;
+		selmon->pertag->curtag = tmptag;
+	}
+
+	selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
+	selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
+	selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
+	selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
+	selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
+
+	if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
+		togglebar(NULL);
+
 	focus(NULL);
 	arrange(selmon);
 }
@@ -2686,7 +2558,6 @@ winpid(Window w)
 {
 
 	pid_t result = 0;
-
 	xcb_res_client_id_spec_t spec = {0};
 	spec.client = w;
 	spec.mask = XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID;
@@ -2720,7 +2591,6 @@ pid_t
 getparentprocess(pid_t p)
 {
 	unsigned int v = 0;
-
 	FILE *f;
 	char buf[256];
 	snprintf(buf, sizeof(buf) - 1, "/proc/%u/stat", (unsigned)p);
@@ -2730,7 +2600,6 @@ getparentprocess(pid_t p)
 
 	fscanf(f, "%*u %*s %*c %u", &v);
 	fclose(f);
-
 	return (pid_t)v;
 }
 
@@ -2847,34 +2716,17 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
 void
 xrdb(const Arg *arg)
 {
-	loadxrdb();
-	int i;
-	for (i = 0; i < LENGTH(colors); i++)
-  		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
-	focus(NULL);
-	arrange(NULL);
+  loadxrdb();
+  int i;
+  for (i = 0; i < LENGTH(colors); i++)
+  	scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+  focus(NULL);
+  arrange(NULL);
 }
 
-//void
-//random_wall(const Arg *arg)
-//{
-////	const char bglock = "";
-////	if ((bclock = getenv("XDG_DATA_HOME/bg")) == NULL)
-////		bglock = getenv("HOME/.local/bg");
-//	//loadrandom_wall(NULL);
-//	//wait(NULL);
-//	system("dwm_random_wall001");
-//	xrdb(NULL);
-//}
-
 void
-random_wall(const Arg *arg)
+random_wall(const Arg *arg)//How to run this simultaneos, asyncronwhatever, to run them on the background
 {
-	/* Daemonize, I'm guessing... */
-//	if (fork() != 0){
-//		fork();
-//		wait(NULL);
-//		xrdb(NULL); }
 	if (fork() == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
@@ -2882,19 +2734,11 @@ random_wall(const Arg *arg)
 		//system("dwm_random_wall001");
 		execlp("dwm_random_wall001", "dwm_random_wall001", NULL);
 		exit(EXIT_SUCCESS);
-//		if (fork() == 0) {
-//			wait(NULL);
-//			xrdb(NULL); }
 	} else {
-//	/* Parent */
+	/* Parent */
 	wait(NULL);
 	xrdb(NULL);
-//	//exit(EXIT_SUCCESS);
 	}
-//	if (fork() != 0){
-//		fork();
-//		wait(NULL);
-//
 }
 
 void
@@ -2929,8 +2773,6 @@ main(int argc, char *argv[])
         loadxrdb();
 	setup();
 	scan();
-	system("killall -q dwmblocks; dwmblocks &");
-//	random_wall(NULL);
 	run();
 	if(restart) execvp(argv[0], argv);
 	cleanup();
