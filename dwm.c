@@ -361,12 +361,12 @@ static Colormap cmap;
 #include "config.h"
 /* scratchpads */
 static Sp scratchpads[] = {
-	/* name          cmd  */
-	{"notes",    spcmd1},
-	{"calc",     spcmd2},
-	{"pre",      spcmd3},
-	{"diary",    spcmd4},
-	{"music",    spcmd5},
+	/* name		cmd  */
+	{SP1,		spcmd1},
+	{SP2,		spcmd2},
+	{SP2,		spcmd3},
+	{SP3,		spcmd4},
+	{SP4,		spcmd5},
 };
 
 /* Pertag */

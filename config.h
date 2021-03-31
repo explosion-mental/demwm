@@ -109,11 +109,12 @@ static const Layout layouts[] = {
 /* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd?*/
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 #define NOTES		"-e", "nvim", "-c", "startinsert"
-#define SP1	notes
-#define SP2	calc
-#define SP3	pre
-#define SP4	diary
-#define SP5	music
+/* scratchpads definitions, I don't use this but this is handy for setting the name */
+#define SP1	"notes"
+#define SP2	"calc"
+#define SP3	"pre"
+#define SP4	"diary"
+#define SP5	"music"
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
@@ -122,11 +123,11 @@ static const char *termcmd[]  = { "st", NULL };
 static const char *web[] = { "surf", "start.duckduckgo.com" };
 static const char *syncthing[] = { "surf", "127.0.0.1:1210" };
 static const char *vifm[] = { "sh",  "-c", "st -t 'FileManager🗄️' -e vifmrun" };
-const char *spcmd1[] = { "st", "-n", "notes", "-g", "50x25", NOTES, "/home/user/yournotes", NULL };
-const char *spcmd2[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
-const char *spcmd3[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/user/yournotes", NULL };
-const char *spcmd4[] = { "st", "-n", "diary", "-g", "100x25", NOTES, "/home/user/yournotes", NULL };
-const char *spcmd5[] = { "st", "-n", "music", "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
+const char *spcmd1[] = { "st", "-n", SP1, "-g", "50x25", NOTES, "/home/user/yournotes", NULL };
+const char *spcmd2[] = { "st", "-n", SP2, "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
+const char *spcmd3[] = { "st", "-n", SP3, "-g", "70x25", NOTES, "/home/user/yournotes", NULL };
+const char *spcmd4[] = { "st", "-n", SP4, "-g", "100x25", NOTES, "/home/user/yournotes", NULL };
+const char *spcmd5[] = { "st", "-n", SP5, "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
