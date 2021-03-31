@@ -40,6 +40,13 @@ static const unsigned int alphas[][3]      = {
 static const char *tags[] = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
 //some icons嗢📊
 
+/* scratchpads definitions, I don't use this but this is handy for setting the name */
+#define SP1	"notes"
+#define SP2	"calc"
+#define SP3	"pre"
+#define SP4	"diary"
+#define SP5	"music"
+
 static const Rule rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
@@ -66,11 +73,12 @@ static const Rule rules[] = {
 { "libreoffice-writer",  "libreoffice",  NULL,  1 << 4,	  0,	      0,	   0,        -1 },
 { NULL,       NULL,   "LibreOffice",         1 << 4,      1,          0,           0,        -1 },
 //	{ NULL,      NULL,    "Notes",       0,           1,	      0,           0,        -1 },
-	{ NULL,      "notes",   NULL,     SPTAG(0),       1,          0,           0,        -1 },
-	{ NULL,      "calc",    NULL,     SPTAG(1),       1,          1,           0,        -1 },
-	{ NULL,      "pre",     NULL,     SPTAG(2),       1,          0,           0,        -1 },
-	{ NULL,      "diary",   NULL,     SPTAG(3),       1,          0,           0,        -1 },
-	{ NULL,      "music",   NULL,     SPTAG(4),       1,          0,           0,        -1 },
+					/* scratchpads */
+	{ NULL,      SP1,	NULL,     SPTAG(0),       1,          0,           0,        -1 },
+	{ NULL,      SP2,	NULL,     SPTAG(1),       1,          1,           0,        -1 },
+	{ NULL,      SP3,	NULL,     SPTAG(2),       1,          0,           0,        -1 },
+	{ NULL,      SP4,	NULL,     SPTAG(3),       1,          0,           0,        -1 },
+	{ NULL,      SP5,	NULL,     SPTAG(4),       1,          0,           0,        -1 },
 };
 
 /* layout(s) */
@@ -109,12 +117,6 @@ static const Layout layouts[] = {
 /* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd?*/
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 #define NOTES		"-e", "nvim", "-c", "startinsert"
-/* scratchpads definitions, I don't use this but this is handy for setting the name */
-#define SP1	"notes"
-#define SP2	"calc"
-#define SP3	"pre"
-#define SP4	"diary"
-#define SP5	"music"
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
