@@ -212,7 +212,6 @@ static void focus(Client *c);
 static void focusin(XEvent *e);
 static void focusmon(const Arg *arg);
 static void focusstack(const Arg *arg);
-static int getdwmblockspid();
 static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
@@ -225,7 +224,6 @@ static void loadxrdb(void);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
-static void monocle(Monitor *m);
 static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
@@ -253,9 +251,12 @@ static void shiftview(const Arg *arg);
 static void shiftviewactive(const Arg *arg);
 static void showhide(Client *c);
 static void sigchld(int unused);
+#ifndef __OpenBSD__
+static int getdwmblockspid();
+static void sigdwmblocks(const Arg *arg);
+#endif
 static void sighup(int unused);
 static void sigterm(int unused);
-static void sigdwmblocks(const Arg *arg);
 static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
@@ -292,6 +293,19 @@ static void xinitvisual();
 static void zoom(const Arg *arg);
 static void random_wall(const Arg *arg);
 //static void loadrandom_wall(const Arg *arg);
+
+/* vanitygaps */
+static void defaultgaps(const Arg *arg);
+static void incrgaps(const Arg *arg);
+static void togglegaps(const Arg *arg);
+/* Internals */
+static void getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc);
+static void getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *sr);
+static void setgaps(int oh, int ov, int ih, int iv);
+/* Layouts */
+static void tile(Monitor *m);
+static void monocle(Monitor *m);
+static void centeredfloatingmaster(Monitor *m);
 
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
@@ -345,7 +359,6 @@ static Colormap cmap;
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
-
 /* scratchpads */
 static Sp scratchpads[] = {
 	/* name          cmd  */
@@ -365,9 +378,10 @@ struct Pertag {
 	const Layout *ltidxs[LENGTH(tags) + 1][2]; /* matrix of tags and layouts indexes  */
 	Bool showbars[LENGTH(tags) + 1]; /* display bar for the current tag */
 	Client *prevzooms[LENGTH(tags) + 1]; /* store zoom information */
-	//int enablegaps[LENGTH(tags) + 1];
+	int enablegaps[LENGTH(tags) + 1]; /* added with vanitygaps */
 };
 
+#include "vanitygaps.c"
 /* compile-time check if all tags fit into an unsigned int bit array. */
 struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
 
@@ -869,6 +883,8 @@ createmon(void)
 				/* swap focus and zoomswap*/
 				m->pertag->prevzooms[i] = NULL;
 			}
+			/* compatibility with pertag and togglegaps line in createmon */
+			m->pertag->enablegaps[i] = 1;
 		}
 	}
 	return m;
@@ -1104,6 +1120,7 @@ getatomprop(Client *c, Atom prop)
 	return atom;
 }
 
+#ifndef __OpenBSD__
 int
 getdwmblockspid()
 {
@@ -1115,6 +1132,7 @@ getdwmblockspid()
 	dwmblockspid = pid;
 	return pid != 0 ? 0 : -1;
 }
+#endif
 
 int
 getrootptr(int *x, int *y)
@@ -1379,22 +1397,6 @@ maprequest(XEvent *e)
 		return;
 	if (!wintoclient(ev->window))
 		manage(ev->window, &wa);
-}
-
-void
-monocle(Monitor *m)
-{
-	unsigned int n;
-	//unsigned int n = 0;
-	int oh, ov, ih, iv;
-	Client *c;
-
-	getgaps(m, &oh, &ov, &ih, &iv, &n);
-
-	if (n > 0) /* override layout symbol */
-		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
-	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
-		resize(c, m->wx + ov, m->wy + oh, m->ww - 2 * c->bw - 2 * ov, m->wh - 2 * c->bw - 2 * oh, 0);
 }
 
 void
@@ -1724,6 +1726,93 @@ setclientstate(Client *c, long state)
 	XChangeProperty(dpy, c->win, wmatom[WMState], wmatom[WMState], 32,
 		PropModeReplace, (unsigned char *)data, 2);
 }
+
+void
+setgaps(int oh, int ov, int ih, int iv)
+{
+	if (oh < 0) oh = 0;
+	if (ov < 0) ov = 0;
+	if (ih < 0) ih = 0;
+	if (iv < 0) iv = 0;
+
+	selmon->gappoh = oh;
+	selmon->gappov = ov;
+	selmon->gappih = ih;
+	selmon->gappiv = iv;
+	arrange(selmon);
+}
+
+/* vanitygaps */
+void
+togglegaps(const Arg *arg)
+{
+	selmon->pertag->enablegaps[selmon->pertag->curtag] = !selmon->pertag->enablegaps[selmon->pertag->curtag];
+	arrange(NULL);
+}
+
+void
+defaultgaps(const Arg *arg)
+{
+	setgaps(gappoh, gappov, gappih, gappiv);
+}
+
+void
+incrgaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh + arg->i,
+		selmon->gappov + arg->i,
+		selmon->gappih + arg->i,
+		selmon->gappiv + arg->i
+	);
+}
+
+/* Intervals */
+void
+getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
+{
+	unsigned int n, oe, ie;
+	oe = ie = selmon->pertag->enablegaps[selmon->pertag->curtag];
+	Client *c;
+
+	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+	if (smartgaps && n == 1) {
+		oe = 0; /* outer gaps disabled when only one client */
+	}
+
+	*oh = m->gappoh*oe; /* outer horizontal gap */
+	*ov = m->gappov*oe; /* outer vertical gap */
+	*ih = m->gappih*ie; /* inner horizontal gap */
+	*iv = m->gappiv*ie; /* inner vertical gap */
+	*nc = n;            /* number of clients */
+}
+
+void
+getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *sr)
+{
+	unsigned int n;
+	float mfacts = 0, sfacts = 0;
+	int mtotal = 0, stotal = 0;
+	Client *c;
+
+	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++)
+		if (n < m->nmaster)
+			mfacts += c->cfact;
+		else
+			sfacts += c->cfact;
+
+	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++)
+		if (n < m->nmaster)
+			mtotal += msize * (c->cfact / mfacts);
+		else
+			stotal += ssize * (c->cfact / sfacts);
+
+	*mf = mfacts; /* total factor of master area */
+	*sf = sfacts; /* total factor of stack area */
+	*mr = msize - mtotal; /* the remainder (rest) of pixels after a cfacts master split */
+	*sr = ssize - stotal; /* the remainder (rest) of pixels after a cfacts stack split */
+}
+/* vanitygaps */
 
 void
 tagtoleft(const Arg *arg) {
@@ -2098,6 +2187,7 @@ sigterm(int unused)
 	quit(&a);
 }
 
+#ifndef __OpenBSD__
 void
 sigdwmblocks(const Arg *arg)
 {
@@ -2114,6 +2204,7 @@ sigdwmblocks(const Arg *arg)
 		}
 	}
 }
+#endif
 
 void
 spawn(const Arg *arg)
@@ -2721,6 +2812,7 @@ getparentprocess(pid_t p)
 {
 	unsigned int v = 0;
 
+#if defined(__linux__)
 	FILE *f;
 	char buf[256];
 	snprintf(buf, sizeof(buf) - 1, "/proc/%u/stat", (unsigned)p);
@@ -2728,9 +2820,18 @@ getparentprocess(pid_t p)
 	if (!(f = fopen(buf, "r")))
 		return 0;
 
-	fscanf(f, "%*u %*s %*c %u", &v);
+	//fscanf(f, "%*u %*s %*c %u", &v);
+	if (fscanf(f, "%*u %*s %*c %u", (unsigned *)&v) != 1)
+		v = (pid_t)0;
 	fclose(f);
+#elif defined(__FreeBSD__)
+	struct kinfo_proc *proc = kinfo_getproc(p);
+	if (!proc)
+		return (pid_t)0;
 
+	v = proc->ki_ppid;
+	free(proc);
+#endif
 	return (pid_t)v;
 }
 
@@ -2928,6 +3029,10 @@ main(int argc, char *argv[])
 	XrmInitialize();
         loadxrdb();
 	setup();
+#ifdef __OpenBSD__
+	if (pledge("stdio rpath proc exec", NULL) == -1)
+		die("pledge");
+#endif /* __OpenBSD__ */
 	scan();
 	system("killall -q dwmblocks; dwmblocks &");
 //	random_wall(NULL);

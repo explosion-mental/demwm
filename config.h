@@ -78,7 +78,6 @@ static float mfact     = 0.55;	/* factor of master area size [0.05..0.95] */
 static int nmaster     = 1;	/* number of clients in master area */
 static int resizehints = 0;	/* 1 means respect size hints in tiled resizals */
 //#define FORCE_VSPLIT 1		/* nrowgrid layout: force two clients to always split vertically */
-#include "vanitygaps.c"		/* Gaps */
 #include <X11/XF86keysym.h>	/* XF86 Keys */
 
 static const Layout layouts[] = {
@@ -110,6 +109,11 @@ static const Layout layouts[] = {
 /* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd?*/
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 #define NOTES		"-e", "nvim", "-c", "startinsert"
+#define SP1	notes
+#define SP2	calc
+#define SP3	pre
+#define SP4	diary
+#define SP5	music
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
@@ -211,9 +215,6 @@ static Key keys[] = {
 //{ MODKEY,			XK_f,		setlayout,	{.v = &layouts[6]} }, //centeredmaster
 
 				/* Audio */
-//	{ 0,            XF86XK_AudioLowerVolume,   spawn,         {.v = downvol } },
-//	{ 0,            XF86XK_AudioMute,          spawn,         {.v = mutevol } },
-//	{ 0,            XF86XK_AudioRaiseVolume,   spawn,         {.v = upvol   } },
 { 0, XF86XK_AudioLowerVolume,	spawn,	SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
 { 0, XF86XK_AudioRaiseVolume,	spawn,	SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
 { 0, XF86XK_AudioMute,		spawn,	SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
@@ -255,7 +256,7 @@ static Key keys[] = {
 	{ MODKEY,			XK_a,	  togglegaps,	   {0} },
 	{ MODKEY|ControlMask,   	XK_a,     defaultgaps,	   {0} },
 	{ MODKEY|Mod4Mask|ShiftMask,    XK_0,     defaultgaps,     {0} },
-//	{ MODKEY|ControlMask,           XK_o,	setcfact,       {.f =  0.00} },
+//	{ MODKEY|ControlMask,           XK_o,	   setcfact,       {.f =  0.00} },
 };
 
 /* button definitions */

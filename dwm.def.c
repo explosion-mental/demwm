@@ -1,24 +1,7 @@
 /* See LICENSE file for copyright and license details.
- *
- * dynamic window manager is designed like any other X client as well. It is
- * driven through handling X events. In contrast to other X clients, a window
- * manager selects for SubstructureRedirectMask on the root window, to receive
- * events about window (dis-)appearance. Only one X connection at a time is
- * allowed to select for this event mask.
- *
- * The event handlers of dwm are organized in an array which is accessed
- * whenever a new event has been fetched. This allows event dispatching
- * in O(1) time.
- *
- * Each child of the root window is called a client, except windows which have
- * set the override_redirect flag. Clients are organized in a linked client
- * list on each monitor, the focus history is remembered through a stack list
- * on each monitor. Each client contains a bit array to indicate the tags of a
- * client.
- *
- * Keys and tagging rules are organized as arrays and defined in config.h.
- *
- * To understand everything else, start reading main().
+ * How to make fakefullscreen default, also alfter exiting and going into
+ * fakefullscreen again the screen doesn't seem to read to gaps so the
+ * window dimentions are wrong.
  */
 #include <errno.h>
 #include <locale.h>
@@ -294,7 +277,6 @@ static int xerror(Display *dpy, XErrorEvent *ee);
 static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void xrdb(const Arg *arg);
-static void random_wall(const Arg *arg);
 static void xinitvisual();
 static void zoom(const Arg *arg);
 //static void load_xresources(void);
@@ -1938,10 +1920,10 @@ setup(void)
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
 	cursor[CurResize] = drw_cur_create(drw, XC_sizing);
 	cursor[CurMove] = drw_cur_create(drw, XC_fleur);
-	/* init appearance Not needed??? */
+	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
-	//for (i = 0; i < LENGTH(colors); i++)
-	//	scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+	for (i = 0; i < LENGTH(colors); i++)
+		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
 	/* init bars */
 	updatebars();
 	updatestatus();
@@ -2804,39 +2786,6 @@ xrdb(const Arg *arg)
   focus(NULL);
   arrange(NULL);
 }
-
-void
-random_wall(const Arg *arg)//How to run this simultaneos, asyncronwhatever, to run them on the background
-{
-	/* Daemonize, I'm guessing... */
-//	if (fork() != 0){
-//		fork();
-//		wait(NULL);
-//		xrdb(NULL); }
-	if (fork() == 0) {
-		if (dpy)
-			close(ConnectionNumber(dpy));
-		setsid();
-		//system("dwm_random_wall001");
-		execlp("dwm_random_wall001", "dwm_random_wall001", NULL);
-		//exit(EXIT_SUCCESS);
-//		if (fork() == 0) {
-//			wait(NULL);
-//			xrdb(NULL); }
-	} else {
-//	/* Parent */
-	wait(NULL);
-	xrdb(NULL);
-//	//exit(EXIT_SUCCESS);
-	}
-//	if (fork() != 0){
-//		fork();
-//		wait(NULL);
-//
-}
-
-
-
 
 void
 zoom(const Arg *arg)
