@@ -14,3 +14,5 @@ Also there all a lot of comments on functions that I don't use or are useless in
 Made this in case I broke anything. This is my definitive build.
 ### Mayor improvements:
 - xrdb patch finally working with pywal without restarting or recompiling (Mar 01 2021)
+- Layouts at startup (Apr 04 2021)
+- Gaps per tag instead of per monitor (Apr 04 2021)

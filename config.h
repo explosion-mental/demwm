@@ -73,11 +73,11 @@ static const Rule rules[] = {
 { "libreoffice-writer",  "libreoffice",  NULL,  1 << 4,	  0,	      0,	   0,        -1 },
 { NULL,       NULL,   "LibreOffice",         1 << 4,      1,          0,           0,        -1 },
 //	{ NULL,      NULL,    "Notes",       0,           1,	      0,           0,        -1 },
-	{ NULL,      "notes",   NULL,     SPTAG(0),       1,          0,           0,        -1 },
-	{ NULL,      "calc",    NULL,     SPTAG(1),       1,          1,           0,        -1 },
-	{ NULL,      "pre",     NULL,     SPTAG(2),       1,          0,           0,        -1 },
-	{ NULL,      "diary",   NULL,     SPTAG(3),       1,          0,           0,        -1 },
-	{ NULL,      "music",   NULL,     SPTAG(4),       1,          0,           0,        -1 },
+	{ NULL,      SP1,   NULL,	SPTAG(0),       1,          0,           0,        -1 },
+	{ NULL,      SP2,   NULL,	SPTAG(1),       1,          1,           0,        -1 },
+	{ NULL,      SP3,   NULL,	SPTAG(2),       1,          0,           0,        -1 },
+	{ NULL,      SP4,   NULL,	SPTAG(3),       1,          0,           0,        -1 },
+	{ NULL,      SP5,   NULL,	SPTAG(4),       1,          0,           0,        -1 },
 	/*{ "Pcmanfm",   NULL,       NULL,       1 << 2,       0, 		    -1},*/
 	//{ "tm",    NULL,         NULL,     1 << 4,          0,        0,            1,         -1},
 };
@@ -296,12 +296,14 @@ static Button buttons[] = {
 	{ ClkWinTitle,          0,              Button1,  	spawn,	SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
 	{ ClkWinTitle,	0,	Button3,  	spawn,	SHCMD("scrot -u -se 'mv $f ~/Downloads'") },
+#ifndef __OpenBSD__
 	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1} },
 	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2} },
 	{ ClkStatusText,        0,              Button3,        sigdwmblocks,   {.i = 3} },
 //	{ ClkStatusText,        0,              Button4,        sigdwmblocks,   {.i = 4} },
 //	{ ClkStatusText,        0,              Button5,        sigdwmblocks,   {.i = 5} },
 	{ ClkStatusText,        ShiftMask,      Button1,        sigdwmblocks,   {.i = 6} },
+#endif
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
