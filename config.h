@@ -280,7 +280,7 @@ static Key keys[] = {
 	{ MODKEY,			XK_a,	togglegaps,		{0}		},
 	{ MODKEY|ControlMask,   	XK_a,	defaultgaps,		{0}		},
 	{ MODKEY|Mod4Mask|ShiftMask,	XK_0,	defaultgaps,		{0}		},
-	{ MODKEY|ShiftMask,	XK_apostrophe,	togglesmartgaps,	{0}		},
+	//{ MODKEY|ShiftMask,	XK_apostrophe,	togglesmartgaps,	{0}		},
 //	{ MODKEY|ControlMask,           XK_o,	setCfact,	{.f =  0.00}		},
 };
 

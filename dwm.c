@@ -263,9 +263,9 @@ static void tagmon(const Arg *arg);
 static void tagtoleft(const Arg *arg);
 static void tagtoright(const Arg *arg);
 static void togglebar(const Arg *arg);
-static void togglefakefullscreen(const Arg *arg);
+static void fakefullscreen(const Arg *arg);
 static void togglefloating(const Arg *arg);
-static void togglefullscreen(const Arg *arg);
+static void fullscreen(const Arg *arg);
 static void togglescratch(const Arg *arg);
 static void toggletag(const Arg *arg);
 static void toggleview(const Arg *arg);
@@ -295,15 +295,16 @@ static void random_wall(const Arg *arg);
 //static void loadrandom_wall(const Arg *arg);
 
 /* vanitygaps */
+static void togglesmartgaps(const Arg *arg);
+static void togglegaps(const Arg *arg);
 static void defaultgaps(const Arg *arg);
 static void incrgaps(const Arg *arg);
-static void togglegaps(const Arg *arg);
 static void getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc);
 static void getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *sr);
 static void setgaps(int oh, int ov, int ih, int iv);
 
 /* Layouts */
-static void tile(Monitor *m);
+static void tile(Monitor *);
 static void monocle(Monitor *m);
 static void centeredfloatingmaster(Monitor *m);
 
@@ -359,6 +360,7 @@ static Colormap cmap;
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
+
 /* scratchpads */
 static Sp scratchpads[] = {
 	/* name		cmd  */
@@ -381,7 +383,9 @@ struct Pertag {
 	int enablegaps[LENGTH(tags) + 1]; /* added with vanitygaps */
 };
 
+/* vanitygaps */
 #include "vanitygaps.c"
+
 /* compile-time check if all tags fit into an unsigned int bit array. */
 struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
 
@@ -1743,20 +1747,27 @@ setgaps(int oh, int ov, int ih, int iv)
 }
 
 /* vanitygaps */
-void
+static void
+togglesmartgaps(const Arg *arg)
+{
+	smartgaps = !smartgaps;
+	arrange(NULL);
+}
+
+static void
 togglegaps(const Arg *arg)
 {
 	selmon->pertag->enablegaps[selmon->pertag->curtag] = !selmon->pertag->enablegaps[selmon->pertag->curtag];
 	arrange(NULL);
 }
 
-void
+static void
 defaultgaps(const Arg *arg)
 {
 	setgaps(gappoh, gappov, gappih, gappiv);
 }
 
-void
+static void
 incrgaps(const Arg *arg)
 {
 	setgaps(
@@ -1767,7 +1778,7 @@ incrgaps(const Arg *arg)
 	);
 }
 
-void
+static void
 getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 {
 	unsigned int n, oe, ie;
@@ -2262,7 +2273,7 @@ togglebar(const Arg *arg)
 }
 
 void
-togglefakefullscreen(const Arg *arg)
+fakefullscreen(const Arg *arg)
 {
 	Client *c = selmon->sel;
 	if (!c)
@@ -2295,7 +2306,7 @@ togglefloating(const Arg *arg)
 }
 
 void
-togglefullscreen(const Arg *arg)
+fullscreen(const Arg *arg)
 {
 	Client *c = selmon->sel;
 	if (!c)
