@@ -63,7 +63,6 @@
 #define TAGMASK     		((1 << NUMTAGS) - 1)
 #define SPTAG(i) 		((1 << LENGTH(tags)) << (i))
 #define SPTAGMASK   		(((1 << LENGTH(scratchpads))-1) << LENGTH(tags))
-//#define TAGMASK		((1 << LENGTH(tags)) - 1)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 #define XRDB_LOAD_COLOR(R,V) \
 	if (XrmGetResource(xrdb, R, NULL, &type, &value) == True) { \
@@ -292,7 +291,7 @@ static void xrdb(const Arg *arg);
 static void xinitvisual();
 static void zoom(const Arg *arg);
 static void random_wall(const Arg *arg);
-//static void loadrandom_wall(const Arg *arg);
+/*static void loadrandom_wall(const Arg *arg);*/
 
 /* vanitygaps */
 static void togglesmartgaps(const Arg *arg);
@@ -430,7 +429,6 @@ applyrules(Client *c)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
-	//c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
 	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (c->mon->tagset[c->mon->seltags] & ~SPTAGMASK);
 }
 
@@ -542,7 +540,6 @@ swallow(Client *p, Client *c)
 	if (c->noswallow || c->isterminal)
 		return;
 	if (c->noswallow && !swallowfloating && c->isfloating)
-	//if (!swallowfloating && c->isfloating)
 		return;
 
 	detach(c);
@@ -2005,7 +2002,6 @@ setmfact(const Arg *arg)
 	if (!arg || !selmon->lt[selmon->sellt]->arrange)
 		return;
 	f = arg->f < 1.0 ? arg->f + selmon->mfact : arg->f - 1.0;
-//	if (f < 0.1 || f > 0.9)
 	if(f < 0.05 || f > 0.95)
 		return;
 	if (pertag)
@@ -2018,7 +2014,6 @@ setmfact(const Arg *arg)
 void
 setup(void)
 {
-	//int i;
 	XSetWindowAttributes wa;
 	Atom utf8string;
 
@@ -2119,13 +2114,13 @@ shiftviewactive(const Arg *arg)
 			tagmask = tagmask | c->tags;
 
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
-	if (arg->i > 0) // left circular shift
+	if (arg->i > 0) /* left circular shift */
 		do {
 			shifted.ui = (shifted.ui << arg->i)
 			   | (shifted.ui >> (LENGTH(tags) - arg->i));
 			shifted.ui &= ~SPTAGMASK;
 		} while (tagmask && !(shifted.ui & tagmask));
-	else // right circular shift
+	else		/* right circular shift */
 		do {
 			shifted.ui = (shifted.ui >> (- arg->i)
 			   | shifted.ui << (LENGTH(tags) + arg->i));
@@ -2830,7 +2825,6 @@ getparentprocess(pid_t p)
 	if (!(f = fopen(buf, "r")))
 		return 0;
 
-	//fscanf(f, "%*u %*s %*c %u", &v);
 	if (fscanf(f, "%*u %*s %*c %u", (unsigned *)&v) != 1)
 		v = (pid_t)0;
 	fclose(f);
@@ -2965,27 +2959,23 @@ xrdb(const Arg *arg)
 	focus(NULL);
 	arrange(NULL);
 }
-
-//void
-//random_wall(const Arg *arg)
-//{
-////	const char bglock = "";
-////	if ((bclock = getenv("XDG_DATA_HOME/bg")) == NULL)
-////		bglock = getenv("HOME/.local/bg");
-//	//loadrandom_wall(NULL);
-//	//wait(NULL);
-//	system("dwm_random_wall001");
-//	xrdb(NULL);
-//}
-
+/*
+void
+random_wall(const Arg *arg)
+{
+//	const char bglock = "";
+//	if ((bclock = getenv("XDG_DATA_HOME/bg")) == NULL)
+//		bglock = getenv("HOME/.local/bg");
+	//loadrandom_wall(NULL);
+	//wait(NULL);
+	system("dwm_random_wall001");
+	xrdb(NULL);
+}
+*/
 void
 random_wall(const Arg *arg)
 {
 	/* Daemonize, I'm guessing... */
-//	if (fork() != 0){
-//		fork();
-//		wait(NULL);
-//		xrdb(NULL); }
 	if (fork() == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
@@ -2993,19 +2983,11 @@ random_wall(const Arg *arg)
 		//system("dwm_random_wall001");
 		execlp("dwm_random_wall001", "dwm_random_wall001", NULL);
 		exit(EXIT_SUCCESS);
-//		if (fork() == 0) {
-//			wait(NULL);
-//			xrdb(NULL); }
 	} else {
-//	/* Parent */
+	/* Parent */
 	wait(NULL);
 	xrdb(NULL);
-//	//exit(EXIT_SUCCESS);
 	}
-//	if (fork() != 0){
-//		fork();
-//		wait(NULL);
-//
 }
 
 void
@@ -3045,7 +3027,6 @@ main(int argc, char *argv[])
 #endif /* __OpenBSD__ */
 	scan();
 	system("killall -q dwmblocks; dwmblocks &");
-//	random_wall(NULL);
 	run();
 	if(restart) execvp(argv[0], argv);
 	cleanup();
