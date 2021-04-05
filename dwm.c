@@ -2085,6 +2085,21 @@ setup(void)
 	XChangeWindowAttributes(dpy, root, CWEventMask|CWCursor, &wa);
 	XSelectInput(dpy, root, wa.event_mask);
 	grabkeys();
+
+        /* set default tag layouts */
+	for (int i = 0; i < LENGTH(tags); i++)
+	{
+		if (taglayouts[i]!=0)
+                {
+                        Layout *l;
+                        view(&((Arg) { .ui = 1 << i }));
+                        l = (Layout *)layouts;
+                        for (int j = 0; j < taglayouts[i]; j++)
+                                l++;
+                        setlayout(&((Arg) { .v = l }));
+                }
+        }
+        view(&((Arg) { .ui = 1 << 0 }));
 	focus(NULL);
 }
 
