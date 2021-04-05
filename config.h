@@ -38,6 +38,12 @@ static const unsigned int alphas[][3]      = {
 	[SchemeNorm] = { OPAQUE,     baralpha,    borderalpha },
 	[SchemeSel]  = { OPAQUE,     baralpha,    borderalpha },
 };
+/* scratchpads definitions(names) */
+#define SP1	"notes"
+#define SP2	"calc"
+#define SP3	"uni"
+#define SP4	"diary"
+#define SP5	"music"
 
 /* tags */
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
@@ -69,11 +75,11 @@ static const Rule rules[] = {
 { "libreoffice-writer",  "libreoffice",  NULL,  1 << 4,	  0,	      0,	   0,        -1 },
 { NULL,       NULL,   "LibreOffice",         1 << 4,      1,          0,           0,        -1 },
 //	{ NULL,      NULL,    "Notes",       0,           1,	      0,           0,        -1 },
-	{ NULL,      "notes",   NULL,     SPTAG(0),       1,          0,           0,        -1 },
-	{ NULL,      "calc",    NULL,     SPTAG(1),       1,          1,           0,        -1 },
-	{ NULL,      "pre",     NULL,     SPTAG(2),       1,          0,           0,        -1 },
-	{ NULL,      "diary",   NULL,     SPTAG(3),       1,          0,           0,        -1 },
-	{ NULL,      "music",   NULL,     SPTAG(4),       1,          0,           0,        -1 },
+	{ NULL,      SP1,   NULL,     SPTAG(0),       1,          0,           0,        -1 },
+	{ NULL,      SP2,    NULL,     SPTAG(1),       1,          1,           0,        -1 },
+	{ NULL,      SP3,     NULL,     SPTAG(2),       1,          0,           0,        -1 },
+	{ NULL,      SP4,   NULL,     SPTAG(3),       1,          0,           0,        -1 },
+	{ NULL,      SP5,   NULL,     SPTAG(4),       1,          0,           0,        -1 },
 	/*{ "Pcmanfm",   NULL,       NULL,       1 << 2,       0, 		    -1},*/
 	//{ "tm",    NULL,         NULL,     1 << 4,          0,        0,            1,         -1},
 };
@@ -121,19 +127,19 @@ static const char *termcmd[]  = { "st", NULL };
 static const char *web[] = { "surf", "start.duckduckgo.com" };
 static const char *syncthing[] = { "surf", "127.0.0.1:1210" };
 static const char *vifm[] = { "sh",  "-c", "st -t 'FileManager🗄️' -e vifmrun" };
-const char *spcmd1[] = { "st", "-n", "notes", "-g", "50x25", NOTES, "/home/wini/Docs/testi/Music", NULL };
-const char *spcmd2[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
-const char *spcmd3[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/wini/Docs/testi/pre-Uni.txt", NULL };
-const char *spcmd4[] = { "st", "-n", "diary", "-g", "100x25", NOTES, "/home/wini/Docs/testi/diary", NULL };
-const char *spcmd5[] = { "st", "-n", "music", "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
+const char *spcmd1[] = { "st", "-n", SP1, "-g", "50x25", NOTES, "/home/wini/Docs/testi/Music", NULL };
+const char *spcmd2[] = { "st", "-n", SP2, "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
+const char *spcmd3[] = { "st", "-n", SP3, "-g", "70x25", NOTES, "/home/wini/Docs/testi/pre-Uni.txt", NULL };
+const char *spcmd4[] = { "st", "-n", SP4, "-g", "100x25", NOTES, "/home/wini/Docs/testi/diary", NULL };
+const char *spcmd5[] = { "st", "-n", SP5, "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
 /* scratchpads */
 static Sp scratchpads[] = {
 	/* name          cmd  */
-	{"notes",    spcmd1},
-	{"calc",     spcmd2},
-	{"pre",      spcmd3},
-	{"diary",    spcmd4},
-	{"music",    spcmd5},
+	{SP1,		spcmd1},
+	{SP2,		spcmd2},
+	{SP3,		spcmd3},
+	{SP4,		spcmd4},
+	{SP5,		spcmd5},
 };
 
 static Key keys[] = {
