@@ -298,10 +298,10 @@ static void random_wall(const Arg *arg);
 static void defaultgaps(const Arg *arg);
 static void incrgaps(const Arg *arg);
 static void togglegaps(const Arg *arg);
-/* Internals */
 static void getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc);
 static void getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *sr);
 static void setgaps(int oh, int ov, int ih, int iv);
+
 /* Layouts */
 static void tile(Monitor *m);
 static void monocle(Monitor *m);
@@ -1767,7 +1767,6 @@ incrgaps(const Arg *arg)
 	);
 }
 
-/* Intervals */
 void
 getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 {

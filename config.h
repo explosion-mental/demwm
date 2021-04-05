@@ -228,7 +228,7 @@ static Key keys[] = {
 	//{ MODKEY,		XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
 	{ MODKEY,                       XK_F11,	random_wall,	{.v = NULL }		},
 	{ MODKEY,                       XK_F12,	xrdb,		{.v = NULL }		},
-	{ 0,	`		    XK_Print,	spawn,	SHCMD("scrot -u -se 'mv $f ~/Downloads && magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
+	{ 0,			    XK_Print,	spawn,	SHCMD("scrot -u -se 'mv $f ~/Downloads && magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
 	{ MODKEY,		    XK_Print,	spawn,	SHCMD("dmenurecord")		},
 	{ ShiftMask,		    XK_Print,	spawn,	SHCMD("scrot")			},
 
