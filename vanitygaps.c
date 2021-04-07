@@ -155,12 +155,38 @@ monocle(Monitor *m)
 		resize(c, m->wx + ov, m->wy + oh, m->ww - 2 * c->bw - 2 * ov, m->wh - 2 * c->bw - 2 * oh, 0);
 }
 
+/* ALPHA Monocle
+ * only show the currently focused window,
+ * rather than all windows stacked on top of each other.
+*/
+
+void
+alphamonocle(Monitor *m)
+{
+	unsigned int n;
+	int oh, ov, ih, iv;
+	Client *c;
+
+	getgaps(m, &oh, &ov, &ih, &iv, &n);
+
+	if (n > 0) /* override layout symbol */
+		snprintf(m->ltsymbol, sizeof m->ltsymbol, "{%d}", n);
+	for (c = m->stack; c && (!ISVISIBLE(c) || c->isfloating); c = c->snext);
+	if (c && !c->isfloating) {
+		XMoveWindow(dpy, c->win, m->wx + ov, m->wy + oh);
+		resize(c, m->wx + ov, m->wy + oh, m->ww - 2 * c->bw - 2 * ov, m->wh - 2 * c->bw - 2 * oh, 0);
+		c = c->snext;
+	}
+	for (; c; c = c->snext)
+		if (!c->isfloating && ISVISIBLE(c))
+			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+}
 /*
  * Center floating master
  * same as master on center but is floating
  */
 void
-centeredfloatingmaster(Monitor *m)
+centeredfloatmaster(Monitor *m)
 {
 	unsigned int i, n;
 	float mfacts, sfacts;

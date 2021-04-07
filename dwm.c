@@ -66,6 +66,7 @@
 #define SPTAGMASK   		(((1 << LENGTH(scratchpads))-1) << LENGTH(tags))
 //#define TAGMASK		((1 << LENGTH(tags)) - 1)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
+#define RULE(...)		{ .monitor = -1, ##__VA_ARGS__ },
 #define XRDB_LOAD_COLOR(R,V) \
 	if (XrmGetResource(xrdb, R, NULL, &type, &value) == True) { \
 		if (value.addr != NULL && strnlen(value.addr, 8) == 7 && value.addr[0] == '#') { \
@@ -175,6 +176,7 @@ typedef struct {
 	int isfloating;
 	int isterminal;
 	int noswallow;
+	int isfakefullscreen;
 	int monitor;
 } Rule;
 
@@ -308,7 +310,8 @@ static void setgaps(int oh, int ov, int ih, int iv);
 /* Layouts */
 static void tile(Monitor *);
 static void monocle(Monitor *m);
-static void centeredfloatingmaster(Monitor *m);
+static void alphamonocle(Monitor *m);
+static void centeredfloatmaster(Monitor *m);
 
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
@@ -409,6 +412,7 @@ applyrules(Client *c)
 			c->noswallow  = r->noswallow;
 			c->isfloating = r->isfloating;
 			c->tags |= r->tags;
+			c->fakefullscreen = r->isfakefullscreen;
 			if ((r->tags & SPTAGMASK) && r->isfloating) {
 				c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
 				c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
@@ -1056,6 +1060,8 @@ focus(Client *c)
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 	}
 	selmon->sel = c;
+	if (selmon->lt[selmon->sellt]->arrange == alphamonocle)
+		arrangemon(selmon);
 	drawbars();
 }
 
@@ -1911,6 +1917,7 @@ setfullscreen(Client *c, int fullscreen)
 	else if ((c->fakefullscreen == 0 && !fullscreen && c->isfullscreen) /* normal fullscreen exit */
 			|| (c->fakefullscreen >= 2 && !fullscreen)) /* fullscreen exit --> fake fullscreen */
 		restorestate = 1; /* go back into tiled */
+
 	/* If leaving fullscreen and the window was previously fake fullscreen (2), then restore
 	 * that while staying in fullscreen. The exception to this is if we are in said state, but
 	 * the client itself disables fullscreen (3) then we let the client go out of fullscreen
@@ -2122,7 +2129,6 @@ setup(void)
 	        }
 	        view(&((Arg) { .ui = 1 << 0 }));
 	}
-
 	focus(NULL);
 }
 
