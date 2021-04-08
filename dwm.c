@@ -306,12 +306,28 @@ static void incrgaps(const Arg *arg);
 static void getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc);
 static void getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *sr);
 static void setgaps(int oh, int ov, int ih, int iv);
+/*static void incrigaps(const Arg *arg);
+static void incrogaps(const Arg *arg);
+static void incrohgaps(const Arg *arg);
+static void incrovgaps(const Arg *arg);
+static void incrihgaps(const Arg *arg);
+static void incrivgaps(const Arg *arg);*/
 
 /* Layouts */
 static void tile(Monitor *);
 static void monocle(Monitor *m);
 static void alphamonocle(Monitor *m);
 static void centeredfloatmaster(Monitor *m);
+/*static void pidgin(Monitor *m);
+static void bstack(Monitor *m);
+static void bstackhoriz(Monitor *m);
+static void centeredmaster(Monitor *m);
+static void deck(Monitor *m);
+static void dwindle(Monitor *m);
+static void fibonacci(Monitor *m, int s);
+static void grid(Monitor *m);
+static void nrowgrid(Monitor *m);
+static void spiral(Monitor *m);*/
 
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
@@ -380,7 +396,7 @@ struct Pertag {
 };
 
 /* vanitygaps */
-#include "vanitygaps.c"
+#include "layouts.c"
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
 struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
@@ -1584,15 +1600,7 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
-	if (c->fakefullscreen == 1)
-		/* Exception: if the client was in actual fullscreen and we exit out to fake fullscreen
-		 * mode, then the focus would drift to whichever window is under the mouse cursor at the
-		 * time. To avoid this we pass True to XSync which will make the X server disregard any
-		 * other events in the queue thus cancelling the EnterNotify event that would otherwise
-		 * have changed focus. */
-		XSync(dpy, True);
-	else
-		XSync(dpy, False);
+	XSync(dpy, False);
 }
 
 void
@@ -1740,6 +1748,7 @@ setclientstate(Client *c, long state)
 		PropModeReplace, (unsigned char *)data, 2);
 }
 
+/* vanitygaps */
 void
 setgaps(int oh, int ov, int ih, int iv)
 {
@@ -1747,28 +1756,22 @@ setgaps(int oh, int ov, int ih, int iv)
 	if (ov < 0) ov = 0;
 	if (ih < 0) ih = 0;
 	if (iv < 0) iv = 0;
-
 	selmon->gappoh = oh;
 	selmon->gappov = ov;
 	selmon->gappih = ih;
 	selmon->gappiv = iv;
-
 	if (gapspertag)
 	/* Pertag gaps */
 		selmon->pertag->gaps[selmon->pertag->curtag] =
 		((oh & 0xFF) << 0) | ((ov & 0xFF) << 8) | ((ih & 0xFF) << 16) | ((iv & 0xFF) << 24);
-
 	arrange(selmon);
 }
-
-/* vanitygaps */
 static void
 togglesmartgaps(const Arg *arg)
 {
 	smartgaps = !smartgaps;
 	arrange(NULL);
 }
-
 static void
 togglegaps(const Arg *arg)
 {
@@ -1778,13 +1781,11 @@ togglegaps(const Arg *arg)
 		enablegaps = !enablegaps;
 	arrange(NULL);
 }
-
 static void
 defaultgaps(const Arg *arg)
 {
 	setgaps(gappoh, gappov, gappih, gappiv);
 }
-
 static void
 incrgaps(const Arg *arg)
 {
@@ -1795,31 +1796,25 @@ incrgaps(const Arg *arg)
 		selmon->gappiv + arg->i
 	);
 }
-
 static void
 getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 {
 	unsigned int n, oe, ie;
 	Client *c;
-
 	if (pertag)
 		oe = ie = selmon->pertag->enablegaps[selmon->pertag->curtag];
 	else
 		oe = ie = enablegaps;
-
-
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
 	if (smartgaps && n == 1) {
-		oe = 0; /* outer gaps disabled when only one client */
+		oe = 0;     /* outer gaps disabled when only one client */
 	}
-
 	*oh = m->gappoh*oe; /* outer horizontal gap */
 	*ov = m->gappov*oe; /* outer vertical gap   */
 	*ih = m->gappih*ie; /* inner horizontal gap */
 	*iv = m->gappiv*ie; /* inner vertical gap   */
 	*nc = n;            /* number of clients    */
 }
-
 void
 getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *sr)
 {
@@ -1827,19 +1822,16 @@ getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *s
 	float mfacts = 0, sfacts = 0;
 	int mtotal = 0, stotal = 0;
 	Client *c;
-
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++)
 		if (n < m->nmaster)
 			mfacts += c->cfact;
 		else
 			sfacts += c->cfact;
-
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++)
 		if (n < m->nmaster)
 			mtotal += msize * (c->cfact / mfacts);
 		else
 			stotal += ssize * (c->cfact / sfacts);
-
 	*mf = mfacts;		/* total factor of master area */
 	*sf = sfacts;		/* total factor of stack area */
 	*mr = msize - mtotal;	/* the remainder (rest) of pixels after a cfacts master split */
@@ -1911,7 +1903,7 @@ setfullscreen(Client *c, int fullscreen)
 {
 	int savestate = 0, restorestate = 0, restorefakefullscreen = 0;
 
-		if ((c->fakefullscreen == 0 && fullscreen && !c->isfullscreen) /* normal fullscreen */
+	if ((c->fakefullscreen == 0 && fullscreen && !c->isfullscreen) /* normal fullscreen */
 			|| (c->fakefullscreen == 2 && fullscreen)) /* fake fullscreen --> actual fullscreen */
 		savestate = 1; /* go actual fullscreen */
 	else if ((c->fakefullscreen == 0 && !fullscreen && c->isfullscreen) /* normal fullscreen exit */
@@ -2049,6 +2041,7 @@ setup(void)
 	/* clean up any zombies immediately */
 	sigchld(0);
 
+	/* exit or restart signal (kill -TERM/-HUP) */
 	signal(SIGHUP, sighup);
 	signal(SIGTERM, sigterm);
 
@@ -2114,8 +2107,7 @@ setup(void)
 	XChangeWindowAttributes(dpy, root, CWEventMask|CWCursor, &wa);
 	XSelectInput(dpy, root, wa.event_mask);
 	grabkeys();
-
-        /* set default tag layouts */
+        /* set default tag layouts, only works with pertag */
 	if (pertag) {
 		for (int i = 0; i < LENGTH(tags); i++)	{
 	                if (taglayouts[i] != 0)	{

@@ -100,6 +100,7 @@ static const Layout layouts[] = {
 	//{ "###",      nrowgrid },		/* Gaplessgrid with no gaps, but not equal size */
 	//{ "---",      horizgrid },		/* Gaplessgrid but with horizontal order */
 	//{ ":::",      gaplessgrid },		/* grid ajusted in such that there are no gaps */
+	//{ "🐷", 	pidgin },		/* Basically grid? */
 	//{ "🥏",	NULL },			/* no layout function means floating behavior */
 	{ NULL,		NULL },
 };
@@ -137,6 +138,7 @@ static Sp scratchpads[] = {
 	{SP4,		spcmd4},
 	{SP5,		spcmd5},
 };
+
 static Key keys[] = {
 	/* modifier(s)			key	function	argument */
 
@@ -196,6 +198,7 @@ static Key keys[] = {
 
 			/* Custom bindings (may be better using shkd) */
 	{ MODKEY,			XK_b,	spawn,	SHCMD("Books001")		},
+	{ MODKEY|ShiftMask,		XK_u,	spawn,	SHCMD("bookmenu")		},
 	{ MODKEY|ShiftMask,		XK_b,	spawn,	SHCMD("Boletin001")		},
 	{ MODKEY,		        XK_c,	spawn,	SHCMD("st -e calcurse")		},
 	{ MODKEY,	         	XK_z,	spawn,	SHCMD("redyt")			},
@@ -204,19 +207,18 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,	   XK_Return,	spawn,	SHCMD("samedir &")		},
 //	{ MODKEY,	        XK_semicolon,	spawn,	SHCMD("dmenu_mpc") },
 //	{ MODKEY|ShiftMask,	    XK_slash,	spawn,	SHCMD("tuxi -q") },
-//	{ MODKEY|ShiftMask,		XK_m,	spawn,	SHCMD("samedir") },
 	{ MODKEY,			XK_u,	spawn,	SHCMD("clipmagick")		},
 	{ MODKEY,			XK_y,	spawn,	SHCMD("termyt -r")		},
 	{ MODKEY|ShiftMask,		XK_y,	spawn,	SHCMD("dmenuhandler")		},
 	{ MODKEY,		    XK_slash,	spawn,	SHCMD("dmenu_browser")		},
 	{ MODKEY|ShiftMask,	        XK_n,	spawn,	SHCMD("xdotool click 1")	},
 	{ MODKEY,			XK_v,	spawn,	SHCMD("killall xcompmgr || setsid xcompmgr &") },
-	{ MODKEY,			XK_t,	spawn,	SHCMD("testi") },
-	{ MODKEY,		   XK_Escape,	spawn,	SHCMD("Sysfunctions001") },
+	{ MODKEY,			XK_t,	spawn,	SHCMD("testi")			},
+	{ MODKEY,		   XK_Escape,	spawn,	SHCMD("Sysfunctions001")	},
 { MODKEY,	XK_e,	spawn,	SHCMD("st -t NewsBoat -e newsboat -q; pkill -RTMIN+6 dwmblocks") },
-	{ MODKEY,	         	XK_F3,	spawn,	SHCMD("dmenumount") },
-	{ MODKEY,		 	XK_F4,	spawn,	SHCMD("dmenumountq") },
-	{ MODKEY,			XK_F2,	spawn,	SHCMD("dmenu_man") },
+	{ MODKEY,	         	XK_F3,	spawn,	SHCMD("dmenumount")		},
+	{ MODKEY,		 	XK_F4,	spawn,	SHCMD("dmenumountq")		},
+	{ MODKEY,			XK_F2,	spawn,	SHCMD("dmenu_man")		},
 	{ MODKEY,	 		XK_F7,	spawn,	SHCMD("st -e nvim -c VimwikiIndex") },
 	{ MODKEY,		 	XK_F8,	spawn,	SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
 	{ MODKEY,			XK_F9,	spawn,	SHCMD("setkeys &")		},
