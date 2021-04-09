@@ -21,6 +21,8 @@ static char selbgcolor[]      = "#005577";/* selected */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
+static const int pywalstart   = 0;        /* 1 means start with pywal script (needs the script) */
+static const int dwmblock     = 0;        /* 1 means start dwmblocks */
 static const unsigned int baralpha    = 185;	/* Bar opcaity (0-255) */
 static const unsigned int borderalpha = OPAQUE;	/* Borders (0xffU) */
 static char *fonts[] = {
@@ -39,6 +41,7 @@ static const unsigned int alphas[][3]      = {
 	[SchemeSel]  = { OPAQUE,     baralpha,    borderalpha },
 };
 /* scratchpads definitions(names) */
+//static const char *SP[] = { "notes", "calc", "uni", "diary", "music" };
 #define SP1	"notes"
 #define SP2	"calc"
 #define SP3	"uni"
@@ -71,11 +74,11 @@ static const Rule rules[] = {
 	RULE(.title = "Event Tester", .noswallow = 1)
 	RULE(.class = "libreoffice-writer", .tags = 1 << 4)
 	RULE(.title = "Firefox Update", .isfloating = 1)
-	RULE(.instance = "SP1", .tags = SPTAG(0), .isfloating = 1)
-	RULE(.instance = "SP2", .tags = SPTAG(1), .isfloating = 1)
-	RULE(.instance = "SP3", .tags = SPTAG(2), .isfloating = 1)
-	RULE(.instance = "SP4", .tags = SPTAG(3), .isfloating = 1)
-	RULE(.instance = "SP5", .tags = SPTAG(4), .isfloating = 1)
+	RULE(.instance = SP1, .tags = SPTAG(0), .isfloating = 1)
+	RULE(.instance = SP2, .tags = SPTAG(1), .isfloating = 1)
+	RULE(.instance = SP3, .tags = SPTAG(2), .isfloating = 1)
+	RULE(.instance = SP4, .tags = SPTAG(3), .isfloating = 1)
+	RULE(.instance = SP5, .tags = SPTAG(4), .isfloating = 1)
 };
 
 /* layout(s) */

@@ -2034,7 +2034,6 @@ setmfact(const Arg *arg)
 void
 setup(void)
 {
-	//int i;
 	XSetWindowAttributes wa;
 	Atom utf8string;
 
@@ -2079,11 +2078,14 @@ setup(void)
 	cursor[CurMove]   = drw_cur_create(drw, XC_fleur);
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
+	if (pywalstart) {
 	//random_wall(NULL);
-	system("dwm_random_wall001");
-	xrdb(NULL);	/* How to start pywal before this? */
-//	for (i = 0; i < LENGTH(colors); i++)
-//		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+		system("dwm_random_wall001");
+		xrdb(NULL);	/* How to start pywal before this? */
+	} else {
+	for (int i = 0; i < LENGTH(colors); i++)
+		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+	}
 	/* init bars */
 	updatebars();
 	updatestatus();
@@ -3079,11 +3081,10 @@ main(int argc, char *argv[])
         loadxrdb();
 	setup();
 #ifdef __OpenBSD__
-	if (pledge("stdio rpath proc exec", NULL) == -1)
-		die("pledge");
+	if (pledge("stdio rpath proc exec", NULL) == -1) die("pledge");
 #endif /* __OpenBSD__ */
 	scan();
-	system("killall -q dwmblocks; dwmblocks &");
+	if (dwmblock) system("killall -q dwmblocks; dwmblocks &");
 	run();
 	if(restart) execvp(argv[0], argv);
 	cleanup();
