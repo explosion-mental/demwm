@@ -2034,6 +2034,7 @@ setmfact(const Arg *arg)
 void
 setup(void)
 {
+	int i;
 	XSetWindowAttributes wa;
 	Atom utf8string;
 
@@ -2083,7 +2084,7 @@ setup(void)
 		system("dwm_random_wall001");
 		xrdb(NULL);	/* How to start pywal before this? */
 	} else {
-	for (int i = 0; i < LENGTH(colors); i++)
+	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
 	}
 	/* init bars */
@@ -2111,7 +2112,7 @@ setup(void)
 	grabkeys();
         /* set default tag layouts, only works with pertag */
 	if (pertag) {
-		for (int i = 0; i < LENGTH(tags); i++)	{
+		for (i = 0; i < LENGTH(tags); i++)	{
 	                if (taglayouts[i] != 0)	{
 	                        Layout *l;
 	                        view(&((Arg) { .ui = 1 << i }));
