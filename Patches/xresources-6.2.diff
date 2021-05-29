@@ -16,7 +16,7 @@ index 1c0b587..e69f288 100644
 +++ b/config.def.h
 @@ -1,21 +1,22 @@
  /* See LICENSE file for copyright and license details. */
- 
+
  /* appearance */
 -static const unsigned int borderpx  = 1;        /* border pixel of windows */
 -static const unsigned int snap      = 32;       /* snap pixel */
@@ -48,11 +48,11 @@ index 1c0b587..e69f288 100644
 +       [SchemeNorm] = { normfgcolor, normbgcolor, normbordercolor },
 +       [SchemeSel]  = { selfgcolor,  selbgcolor,  selbordercolor  },
  };
- 
+
  /* tagging */
 @@ -32,9 +33,9 @@ static const Rule rules[] = {
  };
- 
+
  /* layout(s) */
 -static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
 -static const int nmaster     = 1;    /* number of clients in master area */
@@ -60,17 +60,17 @@ index 1c0b587..e69f288 100644
 +static float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
 +static int nmaster     = 1;    /* number of clients in master area */
 +static int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
- 
+
  static const Layout layouts[] = {
  	/* symbol     arrange function */
 @@ -56,9 +57,28 @@ static const Layout layouts[] = {
- 
+
  /* commands */
  static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 -static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
 +static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
  static const char *termcmd[]  = { "st", NULL };
- 
+
 +/*
 + * Xresources preferences to load at startup
 + */
@@ -111,12 +111,12 @@ index 4bcd5ad..42b04ce 100644
 --- a/drw.h
 +++ b/drw.h
 @@ -39,7 +39,7 @@ void drw_font_getexts(Fnt *font, const char *text, unsigned int len, unsigned in
- 
+
  /* Colorscheme abstraction */
  void drw_clr_create(Drw *drw, Clr *dest, const char *clrname);
 -Clr *drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount);
 +Clr *drw_scm_create(Drw *drw, char *clrnames[], size_t clrcount);
- 
+
  /* Cursor abstraction */
  Cur *drw_cur_create(Drw *drw, int shape);
 diff --git a/dwm.c b/dwm.c
@@ -134,7 +134,7 @@ index 9fd0286..dc0d219 100644
 @@ -141,6 +142,19 @@ typedef struct {
  	int monitor;
  } Rule;
- 
+
 +/* Xresources preferences */
 +enum resource_type {
 +	STRING = 0,
@@ -156,14 +156,15 @@ index 9fd0286..dc0d219 100644
  static int xerrorstart(Display *dpy, XErrorEvent *ee);
  static void zoom(const Arg *arg);
 +static void load_xresources(void);
++static void livexres(const Arg *arg);
 +static void resource_load(XrmDatabase db, char *name, enum resource_type rtype, void *dst);
- 
+
  /* variables */
  static const char broken[] = "broken";
 @@ -2127,6 +2143,60 @@ zoom(const Arg *arg)
  	pop(c);
  }
- 
+
 +void
 +resource_load(XrmDatabase db, char *name, enum resource_type rtype, void *dst)
 +{
@@ -218,6 +219,21 @@ index 9fd0286..dc0d219 100644
 +	XCloseDisplay(display);
 +}
 +
++void
++livexres(const Arg *arg)
++{
++	load_xresources();
++
++	unsigned int i;
++
++	for (i = 0; i < LENGTH(colors); i++)
++	    	scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
++	drw_clr_create(drw, &clrborder, borderbar, borderalpha);
++
++	focus(NULL);
++	arrange(NULL);
++}
+
  int
  main(int argc, char *argv[])
  {
@@ -230,6 +246,6 @@ index 9fd0286..dc0d219 100644
  	setup();
  #ifdef __OpenBSD__
  	if (pledge("stdio rpath proc exec", NULL) == -1)
--- 
+--
 2.26.2
 
