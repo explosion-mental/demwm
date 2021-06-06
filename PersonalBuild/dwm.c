@@ -70,16 +70,15 @@
 #define XRDB_LOAD_COLOR(R,V) \
 	if (XrmGetResource(xrdb, R, NULL, &type, &value) == True) { \
 		if (value.addr != NULL && strnlen(value.addr, 8) == 7 && value.addr[0] == '#') { \
-                	int i = 1; \
-                        for (; i <= 6; i++) { \
+                	int i = 1; for (; i <= 6; i++) { \
                                 if (value.addr[i] < 48) break; \
                                 if (value.addr[i] > 57 && value.addr[i] < 65) break; \
                                 if (value.addr[i] > 70 && value.addr[i] < 97) break; \
-                                if (value.addr[i] > 102) break; \
+                        	if (value.addr[i] > 102) break; \
                         } \
                         if (i == 7) { \
-                        strncpy(V, value.addr, 7); \
-                        V[7] = '\0'; \
+                        	strncpy(V, value.addr, 7); \
+                        	V[7] = '\0'; \
                         } \
                 } \
         }
@@ -182,7 +181,7 @@ typedef struct {
 
 /* scratchpads */
 typedef struct {
-	const char *name;
+//	const char *name;
 	const void *cmd;
 } Sp;
 
@@ -294,8 +293,11 @@ static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void xrdb(const Arg *arg);
 static void xinitvisual();
 static void zoom(const Arg *arg);
-static void random_wall(const Arg *arg);
+
+/* Customs */
 //static void loadrandom_wall(const Arg *arg);
+static void random_wall(const Arg *arg);
+static void toggletopbar(const Arg *arg);
 
 /* vanitygaps */
 static int enablegaps = 1;	/* if not gaps per tag */
@@ -391,7 +393,8 @@ struct Pertag {
 	const Layout *ltidxs[LENGTH(tags) + 1][2]; /* matrix of tags and layouts indexes */
 	Bool showbars[LENGTH(tags) + 1];	/* display bar for the current tag */
 	Client *prevzooms[LENGTH(tags) + 1];	/* store zoom information */
-	int enablegaps[LENGTH(tags) + 1];	/* added with vanitygaps */
+//	int enablegaps[LENGTH(tags) + 1];	/* added with vanitygaps */
+	int enablegaps[NUMTAGS + 1];		/* added with vanitygaps */
 	unsigned int gaps[NUMTAGS + 1];		/* gaps per tag */
 };
 
@@ -1319,23 +1322,21 @@ loadxrdb()
 	XrmValue value;
 
 	display = XOpenDisplay(NULL);
-
-	if (display != NULL) {
 	resm = XResourceManagerString(display);
-		if (resm != NULL) {
-		xrdb = XrmGetStringDatabase(resm);
-			if (xrdb != NULL) {
-		        XRDB_LOAD_COLOR("dwm.color0", normbordercolor);	/*borders(don't use them)*/
-		        XRDB_LOAD_COLOR("dwm.color4", selbordercolor);	/*borders(don't use them)*/
-		        XRDB_LOAD_COLOR("dwm.color0", normbgcolor);	/*bar(default color)*/
-		        XRDB_LOAD_COLOR("dwm.color8", normfgcolor);	/*bartext(light)*/
-		        XRDB_LOAD_COLOR("dwm.color0", selfgcolor);	/*titlefont(same as bar)*/
-		        XRDB_LOAD_COLOR("dwm.color2", selbgcolor);	/*selected(most prominent color)*/
- 			XrmDestroyDatabase(xrdb);
-			}
-		}
+	if (!resm)
+		return;
+
+	xrdb = XrmGetStringDatabase(resm);
+	if (xrdb != NULL) {
+		XRDB_LOAD_COLOR("dwm.color0", normbordercolor);	/* borders(don't use them) */
+		XRDB_LOAD_COLOR("dwm.color4", selbordercolor);	/* borders(don't use them) */
+		XRDB_LOAD_COLOR("dwm.color0", normbgcolor);	/* bar(default color) */
+		XRDB_LOAD_COLOR("dwm.color8", normfgcolor);	/* bartext(light) */
+		XRDB_LOAD_COLOR("dwm.color0", selfgcolor);	/* titlefont(same as bar) */
+		XRDB_LOAD_COLOR("dwm.color2", selbgcolor);	/* selected(most prominent color) */
+ 		XrmDestroyDatabase(xrdb);			/* Fix memory leaks */
 	}
-XCloseDisplay(display);
+	XCloseDisplay(display);
 }
 
 void
@@ -1383,6 +1384,10 @@ manage(Window w, XWindowAttributes *wa)
 	updatewindowtype(c);
 	updatesizehints(c);
 	updatewmhints(c);
+	/* always center */
+	c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
+	c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
+
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
 	if (!c->isfloating)
@@ -1601,6 +1606,14 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
+//	if (c->fakefullscreen == 1)
+//		/* Exception: if the client was in actual fullscreen and we exit out to fake fullscreen
+//		 * mode, then the focus would drift to whichever window is under the mouse cursor at the
+//		 * time. To avoid this we pass True to XSync which will make the X server disregard any
+//		 * other events in the queue thus cancelling the EnterNotify event that would otherwise
+//		 * have changed focus. */
+//		XSync(dpy, True);
+//	else
 	XSync(dpy, False);
 }
 
@@ -2080,13 +2093,14 @@ setup(void)
 	cursor[CurMove]   = drw_cur_create(drw, XC_fleur);
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
-	if (pywalstart) {
-	//random_wall(NULL);
-		system("dwm_random_wall001");
-		xrdb(NULL);	/* How to start pywal before this? */
+	/* If restarting keep the wallpaper, else refresh */
+	if (running) {
+		for (i = 0; i < LENGTH(colors); i++)
+			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
 	} else {
-	for (i = 0; i < LENGTH(colors); i++)
-		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+		//random_wall(NULL);
+		system("dwm_random_wall001");
+		xrdb(NULL);
 	}
 	/* init bars */
 	updatebars();
@@ -2116,14 +2130,14 @@ setup(void)
 		for (i = 0; i < LENGTH(tags); i++)	{
 	                if (taglayouts[i] != 0)	{
 	                        Layout *l;
-	                        view(&((Arg) { .ui = 1 << i }));
+	                        view(&((Arg) { .ui = 1 << i }));//go to i tag
 	                        l = (Layout *)layouts;
 	                        for (int j = 0; j < taglayouts[i]; j++)
 	                                l++;
-	                        setlayout(&((Arg) { .v = l }));
+	                        setlayout(&((Arg) { .v = l }));	//setlayout
 	                }
 	        }
-	        view(&((Arg) { .ui = 1 << 0 }));
+	        view(&((Arg) { .ui = 1 << 0 }));	//return to the first tag
 	}
 	focus(NULL);
 }
@@ -3009,47 +3023,6 @@ xrdb(const Arg *arg)
 	arrange(NULL);
 }
 
-//void
-//random_wall(const Arg *arg)
-//{
-////	const char bglock = "";
-////	if ((bclock = getenv("XDG_DATA_HOME/bg")) == NULL)
-////		bglock = getenv("HOME/.local/bg");
-//	//loadrandom_wall(NULL);
-//	//wait(NULL);
-//	system("dwm_random_wall001");
-//	xrdb(NULL);
-//}
-
-void
-random_wall(const Arg *arg)
-{
-	/* Daemonize, I'm guessing... */
-//	if (fork() != 0){
-//		fork();
-//		wait(NULL);
-//		xrdb(NULL); }
-	if (fork() == 0) {
-		if (dpy)
-			close(ConnectionNumber(dpy));
-		setsid();
-		//system("dwm_random_wall001");
-		execlp("dwm_random_wall001", "dwm_random_wall001", NULL);
-		exit(EXIT_SUCCESS);
-//		if (fork() == 0) {
-//			wait(NULL);
-//			xrdb(NULL); }
-	} else {
-//	/* Parent */
-	wait(NULL);
-	xrdb(NULL);
-//	//exit(EXIT_SUCCESS);
-	}
-//	if (fork() != 0){
-//		fork();
-//		wait(NULL);
-//
-}
 
 void
 zoom(const Arg *arg)
@@ -3064,6 +3037,42 @@ zoom(const Arg *arg)
 			return;
 	pop(c);
 }
+
+/* Customs */
+//void
+//random_wall(const Arg *arg)
+//{
+////	const char bglock = "";
+////	if ((bclock = getenv("XDG_DATA_HOME/bg")) == NULL)
+////		bglock = getenv("HOME/.local/bg");
+//	//loadrandom_wall(NULL);
+//	//wait(NULL);
+//	system("dwm_random_wall001");
+//	xrdb(NULL);
+//}
+void
+random_wall(const Arg *arg)
+{
+	/* "Daemonize" */
+	if (fork() == 0) {
+		if (dpy)
+			close(ConnectionNumber(dpy));
+		setsid();
+		execlp("dwm_random_wall001", "dwm_random_wall001", NULL);
+		exit(EXIT_SUCCESS);
+	} else {
+	/* Parent */
+		wait(NULL);
+		xrdb(NULL);
+	}
+}
+/*void
+toggletopbar(const Arg *arg)
+{
+	topbar = !topbar;
+	arrange(NULL);
+}*/
+/* end of Customs */
 
 int
 main(int argc, char *argv[])
@@ -3086,7 +3095,7 @@ main(int argc, char *argv[])
 	if (pledge("stdio rpath proc exec", NULL) == -1) die("pledge");
 #endif /* __OpenBSD__ */
 	scan();
-	if (dwmblock) system("killall -q dwmblocks; dwmblocks &");
+	system("killall -q dwmblocks; dwmblocks &");
 	run();
 	if(restart) execvp(argv[0], argv);
 	cleanup();
