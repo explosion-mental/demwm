@@ -294,11 +294,6 @@ static void xrdb(const Arg *arg);
 static void xinitvisual();
 static void zoom(const Arg *arg);
 
-/* Customs */
-//static void loadrandom_wall(const Arg *arg);
-static void random_wall(const Arg *arg);
-static void toggletopbar(const Arg *arg);
-
 /* vanitygaps */
 static int enablegaps = 1;	/* if not gaps per tag */
 static void togglesmartgaps(const Arg *arg);
@@ -330,6 +325,11 @@ static void fibonacci(Monitor *m, int s);
 static void grid(Monitor *m);
 static void nrowgrid(Monitor *m);
 static void spiral(Monitor *m);*/
+
+/* Customs */
+//static void loadrandom_wall(const Arg *arg);
+static void random_wall(const Arg *arg);
+//static void toggletopbar(const Arg *arg);
 
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
@@ -1313,7 +1313,7 @@ killclient(const Arg *arg)
 }
 
 void
-loadxrdb()
+loadxrdb(void)
 {
 	Display *display;
 	char * resm;
