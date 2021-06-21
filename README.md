@@ -1,6 +1,8 @@
 # Dwm
 My build of dwm
 
+![Image](PersonalBuild/ss.png "dwm")
+
 ## Patches
 You can see them and 'unpatch' them if you want to.
 
