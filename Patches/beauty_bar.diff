@@ -1,5 +1,10 @@
 From: https://github.com/explosion-mental
-Subject: Basically the bar from https://github.com/pangteypiyush/dwm without the alternative look on the bar. (without this https://dwm.suckless.org/patches/alternativetags). Until I learn how to properly diff something, you need to manually patch these.
+Subject: Basically the bar from https://github.com/pangteypiyush/dwm without
+the alternative look on the bar. (without this
+https://dwm.suckless.org/patches/alternativetags). Until I learn how to
+properly diff something, you need to manually patch these.  Also this should be
+named gruvbox, note that without alpha patch is where gruvbox shines, also the
+"color on icons" doesn't appear on emojis
 
 --- dwm.c	2021-06-20 19:47:36.068353100 -0500
 ***************
@@ -193,8 +198,8 @@ Subject: Basically the bar from https://github.com/pangteypiyush/dwm without the
 +
 + static char *colors[][3] = {
 +        /*               fg           bg           border	 */
-+        [SchemeNorm] = { normfgcolor, normbgcolor, normbordercolor },  //Def color
-+        [SchemeSel]  = { selfgcolor,  selbgcolor,  selbordercolor  },  // Selected color
++        [SchemeNorm]   = { normfgcolor,    col_gb_bg,	normbordercolor },   //normal tags colorl
++        [SchemeSel]    = { selfgcolor,     col_gb_bg,  selbordercolor  },   //Selected tag color
 +        [SchemeUrgent] = { col_gb_fg,      col_gb_bg,      col_gb_bg }, //background color for urgent tag
 +        [SchemeNotify] = { col_gb_red1,    col_gb_bg,      col_gb_bg }, //Little red bar on urgent tag
 +        [SchemeTitle]  = { col_gb_fg,      col_gb_bg,      col_gb_bg }, //window title
