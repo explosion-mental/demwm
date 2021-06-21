@@ -331,6 +331,7 @@ static void spiral(Monitor *m);*/
 //static void loadrandom_wall(const Arg *arg);
 static void random_wall(const Arg *arg);
 //static void toggletopbar(const Arg *arg);
+//static void spawncmd(const Arg *arg);
 
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
@@ -381,6 +382,14 @@ static int useargb = 0;
 static Visual *visual;
 static int depth;
 static Colormap cmap;
+
+/* back up default colors */
+//static char normbordercolor[] = "#444444";	/* borders, don't use them */
+//static char normbgcolor[]     = "#222222";	/* titlefont, same as bar */
+//static char normfgcolor[]     = "#bbbbbb";	/* bar, transparent or default color */
+//static char selbordercolor[]  = "#770000";	/* borders, don't use them */
+//static char selbgcolor[]      = "#005577";	/* selected, most prominent color on the wallpaper */
+//static char selfgcolor[]      = "#eeeeee";	/* bartext, light */
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
@@ -985,6 +994,7 @@ dirtomon(int dir)
 void
 drawbar(Monitor *m)
 {
+	//int x, w, sw = 0;
 	int x, w, sw = 0;
 	int boxs = drw->fonts->h / 9;
 	int boxw = drw->fonts->h / 9;
@@ -993,6 +1003,7 @@ drawbar(Monitor *m)
 
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) { /* status is only drawn on selected monitor */
+		//drw_setscheme(drw, scheme[SchemeNorm]);
 		drw_setscheme(drw, scheme[SchemeStatus]);
 		sw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
 		drw_text(drw, m->ww - sw, 0, sw, bh, 0, stext, 0);
@@ -1320,7 +1331,7 @@ void
 loadxrdb(void)
 {
 	Display *display;
-	char * resm;
+	char *resm;
 	XrmDatabase xrdb;
 	char *type;
 	XrmValue value;
@@ -1332,6 +1343,9 @@ loadxrdb(void)
 
 	xrdb = XrmGetStringDatabase(resm);
 	if (xrdb != NULL) {
+		XRDB_LOAD_COLOR("background", bg_wal);
+		XRDB_LOAD_COLOR("foreground", fg_wal);
+		XRDB_LOAD_COLOR("cursor", cursor_wal);
 		XRDB_LOAD_COLOR("color0", color0);
 		XRDB_LOAD_COLOR("color1", color1);
 		XRDB_LOAD_COLOR("color2", color2);
@@ -1341,7 +1355,6 @@ loadxrdb(void)
 		XRDB_LOAD_COLOR("color6", color6);
 		XRDB_LOAD_COLOR("color7", color7);
 		XRDB_LOAD_COLOR("color8", color8);
-		XRDB_LOAD_COLOR("color9", color9);
  		XrmDestroyDatabase(xrdb);	/* Fix memory leaks */
 	}
 	XCloseDisplay(display);
@@ -1997,9 +2010,8 @@ setlayout(const Arg *arg)
 		if (pertag) {
 			selmon->pertag->sellts[selmon->pertag->curtag] ^= 1;
 			selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
-		} else {
+		} else
 			selmon->sellt ^= 1;
-		}
 	}
 	if (pertag) {
 		if (arg && arg->v)
@@ -2099,6 +2111,7 @@ setup(void)
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
 	cursor[CurResize] = drw_cur_create(drw, XC_sizing);
 	cursor[CurMove]   = drw_cur_create(drw, XC_fleur);
+
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 	/* If restarting keep the wallpaper, else refresh */
@@ -2110,6 +2123,7 @@ setup(void)
 		system("dwm_random_wall001");
 		xrdb(NULL);
 	}
+
 	/* init bars */
 	updatebars();
 	updatestatus();
@@ -2288,6 +2302,21 @@ spawn(const Arg *arg)
 		exit(EXIT_SUCCESS);
 	}
 }
+
+//void
+//spawncmd(const Arg *arg)
+//{
+//	if (fork() == 0) {
+//		if (dpy)
+//			close(ConnectionNumber(dpy));
+//		setsid();
+////(const char*[])
+//		execlp(((char **)arg->v)[0], (char **)arg->v);
+//		fprintf(stderr, "dwm: execvp %s", ((char **)arg->v)[0]);
+//		perror(" failed");
+//		exit(EXIT_SUCCESS);
+//	}
+//}
 
 void
 tag(const Arg *arg)

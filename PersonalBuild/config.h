@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 /* Appearance: colors on here are not used, see loadxrdb function on dwm.c */
-static unsigned int borderpx  = 0;        /* border pixel of windows */
+static unsigned int borderpx  = 2;        /* border pixel of windows */
 static unsigned int snap      = 32;       /* snap pixel */
 static unsigned int gappih    = 15;       /* horiz inner gap between windows */
 static unsigned int gappiv    = 20;       /* vert inner gap between windows */
@@ -11,13 +11,6 @@ static int swallowfloating    = 0;        /* 1 means swallow floating windows by
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int showbar            = 1;        /* 0 means no bar */
 static int topbar             = 1;        /* 0 means bottom bar */
-//static int squareind          = 1;        /* 0 means line indicator on tags */
-static char normbordercolor[] = "#444444";/* borders, don't use them */
-static char normbgcolor[]     = "#222222";/* titlefont, same as bar */
-static char normfgcolor[]     = "#bbbbbb";/* bar, transparent or default color */
-static char selbordercolor[]  = "#770000";/* borders, don't use them */
-static char selbgcolor[]      = "#005577";/* selected, most prominent color on the wallpaper */
-static char selfgcolor[]      = "#eeeeee";/* bartext, light */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
@@ -29,59 +22,25 @@ static char *fonts[] = {
 //	"Noto Color Emoji:pixelsize=16:antialias=true:autohint=true: style=Regular" /* Emojis */
 	"JoyPixels:pixelsize=14:antialias=true:autohint=true"
 };
-
-
-// gruvbox
-//static char col_gb_bg[]        = "#282828";
-//static char col_gb_fg[]        = "#ebdbb2";
-//
-//static char col_gb_red1[]     = "#cc241d";
-//static char col_gb_red2[]     = "#fb4934";
-//
-//static char col_gb_green1[]   = "#98971a";
-//static char col_gb_green2[]   = "#b8bb26";
-//
-//static char col_gb_yellow1[]  = "#d79921";
-//static char col_gb_yellow2[]  = "#fabd2f";
-//
-//static char col_gb_blue1[]    = "#458588";
-//static char col_gb_blue2[]    = "#83a598";
-//
-//static char col_gb_purple1[]  = "#b16286";
-//static char col_gb_purple2[]  = "#83869b";
-//
-//static char col_gb_aqua1[]    = "#689d6a";
-//static char col_gb_aqua2[]    = "#8ec07c";
-//
-//static char col_gb_gray1[]    = "#a89984";
-//static char col_gb_gray2[]    = "#928374";
-//
-//static char col_gb_orange1[]  = "#d65d0e";
-//static char col_gb_orange2[]  = "#fe8019";
-// gruvbox
-
 /* Pywal, 8 bytes because xrdb macro asks for at least 8 (>7)*/
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8], color6[8], color7[8], color8[8];
 static char bg_wal[8], fg_wal[8], cursor_wal[8];
-
-static char *colors[][3] = {
-			/* fg		bg		border	 */
-//	[SchemeNorm]   = { normfgcolor, col_gb_bg, normbordercolor },  //Normal tags section
-//	[SchemeSel]    = { selfgcolor,  col_gb_bg,  selbordercolor  }, //Selected tag
-	[SchemeNorm]   = { fg_wal,	color0,		color0 }, //
-	[SchemeSel]    = { color0,	color1,		color0 },
-	[SchemeLt]     = { color0,	color2,		color0 }, //Layout
-	[SchemeTitle]  = { color0,	color2,		color0 }, //window title
-	[SchemeStatus] = { color2,	color0,		color0 }, //StatusBar
-	[SchemeUrgent] = { color0,	color0,		color0 }, //background color for urgent tag
-	[SchemeNotify] = { color3,	color0,		color0 }, //Little red bar on urgent tag
-	[SchemeIndOff] = { color2,	color0,		color0 }, //BARontag
-	[SchemeIndOn]  = { color4,	color0,		color0 }, //BARontag
+static char *colors[][3]	      = {
+			/* fg		bg		border	    description		*/
+	[SchemeNorm]   = { fg_wal,	color0,		color0 }, /*Normal tags section */
+	[SchemeSel]    = { color0,	color1,		color2 }, /*Selected tag*/
+	[SchemeLt]     = { color2,	color0,		color0 }, /*Layout*/
+	[SchemeTitle]  = { color0,	color2,		color0 }, /*window title*/
+	[SchemeStatus] = { color1,	color0,		color1 }, /*StatusBar*/
+	[SchemeUrgent] = { fg_wal,	color0,		color0 }, /*background color for urgent tag*/
+	[SchemeNotify] = { fg_wal,	color0,		color0 }, /*Little red bar on urgent tag*/
+	[SchemeIndOn]  = { color4,	color0,		color0 }, /*rectangle on active tag*/
+	[SchemeIndOff] = { color2,	color0,		color0 }, /*rectablge on def tag*/
 };
 static const unsigned int alphas[][3] = {
-	/*               fg          bg           border     */
-	[SchemeNorm] = { OPAQUE,     baralpha,    borderalpha },
-	[SchemeSel]  = { OPAQUE,     baralpha,    borderalpha },
+			/* fg		bg		border     */
+	[SchemeNorm]   = { OPAQUE,	baralpha,	borderalpha },
+	[SchemeSel]    = { OPAQUE,	baralpha,	borderalpha },
 };
 
 /* tags */
@@ -160,7 +119,8 @@ static const Layout layouts[] = {
 	{ MODKEY,            		KEY,  	togglescratch,	{.ui = NUM } },
 /* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd?*/
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
-#define DMENUARGS "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor
+/* macro for any dmenu commands, colorize them */
+#define DMENUARGS "-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() (monitor) */
 static const char *dmenucmd[] = { "dmenu_run_i", DMENUARGS, NULL };
@@ -174,9 +134,9 @@ static const char *samevifm[]  = { "samedirvifm", NULL };
 
 /* scratchpads */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
-const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL };
+const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "~/Docs/testi/testi", NULL };
 const char *spcmd1[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
-const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
+const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "~/Docs/testi/Uni.txt", NULL };
 const char *spcmd3[] = { "st", "-n", "diary", "-g", "115x30" , NULL };
 const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
 const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
@@ -254,6 +214,7 @@ static Key keys[] = {
 
 			/* Custom bindings (may be better using shkd) */
 	{ MODKEY,			XK_b,	spawn,	SHCMD("Books001")		},
+	//{ MODKEY,			XK_b,	spawncmd,	{ "Books001", NULL }	},
 	{ MODKEY|ShiftMask,		XK_u,	spawn,	SHCMD("bookmenu")		},
 	{ MODKEY|ShiftMask,		XK_b,	spawn,	SHCMD("Boletin001")		},
 	{ MODKEY,		        XK_c,	spawn,	SHCMD("st -e calcurse")		},
