@@ -11,7 +11,7 @@ static int swallowfloating    = 0;        /* 1 means swallow floating windows by
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int showbar            = 1;        /* 0 means no bar */
 static int topbar             = 1;        /* 0 means bottom bar */
-static int squareind          = 1;        /* 0 means line indicator on tags */
+//static int squareind          = 1;        /* 0 means line indicator on tags */
 static char normbordercolor[] = "#444444";/* borders, don't use them */
 static char normbgcolor[]     = "#222222";/* titlefont, same as bar */
 static char normfgcolor[]     = "#bbbbbb";/* bar, transparent or default color */
@@ -21,20 +21,64 @@ static char selfgcolor[]      = "#eeeeee";/* bartext, light */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
-static const unsigned int baralpha    = 185;	/* Bar opcaity (0-255) */
+static const unsigned int baralpha    = 185;	/* Bar opacity (0-255) */
 static const unsigned int borderalpha = OPAQUE;	/* Borders (0xffU) */
 static char *fonts[] = {
-	"Hack Nerd Font:pixelsize=14:antialias=true:autohint=true", /* Powerline */
+	"Hack Nerd Font:pixelsize=12:antialias=true:autohint=true", /* Powerline */
 //	"SauceCodePro Nerd Font:pixelsize=14:antialias=true:autohint=true",
 //	"Noto Color Emoji:pixelsize=16:antialias=true:autohint=true: style=Regular" /* Emojis */
-	"JoyPixels:pixelsize=16:antialias=true:autohint=true"
+	"JoyPixels:pixelsize=14:antialias=true:autohint=true"
 };
+
+
+// gruvbox
+//static char col_gb_bg[]        = "#282828";
+//static char col_gb_fg[]        = "#ebdbb2";
+//
+//static char col_gb_red1[]     = "#cc241d";
+//static char col_gb_red2[]     = "#fb4934";
+//
+//static char col_gb_green1[]   = "#98971a";
+//static char col_gb_green2[]   = "#b8bb26";
+//
+//static char col_gb_yellow1[]  = "#d79921";
+//static char col_gb_yellow2[]  = "#fabd2f";
+//
+//static char col_gb_blue1[]    = "#458588";
+//static char col_gb_blue2[]    = "#83a598";
+//
+//static char col_gb_purple1[]  = "#b16286";
+//static char col_gb_purple2[]  = "#83869b";
+//
+//static char col_gb_aqua1[]    = "#689d6a";
+//static char col_gb_aqua2[]    = "#8ec07c";
+//
+//static char col_gb_gray1[]    = "#a89984";
+//static char col_gb_gray2[]    = "#928374";
+//
+//static char col_gb_orange1[]  = "#d65d0e";
+//static char col_gb_orange2[]  = "#fe8019";
+// gruvbox
+
+/* Pywal, 8 bytes because xrdb macro asks for at least 8 (>7)*/
+static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8], color6[8], color7[8], color8[8];
+static char bg_wal[8], fg_wal[8], cursor_wal[8];
+
 static char *colors[][3] = {
-       /*               fg           bg           border	 */
-       [SchemeNorm] = { normfgcolor, normbgcolor, normbordercolor },
-       [SchemeSel]  = { selfgcolor,  selbgcolor,  selbordercolor  },
+			/* fg		bg		border	 */
+//	[SchemeNorm]   = { normfgcolor, col_gb_bg, normbordercolor },  //Normal tags section
+//	[SchemeSel]    = { selfgcolor,  col_gb_bg,  selbordercolor  }, //Selected tag
+	[SchemeNorm]   = { fg_wal,	color0,		color0 }, //
+	[SchemeSel]    = { color0,	color1,		color0 },
+	[SchemeLt]     = { color0,	color2,		color0 }, //Layout
+	[SchemeTitle]  = { color0,	color2,		color0 }, //window title
+	[SchemeStatus] = { color2,	color0,		color0 }, //StatusBar
+	[SchemeUrgent] = { color0,	color0,		color0 }, //background color for urgent tag
+	[SchemeNotify] = { color3,	color0,		color0 }, //Little red bar on urgent tag
+	[SchemeIndOff] = { color2,	color0,		color0 }, //BARontag
+	[SchemeIndOn]  = { color4,	color0,		color0 }, //BARontag
 };
-static const unsigned int alphas[][3]      = {
+static const unsigned int alphas[][3] = {
 	/*               fg          bg           border     */
 	[SchemeNorm] = { OPAQUE,     baralpha,    borderalpha },
 	[SchemeSel]  = { OPAQUE,     baralpha,    borderalpha },
@@ -44,29 +88,6 @@ static const unsigned int alphas[][3]      = {
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
 static const int taglayouts[] = {    0,   1,    0,   0,    0,    0,    0,    0,    0 };
 
-//typedef void (*char void);
-//void
-//#define MAXPATH 1024;
-//const char *get_term_env(void)
-//{
-//char sPath[MAXPATH] = "";
-//char *pTmp;
-//
-//if (( pTmp =getenv( "PATH" )) != NULL )
-//  //strncpy( sPath, pTmp, MAXPATH − 1 );           // Save a copy for our use.
-//	 return sPath;
-//else
-//  fprintf( stderr, "No PATH variable set.\n") ;
-//    //printf("%s", getenv("TERMNINAL"));
-////	const char * ptr_path;
-////	ptr_path = getenv ("TERMINAL");
-//
-//	//if (ptr_path!=NULL)
-//	//return ptr_path;
-//	//return 0;
-//}
-////typedef void (**char)(void);
-//const char *term = get_term_env();
 static const Rule rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
@@ -85,8 +106,9 @@ static const Rule rules[] = {
 //	RULE(.class = "Firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
 	RULE(.class = "firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
 	RULE(.class = "Brave-browser",	.tags = 1 << 4, .isfakefullscreen = 1)
-	RULE(.class = "Video", .isfloating = 1)
+	RULE(.class = "Video",       .isfloating = 1)
 	RULE(.class = "Pavucontrol", .isfloating = 1)
+	RULE(.class = "Pcmanfm",     .isfloating = 1)
 //	RULE(.title = "pulsemixer",  .isfloating = 1)
 	RULE(.title = "About Mozilla Firefox",	.isfloating = 1)
 	RULE(.class = "St", .isterminal = 1)
@@ -138,24 +160,27 @@ static const Layout layouts[] = {
 	{ MODKEY,            		KEY,  	togglescratch,	{.ui = NUM } },
 /* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd?*/
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+#define DMENUARGS "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() (monitor) */
-static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
-static const char *clip[] = { "clipmenu", "-i", "-m", dmenumon, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
+static const char *dmenucmd[] = { "dmenu_run_i", DMENUARGS, NULL };
+static const char *clip[] = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
+static const char *passmenu[] = { "passmenu", "-i", "-l", "25", DMENUARGS, NULL };
 static const char *termcmd[]   = { "st", NULL };
-static const char *syncthing[] = { "surf", "127.0.0.1:1210" };
-static const char *web[]       = { "surf", "start.duckduckgo.com" };
-static const char *vifm[]      = { "sh",  "-c", "st -t 'FileManager🗄️' -e vifmrun" };
+static const char *syncthing[] = { "surf", "127.0.0.1:1210", NULL };
+static const char *web[]       = { "surf", "start.duckduckgo.com", NULL };
+static const char *vifm[]      = { "sh",  "-c", "st -t 'FileManager🗄️' -e vifmrun", NULL };
+static const char *samevifm[]  = { "samedirvifm", NULL };
 
 /* scratchpads */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
-const char *spcmd1[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL };
-const char *spcmd2[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
-const char *spcmd3[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
-const char *spcmd4[] = { "st", "-n", "diary", "-g", "100x25" , NULL };
-const char *spcmd5[] = { "st", "-n", "music", "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
-const char *spcmd6[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
-static Sp scratchpads[] = { {spcmd1}, {spcmd2}, {spcmd3}, {spcmd4}, {spcmd5}, {spcmd6} };
+const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL };
+const char *spcmd1[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
+const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
+const char *spcmd3[] = { "st", "-n", "diary", "-g", "115x30" , NULL };
+const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
+const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
+static Sp scratchpads[] = { {spcmd0}, {spcmd1}, {spcmd2}, {spcmd3}, {spcmd4}, {spcmd5} };
 /*static Sp scratchpads[] = {
 	* name          cmd  *
 	{"notes",    spcmd1},
@@ -172,9 +197,11 @@ static Key keys[] = {
 	{ MODKEY,		   XK_Return,	spawn,		{ .v = termcmd }	},
 	{ MODKEY,			XK_d,   spawn,		{ .v = dmenucmd }	},
 	{ MODKEY,			XK_m,	spawn,		{ .v = vifm }		},
+	{ MODKEY|ShiftMask,		XK_m,	spawn,		{ .v = samevifm }	},
 	{ MODKEY,	       XK_apostrophe,	spawn,		{ .v = clip }		},
 	{ MODKEY|ShiftMask,		XK_w,	spawn,		{ .v = web }		},
 	{ MODKEY|ControlMask,		XK_w,	spawn,		{ .v = syncthing }	},
+	{ MODKEY|ShiftMask,		XK_x,	spawn,		{ .v = passmenu }	},
 	{ MODKEY,			XK_e,  	togglescratch,	{.ui = 0 } },/* notes */
 	{ MODKEY,			XK_x,	togglescratch,	{.ui = 1 } },/* bc */
 	{ MODKEY|ControlMask,		XK_s,	togglescratch,	{.ui = 2 } },/* uni */
@@ -294,8 +321,8 @@ static Key keys[] = {
 //	{ 0,	XF86XK_AudioStop,		spawn,	SHCMD("mpc toggle) },
 	{ 0,	XF86XK_Sleep,			spawn,	SHCMD("sudo zzz")		},
 	{ 0,	XF86XK_ScreenSaver,		spawn,	SHCMD("xset dpms force off")	},
-	{ 0,	XF86XK_MonBrightnessUp,		spawn,	SHCMD("sudo brightnessctl -q set +5%") },
-	{ 0,	XF86XK_MonBrightnessDown,	spawn,	SHCMD("sudo brightnessctl -q set 5%-") },
+	{ 0,	XF86XK_MonBrightnessUp,		spawn,	SHCMD("sudo brightnessctl -q set +1%") },
+	{ 0,	XF86XK_MonBrightnessDown,	spawn,	SHCMD("sudo brightnessctl -q set 1%-") },
 	{ 0,	XF86XK_AudioPlay,		spawn,	SHCMD("mpc toggle")		},
 	{ 0,	XF86XK_AudioPrev,		spawn,	SHCMD("mpc prev")		},
 	{ 0,	XF86XK_AudioNext,		spawn,	SHCMD("mpc next")		},
