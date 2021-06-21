@@ -84,7 +84,8 @@
         }
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel }; /* color schemes */
+//enum { SchemeNorm, SchemeSel }; /* color schemes */
+enum { SchemeNorm, SchemeSel, SchemeTitle, SchemeLt, SchemeStatus, SchemeIndOff, SchemeIndOn, SchemeUrgent, SchemeNotify }; /* color schemes */
 enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
        NetWMWindowTypeDialog, NetClientList, NetLast }; /* EWMH atoms */
@@ -722,6 +723,7 @@ cleanupmon(Monitor *mon)
 	}
 	XUnmapWindow(dpy, mon->barwin);
 	XDestroyWindow(dpy, mon->barwin);
+ 	free(mon->pertag);
 	free(mon);
 }
 
@@ -985,13 +987,13 @@ drawbar(Monitor *m)
 {
 	int x, w, sw = 0;
 	int boxs = drw->fonts->h / 9;
-	int boxw = drw->fonts->h / 6 + 2;
+	int boxw = drw->fonts->h / 9;
 	unsigned int i, occ = 0, urg = 0;
 	Client *c;
 
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) { /* status is only drawn on selected monitor */
-		drw_setscheme(drw, scheme[SchemeNorm]);
+		drw_setscheme(drw, scheme[SchemeStatus]);
 		sw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
 		drw_text(drw, m->ww - sw, 0, sw, bh, 0, stext, 0);
 	}
@@ -1004,29 +1006,31 @@ drawbar(Monitor *m)
 	x = 0;
 	for (i = 0; i < LENGTH(tags); i++) {
 		w = TEXTW(tags[i]);
-		drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
-		drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], urg & 1 << i);
+	        if (urg & 1 << i )
+			drw_setscheme(drw, scheme[SchemeUrgent]);
+		else
+			drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
+		drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], 0);
 		if (occ & 1 << i) {
-			//drw_rect(drw, x + boxw, 0, w - ( 2 * boxw + 1), boxw,
-			if (squareind)
-			//drw_rect(drw, x + boxs, boxs, boxw, boxw, /* up line */
-			drw_rect(drw, x + boxw, bh - boxw/2, w - ( 2 * boxw + 1), boxw/2,
-				m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
-				urg & 1 << i);
-			else
-			drw_rect(drw, x + boxs, boxs, boxw, boxw,
-				m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
-				urg & 1 << i);
+			if (urg & 1 << i ) {
+				drw_setscheme(drw, scheme[SchemeNotify]);
+                		drw_rect(drw, x, 0, w, boxw, 1, 0);
+				//drw_rect(drw, x + boxw, bh - boxw/2, w - ( 2 * boxw + 1), boxw/2,
 			}
+			drw_setscheme(drw, scheme[(m == selmon && selmon->sel && selmon->sel->tags & 1 << i) ? SchemeIndOn : SchemeIndOff]);
+			drw_rect(drw, x, bh - boxw, w, boxw, 1, 0);
+		}
 		x += w;
 	}
 	w = blw = TEXTW(m->ltsymbol);
-	drw_setscheme(drw, scheme[SchemeNorm]);
+	drw_setscheme(drw, scheme[SchemeLt]);
+	//drw_setscheme(drw, scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
 	if ((w = m->ww - sw - x) > bh) {
 		if (m->sel) {
-			drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
+			//drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
+			drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]);
 			drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
 			if (m->sel->isfloating)
 				drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
@@ -1328,13 +1332,17 @@ loadxrdb(void)
 
 	xrdb = XrmGetStringDatabase(resm);
 	if (xrdb != NULL) {
-		XRDB_LOAD_COLOR("dwm.color0", normbordercolor);	/* borders(don't use them) */
-		XRDB_LOAD_COLOR("dwm.color4", selbordercolor);	/* borders(don't use them) */
-		XRDB_LOAD_COLOR("dwm.color0", normbgcolor);	/* bar(default color) */
-		XRDB_LOAD_COLOR("dwm.color8", normfgcolor);	/* bartext(light) */
-		XRDB_LOAD_COLOR("dwm.color0", selfgcolor);	/* titlefont(same as bar) */
-		XRDB_LOAD_COLOR("dwm.color2", selbgcolor);	/* selected(most prominent color) */
- 		XrmDestroyDatabase(xrdb);			/* Fix memory leaks */
+		XRDB_LOAD_COLOR("color0", color0);
+		XRDB_LOAD_COLOR("color1", color1);
+		XRDB_LOAD_COLOR("color2", color2);
+		XRDB_LOAD_COLOR("color3", color3);
+		XRDB_LOAD_COLOR("color4", color4);
+		XRDB_LOAD_COLOR("color5", color5);
+		XRDB_LOAD_COLOR("color6", color6);
+		XRDB_LOAD_COLOR("color7", color7);
+		XRDB_LOAD_COLOR("color8", color8);
+		XRDB_LOAD_COLOR("color9", color9);
+ 		XrmDestroyDatabase(xrdb);	/* Fix memory leaks */
 	}
 	XCloseDisplay(display);
 }
@@ -2094,7 +2102,7 @@ setup(void)
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 	/* If restarting keep the wallpaper, else refresh */
-	if (running) {
+	if (restart == 1) {
 		for (i = 0; i < LENGTH(colors); i++)
 			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
 	} else {
