@@ -31,7 +31,7 @@ static char *colors[][3]	      = {
 	[SchemeSel]    = { color0,	color1,		color2 }, /*Selected tag*/
 	[SchemeLt]     = { color2,	color0,		color0 }, /*Layout*/
 	[SchemeTitle]  = { color0,	color2,		color0 }, /*window title*/
-	[SchemeStatus] = { color1,	color0,		color1 }, /*StatusBar*/
+	[SchemeStatus] = { color3,	color0,		color1 }, /*StatusBar*/
 	[SchemeUrgent] = { fg_wal,	color0,		color0 }, /*background color for urgent tag*/
 	[SchemeNotify] = { fg_wal,	color0,		color0 }, /*Little red bar on urgent tag*/
 	[SchemeIndOn]  = { color4,	color0,		color0 }, /*rectangle on active tag*/
@@ -122,10 +122,11 @@ static const Layout layouts[] = {
 /* macro for any dmenu commands, colorize them */
 #define DMENUARGS "-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
 /* commands */
-static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() (monitor) */
-static const char *dmenucmd[] = { "dmenu_run_i", DMENUARGS, NULL };
-static const char *clip[] = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
-static const char *passmenu[] = { "passmenu", "-i", "-l", "25", DMENUARGS, NULL };
+static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, "&&", "notify-send", "hi", NULL };
+static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
+//static const char *passmenu[]  = { "passmenu", "-i", "-l", "25", "-p", "Passmenu:", DMENUARGS, NULL };
+//static const char *passmenu[]  = { "clipctl", "disable", "&&", "passmenu", "-i", "-l", "25", "-p", "Passmenu:", DMENUARGS, "&&", "clipctl", "enable", "&&", "notify-send", "Password will be deleted on 45 seconds❌", NULL };
+//static const char *passmenu[]  = { "sh", "-c", "clipctl disable && passmenu -i -l 25 -p 'Passmenu:' && notify-send Password will be deleted on 45 seconds❌ ; clipctl enable", NULL };
 static const char *termcmd[]   = { "st", NULL };
 static const char *syncthing[] = { "surf", "127.0.0.1:1210", NULL };
 static const char *web[]       = { "surf", "start.duckduckgo.com", NULL };
@@ -134,9 +135,9 @@ static const char *samevifm[]  = { "samedirvifm", NULL };
 
 /* scratchpads */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
-const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "~/Docs/testi/testi", NULL };
+const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL };
 const char *spcmd1[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
-const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "~/Docs/testi/Uni.txt", NULL };
+const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
 const char *spcmd3[] = { "st", "-n", "diary", "-g", "115x30" , NULL };
 const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
 const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
@@ -161,7 +162,8 @@ static Key keys[] = {
 	{ MODKEY,	       XK_apostrophe,	spawn,		{ .v = clip }		},
 	{ MODKEY|ShiftMask,		XK_w,	spawn,		{ .v = web }		},
 	{ MODKEY|ControlMask,		XK_w,	spawn,		{ .v = syncthing }	},
-	{ MODKEY|ShiftMask,		XK_x,	spawn,		{ .v = passmenu }	},
+//	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn,		{ .v = passmenu }	},
+	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn, SHCMD("clipctl disable && passmenu -i -l 25 -p 'Passmenu:' && clipctl enable && notify-send 'Password will be deleted on 45 seconds❌'")		},
 	{ MODKEY,			XK_e,  	togglescratch,	{.ui = 0 } },/* notes */
 	{ MODKEY,			XK_x,	togglescratch,	{.ui = 1 } },/* bc */
 	{ MODKEY|ControlMask,		XK_s,	togglescratch,	{.ui = 2 } },/* uni */

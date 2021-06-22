@@ -150,6 +150,8 @@ static Key keys[] = {
 	{ MODKEY,                       XK_d,   spawn,		{ .v = dmenucmd }	},
 	{ MODKEY,			XK_m,	spawn,		{ .v = vifm }		},
 	{ MODKEY,	       XK_apostrophe,	spawn,		{ .v = clip }		},
+	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn, SHCMD("clipctl disable && passmenu -i -l 25 -p 'Passmenu:' \
+			&& clipctl enable && notify-send 'Password will be deleted on 45 seconds❌'")	},
 	{ MODKEY|ShiftMask,     	XK_w,	spawn,		{ .v = web }		},
 	{ MODKEY|ControlMask,		XK_w,	spawn,		{ .v = syncthing }	},
 	{ MODKEY,            		XK_s,  	togglescratch,	{.ui = 0 } },/* notes */
