@@ -29,13 +29,13 @@ static char *colors[][3]	      = {
 			/* fg		bg		border	    description		*/
 	[SchemeNorm]   = { fg_wal,	color0,		color0 }, /*Normal tags section */
 	[SchemeSel]    = { color0,	color1,		color2 }, /*Selected tag*/
-	[SchemeLt]     = { color2,	color0,		color0 }, /*Layout*/
-	[SchemeTitle]  = { color0,	color2,		color0 }, /*window title*/
-	[SchemeStatus] = { color3,	color0,		color1 }, /*StatusBar*/
-	[SchemeUrgent] = { fg_wal,	color0,		color0 }, /*background color for urgent tag*/
-	[SchemeNotify] = { fg_wal,	color0,		color0 }, /*Little red bar on urgent tag*/
-	[SchemeIndOn]  = { color4,	color0,		color0 }, /*rectangle on active tag*/
-	[SchemeIndOff] = { color2,	color0,		color0 }, /*rectablge on def tag*/
+	[SchemeLt]     = { color2,	color0,		NULL }, /*Layout*/
+	[SchemeTitle]  = { color0,	color2,		NULL }, /*window title*/
+	[SchemeStatus] = { color3,	color0,		NULL }, /*StatusBar*/
+	[SchemeUrgent] = { fg_wal,	color0,		NULL }, /*background color for urgent tag*/
+	[SchemeNotify] = { fg_wal,	color0,		NULL }, /*Little red bar on urgent tag*/
+	[SchemeIndOn]  = { color4,	color0,		NULL }, /*rectangle on active tag*/
+	[SchemeIndOff] = { color2,	color0,		NULL }, /*rectablge on def tag*/
 };
 static const unsigned int alphas[][3] = {
 			/* fg		bg		border     */
@@ -104,6 +104,7 @@ static const Layout layouts[] = {
 	//{ "---",      horizgrid },		/* Gaplessgrid but with horizontal order */
 	//{ ":::",      gaplessgrid },		/* grid ajusted in such that there are no gaps */
 	//{ "🐷", 	pidgin },		/* Basically grid? */
+	//{ ")M(",	ego },
 	//{ "🥏",	NULL },			/* no layout function means floating behavior */
 	{ NULL,		NULL },
 };
@@ -122,7 +123,7 @@ static const Layout layouts[] = {
 /* macro for any dmenu commands, colorize them */
 #define DMENUARGS "-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
 /* commands */
-static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, "&&", "notify-send", "hi", NULL };
+static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
 static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
 //static const char *passmenu[]  = { "passmenu", "-i", "-l", "25", "-p", "Passmenu:", DMENUARGS, NULL };
 //static const char *passmenu[]  = { "clipctl", "disable", "&&", "passmenu", "-i", "-l", "25", "-p", "Passmenu:", DMENUARGS, "&&", "clipctl", "enable", "&&", "notify-send", "Password will be deleted on 45 seconds❌", NULL };
