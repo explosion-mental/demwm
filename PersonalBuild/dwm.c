@@ -251,8 +251,10 @@ static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
 static void shiftag(const Arg *arg);
+static void shiftagclients(const Arg *arg);
 static void shiftview(const Arg *arg);
-static void shiftviewactive(const Arg *arg);
+static void shiftviewclients(const Arg *arg);
+static void shiftboth(const Arg *arg);
 static void showhide(Client *c);
 static void sigchld(int unused);
 #ifndef __OpenBSD__
@@ -1892,36 +1894,6 @@ getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *s
 }
 /* vanitygaps */
 
-void
-shiftag(const Arg *arg) {
-
-	Arg shiftag;
-	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
-//	unsigned int tagset = selmon->sel->tags;
-
-	//if(selmon->sel != NULL
-	//&& __builtin_popcount(selmon->tagset[selmon->seltags] & TAGMASK) == 1
-	//&& selmon->tagset[selmon->seltags] > 1) {
-
-		/* well, is left tag or right tag, we are not moving anything yet */
-		if (arg->i > 0) /* tag to right */
-			shiftag.ui = (seltagset << arg->i)
-			    | (seltagset >> (LENGTH(tags) - arg->i));
-		else		/* tag to left */
-			shiftag.ui = (seltagset >> -arg->i)
-			    | (seltagset << (LENGTH(tags) + arg->i));
-			//selmon->sel->tags <<= 1;
-
-//	if (selmon->sel && arg->ui & TAGMASK) {
-//		selmon->sel->tags = arg->ui & TAGMASK;
-//		focus(NULL);
-//		arrange(selmon);
-//	}
-	tag(&shiftag);
-	//focus(NULL);
-	//arrange(selmon);
-}
-
 int
 sendevent(Client *c, Atom proto)
 {
@@ -2205,7 +2177,68 @@ seturgent(Client *c, int urg)
 }
 
 void
-shiftviewactive(const Arg *arg)
+shiftag(const Arg *arg) {
+
+	Arg shifted;
+	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+
+	if (arg->i > 0) /* tag to right */
+		shifted.ui = (seltagset << arg->i)
+		    | (seltagset >> (LENGTH(tags) - arg->i));
+	else		/* tag to left */
+		shifted.ui = (seltagset >> -arg->i)
+		    | (seltagset << (LENGTH(tags) + arg->i));
+	tag(&shifted);
+}
+
+void
+shiftagclients(const Arg *arg) {
+
+	Arg shifted;
+	Client *c;
+	unsigned int tagmask = 0;
+
+	for (c = selmon->clients; c; c = c->next)
+		if (!(c->tags & SPTAGMASK))
+			tagmask = tagmask | c->tags;
+
+	/* TODO: if no active clients then just move up */
+	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+	if (arg->i > 0)	/* left circular shift */
+		do {
+			shifted.ui = (shifted.ui << arg->i)
+			   | (shifted.ui >> (LENGTH(tags) - arg->i));
+			shifted.ui &= ~SPTAGMASK;
+		} while (tagmask && !(shifted.ui & tagmask));
+	else		/* right circular shift */
+		do {
+			shifted.ui = (shifted.ui >> (- arg->i)
+			   | shifted.ui << (LENGTH(tags) + arg->i));
+			shifted.ui &= ~SPTAGMASK;
+		} while (tagmask && !(shifted.ui & tagmask));
+
+	tag(&shifted);
+}
+
+void
+shiftview(const Arg *arg)
+{
+	Arg shifted;
+	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+
+	if (arg->i > 0)	/* left circular shift */
+		shifted.ui = (seltagset << arg->i)
+		   | (seltagset >> (LENGTH(tags) - arg->i));
+	else		/* right circular shift */
+		shifted.ui = seltagset >> -arg->i
+		   | seltagset << (LENGTH(tags) + arg->i);
+
+	view(&shifted);
+}
+
+
+void
+shiftviewclients(const Arg *arg)
 {
 	Arg shifted;
 	Client *c;
@@ -2232,22 +2265,24 @@ shiftviewactive(const Arg *arg)
 	view(&shifted);
 }
 
-
 void
-shiftview(const Arg *arg)
+shiftboth(const Arg *arg)
 {
 	Arg shifted;
 	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
-	if (arg->i > 0)	/* left circular shift */
+	if (arg->i > 0) /* tag to right */
 		shifted.ui = (seltagset << arg->i)
-		   | (seltagset >> (LENGTH(tags) - arg->i));
-	else		/* right circular shift */
-		shifted.ui = seltagset >> -arg->i
-		   | seltagset << (LENGTH(tags) + arg->i);
-
+		    | (seltagset >> (LENGTH(tags) - arg->i));
+	else		/* tag to left */
+		shifted.ui = (seltagset >> -arg->i)
+		    | (seltagset << (LENGTH(tags) + arg->i));
+	tag(&shifted);
 	view(&shifted);
 }
+
+
+
 
 void
 showhide(Client *c)
@@ -2891,15 +2926,15 @@ view(const Arg *arg)
 		selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
 
 		if (gapspertag) {
-		selmon->gappoh = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff) >> 0;
-		selmon->gappov = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff00) >> 8;
-		selmon->gappih = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff0000) >> 16;
-		selmon->gappiv = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff000000) >> 24;
+			selmon->gappoh = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff) >> 0;
+			selmon->gappov = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff00) >> 8;
+			selmon->gappih = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff0000) >> 16;
+			selmon->gappiv = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff000000) >> 24;
 		}
 
 		if (pertagbar && selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
 			togglebar(NULL);
-	} else if (arg->ui & TAGMASK)
+	} else if (arg->ui & TAGMASK) /* if pertag */
 		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
 	focus(NULL);
 	arrange(selmon);
