@@ -9,13 +9,6 @@ You can see them and 'unpatch' them if you want to.
 
 _Little note:_ I don't use cfacts patch.
 
-## PersonalBuild
-My changes, you can refer to them in case you find them usefull. I mostly like
-a baeutiful config.h with not much stuff.
-
-
-**NOTE**: You need **PYWAL**
-
 ## dwm.def.c
 This build is **perfect** for me I really wouldn't bother with adding or
 cleaning more things, but sometimes things happen (maybe I get a new monitor,
