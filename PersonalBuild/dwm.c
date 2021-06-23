@@ -1905,11 +1905,11 @@ shiftag(const Arg *arg) {
 
 		/* well, is left tag or right tag, we are not moving anything yet */
 		if (arg->i > 0) /* tag to right */
-		shiftag.ui = (seltagset << arg->i)
-		   | (seltagset >> (LENGTH(tags) - arg->i));
+			shiftag.ui = (seltagset << arg->i)
+			    | (seltagset >> (LENGTH(tags) - arg->i));
 		else		/* tag to left */
-		shiftag.ui = (seltagset >> -arg->i)
-		   | (seltagset << (LENGTH(tags) + arg->i));
+			shiftag.ui = (seltagset >> -arg->i)
+			    | (seltagset << (LENGTH(tags) + arg->i));
 			//selmon->sel->tags <<= 1;
 
 //	if (selmon->sel && arg->ui & TAGMASK) {
