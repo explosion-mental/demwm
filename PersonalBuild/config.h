@@ -32,7 +32,7 @@ static char *colors[][3]	      = {
 	[SchemeLt]     = { color2,	color0,		NULL }, /*Layout*/
 	[SchemeTitle]  = { color0,	color2,		NULL }, /*window title*/
 	[SchemeStatus] = { color3,	color0,		NULL }, /*StatusBar*/
-	[SchemeUrgent] = { fg_wal,	color0,		NULL }, /*background color for urgent tag*/
+	[SchemeUrgent] = { fg_wal,	color0,		fg_wal }, /*background color for urgent tag*/
 	[SchemeNotify] = { fg_wal,	color0,		NULL }, /*Little red bar on urgent tag*/
 	[SchemeIndOn]  = { color4,	color0,		NULL }, /*rectangle on active tag*/
 	[SchemeIndOff] = { color2,	color0,		NULL }, /*rectablge on def tag*/
@@ -174,10 +174,10 @@ static Key keys[] = {
 //	{ MODKEY,		   XK_Num_Lock,	togglescratch,	{.ui = 1 } },/* bc */
 
 				/* Navigation */
-	{ MODKEY,                       XK_j,	focusstack,	{ .i = +1 }		},
-	{ MODKEY|ShiftMask,             XK_j,	tagtoleft,		{0}		},
-	{ MODKEY,                       XK_k,	focusstack,	{ .i = -1 }		},
-	{ MODKEY|ShiftMask,             XK_k,	tagtoright,		{0}		},
+	{ MODKEY,                       XK_j,	focusstack,	{ .i = -1 }		},
+	{ MODKEY|ShiftMask,             XK_j,	shiftag,	{ .i = -1 }		},
+	{ MODKEY,                       XK_k,	focusstack,	{ .i = +1 }		},
+	{ MODKEY|ShiftMask,             XK_k,	shiftag,	{ .i = +1 }		},
 	{ MODKEY,                       XK_h,	setmfact,	{ .f = -0.05 }		},
 	{ MODKEY|ShiftMask,             XK_h,	setcfact,	{ .f = +0.05 }		},
 	{ MODKEY,                       XK_l,	setmfact,	{ .f = +0.05 }		},

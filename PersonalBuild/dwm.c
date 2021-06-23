@@ -250,6 +250,7 @@ static void setcfact(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
+static void shiftag(const Arg *arg);
 static void shiftview(const Arg *arg);
 static void shiftviewactive(const Arg *arg);
 static void showhide(Client *c);
@@ -263,8 +264,6 @@ static void sigterm(int unused);
 static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
-static void tagtoleft(const Arg *arg);
-static void tagtoright(const Arg *arg);
 static void togglebar(const Arg *arg);
 static void fakefullscreen(const Arg *arg);
 static void togglefloating(const Arg *arg);
@@ -317,6 +316,7 @@ static void monocle(Monitor *m);
 static void alphamonocle(Monitor *m);
 static void centeredfloatmaster(Monitor *m);
 /*static void pidgin(Monitor *m);
+static void ego(Monitor *m);
 static void bstack(Monitor *m);
 static void bstackhoriz(Monitor *m);
 static void centeredmaster(Monitor *m);
@@ -383,6 +383,8 @@ static Visual *visual;
 static int depth;
 static Colormap cmap;
 
+static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() (monitor) */
+
 /* back up default colors */
 //static char normbordercolor[] = "#444444";	/* borders, don't use them */
 //static char normbgcolor[]     = "#222222";	/* titlefont, same as bar */
@@ -408,7 +410,7 @@ struct Pertag {
 	unsigned int gaps[NUMTAGS + 1];		/* gaps per tag */
 };
 
-/* vanitygaps */
+/* vanitygaps and layouts */
 #include "layouts.c"
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
@@ -712,6 +714,7 @@ cleanup(void)
 		drw_cur_free(drw, cursor[i]);
 	for (i = 0; i < LENGTH(colors); i++)
 		free(scheme[i]);
+ 	free(scheme);
 	XDestroyWindow(dpy, wmcheckwin);
 	drw_free(drw);
 	XSync(dpy, False);
@@ -999,6 +1002,8 @@ drawbar(Monitor *m)
 	int boxs = drw->fonts->h / 9;
 	int boxw = drw->fonts->h / 9;
 	unsigned int i, occ = 0, urg = 0;
+
+	unsigned int a = 0, s = 0;
 	Client *c;
 
 	/* draw status first so it can be overdrawn by tags later */
@@ -1008,7 +1013,6 @@ drawbar(Monitor *m)
 		sw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
 		drw_text(drw, m->ww - sw, 0, sw, bh, 0, stext, 0);
 	}
-
 	for (c = m->clients; c; c = c->next) {
 		occ |= c->tags;
 		if (c->isurgent)
@@ -1033,6 +1037,16 @@ drawbar(Monitor *m)
 		}
 		x += w;
 	}
+	/* Monocle, count clients */
+	if (m->lt[m->sellt]->arrange == monocle) {
+		for(a = 0, s = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), a++)
+			if (c == m->stack)
+				s = a;
+		if (!s && a)
+			s = a;
+		if (a > 1)
+			snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d/%d]", s, a);
+	}
 	w = blw = TEXTW(m->ltsymbol);
 	drw_setscheme(drw, scheme[SchemeLt]);
 	//drw_setscheme(drw, scheme[SchemeNorm]);
@@ -1040,6 +1054,7 @@ drawbar(Monitor *m)
 
 	if ((w = m->ww - sw - x) > bh) {
 		if (m->sel) {
+			/* Scheme Title patch */
 			//drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
 			drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]);
 			drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
@@ -1625,6 +1640,9 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	c->oldw = c->w; c->w = wc.width = w;
 	c->oldh = c->h; c->h = wc.height = h;
 	wc.border_width = c->bw;
+	/* if monocle don't draw borders */
+ 	if (c->mon->lt[c->mon->sellt]->arrange == monocle && !c->isfloating)
+		wc.border_width = 0;
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
 //	if (c->fakefullscreen == 1)
@@ -1875,25 +1893,33 @@ getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *s
 /* vanitygaps */
 
 void
-tagtoleft(const Arg *arg) {
-	if(selmon->sel != NULL
-	&& __builtin_popcount(selmon->tagset[selmon->seltags] & TAGMASK) == 1
-	&& selmon->tagset[selmon->seltags] > 1) {
-		selmon->sel->tags >>= 1;
-		focus(NULL);
-		arrange(selmon);
-	}
-}
+shiftag(const Arg *arg) {
 
-void
-tagtoright(const Arg *arg) {
-	if(selmon->sel != NULL
-	&& __builtin_popcount(selmon->tagset[selmon->seltags] & TAGMASK) == 1
-	&& selmon->tagset[selmon->seltags] & (TAGMASK >> 1)) {
-		selmon->sel->tags <<= 1;
-		focus(NULL);
-		arrange(selmon);
-	}
+	Arg shiftag;
+	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+//	unsigned int tagset = selmon->sel->tags;
+
+	//if(selmon->sel != NULL
+	//&& __builtin_popcount(selmon->tagset[selmon->seltags] & TAGMASK) == 1
+	//&& selmon->tagset[selmon->seltags] > 1) {
+
+		/* well, is left tag or right tag, we are not moving anything yet */
+		if (arg->i > 0) /* tag to right */
+		shiftag.ui = (seltagset << arg->i)
+		   | (seltagset >> (LENGTH(tags) - arg->i));
+		else		/* tag to left */
+		shiftag.ui = (seltagset >> -arg->i)
+		   | (seltagset << (LENGTH(tags) + arg->i));
+			//selmon->sel->tags <<= 1;
+
+//	if (selmon->sel && arg->ui & TAGMASK) {
+//		selmon->sel->tags = arg->ui & TAGMASK;
+//		focus(NULL);
+//		arrange(selmon);
+//	}
+	tag(&shiftag);
+	//focus(NULL);
+	//arrange(selmon);
 }
 
 int
@@ -2211,16 +2237,15 @@ void
 shiftview(const Arg *arg)
 {
 	Arg shifted;
+	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
-	if(arg->i > 0) {/* left circular shift */
-		shifted.ui = (selmon->tagset[selmon->seltags] << arg->i)
-		   | (selmon->tagset[selmon->seltags] >> (LENGTH(tags) - arg->i));
-      		shifted.ui &= ~SPTAGMASK;
-	} else {	/* right circular shift */
-		shifted.ui = selmon->tagset[selmon->seltags] >> (- arg->i)
-		   | selmon->tagset[selmon->seltags] << (LENGTH(tags) + arg->i);
-      		shifted.ui &= ~SPTAGMASK;
-	}
+	if (arg->i > 0)	/* left circular shift */
+		shifted.ui = (seltagset << arg->i)
+		   | (seltagset >> (LENGTH(tags) - arg->i));
+	else		/* right circular shift */
+		shifted.ui = seltagset >> -arg->i
+		   | seltagset << (LENGTH(tags) + arg->i);
+
 	view(&shifted);
 }
 
@@ -2782,8 +2807,12 @@ updatewmhints(Client *c)
 		if (c == selmon->sel && wmh->flags & XUrgencyHint) {
 			wmh->flags &= ~XUrgencyHint;
 			XSetWMHints(dpy, c->win, wmh);
-		} else
+		} else {
 			c->isurgent = (wmh->flags & XUrgencyHint) ? 1 : 0;
+			/* Set border to urgent */
+			if (c->isurgent)
+				XSetWindowBorder(dpy, c->win, scheme[SchemeUrgent][ColBorder].pixel);
+		}
 		if (wmh->flags & InputHint)
 			c->neverfocus = !wmh->input;
 		else
