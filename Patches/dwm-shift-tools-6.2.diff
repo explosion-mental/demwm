@@ -1,0 +1,162 @@
+From 5b21de74b97e3a9a6129941aaaec8d240da58a84 Mon Sep 17 00:00:00 2001
+From: explosion-mental <explosion0mental@gmail.com>
+Date: Wed, 23 Jun 2021 13:31:42 -0500
+Subject: [PATCH] Shift-Tools - shiftview - shiftviewclients - shiftag -
+ shiftagclients (still working on it) - shiftboth (tag and then view)
+ basically 'focus adjacent tag' and 'shiftview' patches merged.
+Made to work with scratchpads
+---
+ config.def.h |   9 +++++
+ dwm.c        | 109 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 118 insertions(+)
+
+diff --git a/config.def.h b/config.def.h
+index 1c0b587..62075b5 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -65,6 +65,15 @@ static Key keys[] = {
+ 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
+ 	{ MODKEY,                       XK_b,      togglebar,      {0} },
+ 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
++	{ MODKEY|ShiftMask,		XK_j,      shiftag,        {.i = -1 } },
++	{ MODKEY|ControlMask,		XK_j,      shiftboth,	   {.i = -1 } },
++	{ MODKEY|ControlMask|ShiftMask,	XK_j,      shiftagclients, {.i = -1 } },
++	{ MODKEY|ControlMask|ShiftMask,	XK_j,      shiftagclients, {.i = +1 } },
++	{ MODKEY|ControlMask,		XK_k,      shiftboth,	   {.i = +1 } },
++	{ MODKEY,                       XK_o,    shiftviewclients, {.i = +1 } },
++	{ MODKEY|ShiftMask,             XK_o,	   shiftview,	   {.i = +1 } },
++	{ MODKEY,	                XK_i,    shiftviewclients, {.i = -1 } },
++	{ MODKEY|ShiftMask,             XK_i,	   shiftview,	   {.i = -1 } },
+ 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
+ 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
+ 	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
+diff --git a/dwm.c b/dwm.c
+index 4465af1..8ec0af7 100644
+--- a/dwm.c
++++ b/dwm.c
+@@ -203,6 +203,11 @@ static void setlayout(const Arg *arg);
+ static void setmfact(const Arg *arg);
+ static void setup(void);
+ static void seturgent(Client *c, int urg);
++static void shiftag(const Arg *arg);
++static void shiftagclients(const Arg *arg);
++static void shiftview(const Arg *arg);
++static void shiftviewclients(const Arg *arg);
++static void shiftboth(const Arg *arg);
+ static void showhide(Client *c);
+ static void sigchld(int unused);
+ static void spawn(const Arg *arg);
+@@ -1610,6 +1615,110 @@ seturgent(Client *c, int urg)
+ 	XFree(wmh);
+ }
+
++void
++shiftag(const Arg *arg) {
++
++	Arg shifted;
++	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
++
++	if (arg->i > 0) /* tag to right */
++		shifted.ui = (seltagset << arg->i)
++		    | (seltagset >> (LENGTH(tags) - arg->i));
++	else		/* tag to left */
++		shifted.ui = (seltagset >> -arg->i)
++		    | (seltagset << (LENGTH(tags) + arg->i));
++	tag(&shifted);
++}
++
++void
++shiftagclients(const Arg *arg) {
++
++	Arg shifted;
++	Client *c;
++	unsigned int tagmask = 0;
++
++	for (c = selmon->clients; c; c = c->next)
++		if (!(c->tags & SPTAGMASK))
++			tagmask = tagmask | c->tags;
++
++	/* TODO: if no active clients then just move up */
++	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
++	if (arg->i > 0)	/* left circular shift */
++		do {
++			shifted.ui = (shifted.ui << arg->i)
++			   | (shifted.ui >> (LENGTH(tags) - arg->i));
++			shifted.ui &= ~SPTAGMASK;
++		} while (tagmask && !(shifted.ui & tagmask));
++	else		/* right circular shift */
++		do {
++			shifted.ui = (shifted.ui >> (- arg->i)
++			   | shifted.ui << (LENGTH(tags) + arg->i));
++			shifted.ui &= ~SPTAGMASK;
++		} while (tagmask && !(shifted.ui & tagmask));
++
++	tag(&shifted);
++}
++
++void
++shiftview(const Arg *arg)
++{
++	Arg shifted;
++	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
++
++	if (arg->i > 0)	/* left circular shift */
++		shifted.ui = (seltagset << arg->i)
++		   | (seltagset >> (LENGTH(tags) - arg->i));
++	else		/* right circular shift */
++		shifted.ui = seltagset >> -arg->i
++		   | seltagset << (LENGTH(tags) + arg->i);
++
++	view(&shifted);
++}
++
++void
++shiftviewclients(const Arg *arg)
++{
++	Arg shifted;
++	Client *c;
++	unsigned int tagmask = 0;
++
++	for (c = selmon->clients; c; c = c->next)
++		if (!(c->tags & SPTAGMASK))
++			tagmask = tagmask | c->tags;
++
++	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
++	if (arg->i > 0)	/* left circular shift */
++		do {
++			shifted.ui = (shifted.ui << arg->i)
++			   | (shifted.ui >> (LENGTH(tags) - arg->i));
++			shifted.ui &= ~SPTAGMASK;
++		} while (tagmask && !(shifted.ui & tagmask));
++	else		/* right circular shift */
++		do {
++			shifted.ui = (shifted.ui >> (- arg->i)
++			   | shifted.ui << (LENGTH(tags) + arg->i));
++			shifted.ui &= ~SPTAGMASK;
++		} while (tagmask && !(shifted.ui & tagmask));
++
++	view(&shifted);
++}
++
++void
++shiftboth(const Arg *arg)
++{
++	Arg shifted;
++	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
++
++	if (arg->i > 0) /* tag to right */
++		shifted.ui = (seltagset << arg->i)
++		    | (seltagset >> (LENGTH(tags) - arg->i));
++	else		/* tag to left */
++		shifted.ui = (seltagset >> -arg->i)
++		    | (seltagset << (LENGTH(tags) + arg->i));
++	tag(&shifted);
++	view(&shifted);
++}
++
+ void
+ showhide(Client *c)
+ {
+--
+2.32.0
+
