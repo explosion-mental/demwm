@@ -19,10 +19,8 @@ index 1c0b587..62075b5 100644
  	{ MODKEY,                       XK_b,      togglebar,      {0} },
  	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 +	{ MODKEY|ShiftMask,		XK_j,      shiftag,        {.i = -1 } },
-+	{ MODKEY|ControlMask,		XK_j,      shiftboth,	   {.i = -1 } },
 +	{ MODKEY|ControlMask|ShiftMask,	XK_j,      shiftagclients, {.i = -1 } },
 +	{ MODKEY|ControlMask|ShiftMask,	XK_j,      shiftagclients, {.i = +1 } },
-+	{ MODKEY|ControlMask,		XK_k,      shiftboth,	   {.i = +1 } },
 +	{ MODKEY,                       XK_o,    shiftviewclients, {.i = +1 } },
 +	{ MODKEY|ShiftMask,             XK_o,	   shiftview,	   {.i = +1 } },
 +	{ MODKEY,	                XK_i,    shiftviewclients, {.i = -1 } },
@@ -42,7 +40,6 @@ index 4465af1..8ec0af7 100644
 +static void shiftagclients(const Arg *arg);
 +static void shiftview(const Arg *arg);
 +static void shiftviewclients(const Arg *arg);
-+static void shiftboth(const Arg *arg);
  static void showhide(Client *c);
  static void sigchld(int unused);
  static void spawn(const Arg *arg);
@@ -91,9 +88,7 @@ index 4465af1..8ec0af7 100644
 +			shifted.ui &= ~SPTAGMASK;
 +		} while (tagmask && !(shifted.ui & tagmask));
 +
-+	tag(&shifted);
-+}
-+
++	tag(&shifted); +} +
 +void
 +shiftview(const Arg *arg)
 +{
@@ -135,22 +130,6 @@ index 4465af1..8ec0af7 100644
 +			shifted.ui &= ~SPTAGMASK;
 +		} while (tagmask && !(shifted.ui & tagmask));
 +
-+	view(&shifted);
-+}
-+
-+void
-+shiftboth(const Arg *arg)
-+{
-+	Arg shifted;
-+	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
-+
-+	if (arg->i > 0) /* tag to right */
-+		shifted.ui = (seltagset << arg->i)
-+		    | (seltagset >> (LENGTH(tags) - arg->i));
-+	else		/* tag to left */
-+		shifted.ui = (seltagset >> -arg->i)
-+		    | (seltagset << (LENGTH(tags) + arg->i));
-+	tag(&shifted);
 +	view(&shifted);
 +}
 +
