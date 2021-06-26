@@ -1,0 +1,5 @@
+#!/bin/sh
+bgloc="${XDG_DATA_HOME:-$HOME/.local/share/}/bg"
+ln -sf "$(find "$HOME/Media/Pictures/Wallpapers" -iregex '.*.\(jpg\|jpeg\|png\)' -type f | shuf -n 1)" "$bgloc"
+wal -i "$(readlink -f "$bgloc")" -o "${XDG_CONFIG_HOME:-$HOME/.config}/wal/postrun" --backend colorz -qn >/dev/null 2>&1
+xwallpaper --zoom "$bgloc"

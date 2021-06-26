@@ -112,12 +112,12 @@ static const Layout layouts[] = {
 /* key definitions */
 #define MODKEY Mod4Mask
 #define TAGKEYS(KEY,TAG) \
-	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
-	{ MODKEY|ShiftMask,             KEY,      tag,            {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
+	{ MODKEY,                       KEY,	view,           { .ui = 1 << TAG } }, \
+	{ MODKEY|ControlMask,           KEY,	toggleview,     { .ui = 1 << TAG } }, \
+	{ MODKEY|ShiftMask,             KEY,	tag,            { .ui = 1 << TAG } }, \
+	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,      { .ui = 1 << TAG } },
 #define SCRATCH(KEY,NUM) \
-	{ MODKEY,            		KEY,  	togglescratch,	{.ui = NUM } },
+	{ MODKEY,            		KEY,	togglescratch,	{ .ui = NUM } },
 /* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd?*/
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 /* macro for any dmenu commands, colorize them */
@@ -143,14 +143,14 @@ const char *spcmd3[] = { "st", "-n", "diary", "-g", "115x30" , NULL };
 const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
 const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
 static Sp scratchpads[] = { {spcmd0}, {spcmd1}, {spcmd2}, {spcmd3}, {spcmd4}, {spcmd5} };
-/*static Sp scratchpads[] = {
-	* name          cmd  *
-	{"notes",    spcmd1},
-	{"calc",     spcmd2},
-	{"pre",      spcmd3},
-	{"diary",    spcmd4},
-	{"music",    spcmd5},
-};*/
+//static Sp scratchpads[] = {
+//	/* name		cmd */
+//	{"notes",    spcmd1},
+//	{"calc",     spcmd2},
+//	{"pre",      spcmd3},
+//	{"diary",    spcmd4},
+//	{"music",    spcmd5},
+//};
 
 static Key keys[] = {
 	/* modifier(s)			key	function	argument */
@@ -164,7 +164,8 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,		XK_w,	spawn,		{ .v = web }		},
 	{ MODKEY|ControlMask,		XK_w,	spawn,		{ .v = syncthing }	},
 //	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn,		{ .v = passmenu }	},
-	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn, SHCMD("clipctl disable && passmenu -i -l 25 -p 'Passmenu:' && clipctl enable && notify-send 'Password will be deleted on 45 seconds❌'")		},
+	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn, 		SHCMD("clipctl disable && \
+		passmenu -i -l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")	},
 	{ MODKEY,			XK_e,  	togglescratch,	{.ui = 0 } },/* notes */
 	{ MODKEY,			XK_x,	togglescratch,	{.ui = 1 } },/* bc */
 	{ MODKEY|ControlMask,		XK_s,	togglescratch,	{.ui = 2 } },/* uni */
