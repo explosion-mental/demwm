@@ -20,6 +20,7 @@
  *
  * To understand everything else, start reading main().
  */
+
 #include <errno.h>
 #include <locale.h>
 #include <signal.h>
@@ -868,9 +869,8 @@ copyvalidchars(char *text, char *rawtext)
 	int i = -1, j = 0;
 
 	while(rawtext[++i]) {
-		if ((unsigned char)rawtext[i] >= ' ') {
+		if ((unsigned char)rawtext[i] >= ' ')
 			text[j++] = rawtext[i];
-		}
 	}
 	text[j] = '\0';
 }
@@ -880,6 +880,8 @@ createmon(void)
 {
 	Monitor *m;
 	unsigned int i;
+	//int mi, j, layout;
+	//int tr;
 
 	m = ecalloc(1, sizeof(Monitor));
 	m->tagset[0] = m->tagset[1] = 1;
@@ -891,6 +893,18 @@ createmon(void)
 	m->gappiv = gappiv;
 	m->gappoh = gappoh;
 	m->gappov = gappov;
+
+//	for (j = 0; j < LENGTH(taglayouts); j++) {
+//		tr = &taglayouts[j];
+//		if (tr > 0) {
+//			layout = MAX(tr, 0);
+//			layout = MIN(layout, LENGTH(layouts) - 1);
+//			m->lt[0] = &layouts[layout];
+//			m->lt[1] = &layouts[1 % LENGTH(layouts)];
+//			strncpy(m->ltsymbol, layouts[layout].symbol, sizeof m->ltsymbol);
+//		}
+//	}
+
 	m->lt[0] = &layouts[0];
 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
 	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
@@ -931,14 +945,14 @@ createmon(void)
 void
 cyclelayout(const Arg *arg) {
 	Layout *l;
-	for(l = (Layout *)layouts; l != selmon->lt[selmon->sellt]; l++);
-	if(arg->i > 0) {
-		if(l->symbol && (l + 1)->symbol)
+	for (l = (Layout *)layouts; l != selmon->lt[selmon->sellt]; l++);
+	if (arg->i > 0) {
+		if (l->symbol && (l + 1)->symbol)
 			setlayout(&((Arg) { .v = (l + 1) }));
 		else
 			setlayout(&((Arg) { .v = layouts }));
 	} else {
-		if(l != layouts && (l - 1)->symbol)
+		if (l != layouts && (l - 1)->symbol)
 			setlayout(&((Arg) { .v = (l - 1) }));
 		else
 			setlayout(&((Arg) { .v = &layouts[LENGTH(layouts) - 2] }));
@@ -1641,18 +1655,30 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	c->oldy = c->y; c->y = wc.y = y;
 	c->oldw = c->w; c->w = wc.width = w;
 	c->oldh = c->h; c->h = wc.height = h;
-	wc.border_width = c->bw;
+ 	wc.border_width = c->bw;
+
 	/* if monocle don't draw borders */
- 	if (c->mon->lt[c->mon->sellt]->arrange == monocle && !c->isfloating)
-		wc.border_width = 0;
+// 	if ((c->mon->lt[c->mon->sellt]->arrange == monocle || c->mon->lt[c->mon->sellt]->arrange == alphamonocle) && !c->isfloating)
+//		wc.border_width = 0;
+//	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next))
+//		|| &monocle == c->mon->lt[c->mon->sellt]->arrange)
+//		&& (c->fakefullscreen == 1 || !c->isfullscreen)
+//		&& !c->isfloating
+//		&& c->mon->lt[c->mon->sellt]->arrange) {
+//		c->w = wc.width += c->bw * 2;
+//		c->h = wc.height += c->bw * 2;
+//		wc.border_width = 0;
+//	}
+
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
 //	if (c->fakefullscreen == 1)
-//		/* Exception: if the client was in actual fullscreen and we exit out to fake fullscreen
-//		 * mode, then the focus would drift to whichever window is under the mouse cursor at the
-//		 * time. To avoid this we pass True to XSync which will make the X server disregard any
-//		 * other events in the queue thus cancelling the EnterNotify event that would otherwise
-//		 * have changed focus. */
+		/* Exception: if the client was in actual fullscreen and we
+		 * exit out to fake fullscreen mode, then the focus would drift
+		 * to whichever window is under the mouse cursor at the time. To
+		 * avoid this we pass True to XSync which will make the X server
+		 * disregard any other events in the queue thus cancelling the
+		 * EnterNotify event that would otherwise have changed focus. */
 //		XSync(dpy, True);
 //	else
 	XSync(dpy, False);
@@ -1662,9 +1688,14 @@ void
 resizemouse(const Arg *arg)
 {
 	int ocx, ocy, nw, nh;
+	int ocx2, ocy2, nx, ny;
 	Client *c;
 	Monitor *m;
 	XEvent ev;
+	int horizcorner, vertcorner;
+	int di;
+	unsigned int dui;
+	Window dummy;
 	Time lasttime = 0;
 
 	if (!(c = selmon->sel))
@@ -1674,10 +1705,19 @@ resizemouse(const Arg *arg)
 	restack(selmon);
 	ocx = c->x;
 	ocy = c->y;
+	ocx2 = c->x + c->w;
+	ocy2 = c->y + c->h;
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
 		None, cursor[CurResize]->cursor, CurrentTime) != GrabSuccess)
 		return;
-	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1, c->h + c->bw - 1);
+	if (!XQueryPointer (dpy, c->win, &dummy, &dummy, &di, &di, &nx, &ny, &dui))
+	       return;
+	horizcorner = nx < c->w / 2;
+	vertcorner = ny < c->h / 2;
+	XWarpPointer (dpy, None, c->win, 0, 0, 0, 0,
+		      horizcorner ? (-c->bw) : (c->w + c->bw - 1),
+		      vertcorner ? (-c->bw) : (c->h + c->bw - 1));
+
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
 		switch(ev.type) {
@@ -1693,6 +1733,11 @@ resizemouse(const Arg *arg)
 
 			nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
 			nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
+			nx = horizcorner ? ev.xmotion.x : c->x;
+			ny = vertcorner ? ev.xmotion.y : c->y;
+			nw = MAX(horizcorner ? (ocx2 - nx) : (ev.xmotion.x - ocx - 2 * c->bw + 1), 1);
+			nh = MAX(vertcorner ? (ocy2 - ny) : (ev.xmotion.y - ocy - 2 * c->bw + 1), 1);
+
 			if (c->mon->wx + nw >= selmon->wx && c->mon->wx + nw <= selmon->wx + selmon->ww
 			&& c->mon->wy + nh >= selmon->wy && c->mon->wy + nh <= selmon->wy + selmon->wh)
 			{
@@ -1701,11 +1746,13 @@ resizemouse(const Arg *arg)
 					togglefloating(NULL);
 			}
 			if (!selmon->lt[selmon->sellt]->arrange || c->isfloating)
-				resize(c, c->x, c->y, nw, nh, 1);
+				resize(c, nx, ny, nw, nh, 1);
 			break;
 		}
 	} while (ev.type != ButtonRelease);
-	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1, c->h + c->bw - 1);
+	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0,
+		      horizcorner ? (-c->bw) : (c->w + c->bw - 1),
+		      vertcorner ? (-c->bw) : (c->h + c->bw - 1));
 	XUngrabPointer(dpy, CurrentTime);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
@@ -1725,13 +1772,14 @@ restack(Monitor *m)
 	drawbar(m);
 	if (!m->sel)
 		return;
-	if (m->sel->isfloating || !m->lt[m->sellt]->arrange)
+	//if (m->sel->isfloating || !m->lt[m->sellt]->arrange)
 		XRaiseWindow(dpy, m->sel->win);
 	if (m->lt[m->sellt]->arrange) {
 		wc.stack_mode = Below;
 		wc.sibling = m->barwin;
 		for (c = m->stack; c; c = c->snext)
-			if (!c->isfloating && ISVISIBLE(c)) {
+			//if (!c->isfloating && ISVISIBLE(c)) {
+			if (c != m->sel && !c->isfloating && ISVISIBLE(c)) {
 				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 				wc.sibling = c->win;
 			}
@@ -2113,14 +2161,14 @@ setup(void)
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 	/* If restarting keep the wallpaper, else refresh */
-	if (restart == 1) {
-		for (i = 0; i < LENGTH(colors); i++)
-			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
-	} else {
+//	if (restart == 1) {
+//		for (i = 0; i < LENGTH(colors); i++)
+//			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+//	} else {
 		//random_wall(NULL);
 		system("dwm_random_wall001");
 		xrdb(NULL);
-	}
+//	}
 
 	/* init bars */
 	updatebars();
@@ -2177,62 +2225,74 @@ seturgent(Client *c, int urg)
 }
 
 void
-shiftag(const Arg *arg) {
-
+shiftag(const Arg *arg)
+{
 	Arg shifted;
-	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+	//Client *c;
+	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
-	if (arg->i > 0) /* tag to right */
-		shifted.ui = (seltagset << arg->i)
-		    | (seltagset >> (LENGTH(tags) - arg->i));
-	else		/* tag to left */
-		shifted.ui = (seltagset >> -arg->i)
-		    | (seltagset << (LENGTH(tags) + arg->i));
+	//	/* if it is a scratchpad do nothing */
+	////	if ((c->tags & SPTAGMASK) && c->isfloating) {
+	////		c = c->next;
+	////		return;
+	////	}
+
+	if (arg->i > 0) {/* left circular shift */
+		shifted.ui = (shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i));
+      		shifted.ui &= ~SPTAGMASK;
+	} else {	/* right circular shift */
+		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i));
+      		shifted.ui &= ~SPTAGMASK;
+	}
+
 	tag(&shifted);
 }
 
 void
-shiftagclients(const Arg *arg) {
-
-	Arg shifted;
+shiftagclients(const Arg *arg)
+{
+	Arg a;
 	Client *c;
-	unsigned int tagmask = 0;
+	unsigned visible = 0;
+	int i = arg->i;
+	int count = 0;
+	int nextseltags, curseltags = selmon->tagset[selmon->seltags];
 
-	for (c = selmon->clients; c; c = c->next)
-		if (!(c->tags & SPTAGMASK))
-			tagmask = tagmask | c->tags;
+	do {
+		if (i > 0) /* left circular shift */
+			nextseltags = (curseltags << i) | (curseltags >> (LENGTH(tags) - i));
 
-	/* TODO: if no active clients then just move up */
-	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
-	if (arg->i > 0)	/* left circular shift */
-		do {
-			shifted.ui = (shifted.ui << arg->i)
-			   | (shifted.ui >> (LENGTH(tags) - arg->i));
-			shifted.ui &= ~SPTAGMASK;
-		} while (tagmask && !(shifted.ui & tagmask));
-	else		/* right circular shift */
-		do {
-			shifted.ui = (shifted.ui >> (- arg->i)
-			   | shifted.ui << (LENGTH(tags) + arg->i));
-			shifted.ui &= ~SPTAGMASK;
-		} while (tagmask && !(shifted.ui & tagmask));
+		else	/* right circular shift */
+			nextseltags = curseltags >> (- i) | (curseltags << (LENGTH(tags) + i));
 
-	tag(&shifted);
+                /* Check if tag is visible */
+		for (c = selmon->clients; c && !visible; c = c->next)
+			if (nextseltags & c->tags) {
+				visible = 1;
+				break;
+			}
+		i += arg->i;
+	} while (!visible && ++count < 10);
+
+	if (count < 10) {
+		a.i = nextseltags;
+		tag(&a);
+	}
 }
 
 void
 shiftview(const Arg *arg)
 {
 	Arg shifted;
-	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
-	if (arg->i > 0)	/* left circular shift */
-		shifted.ui = (seltagset << arg->i)
-		   | (seltagset >> (LENGTH(tags) - arg->i));
-	else		/* right circular shift */
-		shifted.ui = seltagset >> -arg->i
-		   | seltagset << (LENGTH(tags) + arg->i);
-
+	if (arg->i > 0) {/* left circular shift */
+		shifted.ui = (shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i));
+		shifted.ui &= ~SPTAGMASK;
+	} else {	/* right circular shift */
+		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i));
+		shifted.ui &= ~SPTAGMASK;
+	}
 	view(&shifted);
 }
 
@@ -2243,12 +2303,13 @@ shiftviewclients(const Arg *arg)
 	Arg shifted;
 	Client *c;
 	unsigned int tagmask = 0;
+	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
 	for (c = selmon->clients; c; c = c->next)
 		if (!(c->tags & SPTAGMASK))
 			tagmask = tagmask | c->tags;
 
-	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+
 	if (arg->i > 0)	/* left circular shift */
 		do {
 			shifted.ui = (shifted.ui << arg->i)
@@ -2261,27 +2322,25 @@ shiftviewclients(const Arg *arg)
 			   | shifted.ui << (LENGTH(tags) + arg->i));
 			shifted.ui &= ~SPTAGMASK;
 		} while (tagmask && !(shifted.ui & tagmask));
-
 	view(&shifted);
 }
 
 void
 shiftboth(const Arg *arg)
 {
-	Arg shifted;
-	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
-
-	if (arg->i > 0) /* tag to right */
-		shifted.ui = (seltagset << arg->i)
-		    | (seltagset >> (LENGTH(tags) - arg->i));
-	else		/* tag to left */
-		shifted.ui = (seltagset >> -arg->i)
-		    | (seltagset << (LENGTH(tags) + arg->i));
-	tag(&shifted);
-	view(&shifted);
+	//shiftview(&arg->i);
+//	Arg shifted;
+//	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+//
+//	if (arg->i > 0) /* tag to right */
+//		shifted.ui = (seltagset << arg->i)
+//		    | (seltagset >> (LENGTH(tags) - arg->i));
+//	else		/* tag to left */
+//		shifted.ui = (seltagset >> -arg->i)
+//		    | (seltagset << (LENGTH(tags) + arg->i));
+//	tag(&shifted);
+//	view(&shifted);
 }
-
-
 
 
 void
@@ -2290,9 +2349,12 @@ showhide(Client *c)
 	if (!c)
 		return;
 	if (ISVISIBLE(c)) {
+		/* if scratchpad center */
 		if ((c->tags & SPTAGMASK) && c->isfloating) {
+			//if (scratchpads[1][0] = spcmd1) {
 			c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
 			c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
+			//}
 		}
 		/* show clients top down */
 		XMoveWindow(dpy, c->win, c->x, c->y);
@@ -2806,7 +2868,7 @@ void
 updatestatus(void)
 {
 	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
-		strcpy(stext, " Welcome! :)");
+		strcpy(stext, " Welcome! :) ");
 	else
 		copyvalidchars(stext, rawstext);
 	drawbar(selmon);
@@ -2861,15 +2923,14 @@ xinitvisual()
 {
 	XVisualInfo *infos;
 	XRenderPictFormat *fmt;
-	int nitems;
-	int i;
+	int nitems, i;
+	long masks = VisualScreenMask | VisualDepthMask | VisualClassMask;
 
 	XVisualInfo tpl = {
 		.screen = screen,
 		.depth = 32,
 		.class = TrueColor
 	};
-	long masks = VisualScreenMask | VisualDepthMask | VisualClassMask;
 
 	infos = XGetVisualInfo(dpy, masks, &tpl, &nitems);
 	visual = NULL;
@@ -2885,7 +2946,6 @@ xinitvisual()
 	}
 
 	XFree(infos);
-
 	if (! visual) {
 		visual = DefaultVisual(dpy, screen);
 		depth = DefaultDepth(dpy, screen);
