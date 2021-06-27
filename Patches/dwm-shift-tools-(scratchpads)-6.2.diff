@@ -48,60 +48,68 @@ index 4465af1..8ec0af7 100644
  }
 
 +void
-+shiftag(const Arg *arg) {
++shiftag(const Arg *arg)
++{
 +
 +	Arg shifted;
-+	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
++	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 +
-+	if (arg->i > 0) /* tag to right */
-+		shifted.ui = (seltagset << arg->i)
-+		    | (seltagset >> (LENGTH(tags) - arg->i));
-+	else		/* tag to left */
-+		shifted.ui = (seltagset >> -arg->i)
-+		    | (seltagset << (LENGTH(tags) + arg->i));
++
++	if (arg->i > 0) {/* left circular shift */
++		shifted.ui = (shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i));
++      		shifted.ui &= ~SPTAGMASK;
++	} else {	/* right circular shift */
++		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i));
++      		shifted.ui &= ~SPTAGMASK;
++	}
 +	tag(&shifted);
 +}
 +
 +void
-+shiftagclients(const Arg *arg) {
-+
-+	Arg shifted;
++shiftagclients(const Arg *arg)
++{
++	Arg a;
 +	Client *c;
-+	unsigned int tagmask = 0;
++	unsigned visible = 0;
++	int i = arg->i;
++	int count = 0;
++	int nextseltags, curseltags = selmon->tagset[selmon->seltags];
 +
-+	for (c = selmon->clients; c; c = c->next)
-+		if (!(c->tags & SPTAGMASK))
-+			tagmask = tagmask | c->tags;
++	do {
++		if (i > 0) /* left circular shift */
++			nextseltags = (curseltags << i) | (curseltags >> (LENGTH(tags) - i));
 +
-+	/* TODO: if no active clients then just move up */
-+	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
-+	if (arg->i > 0)	/* left circular shift */
-+		do {
-+			shifted.ui = (shifted.ui << arg->i)
-+			   | (shifted.ui >> (LENGTH(tags) - arg->i));
-+			shifted.ui &= ~SPTAGMASK;
-+		} while (tagmask && !(shifted.ui & tagmask));
-+	else		/* right circular shift */
-+		do {
-+			shifted.ui = (shifted.ui >> (- arg->i)
-+			   | shifted.ui << (LENGTH(tags) + arg->i));
-+			shifted.ui &= ~SPTAGMASK;
-+		} while (tagmask && !(shifted.ui & tagmask));
++		else	/* right circular shift */
++			nextseltags = curseltags >> (- i) | (curseltags << (LENGTH(tags) + i));
 +
-+	tag(&shifted); +} +
++                /* Check if tag is visible */
++		for (c = selmon->clients; c && !visible; c = c->next)
++			if (nextseltags & c->tags) {
++				visible = 1;
++				break;
++			}
++		i += arg->i;
++	} while (!visible && ++count < 10);
++
++	if (count < 10) {
++		a.i = nextseltags;
++		tag(&a);
++	}
++}
++
 +void
 +shiftview(const Arg *arg)
 +{
 +	Arg shifted;
-+	unsigned int seltagset = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
++	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 +
-+	if (arg->i > 0)	/* left circular shift */
-+		shifted.ui = (seltagset << arg->i)
-+		   | (seltagset >> (LENGTH(tags) - arg->i));
-+	else		/* right circular shift */
-+		shifted.ui = seltagset >> -arg->i
-+		   | seltagset << (LENGTH(tags) + arg->i);
-+
++	if (arg->i > 0) {/* left circular shift */
++		shifted.ui = (shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i));
++		shifted.ui &= ~SPTAGMASK;
++	} else {	/* right circular shift */
++		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i));
++		shifted.ui &= ~SPTAGMASK;
++	}
 +	view(&shifted);
 +}
 +
@@ -111,12 +119,12 @@ index 4465af1..8ec0af7 100644
 +	Arg shifted;
 +	Client *c;
 +	unsigned int tagmask = 0;
++	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 +
 +	for (c = selmon->clients; c; c = c->next)
 +		if (!(c->tags & SPTAGMASK))
 +			tagmask = tagmask | c->tags;
 +
-+	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 +	if (arg->i > 0)	/* left circular shift */
 +		do {
 +			shifted.ui = (shifted.ui << arg->i)

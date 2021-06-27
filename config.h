@@ -26,6 +26,7 @@ static const int dwmblock     = 0;        /* 1 means start dwmblocks */
 static const unsigned int baralpha    = 185;	/* Bar opcaity (0-255) */
 static const unsigned int borderalpha = OPAQUE;	/* Borders (0xffU) */
 static char *fonts[] = {
+	"monospace:size=10",
 	"Hack Nerd Font:pixelsize=14:antialias=true:autohint=true", /* Powerline */
 //	"SauceCodePro Nerd Font:pixelsize=14:antialias=true:autohint=true",
 	"Noto Color Emoji:pixelsize=16:antialias=true:autohint=true: style=Regular" /* Emojis */
