@@ -99,6 +99,7 @@ typedef union {
 	unsigned int ui;
 	float f;
 	const void *v;
+	//const char?
 } Arg;
 
 typedef struct {
@@ -334,7 +335,7 @@ static void spiral(Monitor *m);*/
 //static void loadrandom_wall(const Arg *arg);
 static void random_wall(const Arg *arg);
 //static void toggletopbar(const Arg *arg);
-//static void spawncmd(const Arg *arg);
+static void spawncmd(const Arg *arg);
 
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
@@ -2425,20 +2426,23 @@ spawn(const Arg *arg)
 	}
 }
 
-//void
-//spawncmd(const Arg *arg)
-//{
-//	if (fork() == 0) {
-//		if (dpy)
-//			close(ConnectionNumber(dpy));
-//		setsid();
-////(const char*[])
-//		execlp(((char **)arg->v)[0], (char **)arg->v);
-//		fprintf(stderr, "dwm: execvp %s", ((char **)arg->v)[0]);
-//		perror(" failed");
-//		exit(EXIT_SUCCESS);
-//	}
-//}
+void
+spawncmd(const Arg *arg)
+{
+//#define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+	if (fork() == 0) {
+		if (dpy)
+			close(ConnectionNumber(dpy));
+		setsid();
+		char shcmd[1024];
+		strcpy(shcmd, arg->v);
+		char *command[] = { "/bin/sh", "-c", shcmd, NULL };
+		execvp(command[0], command);
+		fprintf(stderr, "dwm: execvp %s", *command);
+		perror(" failed");
+		exit(EXIT_SUCCESS);
+	}
+}
 
 void
 tag(const Arg *arg)

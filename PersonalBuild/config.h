@@ -19,7 +19,7 @@ static const unsigned int borderalpha = OPAQUE;	/* Borders (0xffU) */
 static char *fonts[] = {
 	"Hack Nerd Font:pixelsize=12:antialias=true:autohint=true", /* Powerline */
 //	"SauceCodePro Nerd Font:pixelsize=14:antialias=true:autohint=true",
-//	"Noto Color Emoji:pixelsize=16:antialias=true:autohint=true: style=Regular" /* Emojis */
+//	"Noto Color Emoji:pixelsize=16:antialias=true:autohint=true: style=Regular", /* Emojis */
 	"JoyPixels:pixelsize=14:antialias=true:autohint=true"
 };
 /* Pywal, 8 bytes because xrdb macro asks for at least 8 (>7)*/
@@ -29,13 +29,13 @@ static char *colors[][3]	      = {
 			/* fg		bg		border	    description		*/
 	[SchemeNorm]   = { fg_wal,	color0,		color0 }, /*Normal tags section */
 	[SchemeSel]    = { color0,	color1,		color2 }, /*Selected tag*/
-	[SchemeLt]     = { color2,	color0,		NULL }, /*Layout*/
-	[SchemeTitle]  = { color0,	color2,		NULL }, /*window title*/
-	[SchemeStatus] = { color3,	color0,		NULL }, /*StatusBar*/
+	[SchemeLt]     = { color2,	color0,		NULL },   /*Layout*/
+	[SchemeTitle]  = { color0,	color2,		NULL },   /*window title*/
+	[SchemeStatus] = { color3,	color0,		NULL },   /*StatusBar*/
 	[SchemeUrgent] = { fg_wal,	color0,		fg_wal }, /*background color for urgent tag*/
-	[SchemeNotify] = { fg_wal,	color0,		NULL }, /*Little red bar on urgent tag*/
-	[SchemeIndOn]  = { color4,	color0,		NULL }, /*rectangle on active tag*/
-	[SchemeIndOff] = { color2,	color0,		NULL }, /*rectablge on def tag*/
+	[SchemeNotify] = { fg_wal,	color0,		NULL },   /*Little red bar on urgent tag*/
+	[SchemeIndOn]  = { color4,	color0,		NULL },   /*rectangle on active tag*/
+	[SchemeIndOff] = { color2,	color0,		NULL },   /*rectablge on def tag*/
 };
 static const unsigned int alphas[][3] = {
 			/* fg		bg		border     */
@@ -118,8 +118,10 @@ static const Layout layouts[] = {
 	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,      { .ui = 1 << TAG } },
 #define SCRATCH(KEY,NUM) \
 	{ MODKEY,            		KEY,	togglescratch,	{ .ui = NUM } },
-/* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd?*/
-#define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+/* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd? */
+#define SHCMD(cmd)	spawn, { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+/* helper macro for the custom command of mine 'spawncmd' */
+#define CMDCMD(cmd) 	spawncmd,{ .v = cmd }
 /* macro for any dmenu commands, colorize them */
 #define DMENUARGS "-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
 /* commands */
@@ -164,8 +166,8 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,		XK_w,	spawn,		{ .v = web }		},
 	{ MODKEY|ControlMask,		XK_w,	spawn,		{ .v = syncthing }	},
 //	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn,		{ .v = passmenu }	},
-	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn, 		SHCMD("clipctl disable && \
-		passmenu -i -l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")	},
+	{ MODKEY|ShiftMask,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
+	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
 	{ MODKEY,			XK_e,  	togglescratch,	{.ui = 0 } },/* notes */
 	{ MODKEY,			XK_x,	togglescratch,	{.ui = 1 } },/* bc */
 	{ MODKEY|ControlMask,		XK_s,	togglescratch,	{.ui = 2 } },/* uni */
@@ -221,47 +223,46 @@ static Key keys[] = {
 	  TAGKEYS(			XK_9,				8)
 
 			/* Custom bindings (may be better using shkd) */
-	{ MODKEY,			XK_b,	spawn,	SHCMD("Books001")		},
-	//{ MODKEY,			XK_b,	spawncmd,	{ "Books001", NULL }	},
-	{ MODKEY|ShiftMask,		XK_u,	spawn,	SHCMD("bookmenu")		},
-	{ MODKEY|ShiftMask,		XK_b,	spawn,	SHCMD("Boletin001")		},
-	{ MODKEY,		        XK_c,	spawn,	SHCMD("st -e calcurse")		},
-	{ MODKEY,	         	XK_z,	spawn,	SHCMD("redyt -r")		},
-	{ MODKEY|ShiftMask,	      	XK_z,	spawn,	SHCMD("walldown")		},
-	{ MODKEY,		    XK_grave,	spawn,	SHCMD("dmenuunicode")		},
-	{ MODKEY|ShiftMask,	   XK_Return,	spawn,	SHCMD("samedir &")		},
-//	{ MODKEY,	        XK_semicolon,	spawn,	SHCMD("dmenu_mpc")		},
-//	{ MODKEY|ShiftMask,	    XK_slash,	spawn,	SHCMD("tuxi -q")		},
-	{ MODKEY,			XK_u,	spawn,	SHCMD("clipmagick")		},
-	{ MODKEY,			XK_y,	spawn,	SHCMD("termyt -r")		},
-	{ MODKEY|ShiftMask,		XK_y,	spawn,	SHCMD("dmenuhandler")		},
-	{ MODKEY,		    XK_slash,	spawn,	SHCMD("dmenu_browser")		},
-	{ MODKEY|ShiftMask,	        XK_n,	spawn,	SHCMD("xdotool click 1")	},
-	{ MODKEY,			XK_v,	spawn,	SHCMD("killall xcompmgr || \
-								setsid xcompmgr &")	},
-	{ MODKEY,			XK_t,	spawn,	SHCMD("testi")			},
-	{ MODKEY,		   XK_Escape,	spawn,	SHCMD("Sysfunctions001")	},
-//{ MODKEY,	XK_e,	spawn,	SHCMD("st -t NewsBoat -e newsboat -q; pkill -RTMIN+6 dwmblocks") },
-	{ MODKEY,			XK_r,	spawn,	SHCMD("st -t NewsBoat -e newsboat -q") },
-//					XK_F1, FullScreen
-//	{ MODKEY,			XK_F2,	spawn,	SHCMD("dmenu_man")		},
-//	{ MODKEY,	         	XK_F3,	spawn,	SHCMD("dmenumount")		},
-	{ MODKEY,	         	XK_F3,	spawn,	SHCMD("dmenumount")		},
-	{ MODKEY,		 	XK_F4,	spawn,	SHCMD("syncthing & kill -55 $(pidof dwmblocks)") },
-//					XK_F5,	reload
-	{ MODKEY,	         	XK_F6,	spawn,	SHCMD("dmenumount")		},
-	{ MODKEY,		 	XK_F7,	spawn,	SHCMD("dmenumountq")		},
-//	{ MODKEY,	 		XK_F7,	spawn,	SHCMD("st -e nvim -c VimwikiIndex") },
-	{ MODKEY,		 	XK_F8,	spawn,	SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
-	{ MODKEY,			XK_F9,	spawn,	SHCMD("setkeys & notify-send -t 2400 \
+	{ MODKEY,			XK_b,	CMDCMD("Books001")		},
+	{ MODKEY|ShiftMask,		XK_u,	SHCMD("bookmenu")		},
+	{ MODKEY|ShiftMask,		XK_b,	SHCMD("Boletin001")		},
+	{ MODKEY,		        XK_c,	SHCMD("st -e calcurse")		},
+	{ MODKEY,	         	XK_z,	SHCMD("redyt -r")		},
+	{ MODKEY|ShiftMask,	      	XK_z,	SHCMD("walldown")		},
+	{ MODKEY,		    XK_grave,	SHCMD("dmenuunicode")		},
+	{ MODKEY|ShiftMask,	   XK_Return,	SHCMD("samedir &")		},
+//	{ MODKEY,	        XK_semicolon,	SHCMD("dmenu_mpc")		},
+//	{ MODKEY|ShiftMask,	    XK_slash,	SHCMD("tuxi -q")		},
+	{ MODKEY,			XK_u,	SHCMD("clipmagick")		},
+	{ MODKEY,			XK_y,	SHCMD("termyt -r")		},
+	{ MODKEY|ShiftMask,		XK_y,	SHCMD("dmenuhandler")		},
+	{ MODKEY,		    XK_slash,	SHCMD("dmenu_browser")		},
+	{ MODKEY|ShiftMask,	        XK_n,	SHCMD("xdotool click 1")	},
+	{ MODKEY,			XK_v,	SHCMD("killall xcompmgr || \
+						  	setsid xcompmgr &")	},
+	{ MODKEY,			XK_t,	SHCMD("testi")			},
+	{ MODKEY,		   XK_Escape,	SHCMD("Sysfunctions001")	},
+//{ MODKEY,	XK_e,	spawn,	SHCMD("st -t New-e newsboat -q; pkill -RTMIN+6 dwmblocks") },
+	{ MODKEY,			XK_r,	SHCMD("st -t NewsBoat -e newsboat -q") },
+//					XK_F1, Feen
+//	{ MODKEY,			XK_F2,	SHCMD("dmenu_man")			},
+//	{ MODKEY,	         	XK_F3,	SHCMD("dmenumount")			},
+	{ MODKEY,	         	XK_F3,	SHCMD("dmenumount")			},
+	{ MODKEY,		 	XK_F4,	SHCMD("syncthing & kill -55 $(pidof dwmblocks)") },
+//					XK_F5,
+	{ MODKEY,	         	XK_F6,	SHCMD("dmenumount")			},
+	{ MODKEY,		 	XK_F7,	SHCMD("dmenumountq")			},
+//	{ MODKEY,	 		XK_F7,	SHCMD("st -e nvim -c VimwikiIndex") },
+	{ MODKEY,		 	XK_F8,	SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
+	{ MODKEY,			XK_F9,	SHCMD("setkeys & notify-send -t 2400 \
 		'Keyboard remapping⌨️ ' 'WAIT!\nRerunning <b>customs</b> shorcuts'")	},
-	{ MODKEY,			XK_F10,	spawn,	SHCMD("setxkbmap -layout us -variant altgr-intl -option nodeadkeys & notify-send 'Keyboard⌨️ ' 'Keyboard remapping...\nRunning keyboard defaults, US altgr-intl variant with nodeadkeys...'") },
+	{ MODKEY,			XK_F10,	SHCMD("setxkbmap -layout us -variant altgr-intl -option nodeadkeys & notify-send 'Keyboard⌨️ ' 'Keyboard remapping...\nRunning keyboard defaults, US altgr-intl variant with nodeadkeys...'") },
 	//{ MODKEY,			XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
 	{ MODKEY,                       XK_F11,	random_wall,	{.v = NULL }		},
 	{ MODKEY,                       XK_F12,	xrdb,		{.v = NULL }		},
-	{ 0,			    XK_Print,	spawn,	SHCMD("scrot -u -se 'mv $f ~/Downloads && magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
-	{ MODKEY,		    XK_Print,	spawn,	SHCMD("dmenurecord")		},
-	{ ShiftMask,		    XK_Print,	spawn,	SHCMD("scrot")			},
+	{ 0,			    XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
+	{ MODKEY,		    XK_Print,	SHCMD("dmenurecord")		},
+	{ ShiftMask,		    XK_Print,	SHCMD("scrot")			},
 
 					/* LAYOUTS */
 	{ MODKEY,		XK_backslash,   cyclelayout,	{.i = +1 }		},
@@ -275,31 +276,31 @@ static Key keys[] = {
 //	{ MODKEY,			XK_f,	setlayout,	{.v = &layouts[6]} }, //centeredmaster
 
 				/* Media */
-	{ MODKEY|ShiftMask,		XK_minus,	spawn,	SHCMD("mpc volume -3")	},
-	{ MODKEY|ShiftMask,		XK_equal,	spawn,	SHCMD("mpc volume +3")	},
-	{ MODKEY|ShiftMask,		XK_bracketleft,	spawn,	SHCMD("mpc seek -10")	},
-	{ MODKEY|ShiftMask,		XK_bracketright,spawn,	SHCMD("mpc seek +10")	},
-{ 0, XF86XK_AudioLowerVolume,	spawn,	SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioRaiseVolume,	spawn,	SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioMute,		spawn,	SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
-{ MODKEY,	XK_minus,	spawn,	SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
-{ MODKEY,	XK_equal,	spawn,	SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
-{ MODKEY,	 XK_BackSpace,	spawn,	SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
-//{ 0,	XF86XK_Calculator,	spawn,	SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
-//{ 0, XF86XK_ScreenSaver,	spawn,	SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
-//	{ 0,	XF86XK_AudioStop,		spawn,	SHCMD("mpc toggle) },
-	{ 0,	XF86XK_Sleep,			spawn,	SHCMD("sudo zzz")		},
-	{ 0,	XF86XK_ScreenSaver,		spawn,	SHCMD("xset dpms force off")	},
-	{ 0,	XF86XK_MonBrightnessUp,		spawn,	SHCMD("sudo brightnessctl -q set +1%") },
-	{ 0,	XF86XK_MonBrightnessDown,	spawn,	SHCMD("sudo brightnessctl -q set 1%-") },
-	{ 0,	XF86XK_AudioPlay,		spawn,	SHCMD("mpc toggle")		},
-	{ 0,	XF86XK_AudioPrev,		spawn,	SHCMD("mpc prev")		},
-	{ 0,	XF86XK_AudioNext,		spawn,	SHCMD("mpc next")		},
-	{ MODKEY,		XK_p,		spawn,	SHCMD("mpc toggle") },
-	{ MODKEY,	XK_bracketleft,		spawn,	SHCMD("mpc prev") },
-	{ MODKEY,	XK_bracketright,	spawn,	SHCMD("mpc next") },
-	{ MODKEY|ControlMask,	XK_p,		spawn,	SHCMD("mpdnoti")		},
-//	{ MODKEY|ShiftMask,	XK_p,		spawn,	SHCMD("st -e pulsemixer")	},
+	{ MODKEY|ShiftMask,		XK_minus,		SHCMD("mpc volume -3")	},
+	{ MODKEY|ShiftMask,		XK_equal,		SHCMD("mpc volume +3")	},
+	{ MODKEY|ShiftMask,		XK_bracketleft,		SHCMD("mpc seek -10")	},
+	{ MODKEY|ShiftMask,		XK_bracketright,	SHCMD("mpc seek +10")	},
+{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
+{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
+{ 0, XF86XK_AudioMute,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
+{ MODKEY,	XK_minus,	SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
+{ MODKEY,	XK_equal,	SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
+{ MODKEY,	 XK_BackSpace,	SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
+//{ 0,	XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
+//{ 0, XF86XK_ScreenSaver,		SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
+//	{ 0,	XF86XK_AudioStop,			SHCMD("mpc toggle) },
+	{ 0,	XF86XK_Sleep,			SHCMD("sudo zzz")		},
+	{ 0,	XF86XK_ScreenSaver,		SHCMD("xset dpms force off")	},
+	{ 0,	XF86XK_MonBrightnessUp,		SHCMD("sudo brightnessctl -q set +1%") },
+	{ 0,	XF86XK_MonBrightnessDown,	SHCMD("sudo brightnessctl -q set 1%-") },
+	{ 0,	XF86XK_AudioPlay,		SHCMD("mpc toggle")		},
+	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev")		},
+	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next")		},
+	{ MODKEY,		XK_p,		SHCMD("mpc toggle")		},
+	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev")		},
+	{ MODKEY,	XK_bracketright,	SHCMD("mpc next")		},
+	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")		},
+//	{ MODKEY|ShiftMask,	XK_p,		SHCMD("st -e pulsemixer")	},
 
 				/* GAPS */
 	{ MODKEY,			XK_f,	incrgaps,	{.i = +3 }		},
@@ -316,15 +317,17 @@ static Button buttons[] = {
 	/* click                event mask      button          function        argument */
 	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
 	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
-	{ ClkWinTitle,          0,              Button1,  spawn,  SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
-	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
-	{ ClkWinTitle,		0,		Button3,  spawn, SHCMD("scrot -u -se 'mv $f ~/Downloads'") },
-	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1} },
-	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2} },
-	{ ClkStatusText,        0,              Button3,        sigdwmblocks,   {.i = 3} },
-	{ ClkStatusText,        0,              Button4,        sigdwmblocks,   {.i = 4} },
-	{ ClkStatusText,        0,              Button5,        sigdwmblocks,   {.i = 5} },
-	{ ClkStatusText,        ShiftMask,      Button1,        sigdwmblocks,   {.i = 6} },
+	{ ClkWinTitle,          0,              Button1,	SHCMD("sleep 0.2 ; \
+							   scrot -se 'mv $f ~/Downloads'") },
+	{ ClkWinTitle,          0,              Button2,	zoom,           {0} },
+	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -u -se \
+								   'mv $f ~/Downloads'") },
+	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1 } },
+	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2 } },
+	{ ClkStatusText,        0,              Button3,        sigdwmblocks,   {.i = 3 } },
+	{ ClkStatusText,        0,              Button4,        sigdwmblocks,   {.i = 4 } },
+	{ ClkStatusText,        0,              Button5,        sigdwmblocks,   {.i = 5 } },
+	{ ClkStatusText,        ShiftMask,      Button1,        sigdwmblocks,   {.i = 6 } },
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
