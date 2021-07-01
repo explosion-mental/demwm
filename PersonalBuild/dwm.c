@@ -71,7 +71,8 @@
 #define XRDB_LOAD_COLOR(R,V) \
 	if (XrmGetResource(xrdb, R, NULL, &type, &value) == True) { \
 		if (value.addr != NULL && strnlen(value.addr, 8) == 7 && value.addr[0] == '#') { \
-                	int i = 1; for (; i <= 6; i++) { \
+                	int i = 1; \
+			for (; i <= 6; i++) { \
                                 if (value.addr[i] < 48) break; \
                                 if (value.addr[i] > 57 && value.addr[i] < 65) break; \
                                 if (value.addr[i] > 70 && value.addr[i] < 97) break; \
@@ -83,6 +84,11 @@
                         } \
                 } \
         }
+
+// if we are searching for '#' as the first character and also verifying that
+// is not null is redundant
+//		if (value.addr != NULL && strnlen(value.addr, 8) == 7 && value.addr[0] == '#') {
+
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 //enum { SchemeNorm, SchemeSel }; /* color schemes */
@@ -184,7 +190,7 @@ typedef struct {
 
 /* scratchpads */
 typedef struct {
-//	const char *name;
+	const char *name;
 	const void *cmd;
 } Sp;
 
@@ -372,6 +378,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 };
 static Atom wmatom[WMLast], netatom[NetLast];
 static int restart = 0;
+int restcol = 0;
 static int running = 1;
 static Cur *cursor[CurLast];
 static Clr **scheme;
@@ -396,9 +403,22 @@ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() 
 //static char selbordercolor[]  = "#770000";	/* borders, don't use them */
 //static char selbgcolor[]      = "#005577";	/* selected, most prominent color on the wallpaper */
 //static char selfgcolor[]      = "#eeeeee";	/* bartext, light */
+//char *terminal;
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
+
+/* scratchpads */
+//static Sp scratchpads[] = { {spcmd0}, {spcmd1}, {spcmd2}, {spcmd3}, {spcmd4}, {spcmd5} };
+static Sp scratchpads[] = {
+	/* name		cmd   */
+	{"notes",	spcmd0},
+	{"calc",	spcmd1},
+	{"pre",		spcmd2},
+	{"diary",	spcmd3},
+	{"music",	spcmd4},
+	{"pulsemixer",	spcmd5},
+};
 
 /* Pertag */
 struct Pertag {
@@ -1045,16 +1065,18 @@ drawbar(Monitor *m)
 		drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], 0);
 		if (occ & 1 << i) {
 			if (urg & 1 << i ) {
+				//Urgent underline (which is on top)
 				drw_setscheme(drw, scheme[SchemeNotify]);
                 		drw_rect(drw, x, 0, w, boxw, 1, 0);
 				//drw_rect(drw, x + boxw, bh - boxw/2, w - ( 2 * boxw + 1), boxw/2,
 			}
+			// Normal underline
 			drw_setscheme(drw, scheme[(m == selmon && selmon->sel && selmon->sel->tags & 1 << i) ? SchemeIndOn : SchemeIndOff]);
-			drw_rect(drw, x, bh - boxw, w, boxw, 1, 0);
+			drw_rect(drw, x, bh - boxw - 1, w, boxw + 1, 1, 0);
 		}
 		x += w;
 	}
-	/* Monocle, count clients */
+	/* Monocle, count clients if there are more than one */
 	if (m->lt[m->sellt]->arrange == monocle) {
 		for(a = 0, s = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), a++)
 			if (c == m->stack)
@@ -1364,15 +1386,14 @@ loadxrdb(void)
 {
 	Display *display;
 	char *resm;
-	XrmDatabase xrdb;
 	char *type;
 	XrmValue value;
+	XrmDatabase xrdb;
 
 	display = XOpenDisplay(NULL);
 	resm = XResourceManagerString(display);
 	if (!resm)
 		return;
-
 	xrdb = XrmGetStringDatabase(resm);
 	if (xrdb != NULL) {
 		XRDB_LOAD_COLOR("background", bg_wal);
@@ -1437,6 +1458,7 @@ manage(Window w, XWindowAttributes *wa)
 	updatewindowtype(c);
 	updatesizehints(c);
 	updatewmhints(c);
+
 	/* always center */
 	c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
 	c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
@@ -1467,7 +1489,6 @@ void
 mappingnotify(XEvent *e)
 {
 	XMappingEvent *ev = &e->xmapping;
-
 	XRefreshKeyboardMapping(ev);
 	if (ev->request == MappingKeyboard)
 		grabkeys();
@@ -1622,7 +1643,7 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
-	if(arg->i) restart = 1;
+	if (arg->i) restart = 1;
 	running = 0;
 }
 
@@ -2162,14 +2183,14 @@ setup(void)
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 	/* If restarting keep the wallpaper, else refresh */
-//	if (restart == 1) {
-//		for (i = 0; i < LENGTH(colors); i++)
-//			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
-//	} else {
+	if (restcol) {
+		for (i = 0; i < LENGTH(colors); i++)
+			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+	} else {
 		//random_wall(NULL);
 		system("dwm_random_wall001");
 		xrdb(NULL);
-//	}
+	}
 
 	/* init bars */
 	updatebars();
@@ -2229,14 +2250,14 @@ void
 shiftag(const Arg *arg)
 {
 	Arg shifted;
-	//Client *c;
+	Client *c;
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+	c = selmon->clients;
 
-	//	/* if it is a scratchpad do nothing */
-	////	if ((c->tags & SPTAGMASK) && c->isfloating) {
-	////		c = c->next;
-	////		return;
-	////	}
+	/* if it is a scratchpad do nothing */
+	if ((c->tags & SPTAGMASK) && c->isfloating)
+		return;
+	//c = c->next;
 
 	if (arg->i > 0) {/* left circular shift */
 		shifted.ui = (shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i));
@@ -2252,33 +2273,60 @@ shiftag(const Arg *arg)
 void
 shiftagclients(const Arg *arg)
 {
-	Arg a;
+
+	Arg shifted;
 	Client *c;
-	unsigned visible = 0;
-	int i = arg->i;
-	int count = 0;
-	int nextseltags, curseltags = selmon->tagset[selmon->seltags];
+	unsigned int tagmask = 0;
+	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
-	do {
-		if (i > 0) /* left circular shift */
-			nextseltags = (curseltags << i) | (curseltags >> (LENGTH(tags) - i));
+	for (c = selmon->clients; c; c = c->next)
+		if (!(c->tags & SPTAGMASK))
+			tagmask = tagmask | c->tags;
 
-		else	/* right circular shift */
-			nextseltags = curseltags >> (- i) | (curseltags << (LENGTH(tags) + i));
 
-                /* Check if tag is visible */
-		for (c = selmon->clients; c && !visible; c = c->next)
-			if (nextseltags & c->tags) {
-				visible = 1;
-				break;
-			}
-		i += arg->i;
-	} while (!visible && ++count < 10);
+	if (arg->i > 0)	/* left circular shift */
+		do {
+			shifted.ui = (shifted.ui << arg->i)
+			   | (shifted.ui >> (LENGTH(tags) - arg->i));
+			shifted.ui &= ~SPTAGMASK;
+		} while (tagmask && !(shifted.ui & tagmask));
+	else		/* right circular shift */
+		do {
+			shifted.ui = (shifted.ui >> (- arg->i)
+			   | shifted.ui << (LENGTH(tags) + arg->i));
+			shifted.ui &= ~SPTAGMASK;
+		} while (tagmask && !(shifted.ui & tagmask));
+	tag(&shifted);
 
-	if (count < 10) {
-		a.i = nextseltags;
-		tag(&a);
-	}
+
+
+//	Arg a;
+//	Client *c;
+//	unsigned visible = 0;
+//	int i = arg->i;
+//	int count = 0;
+//	int nextseltags, curseltags = selmon->tagset[selmon->seltags];
+//
+//	do {
+//		if (i > 0) /* left circular shift */
+//			nextseltags = (curseltags << i) | (curseltags >> (LENGTH(tags) - i));
+//
+//		else	/* right circular shift */
+//			nextseltags = curseltags >> (- i) | (curseltags << (LENGTH(tags) + i));
+//
+//                /* Check if tag is visible */
+//		for (c = selmon->clients; c && !visible; c = c->next)
+//			if (nextseltags & c->tags) {
+//				visible = 1;
+//				break;
+//			}
+//		i += arg->i;
+//	} while (!visible && ++count < 10);
+//
+//	if (count < 10) {
+//		a.i = nextseltags;
+//		tag(&a);
+//	}
 }
 
 void
@@ -2352,7 +2400,7 @@ showhide(Client *c)
 	if (ISVISIBLE(c)) {
 		/* if scratchpad center */
 		if ((c->tags & SPTAGMASK) && c->isfloating) {
-			//if (scratchpads[1][0] = spcmd1) {
+			//if (scratchpads[0].cmd) {
 			c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
 			c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
 			//}
@@ -2963,8 +3011,11 @@ view(const Arg *arg)
 	int i;
 	unsigned int tmptag;
 
+//	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
 	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
-		return;
+		/* toggletag patch */
+		//view(&((Arg) { .ui = 0 }));
+ 		return;
 	selmon->seltags ^= 1; /* toggle sel tagset */
 
 	if (pertag) {
@@ -3252,17 +3303,19 @@ main(int argc, char *argv[])
 		die("dwm: cannot open display");
 	if (!(xcon = XGetXCBConnection(dpy)))
 		die("dwm: cannot get xcb connection\n");
+	//terminal = getenv("TERMINAL");
 	checkotherwm();
 	XrmInitialize();
         loadxrdb();
+	system("killall -q dwmblocks; dwmblocks &");
+	if (restart) restcol = 1;
 	setup();
 #ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec", NULL) == -1) die("pledge");
 #endif /* __OpenBSD__ */
 	scan();
-	system("killall -q dwmblocks; dwmblocks &");
 	run();
-	if(restart) execvp(argv[0], argv);
+	if (restart) execvp(argv[0], argv);
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
