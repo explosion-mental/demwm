@@ -57,6 +57,7 @@ index 4465af1..8ec0af7 100644
 +	c = selmon->clients;
 +
 +	/* if it is a scratchpad do nothing */
++	if (!c) return;
 +	if ((c->tags & SPTAGMASK) && c->isfloating)
 +		return;
 +
@@ -151,6 +152,7 @@ index 4465af1..8ec0af7 100644
 +	c = selmon->clients;
 +
 +	/* if it is a scratchpad do nothing */
++	if (!c) return;
 +	if ((c->tags & SPTAGMASK) && c->isfloating)
 +		return;
 +
