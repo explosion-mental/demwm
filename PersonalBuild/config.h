@@ -76,9 +76,10 @@ static const Rule rules[] = {
 	RULE(.instance = "notes", .tags = SPTAG(0), .isfloating = 1)
 	RULE(.instance = "calc" , .tags = SPTAG(1), .isfloating = 1)
 	RULE(.instance = "pre"  , .tags = SPTAG(2), .isfloating = 1)
-	RULE(.instance = "diary", .tags = SPTAG(3), .isfloating = 1)
+	RULE(.instance = "term", .tags = SPTAG(3), .isfloating = 1)
 	RULE(.instance = "music", .tags = SPTAG(4), .isfloating = 1)
-	RULE(.instance = "pulsemixer", .tags = SPTAG(5), .isfloating = 1)
+	RULE(.instance = "pulsemixer",	.tags = SPTAG(5), .isfloating = 1)
+	RULE(.instance = "term",	.tags = SPTAG(6), .isfloating = 1)
 };
 
 /* layout(s) */
@@ -113,46 +114,50 @@ static const Layout layouts[] = {
 #define MODKEY Mod4Mask
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,	view,           { .ui = 1 << TAG } }, \
-	{ MODKEY|ControlMask,           KEY,	toggleview,     { .ui = 1 << TAG } }, \
 	{ MODKEY|ShiftMask,             KEY,	tag,            { .ui = 1 << TAG } }, \
+	{ MODKEY|ControlMask,           KEY,	toggleview,     { .ui = 1 << TAG } }, \
 	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,      { .ui = 1 << TAG } },
-#define SCRATCH(KEY,NUM) \
-	{ MODKEY,            		KEY,	togglescratch,	{ .ui = NUM } },
+
+/*#define SHIFTKEYS(KEY,NUM) \
+//	{ MODKEY|ShiftMask,             KEY,     shifttag,	  {.i = NUM } }, \
+//	{ MODKEY|ControlMask,           KEY,     shiftboth,	  {.i = NUM } }, \
+//	{ MODKEY|ControlMask|ShiftMask, KEY,     shifttagclients, {.i = NUM } },
+//	{ MODKEY,                       KEY,     shiftACTION##, {.i = 2 } },
+//	{ MODKEY,                       KEY,     shiftACTION##, {.i = -1 } }, */
+
+#define SCRATCHKEYS(MOD,KEY,NUM) \
+	{ MOD,			KEY,	togglescratch,	{ .ui = NUM } },
 /* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd? */
 #define SHCMD(cmd)	spawn, { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 /* helper macro for the custom command of mine 'spawncmd' */
 #define CMDCMD(cmd) 	spawncmd,{ .v = cmd }
 /* macro for any dmenu commands, colorize them */
 #define DMENUARGS "-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
+/* Helper for defining commands */
+#define EXEC(name,cmd)	static const char *name[] = { "/bin/sh", "-c", cmd, NULL };
 /* commands */
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
+static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
 static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
 //static const char *passmenu[]  = { "passmenu", "-i", "-l", "25", "-p", "Passmenu:", DMENUARGS, NULL };
-//static const char *passmenu[]  = { "clipctl", "disable", "&&", "passmenu", "-i", "-l", "25", "-p", "Passmenu:", DMENUARGS, "&&", "clipctl", "enable", "&&", "notify-send", "Password will be deleted on 45 seconds❌", NULL };
-//static const char *passmenu[]  = { "sh", "-c", "clipctl disable && passmenu -i -l 25 -p 'Passmenu:' && notify-send Password will be deleted on 45 seconds❌ ; clipctl enable", NULL };
-static const char *termcmd[]   = { "st", NULL };
+//static const char *termcmd[]   = { terminalcmd, NULL };
+EXEC(termcmd, "st")
 static const char *syncthing[] = { "surf", "127.0.0.1:1210", NULL };
 static const char *web[]       = { "surf", "start.duckduckgo.com", NULL };
 static const char *vifm[]      = { "sh",  "-c", "st -t 'FileManager🗄️' -e vifmrun", NULL };
 static const char *samevifm[]  = { "samedirvifm", NULL };
+//EXEC(samedmenu, "samedirmenu"
 
 /* scratchpads */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
-const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL };
+static Sp scratchpads[7];
+const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "~/Docs/testi/testi", NULL };
 const char *spcmd1[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
-const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
-const char *spcmd3[] = { "st", "-n", "diary", "-g", "115x30" , NULL };
+const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "~/Docs/testi/pre-Uni.txt", NULL };
+const char *spcmd3[] = { "st", "-n", "term", "-g", "115x30" , NULL };
 const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
 const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
-static Sp scratchpads[] = { {spcmd0}, {spcmd1}, {spcmd2}, {spcmd3}, {spcmd4}, {spcmd5} };
-//static Sp scratchpads[] = {
-//	/* name		cmd */
-//	{"notes",    spcmd1},
-//	{"calc",     spcmd2},
-//	{"pre",      spcmd3},
-//	{"diary",    spcmd4},
-//	{"music",    spcmd5},
-//};
+const char *spcmd6[] = { "samedir", "-n", "term", "-g", "115x30", NULL };
 
 static Key keys[] = {
 	/* modifier(s)			key	function	argument */
@@ -160,6 +165,7 @@ static Key keys[] = {
 				/* Commands */
 	{ MODKEY,		   XK_Return,	spawn,		{ .v = termcmd }	},
 	{ MODKEY,			XK_d,   spawn,		{ .v = dmenucmd }	},
+	{ MODKEY|ShiftMask,		XK_d,   spawn,		{ .v = samedmenu }	},
 	{ MODKEY,			XK_m,	spawn,		{ .v = vifm }		},
 	{ MODKEY|ShiftMask,		XK_m,	spawn,		{ .v = samevifm }	},
 	{ MODKEY,	       XK_apostrophe,	spawn,		{ .v = clip }		},
@@ -168,31 +174,46 @@ static Key keys[] = {
 //	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn,		{ .v = passmenu }	},
 	{ MODKEY|ShiftMask,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
 	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
-	{ MODKEY,			XK_e,  	togglescratch,	{.ui = 0 } },/* notes */
-	{ MODKEY,			XK_x,	togglescratch,	{.ui = 1 } },/* bc */
-	{ MODKEY|ControlMask,		XK_s,	togglescratch,	{.ui = 2 } },/* uni */
-	{ MODKEY,			XK_s,	togglescratch,	{.ui = 3 } },/* diary */
-	{ MODKEY,			XK_n,	togglescratch,	{.ui = 4 } },/* ncmpcpp */
-	{ MODKEY|ShiftMask,		XK_p,	togglescratch,	{.ui = 5 } },/* pulsemixer */
+	SCRATCHKEYS(MODKEY,		XK_e,	/* notes	*/	0)
+	SCRATCHKEYS(MODKEY,		XK_x,	/* calculator	*/	1)
+	SCRATCHKEYS(MODKEY|ControlMask,	XK_s,	/* uni		*/	2)
+	SCRATCHKEYS(MODKEY,		XK_s,	/* terminal	*/	3)
+	SCRATCHKEYS(MODKEY,		XK_n,	/* music	*/	4)
+	SCRATCHKEYS(MODKEY|ShiftMask,	XK_p,	/* pulsemixer	*/	5)
+	SCRATCHKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	5)
+	//{ MODKEY,			XK_e,  	togglescratch,	{.ui = 0 } },/* notes */
+	//{ MODKEY,			XK_x,	togglescratch,	{.ui = 1 } },/* bc */
+	//{ MODKEY,			XK_s,	togglescratch,	{.ui = 3 } },/* term */
+	//{ MODKEY|ShiftMask,		XK_s,	togglescratch,	{.ui = 6 } },/* term */
+	//{ MODKEY|ControlMask,		XK_s,	togglescratch,	{.ui = 2 } },/* uni */
+	//{ MODKEY,			XK_n,	togglescratch,	{.ui = 4 } },/* ncmpcpp */
+	//{ MODKEY|ShiftMask,		XK_p,	togglescratch,	{.ui = 5 } },/* pulsemixer */
 //	{ MODKEY,		   XK_Num_Lock,	togglescratch,	{.ui = 1 } },/* bc */
 
 				/* Navigation */
-	{ MODKEY,			XK_j,	focusstack,	{ .i = -1 }		},
-	{ MODKEY|ShiftMask,		XK_j,	shiftag,	{ .i = -1 }		},
-	{ MODKEY|ControlMask,		XK_j,	shiftboth,	{ .i = -1 }		},
-	{ MODKEY|ControlMask|ShiftMask,	XK_j,	shiftagclients,	{ .i = -1 }		},
-	{ MODKEY|ControlMask|ShiftMask,	XK_j,	shiftagclients,	{ .i = +1 }		},
-	{ MODKEY|ControlMask,		XK_k,	shiftboth,	{ .i = +1 }		},
-	{ MODKEY,                       XK_k,	focusstack,	{ .i = +1 }		},
-	{ MODKEY|ShiftMask,             XK_k,	shiftag,	{ .i = +1 }		},
-	{ MODKEY,                       XK_h,	setmfact,	{ .f = -0.05 }		},
-	{ MODKEY|ShiftMask,             XK_h,	setcfact,	{ .f = +0.05 }		},
-	{ MODKEY,                       XK_l,	setmfact,	{ .f = +0.05 }		},
-	{ MODKEY|ShiftMask,             XK_l,	setcfact,	{ .f = -0.05 }		},
+	{ MODKEY,			XK_j,	focusstack,	{ .i = INC(1) }	},
+	{ MODKEY|ShiftMask,		XK_j,	pushstack,	{ .i = INC(1) }	},
+
+	{ MODKEY|ControlMask,		XK_j,	shifttag,	{ .i = -1 }		},
+	{ MODKEY|ControlMask|ShiftMask,	XK_j,  shifttagclients,	{ .i = -1 }		},
+	{ MODKEY|ControlMask|ShiftMask,	XK_k,  shifttagclients,	{ .i = +1 }		},
+	{ MODKEY|ControlMask,		XK_k,	shifttag,	{ .i = +1 }		},
+
+	{ MODKEY|ShiftMask,		XK_k,	pushstack,	{ .i = INC(-1) }	},
+	{ MODKEY,                       XK_k,	focusstack,	{ .i = INC(-1) }	},
+
+	{ MODKEY,                       XK_h,	setmfact,	{ .f = -0.02 }		},
+	{ MODKEY|ShiftMask,		XK_h,	shiftboth,	{ .i = -1 }		},
+//	{ MODKEY|ShiftMask,             XK_h,	setcfact,	{ .f = +0.05 }		},
+//	{ MODKEY|ShiftMask,             XK_l,	setcfact,	{ .f = -0.05 }		},
+	{ MODKEY|ShiftMask,             XK_l,	shiftboth,	{ .i = +1 }		},
+	{ MODKEY,                       XK_l,	setmfact,	{ .f = +0.02 }		},
+
 	{ MODKEY,                       XK_o, shiftviewclients,	{ .i = +1 }		},
 	{ MODKEY|ShiftMask,             XK_o,	shiftview,	{ .i = +1 }		},
-	{ MODKEY,	                XK_i, shiftviewclients,	{ .i = -1 }		},
 	{ MODKEY|ShiftMask,             XK_i,	shiftview,	{ .i = -1 }		},
+	{ MODKEY,	                XK_i, shiftviewclients,	{ .i = -1 }		},
+
 	{ MODKEY,		XK_semicolon,	incnmaster,	{ .i = +1 }		},
 	{ MODKEY|ShiftMask,	XK_semicolon,	incnmaster,	{ .i = -1 }		},
 	{ MODKEY,	                XK_q,	killclient,		{0}		},
@@ -241,7 +262,7 @@ static Key keys[] = {
 	{ MODKEY,			XK_v,	SHCMD("killall xcompmgr || \
 						  	setsid xcompmgr &")	},
 	{ MODKEY,			XK_t,	SHCMD("testi")			},
-	{ MODKEY,		   XK_Escape,	SHCMD("Sysfunctions001")	},
+	{ MODKEY,		   XK_Escape,	SHCMD("sysfunctions")	},
 //{ MODKEY,	XK_e,	spawn,	SHCMD("st -t New-e newsboat -q; pkill -RTMIN+6 dwmblocks") },
 	{ MODKEY,			XK_r,	SHCMD("st -t NewsBoat -e newsboat -q") },
 //					XK_F1, Feen
@@ -258,8 +279,8 @@ static Key keys[] = {
 		'Keyboard remapping⌨️ ' 'WAIT!\nRerunning <b>customs</b> shorcuts'")	},
 	{ MODKEY,			XK_F10,	SHCMD("setxkbmap -layout us -variant altgr-intl -option nodeadkeys & notify-send 'Keyboard⌨️ ' 'Keyboard remapping...\nRunning keyboard defaults, US altgr-intl variant with nodeadkeys...'") },
 	//{ MODKEY,			XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
-	{ MODKEY,                       XK_F11,	random_wall,	{.v = NULL }		},
-	{ MODKEY,                       XK_F12,	xrdb,		{.v = NULL }		},
+	{ MODKEY,                       XK_F11,	random_wall,		{0}	},
+	{ MODKEY,                       XK_F12,	xrdb,			{0}	},
 	{ 0,			    XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
 	{ MODKEY,		    XK_Print,	SHCMD("dmenurecord")		},
 	{ ShiftMask,		    XK_Print,	SHCMD("scrot")			},
@@ -288,8 +309,8 @@ static Key keys[] = {
 { MODKEY,	 XK_BackSpace,	SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
 //{ 0,	XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 //{ 0, XF86XK_ScreenSaver,		SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
-//	{ 0,	XF86XK_AudioStop,			SHCMD("mpc toggle) },
-	{ 0,	XF86XK_Sleep,			SHCMD("sudo zzz")		},
+//	{ 0,	XF86XK_AudioStop,		SHCMD("mpc toggle)		},
+//	{ 0,	XF86XK_Sleep,			SHCMD("sudo zzz")		},
 	{ 0,	XF86XK_ScreenSaver,		SHCMD("xset dpms force off")	},
 	{ 0,	XF86XK_MonBrightnessUp,		SHCMD("sudo brightnessctl -q set +1%") },
 	{ 0,	XF86XK_MonBrightnessDown,	SHCMD("sudo brightnessctl -q set 1%-") },
