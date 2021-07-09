@@ -261,7 +261,7 @@ static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setlayout(const Arg *arg);
-static void setcfact(const Arg *arg);
+//static void setcfact(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
@@ -327,23 +327,6 @@ static void incrovgaps(const Arg *arg);
 static void incrihgaps(const Arg *arg);
 static void incrivgaps(const Arg *arg);*/
 
-/* Layouts */
-static void tile(Monitor *);
-static void monocle(Monitor *m);
-static void alphamonocle(Monitor *m);
-static void centeredfloatmaster(Monitor *m);
-/*static void pidgin(Monitor *m);
-static void ego(Monitor *m);
-static void bstack(Monitor *m);
-static void bstackhoriz(Monitor *m);
-static void centeredmaster(Monitor *m);
-static void deck(Monitor *m);
-static void dwindle(Monitor *m);
-static void fibonacci(Monitor *m, int s);
-static void grid(Monitor *m);
-static void nrowgrid(Monitor *m);
-static void spiral(Monitor *m);*/
-
 /* Customs */
 //static void loadrandom_wall(const Arg *arg);
 static void random_wall(const Arg *arg);
@@ -351,6 +334,7 @@ static void random_wall(const Arg *arg);
 static void spawncmd(const Arg *arg);
 static int stackpos(const Arg *arg);
 static void pushstack(const Arg *arg);
+static void swaptags(const Arg *arg);
 
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
@@ -414,6 +398,9 @@ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() 
 //static char selfgcolor[]      = "#eeeeee";	/* bartext, light */
 //char terminalcmd[1024];
 
+/* vanitygaps and layouts */
+//#include "layouts.c"
+
 /* configuration, allows nested code to access above variables */
 #include "config.h"
 
@@ -442,9 +429,6 @@ struct Pertag {
 	int enablegaps[NUMTAGS + 1];		/* added with vanitygaps */
 	unsigned int gaps[NUMTAGS + 1];		/* gaps per tag */
 };
-
-/* vanitygaps and layouts */
-#include "layouts.c"
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
 struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
@@ -910,8 +894,8 @@ createmon(void)
 {
 	Monitor *m;
 	unsigned int i;
-	//int mi, j, layout;
-	//int tr;
+	//int j, tr, layout;
+//	int numtags = LENGTH(tags) + 1;
 
 	m = ecalloc(1, sizeof(Monitor));
 	m->tagset[0] = m->tagset[1] = 1;
@@ -919,31 +903,39 @@ createmon(void)
 	m->nmaster = nmaster;
 	m->showbar = showbar;
 	m->topbar = topbar;
+	/* gaps per tag */
 	m->gappih = gappih;
 	m->gappiv = gappiv;
 	m->gappoh = gappoh;
 	m->gappov = gappov;
 
-//	for (j = 0; j < LENGTH(taglayouts); j++) {
-//		tr = &taglayouts[j];
-//		if (tr > 0) {
-//			layout = MAX(tr, 0);
-//			layout = MIN(layout, LENGTH(layouts) - 1);
-//			m->lt[0] = &layouts[layout];
-//			m->lt[1] = &layouts[1 % LENGTH(layouts)];
-//			strncpy(m->ltsymbol, layouts[layout].symbol, sizeof m->ltsymbol);
-//		}
-//	}
-
 	m->lt[0] = &layouts[0];
 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
 	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
+
+//	for (j = 0; j < numtags; j++) {
+//		tr = taglayouts[j];
+//		if (tr != 0) {
+//			//m->tagset[j] = (1 << j);
+//			//m->lt[j] = taglayouts[j];
+//			layout = tr;
+//			//layout = MAX(tr, 0);
+//			//layout = MIN(layout, LENGTH(layouts) - 1);
+//			m->lt[0] = &layouts[layout];
+//			m->lt[1] = &layouts[1 % LENGTH(layouts)];
+//			strncpy(m->ltsymbol, layouts[layout].symbol, sizeof m->ltsymbol);
+//		//	break;
+//		}
+//	}
 
 	if (pertag) {
 		if (!(m->pertag = (Pertag *)calloc(1, sizeof(Pertag))))
 			die("fatal: could not malloc() %u bytes\n", sizeof(Pertag));
 		m->pertag->curtag = m->pertag->prevtag = 1;
-		for(i=0; i <= LENGTH(tags); i++) {
+
+		//m->lt[0] = m->lt[m->pertag->curtag];
+
+		for (i = 0; i <= LENGTH(tags); i++) {
 			/* init nmaster */
 			m->pertag->nmasters[i] = m->nmaster;
 
@@ -954,6 +946,18 @@ createmon(void)
 			m->pertag->ltidxs[i][0] = m->lt[0];
 			m->pertag->ltidxs[i][1] = m->lt[1];
 			m->pertag->sellts[i] = m->sellt;
+
+	//		for (j = 0; j < numtags; j++) {
+	//		//	tr = taglayouts[j];
+	//			//if (tr != 0) {
+	//				layout = tr;
+	//				//layout = MAX(tr, 0);
+	//				//layout = MIN(layout, LENGTH(layouts) - 1);
+	//				m->pertag->ltidxs[i][0] = &layouts[layout];
+	//				m->pertag->ltidxs[i][1] = m->lt[0];
+	//			//	break;
+	//			//}
+	//		}
 
 			if (pertagbar) {
 				/* init showbar */
@@ -973,7 +977,8 @@ createmon(void)
 }
 
 void
-cyclelayout(const Arg *arg) {
+cyclelayout(const Arg *arg)
+{
 	Layout *l;
 	for (l = (Layout *)layouts; l != selmon->lt[selmon->sellt]; l++);
 	if (arg->i > 0) {
@@ -2129,22 +2134,22 @@ setlayout(const Arg *arg)
 		drawbar(selmon);
 }
 
-void setcfact(const Arg *arg) {
-	float f;
-	Client *c;
-
-	c = selmon->sel;
-
-	if(!arg || !c || !selmon->lt[selmon->sellt]->arrange)
-		return;
-	f = arg->f + c->cfact;
-	if(arg->f == 0.0)
-		f = 1.0;
-	else if(f < 0.25 || f > 4.0)
-		return;
-	c->cfact = f;
-	arrange(selmon);
-}
+//void setcfact(const Arg *arg) {
+//	float f;
+//	Client *c;
+//
+//	c = selmon->sel;
+//
+//	if(!arg || !c || !selmon->lt[selmon->sellt]->arrange)
+//		return;
+//	f = arg->f + c->cfact;
+//	if(arg->f == 0.0)
+//		f = 1.0;
+//	else if(f < 0.25 || f > 4.0)
+//		return;
+//	c->cfact = f;
+//	arrange(selmon);
+//}
 
 /* arg > 1.0 will set mfact absolutely */
 void
@@ -2248,19 +2253,19 @@ setup(void)
 	XSelectInput(dpy, root, wa.event_mask);
 	grabkeys();
         /* set default tag layouts, only works with pertag */
-	if (pertag) {
-		for (i = 0; i < LENGTH(tags); i++)	{
-	                if (taglayouts[i] != 0)	{
-	                        Layout *l;
-	                        view(&((Arg) { .ui = 1 << i }));//go to i tag
-	                        l = (Layout *)layouts;
-	                        for (int j = 0; j < taglayouts[i]; j++)
-	                                l++;
-	                        setlayout(&((Arg) { .v = l }));	//setlayout
-	                }
-	        }
-	        view(&((Arg) { .ui = 1 << 0 }));	//return to the first tag
-	}
+//	if (pertag) {
+//		for (i = 0; i < LENGTH(tags); i++)	{
+//	                if (taglayouts[i] != 0)	{
+//	                        Layout *l;
+//	                        view(&((Arg) { .ui = 1 << i }));//go to i tag
+//	                        l = (Layout *)layouts;
+//	                        for (int j = 0; j < taglayouts[i]; j++)
+//	                                l++;
+//	                        setlayout(&((Arg) { .v = l }));	//setlayout
+//	                }
+//	        }
+//	        view(&((Arg) { .ui = 1 << 0 }));	//return to the first tag
+//	}
 	focus(NULL);
 }
 
@@ -2392,8 +2397,8 @@ shiftboth(const Arg *arg)
 	c = selmon->clients;
 
 	/* if it is a scratchpad do nothing */
-	if (!c) return;
-	if ((c->tags & SPTAGMASK) && c->isfloating)
+	//if (!c) return;
+	if (!c && ((c->tags & SPTAGMASK) && c->isfloating))
 		return;
 
 	if (arg->i > 0)	/* left circular shift */
@@ -3268,6 +3273,30 @@ zoom(const Arg *arg)
 }
 
 /* Customs */
+void
+swaptags(const Arg *arg)
+{
+	Client *c;
+	unsigned int newtag = arg->ui & TAGMASK;
+	unsigned int curtag = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+
+	if (newtag == curtag || !curtag || (curtag & (curtag-1)))
+		return;
+
+	for (c = selmon->clients; c != NULL; c = c->next) {
+		if ((c->tags & newtag) || (c->tags & curtag))
+			c->tags ^= curtag ^ newtag;
+
+		if (!c->tags)
+			c->tags = newtag;
+	}
+
+	//selmon->tagset[selmon->seltags] = newtag;
+
+	focus(NULL);
+	arrange(selmon);
+}
+
 int
 stackpos(const Arg *arg) {
 	int n, i;

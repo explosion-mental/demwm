@@ -45,7 +45,7 @@ static const unsigned int alphas[][3] = {
 
 /* tags */
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
-static const int taglayouts[] = {    0,   1,    0,   0,    0,    0,    0,    0,    0 };
+//static const int taglayouts[] = {    0,   1,    0,   0,    0,    0,    0,    0,    0 };
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -60,7 +60,7 @@ static const Rule rules[] = {
 	RULE(.title = "Music",		.tags = 1 << 6)
 	RULE(.title = "Sxiv - redyt",	.tags = 1 << 8)
 	RULE(.title = "Sxiv - walld",	.tags = 1 << 8)
-	RULE(.class = "libreoffice",	.tags = 1 << 3)
+//	RULE(.class = "libreoffice",	.tags = 1 << 3)
 //	RULE(.title = "LibreOffice",	.isfloating = 1, .noswallow = 1)
 //	RULE(.class = "Firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
 	RULE(.class = "firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
@@ -73,11 +73,11 @@ static const Rule rules[] = {
 	RULE(.class = "St", .isterminal = 1)
 	RULE(.title = "Event Tester", .noswallow = 1) /* xev */
 	RULE(.title = "Firefox Update", .isfloating = 1)
-	RULE(.instance = "notes", .tags = SPTAG(0), .isfloating = 1)
-	RULE(.instance = "calc" , .tags = SPTAG(1), .isfloating = 1)
-	RULE(.instance = "pre"  , .tags = SPTAG(2), .isfloating = 1)
-	RULE(.instance = "term", .tags = SPTAG(3), .isfloating = 1)
-	RULE(.instance = "music", .tags = SPTAG(4), .isfloating = 1)
+	RULE(.instance = "notes",	.tags = SPTAG(0), .isfloating = 1)
+	RULE(.instance = "calc" ,	.tags = SPTAG(1), .isfloating = 1)
+	RULE(.instance = "pre"  ,	.tags = SPTAG(2), .isfloating = 1)
+	RULE(.instance = "term",	.tags = SPTAG(3), .isfloating = 1)
+	RULE(.instance = "music",	.tags = SPTAG(4), .isfloating = 1)
 	RULE(.instance = "pulsemixer",	.tags = SPTAG(5), .isfloating = 1)
 	RULE(.instance = "term",	.tags = SPTAG(6), .isfloating = 1)
 };
@@ -86,7 +86,25 @@ static const Rule rules[] = {
 static float mfact     = 0.55;	/* factor of master area size [0.05..0.95] */
 static int nmaster     = 1;	/* number of clients in master area */
 static int resizehints = 0;	/* 1 means respect size hints in tiled resizals */
+
+#define TILE
+#define MONOCLE
+#define ALPHAMONOCLE
+#define CENTEREDFLOATMASTER
+//#define BSTACK
+#define SPIRAL
+//#define DWINDLE
+#define DECK
+//#define CENTEREDMASTER
+//#define BSTACKHORIZ
+//#define GRID
+//#define NROWGRID
 //#define FORCE_VSPLIT 1	/* nrowgrid: force two clients to always split vertically */
+//#define HORIZGRID
+//#define GAPLESSGRID
+//#define PIDGIN
+//#define EGO
+#include "layouts.c"
 
 static const Layout layouts[] = {
 	/* symbol	arrange function			Description			*/
@@ -95,9 +113,9 @@ static const Layout layouts[] = {
  	{ "{}",		alphamonocle },		/* monocle but windows aren't stacked */
 	{ ">M>",	centeredfloatmaster},	/* Centermaster but master floats */
 	//{ "TTT",	bstack },		/* Master on top, slaves on bottom */
-	//{ "🐚",	spiral },		/* Fibonacci spiral */
+	{ "🐚",		spiral },		/* Fibonacci spiral */
 	//{ "[\\]",	dwindle },		/* Decreasing in size right and leftward */
-	//{ "[D]",	deck },			/* Master on left, slaves in monocle mode on right */
+	{ "[D]",	deck },			/* Master on left, slaves in monocle mode on right */
 	//{ "|M|",	centeredmaster },	/* Master in middle, slaves on sides */
 	//{ "===",      bstackhoriz },		/* Bstack but slaves stacked "monocle"-like */
 	//{ "HHH",      grid },			/* windows in a grid */
@@ -116,7 +134,8 @@ static const Layout layouts[] = {
 	{ MODKEY,                       KEY,	view,           { .ui = 1 << TAG } }, \
 	{ MODKEY|ShiftMask,             KEY,	tag,            { .ui = 1 << TAG } }, \
 	{ MODKEY|ControlMask,           KEY,	toggleview,     { .ui = 1 << TAG } }, \
-	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,      { .ui = 1 << TAG } },
+	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,      { .ui = 1 << TAG } }, \
+	{ MODKEY|Mod1Mask,		KEY,	swaptags,	{ .ui = 1 << TAG } },
 
 /*#define SHIFTKEYS(KEY,NUM) \
 //	{ MODKEY|ShiftMask,             KEY,     shifttag,	  {.i = NUM } }, \
@@ -151,9 +170,9 @@ static const char *samevifm[]  = { "samedirvifm", NULL };
 /* scratchpads */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
 static Sp scratchpads[7];
-const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "~/Docs/testi/testi", NULL };
+const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL };
 const char *spcmd1[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
-const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "~/Docs/testi/pre-Uni.txt", NULL };
+const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
 const char *spcmd3[] = { "st", "-n", "term", "-g", "115x30" , NULL };
 const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
 const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
@@ -180,14 +199,7 @@ static Key keys[] = {
 	SCRATCHKEYS(MODKEY,		XK_s,	/* terminal	*/	3)
 	SCRATCHKEYS(MODKEY,		XK_n,	/* music	*/	4)
 	SCRATCHKEYS(MODKEY|ShiftMask,	XK_p,	/* pulsemixer	*/	5)
-	SCRATCHKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	5)
-	//{ MODKEY,			XK_e,  	togglescratch,	{.ui = 0 } },/* notes */
-	//{ MODKEY,			XK_x,	togglescratch,	{.ui = 1 } },/* bc */
-	//{ MODKEY,			XK_s,	togglescratch,	{.ui = 3 } },/* term */
-	//{ MODKEY|ShiftMask,		XK_s,	togglescratch,	{.ui = 6 } },/* term */
-	//{ MODKEY|ControlMask,		XK_s,	togglescratch,	{.ui = 2 } },/* uni */
-	//{ MODKEY,			XK_n,	togglescratch,	{.ui = 4 } },/* ncmpcpp */
-	//{ MODKEY|ShiftMask,		XK_p,	togglescratch,	{.ui = 5 } },/* pulsemixer */
+	SCRATCHKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	6)
 //	{ MODKEY,		   XK_Num_Lock,	togglescratch,	{.ui = 1 } },/* bc */
 
 				/* Navigation */
@@ -218,8 +230,6 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,	XK_semicolon,	incnmaster,	{ .i = -1 }		},
 	{ MODKEY,	                XK_q,	killclient,		{0}		},
 	{ MODKEY|ShiftMask,         XK_space,	togglefloating,		{0}		},
-	{ MODKEY,                       XK_0,	view,		{.ui = ~SPTAGMASK }	},
-	{ MODKEY|ShiftMask,             XK_0,	tag,		{.ui = ~SPTAGMASK }	},
 	{ MODKEY,                       XK_F1,	fullscreen,		{0}		},
 	{ MODKEY|ControlMask,        	XK_F1,	fakefullscreen,		{0}		},
 	{ MODKEY,                       XK_w,	zoom,			{0}		},
@@ -229,10 +239,12 @@ static Key keys[] = {
 //	{ MODKEY|ShiftMask,	    XK_grave,	toggletopbar,		{0}		},
 //	{ MODKEY|ShiftMask,             XK_c,	quit,           	{0}		},
 	{ MODKEY,			XK_F5,	/*restart*/	quit,	{1}		},
-	{ MODKEY,                   XK_comma,	focusmon,	{.i = -1 }		},
-	{ MODKEY,                  XK_period,	focusmon,	{.i = +1 }		},
-	{ MODKEY|ShiftMask,         XK_comma,	tagmon,		{.i = -1 }		},
-	{ MODKEY|ShiftMask,        XK_period,	tagmon,		{.i = +1 }		},
+	{ MODKEY,                   XK_comma,	focusmon,	{ .i = -1 }		},
+	{ MODKEY|ShiftMask,         XK_comma,	tagmon,		{ .i = -1 }		},
+	{ MODKEY|ShiftMask,        XK_period,	tagmon,		{ .i = +1 }		},
+	{ MODKEY,                  XK_period,	focusmon,	{ .i = +1 }		},
+	{ MODKEY,                       XK_0,	view,		{.ui = ~SPTAGMASK }	},
+	{ MODKEY|ShiftMask,             XK_0,	tag,		{.ui = ~SPTAGMASK }	},
 	  TAGKEYS(			XK_1,				0)
 	  TAGKEYS(			XK_2,				1)
 	  TAGKEYS(			XK_3,				2)
@@ -338,11 +350,10 @@ static Button buttons[] = {
 	/* click                event mask      button          function        argument */
 	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
 	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
-	{ ClkWinTitle,          0,              Button1,	SHCMD("sleep 0.2 ; \
-							   scrot -se 'mv $f ~/Downloads'") },
+	//{ ClkWinTitle,          0,              Button1,	SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
+	{ ClkWinTitle,          0,              Button1,	SHCMD("maim -s ~/Downloads/$(date +'%d-%m_%I_%M_%S').png") },
 	{ ClkWinTitle,          0,              Button2,	zoom,           {0} },
-	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -u -se \
-								   'mv $f ~/Downloads'") },
+	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -u -se 'mv $f ~/Downloads'") },
 	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1 } },
 	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2 } },
 	{ ClkStatusText,        0,              Button3,        sigdwmblocks,   {.i = 3 } },
