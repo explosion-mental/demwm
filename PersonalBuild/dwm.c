@@ -45,6 +45,11 @@
 #include <X11/Xlib-xcb.h>
 #include <xcb/res.h>
 #include <X11/XF86keysym.h>	/* XF86 Keys */
+#ifdef ICONS
+#include <limits.h>
+#include <stdint.h>
+#include <Imlib2.h>
+#endif /* ICONS */
 
 #include "drw.h"
 #include "util.h"
@@ -99,8 +104,12 @@
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 //enum { SchemeNorm, SchemeSel }; /* color schemes */
-enum { SchemeNorm, SchemeSel, SchemeTitle, SchemeLt, SchemeStatus, SchemeIndOff, SchemeIndOn, SchemeUrgent, SchemeNotify }; /* color schemes */
-enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
+enum { SchemeNorm, SchemeSel, SchemeTitle, SchemeLt, SchemeStatus, SchemeIndOff, SchemeIndOn, SchemeUrgent, SchemeNotify, SchemeImg }; /* color schemes */
+enum { NetSupported, NetWMName,
+#ifdef ICONS
+	NetWMIcon,
+#endif /* ICONS */
+       NetWMState, NetWMCheck,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
        NetWMWindowTypeDialog, NetClientList, NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
@@ -137,6 +146,9 @@ struct Client {
 	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen, isterminal, noswallow;
 	int fakefullscreen;
 	pid_t pid;
+#ifdef ICONS
+	XImage *icon;
+#endif /* ICONS */
 	Client *next;
 	Client *snext;
 	Client *swallowing;
@@ -169,6 +181,7 @@ struct Monitor {
 	int gappiv;           /* vertical gap between windows */
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
+	unsigned int borderpx;
 	unsigned int seltags;
 	unsigned int sellt;
 	unsigned int tagset[2];
@@ -232,6 +245,11 @@ static void focusmon(const Arg *arg);
 static void focusstack(const Arg *arg);
 static int getrootptr(int *x, int *y);
 static long getstate(Window w);
+#ifdef ICONS
+static XImage *geticonprop(Window win);
+static void freeicon(Client *c);
+static void updateicon(Client *c);
+#endif /* ICONS */
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
@@ -331,6 +349,9 @@ static void incrivgaps(const Arg *arg);*/
 //static void loadrandom_wall(const Arg *arg);
 static void random_wall(const Arg *arg);
 //static void toggletopbar(const Arg *arg);
+//static void toggleborder(const Arg *arg);
+static void reorganizetags(void);
+static void nostatus(const Arg *arg);
 static void spawncmd(const Arg *arg);
 static int stackpos(const Arg *arg);
 static void pushstack(const Arg *arg);
@@ -398,6 +419,7 @@ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() 
 //static char selfgcolor[]      = "#eeeeee";	/* bartext, light */
 //char terminalcmd[1024];
 
+//static char *terminalcmd;
 /* vanitygaps and layouts */
 //#include "layouts.c"
 
@@ -903,6 +925,7 @@ createmon(void)
 	m->nmaster = nmaster;
 	m->showbar = showbar;
 	m->topbar = topbar;
+	m->borderpx = borderpx;
 	/* gaps per tag */
 	m->gappih = gappih;
 	m->gappiv = gappiv;
@@ -969,8 +992,7 @@ createmon(void)
 			/* compatibility with pertag and togglegaps line in createmon */
 			m->pertag->enablegaps[i] = 1;
 			if (gapspertag)
-				m->pertag->gaps[i] =
-			((gappoh & 0xFF) << 0) | ((gappov & 0xFF) << 8) | ((gappih & 0xFF) << 16) | ((gappiv & 0xFF) << 24);
+				m->pertag->gaps[i] = ((gappoh & 0xFF) << 0) | ((gappov & 0xFF) << 8) | ((gappih & 0xFF) << 16) | ((gappiv & 0xFF) << 24);
 		}
 	}	/* if pertag */
 	return m;
@@ -1110,7 +1132,18 @@ drawbar(Monitor *m)
 			/* Scheme Title patch */
 			//drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
 			drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]);
+#ifdef ICONS
+			//drw_setscheme(drw, scheme[SchemeImg]);
+			drw_text(drw, x, 0, w, bh, lrpad / 2 + (m->sel->icon ? m->sel->icon->width + ICONSPACING : 0), m->sel->name, 0);
+			static uint32_t tmp[ICONSIZE * ICONSIZE];
+			if (m->sel->icon) {
+				//drw_setscheme(drw, scheme[m->sel->icon->width != 0 ? SchemeImg : SchemeTitle]);
+				drw_setscheme(drw, scheme[SchemeImg]);
+				drw_img(drw, x + lrpad / 2, (bh - m->sel->icon->height) / 2, m->sel->icon, tmp);
+			}
+#else
 			drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
+#endif /* ICONS */
 			if (m->sel->isfloating)
 				drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
 		} else {
@@ -1293,6 +1326,104 @@ getstate(Window w)
 	return result;
 }
 
+#ifdef ICONS
+static uint32_t prealpha(uint32_t p) {
+	uint8_t a = p >> 24u;
+	uint32_t rb = (a * (p & 0xFF00FFu)) >> 8u;
+	uint32_t g = (a * (p & 0x00FF00u)) >> 8u;
+	return (rb & 0xFF00FFu) | (g & 0x00FF00u) | ((~a) << 24u);
+}
+XImage *
+geticonprop(Window win)
+{
+	int format;
+	unsigned long n, extra, *p = NULL;
+	Atom real;
+
+	if (XGetWindowProperty(dpy, win, netatom[NetWMIcon], 0L, LONG_MAX, False, AnyPropertyType,
+						   &real, &format, &n, &extra, (unsigned char **)&p) != Success)
+		return NULL;
+	if (n == 0) { XFree(p); return NULL; }
+
+	unsigned long *bstp = NULL, w, h;
+
+	{
+		const unsigned long *end = p + n;
+		unsigned long *i;
+		int bstd = INT_MAX, d, m;
+		for (i = p; i < end; ) {
+			w = *i++; h = *i++;
+			m = w > h ? w : h;
+			if (m >= ICONSIZE && (d = m - ICONSIZE) < bstd) { bstd = d; bstp = i; }
+			i += (w * h);
+		}
+		if (!bstp) {
+			for (i = p; i < end; ) {
+				w = *i++; h = *i++;
+				m = w > h ? w : h;
+				if ((d = ICONSIZE - m) < bstd) { bstd = d; bstp = i; }
+				i += (w * h);
+			}
+		}
+		if (!bstp) { XFree(p); return NULL; }
+	}
+
+	w = *(bstp - 2); h = *(bstp - 1);
+
+	int icw, ich, icsz;
+	if (w <= h) {
+		ich = ICONSIZE; icw = w * ICONSIZE / h;
+		if (icw < 1) icw = 1;
+	} else {
+		icw = ICONSIZE; ich = h * ICONSIZE / w;
+		if (ich < 1) ich = 1;
+	}
+	icsz = icw * ich;
+
+	int i;
+#if ULONG_MAX > UINT32_MAX
+	int sz = w * h;
+	uint32_t *bstp32 = (uint32_t *)bstp;
+	for (i = 0; i < sz; ++i)
+		bstp32[i] = bstp[i];
+#endif
+	uint32_t *icbuf = malloc(icsz << 2); if(!icbuf) { XFree(p); return NULL; }
+	if (w == icw && h == ich) memcpy(icbuf, bstp, icsz << 2);
+	else {
+		Imlib_Image origin = imlib_create_image_using_data(w, h, (DATA32 *)bstp);
+		if (!origin) { XFree(p); free(icbuf); return NULL; }
+		imlib_context_set_image(origin);
+		imlib_image_set_has_alpha(1);
+		Imlib_Image scaled = imlib_create_cropped_scaled_image(0, 0, w, h, icw, ich);
+		imlib_free_image_and_decache();
+		if (!scaled) { XFree(p); free(icbuf); return NULL; }
+		imlib_context_set_image(scaled);
+		imlib_image_set_has_alpha(1);
+		memcpy(icbuf, imlib_image_get_data_for_reading_only(), icsz << 2);
+		imlib_free_image_and_decache();
+	}
+	XFree(p);
+	for (i = 0; i < icsz; ++i) icbuf[i] = prealpha(icbuf[i]);
+
+	return XCreateImage(dpy, visual, depth, ZPixmap, 0, (char *)icbuf, icw, ich, 32, 0);
+}
+void
+freeicon(Client *c)
+{
+	if (c->icon) {
+		XDestroyImage(c->icon);
+		c->icon = NULL;
+	}
+}
+void
+updateicon(Client *c)
+{
+	freeicon(c);
+	c->icon = geticonprop(c->win);
+}
+#endif /* ICONS */
+
+
 int
 gettextprop(Window w, Atom atom, char *text, unsigned int size)
 {
@@ -1461,6 +1592,10 @@ manage(Window w, XWindowAttributes *wa)
 	c->oldbw = wa->border_width;
 	c->cfact = 1.0;
 
+#ifdef ICONS
+	c->icon = NULL;
+	updateicon(c);
+#endif /* ICONS */
 	updatetitle(c);
 	if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
 		c->mon = t->mon;
@@ -1479,7 +1614,8 @@ manage(Window w, XWindowAttributes *wa)
 	/* only fix client y-offset, if the client center might cover the bar */
 	c->y = MAX(c->y, ((c->mon->by == c->mon->my) && (c->x + (c->w / 2) >= c->mon->wx)
 		&& (c->x + (c->w / 2) < c->mon->wx + c->mon->ww)) ? bh : c->mon->my);
-	c->bw = borderpx;
+//	c->bw = borderpx;
+	c->bw = c->mon->borderpx;
 
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
@@ -1665,6 +1801,13 @@ propertynotify(XEvent *e)
 			if (c == c->mon->sel)
 				drawbar(c->mon);
 		}
+#ifdef ICONS
+		else if (ev->atom == netatom[NetWMIcon]) {
+			updateicon(c);
+			if (c == c->mon->sel)
+				drawbar(c->mon);
+		}
+#endif /* ICONS */
 		if (ev->atom == netatom[NetWMWindowType])
 			updatewindowtype(c);
 	}
@@ -1673,7 +1816,8 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
-	if (arg->i) restart = 1;
+	if (arg->i)
+		restart = 1;
 	running = 0;
 }
 
@@ -1905,7 +2049,7 @@ setclientstate(Client *c, long state)
 }
 
 /* vanitygaps */
-void
+static void
 setgaps(int oh, int ov, int ih, int iv)
 {
 	if (oh < 0) oh = 0;
@@ -2206,6 +2350,9 @@ setup(void)
 	netatom[NetActiveWindow]       = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	netatom[NetSupported]          = XInternAtom(dpy, "_NET_SUPPORTED", False);
 	netatom[NetWMName]             = XInternAtom(dpy, "_NET_WM_NAME", False);
+	#ifdef ICONS
+	netatom[NetWMIcon]             = XInternAtom(dpy, "_NET_WM_ICON", False);
+	#endif /* ICONS */
 	netatom[NetWMState]            = XInternAtom(dpy, "_NET_WM_STATE", False);
 	netatom[NetWMCheck]            = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	netatom[NetWMFullscreen]       = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
@@ -2220,7 +2367,7 @@ setup(void)
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 	/* If restarting keep the wallpaper, else refresh */
-	if (restcol) {
+	if (restart) {
 		for (i = 0; i < LENGTH(colors); i++)
 			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
 	} else {
@@ -2291,8 +2438,10 @@ shifttag(const Arg *arg)
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 	c = selmon->clients;
 
+	/* if no client do nothing */
+	if (!c)
+		return;
 	/* if it is a scratchpad do nothing */
-	if (!c) return;
 	if ((c->tags & SPTAGMASK) && c->isfloating)
 		return;
 	//c = c->next;
@@ -2712,6 +2861,9 @@ unmanage(Client *c, int destroyed)
 
 	detach(c);
 	detachstack(c);
+#ifdef ICONS
+	freeicon(c);
+#endif /* ICONS */
 	if (!destroyed) {
 		wc.border_width = c->oldbw;
 		XGrabServer(dpy); /* avoid race conditions */
@@ -3274,6 +3426,77 @@ zoom(const Arg *arg)
 
 /* Customs */
 void
+reorganizetags(void)
+{
+	Client *c;
+	unsigned int ui = 1;
+        int i = 0;
+	int n;
+	for (n = 0, c = selmon->clients; c; c = c->next, n++);
+	for (c = selmon->clients; c; c = c->next) {
+		if (n > 2 && !((c->tags & SPTAGMASK) && c->isfloating)) {
+                	//c->tags = (ui << i) & TAGMASK & ~SPTAGMASK;
+                	c->tags = (ui << i) & TAGMASK;
+                	i = (i + 1) % LENGTH(tags);
+		} else
+			return;
+        }
+        focus(NULL);
+        arrange(selmon);
+}
+
+static int oldborder;
+static void
+toggleborder(const Arg *arg)
+{
+	Client *c;
+	//int prev_borderpx = selmon->borderpx;
+
+	oldborder = selmon->borderpx;
+	if (selmon->borderpx == 0)
+		selmon->borderpx = oldborder;
+	else {
+		oldborder = selmon->borderpx;
+		selmon->borderpx = 0;
+	}
+	for (c = selmon->clients; c; c = c->next) {
+		if (borderpx == 0)
+			c->bw = selmon->borderpx;
+		else
+			c->bw = selmon->borderpx = 0;
+		//if (c->isfloating || !selmon->lt[selmon->sellt]->arrange) {
+		//	resize(c, c->x, c->y, c->w-(arg->i*2), c->h-(arg->i*2), 0);
+		//}
+	}
+
+
+	//if (oldborder == 0) {
+	//	oldborder  = borderpx;
+	//	borderpx = 0;
+	//} else {
+	//	borderpx  = oldborder;
+	//}
+	arrange(NULL);
+}
+
+void
+nostatus(const Arg *arg)
+{
+	//if (arg->i > 0)
+	//char *hello = "\0";
+	//if (gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
+	//else
+	//if (gettextprop(root, XA_WM_NAME, hello , sizeof(hello)))
+	//	copyvalidchars(stext, rawstext);
+	//else
+	//	strcpy(stext, hello);
+	if (arg->i > 0)
+		strcpy(stext, "");
+	else
+		copyvalidchars(stext, rawstext);
+	drawbar(selmon);
+}
+void
 swaptags(const Arg *arg)
 {
 	Client *c;
@@ -3298,7 +3521,8 @@ swaptags(const Arg *arg)
 }
 
 int
-stackpos(const Arg *arg) {
+stackpos(const Arg *arg)
+{
 	int n, i;
 	Client *c, *l;
 
@@ -3328,7 +3552,8 @@ stackpos(const Arg *arg) {
 }
 
 void
-pushstack(const Arg *arg) {
+pushstack(const Arg *arg)
+{
 	int i = stackpos(arg);
 	Client *sel = selmon->sel, *c, *p;
 
@@ -3380,10 +3605,15 @@ random_wall(const Arg *arg)
 		xrdb(NULL);
 	}
 }
+
+
+//char *
 void
-get_term()
+get_term(void)
 {
-//terminalcmd[1024] = getenv("TERMINAL");
+
+	//terminalcmd = getenv("TERMINAL");
+	//return terminalcmd;
 }
 /*void
 toggletopbar(const Arg *arg)
@@ -3412,15 +3642,20 @@ main(int argc, char *argv[])
 	XrmInitialize();
         loadxrdb();
 	//system("killall -q dwmblocks; dwmblocks &");
-	if (restart) restcol = 1;
+	//if (restart) restcol = 1;
 	setup();
 #ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec", NULL) == -1) die("pledge");
 #endif /* __OpenBSD__ */
 	scan();
 	system("killall -q dwmblocks; dwmblocks &");
+	//if (restart) reorganizetags();
+	reorganizetags();	/* if more than 2 clients reorganize clients on restart*/
 	run();
-	if (restart) execvp(argv[0], argv);
+	if (restart) {
+		restcol = 1;
+		execvp(argv[0], argv);
+	}
 	//system("killall -q dwmblocks; dwmblocks &");
 	cleanup();
 	XCloseDisplay(dpy);

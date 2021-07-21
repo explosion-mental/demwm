@@ -1,7 +1,9 @@
 /* See LICENSE file for copyright and license details. */
 
 /* Appearance: colors on here are not used, see loadxrdb function on dwm.c */
-static unsigned int borderpx  = 2;        /* border pixel of windows */
+#define ICONSIZE 20   /* icon size */
+#define ICONSPACING 5 /* space between icon and title */
+static unsigned int borderpx  = 3;        /* border pixel of windows */
 static unsigned int snap      = 32;       /* snap pixel */
 static unsigned int gappih    = 15;       /* horiz inner gap between windows */
 static unsigned int gappiv    = 20;       /* vert inner gap between windows */
@@ -14,7 +16,7 @@ static int topbar             = 1;        /* 0 means bottom bar */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
-static const unsigned int baralpha    = 185;	/* Bar opacity (0-255) */
+static const unsigned int baralpha    = 255;	/* Bar opacity (0-255) */
 static const unsigned int borderalpha = OPAQUE;	/* Borders (0xffU) */
 static char *fonts[] = {
 	"Hack Nerd Font:pixelsize=12:antialias=true:autohint=true", /* Powerline */
@@ -27,20 +29,27 @@ static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8], co
 static char bg_wal[8], fg_wal[8], cursor_wal[8];
 static char *colors[][3]	      = {
 			/* fg		bg		border	    description		*/
-	[SchemeNorm]   = { fg_wal,	color0,		color0 }, /*Normal tags section */
-	[SchemeSel]    = { color0,	color1,		color2 }, /*Selected tag*/
-	[SchemeLt]     = { color2,	color0,		NULL },   /*Layout*/
-	[SchemeTitle]  = { color0,	color2,		NULL },   /*window title*/
-	[SchemeStatus] = { color3,	color0,		NULL },   /*StatusBar*/
-	[SchemeUrgent] = { fg_wal,	color0,		fg_wal }, /*background color for urgent tag*/
-	[SchemeNotify] = { fg_wal,	color0,		NULL },   /*Little red bar on urgent tag*/
-	[SchemeIndOn]  = { color4,	color0,		NULL },   /*rectangle on active tag*/
-	[SchemeIndOff] = { color2,	color0,		NULL },   /*rectablge on def tag*/
+	[SchemeNorm]   = { fg_wal,	color0,		color0 }, /* Normal tags section */
+	[SchemeSel]    = { color0,	color1,		color2 }, /* Selected tag*/
+	[SchemeLt]     = { color2,	color0,		NULL },   /* Layout*/
+	[SchemeTitle]  = { color0,	color2,		NULL },   /* window title*/
+#ifdef ICONS
+	[SchemeImg]    = { color0,	color2,		NULL },   /* window title*/
+#endif /* ICONS */
+	[SchemeStatus] = { color3,	color0,		NULL },   /* StatusBar*/
+	[SchemeUrgent] = { fg_wal,	color0,		fg_wal }, /* background color for urgent tag*/
+	[SchemeNotify] = { fg_wal,	color0,		NULL },   /* Little red bar on urgent tag*/
+	[SchemeIndOn]  = { color4,	color0,		NULL },   /* rectangle on active tag*/
+	[SchemeIndOff] = { color2,	color0,		NULL },   /* rectablge on def tag*/
 };
 static const unsigned int alphas[][3] = {
 			/* fg		bg		border     */
-	[SchemeNorm]   = { OPAQUE,	baralpha,	borderalpha },
+	[SchemeNorm]   = { OPAQUE,	baralpha,	0 },
 	[SchemeSel]    = { OPAQUE,	baralpha,	borderalpha },
+	[SchemeLt]     = { OPAQUE,	baralpha,	borderalpha },
+	[SchemeStatus] = { OPAQUE,	baralpha,	borderalpha },
+	[SchemeTitle]  = { OPAQUE,	baralpha,	borderalpha },
+	[SchemeImg]    = { OPAQUE,	baralpha,	borderalpha },
 };
 
 /* tags */
@@ -254,6 +263,8 @@ static Key keys[] = {
 	  TAGKEYS(			XK_7,				6)
 	  TAGKEYS(			XK_8,				7)
 	  TAGKEYS(			XK_9,				8)
+	{ MODKEY|ControlMask,		XK_b,	nostatus,	{ .i = 1  }		},
+	{ MODKEY|ControlMask,		XK_n,	nostatus,	{ .i = -1 }		},
 
 			/* Custom bindings (may be better using shkd) */
 	{ MODKEY,			XK_b,	CMDCMD("Books001")		},
@@ -323,17 +334,16 @@ static Key keys[] = {
 //{ 0, XF86XK_ScreenSaver,		SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
 //	{ 0,	XF86XK_AudioStop,		SHCMD("mpc toggle)		},
 //	{ 0,	XF86XK_Sleep,			SHCMD("sudo zzz")		},
-	{ 0,	XF86XK_ScreenSaver,		SHCMD("xset dpms force off")	},
-	{ 0,	XF86XK_MonBrightnessUp,		SHCMD("sudo brightnessctl -q set +1%") },
-	{ 0,	XF86XK_MonBrightnessDown,	SHCMD("sudo brightnessctl -q set 1%-") },
-	{ 0,	XF86XK_AudioPlay,		SHCMD("mpc toggle")		},
-	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev")		},
-	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next")		},
-	{ MODKEY,		XK_p,		SHCMD("mpc toggle")		},
-	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev")		},
-	{ MODKEY,	XK_bracketright,	SHCMD("mpc next")		},
-	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")		},
-//	{ MODKEY|ShiftMask,	XK_p,		SHCMD("st -e pulsemixer")	},
+	{ 0,	XF86XK_ScreenSaver,		SHCMD("xset dpms force off")		},
+	{ 0,	XF86XK_MonBrightnessUp,		SHCMD("sudo brightnessctl -q set +1%")	},
+	{ 0,	XF86XK_MonBrightnessDown,	SHCMD("sudo brightnessctl -q set 1%-")	},
+	{ 0,	XF86XK_AudioPlay,		SHCMD("mpc toggle")			},
+	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev")			},
+	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next")			},
+	{ MODKEY,		XK_p,		SHCMD("mpc toggle")			},
+	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev")			},
+	{ MODKEY,	XK_bracketright,	SHCMD("mpc next")			},
+	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")			},
 
 				/* GAPS */
 	{ MODKEY,			XK_f,	incrgaps,	{.i = +3 }		},
@@ -341,6 +351,7 @@ static Key keys[] = {
 	{ MODKEY,			XK_a,	togglegaps,		{0}		},
 	{ MODKEY|ControlMask,   	XK_a,	defaultgaps,		{0}		},
 	{ MODKEY|ShiftMask,		XK_a,	togglesmartgaps,	{0}		},
+	//{ MODKEY|ControlMask|ShiftMask,	XK_a,	toggleborder,	{0}		},
 //	{ MODKEY|ControlMask,           XK_o,	setcfact,	{.f =  0.00}		},
 };
 
@@ -350,10 +361,17 @@ static Button buttons[] = {
 	/* click                event mask      button          function        argument */
 	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
 	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
-	//{ ClkWinTitle,          0,              Button1,	SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
-	{ ClkWinTitle,          0,              Button1,	SHCMD("maim -s ~/Downloads/$(date +'%d-%m_%I_%M_%S').png") },
+	{ ClkLtSymbol,          0,              Button4,        cyclelayout,    {.i = +1 } },
+	{ ClkLtSymbol,          0,              Button5,        cyclelayout,    {.i = -1 } },
+//	{ ClkLtSymbol,          0,              Button4,        focusstack,	{.i = INC(1)} },
+//	{ ClkLtSymbol,          0,              Button5,        focusstack,	{.i = INC(-1)} },
+//	{ ClkWinTitle,          0,              Button1,	SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
+	{ ClkWinTitle,          0,              Button1,	SHCMD("maim -sDq ~/Downloads/$(date +'%d-%m_%I_%M_%S').png") },
 	{ ClkWinTitle,          0,              Button2,	zoom,           {0} },
-	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -u -se 'mv $f ~/Downloads'") },
+	{ ClkWinTitle,          0,              Button2,	killclient,	{0} },
+	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -us -e 'mv $f ~/Downloads'") },
+	{ ClkWinTitle,          0,              Button4,        focusstack,	{.i = INC(1)} },
+	{ ClkWinTitle,          0,              Button5,        focusstack,	{.i = INC(-1)} },
 	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1 } },
 	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2 } },
 	{ ClkStatusText,        0,              Button3,        sigdwmblocks,   {.i = 3 } },
@@ -367,4 +385,7 @@ static Button buttons[] = {
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
+
+	{ ClkTagBar,            0,              Button4,	shiftview,	{ .i = +1 } },
+	{ ClkTagBar,            0,              Button5,	shiftview,	{ .i = -1 } },
 };
