@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef ICONS
+#include <stdint.h>
+#endif /* ICONS */
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 
@@ -113,11 +116,12 @@ xfont_create(Drw *drw, const char *fontname, FcPattern *fontpattern)
 	FcPattern *pattern = NULL;
 
 	if (fontname) {
-		/* Using the pattern found at font->xfont->pattern does not yield the
-		 * same substitution results as using the pattern returned by
-		 * FcNameParse; using the latter results in the desired fallback
-		 * behaviour whereas the former just results in missing-character
-		 * rectangles being drawn, at least with some fonts. */
+		/* Using the pattern found at font->xfont->pattern does not
+		 * yield the same substitution results as using the pattern
+		 * returned by FcNameParse; using the latter results in the
+		 * desired fallback behaviour whereas the former just results
+		 * in missing-character rectangles being drawn, at least with
+		 * some fonts. */
 		if (!(xfont = XftFontOpenName(drw->dpy, drw->screen, fontname))) {
 			fprintf(stderr, "error, cannot load font from name: '%s'\n", fontname);
 			return NULL;
@@ -132,17 +136,9 @@ xfont_create(Drw *drw, const char *fontname, FcPattern *fontpattern)
 			fprintf(stderr, "error, cannot load font from pattern.\n");
 			return NULL;
 		}
-	} else {
+	} else
 		die("no font specified.");
-	}
 
-	/* Do not allow using color fonts. This is a workaround for a BadLength
-	 * error from Xft with color glyphs. Modelled on the Xterm workaround. See
-	 * https://bugzilla.redhat.com/show_bug.cgi?id=1498269
-	 * https://lists.suckless.org/dev/1701/30932.html
-	 * https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=916349
-	 * and lots more all over the internet.
-	 */
 	font = ecalloc(1, sizeof(Fnt));
 	font->xfont = xfont;
 	font->pattern = pattern;
@@ -164,8 +160,7 @@ xfont_free(Fnt *font)
 }
 
 Fnt*
-//drw_fontset_create(Drw* drw, const char *fonts[], size_t fontcount)
- drw_fontset_create(Drw* drw, char *fonts[], size_t fontcount)
+drw_fontset_create(Drw* drw, char *fonts[], size_t fontcount)
 {
 	Fnt *cur, *ret = NULL;
 	size_t i;
@@ -192,16 +187,12 @@ drw_fontset_free(Fnt *font)
 }
 
 void
-//drw_clr_create(Drw *drw, Clr *dest, const char *clrname)
 drw_clr_create(Drw *drw, Clr *dest, const char *clrname, unsigned int alpha)
 {
 	if (!drw || !dest || !clrname)
 		return;
 
-//	if (!XftColorAllocName(drw->dpy, DefaultVisual(drw->dpy, drw->screen),
-//	                       DefaultColormap(drw->dpy, drw->screen),
-	if (!XftColorAllocName(drw->dpy, drw->visual, drw->cmap,
-	                       clrname, dest))
+	if (!XftColorAllocName(drw->dpy, drw->visual, drw->cmap, clrname, dest))
 		die("error, cannot allocate color '%s'", clrname);
 
 	dest->pixel = (dest->pixel & 0x00ffffffU) | (alpha << 24);
@@ -210,7 +201,6 @@ drw_clr_create(Drw *drw, Clr *dest, const char *clrname, unsigned int alpha)
 /* Wrapper to create color schemes. The caller has to call free(3) on the
  * returned color scheme when done using it. */
 Clr *
-//drw_scm_create(Drw *drw, char *clrnames[], size_t clrcount)
 drw_scm_create(Drw *drw, char *clrnames[], const unsigned int alphas[], size_t clrcount)
 {
 	size_t i;
@@ -379,6 +369,57 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 
 	return x + (render ? w : 0);
 }
+
+#ifdef ICONS
+inline static uint8_t div255(uint32_t x) {return (x*0x8081u) >> 23u; }
+inline static uint32_t blend(uint32_t p1rb, uint32_t p1g, uint8_t p1a, uint32_t p2) {
+	uint8_t a = p2 >> 24u;
+	uint32_t rb = (p2 & 0xFF00FFu) + ( (a * p1rb) >> 8u );
+	uint32_t g = (p2 & 0x00FF00u) + ( (a * p1g) >> 8u );
+	return (rb & 0xFF00FFu) | (g & 0x00FF00u) | div255(~a * 255u + a * p1a) << 24u;
+}
+void
+drw_img(Drw *drw, int x, int y, XImage *img, uint32_t *tmp)
+{
+	if (!drw || !drw->scheme)
+		return;
+	uint32_t *data = (uint32_t *)img->data, p = drw->scheme[ColBg].pixel,
+			 prb = p & 0xFF00FFu, pg = p & 0x00FF00u;
+	uint8_t pa = p >> 24u;
+	int icsz = img->width * img->height, i;
+	for (i = 0; i < icsz; ++i) tmp[i] = blend(prb, pg, pa, data[i]);
+
+	img->data = (char *) tmp;
+	XPutImage(drw->dpy, drw->drawable, drw->gc, img, 0, 0, x, y, img->width, img->height);
+	img->data = (char *) data;
+}
+
+
+//static uint32_t blend(uint32_t p1rb, uint32_t p1g, uint32_t p2) {
+//	uint8_t a = p2 >> 24u;
+//	uint32_t rb = (p2 & 0xFF00FFu) + ( (a * p1rb) >> 8u );
+//	uint32_t g = (p2 & 0x00FF00u) + ( (a * p1g) >> 8u );
+//	return (rb & 0xFF00FFu) | (g & 0x00FF00u);
+//}
+//void
+//drw_img(Drw *drw, int x, int y, int invert, XImage *img, uint32_t *tmp)
+//{
+//	if (!drw || !drw->scheme)
+//		return;
+//	uint32_t *data = (uint32_t *)img->data, p = drw->scheme[invert ? ColBg : ColFg].pixel, prb = p & 0xFF00FFu, pg = p & 0x00FF00u;
+//	//uint32_t *data = (uint32_t *)img->data, p = drw->scheme[ColBg].pixel, prb = p & 0xFF00FFu, pg = p & 0x00FF00u;
+//	int icsz = img->width * img->height, i;
+//	for (i = 0; i < icsz; ++i)
+//		tmp[i] = blend(prb, pg, data[i]);
+//	img->data = (char *) tmp;
+//	//XSetForeground(drw->dpy, drw->gc, p);
+//	//XSetForeground(drw->dpy, drw->gc, drw->scheme[ColBg].pixel);
+//	//XDrawRectangle(drw->dpy, drw->drawable, drw->gc, x, y, img->width, img->height);
+//	//XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, img->width, img->height);
+//	XPutImage(drw->dpy, drw->drawable, drw->gc, img, 0, 0, x, y, img->width, img->height);
+//	img->data = (char *) data;
+//}
+#endif /* ICONS */
 
 void
 drw_map(Drw *drw, Window win, int x, int y, unsigned int w, unsigned int h)

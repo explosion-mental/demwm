@@ -9,20 +9,18 @@ You can see them and 'unpatch' them if you want to.
 
 _Little note:_ I don't use cfacts patch.
 
-## dwm.def.c
-This build is **perfect** for me I really wouldn't bother with adding or
-cleaning more things, but sometimes things happen (maybe I get a new monitor,
-keyboard, or the situation asks for it) so this is the file where I tinker
-with, currently im working on:
-- If fullscreened a window make it fakefullscreen (_start with fakefullscreen_, this prob need to be a keybinding into itself, so if a windows that is not fakefullscreened by the rules array and I wanted to make it fakefullscreen, normalstate -> fakefullscreen, without going normalstate -> fullscreen -> fakefullscreen.
+## dwm.c
+dwm.def.c is not needed anymore. I'm happy with what I got.
 
-Also there all a lot of comments on functions that I don't use or are useless
-in some cases. Taake a look before doing anything :). dwm.c is cleanear now.
+Some little TODOS:
+- systray toggleable with _#ifdef_ and _#endif_
+- getenv("TERMINAL")
+- DE-patch cfacts
 
-Made this in case I broke anything. This is my definitive build.
-### Mayor improvements:
+## Mayor improvements:
 - xrdb patch finally working with pywal without restarting or recompiling (Mar
   01 2021)
 - Layouts at startup (Apr 04 2021)
 - Gaps per tag instead of per monitor (Apr 04 2021)
 - Better way of handling Pywal colors (Jun 21 2021)
+- Window icons (Jul 22 2021)
