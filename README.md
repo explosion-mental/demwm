@@ -1,11 +1,20 @@
 # Dwm
 My build of dwm
 
-![Image](PersonalBuild/ss.png "dwm")
+![Image](PersonalBuild/rice.gif "dwm")
+
+## dwm_random_wall
+This is a little script that changes the wallpaper to a random one and uses
+pywal. By default my dwm build syncs all colors to pywal colors. You should
+**edit** the variable `img_path` to your actual path of wallpapers.
+
+Remember, the script is copied and removes automatically by the makefile (`make
+install` and `make unistall`).
+
+_Note_: you need **pywal**
 
 ## Patches
 You can see them and 'unpatch' them if you want to.
-
 
 _Little note:_ I don't use cfacts patch.
 
@@ -16,6 +25,7 @@ Some little TODOS:
 - systray toggleable with _#ifdef_ and _#endif_
 - getenv("TERMINAL")
 - DE-patch cfacts
+- integrate dwmblocks into dwm
 
 ## Mayor improvements:
 - xrdb patch finally working with pywal without restarting or recompiling (Mar

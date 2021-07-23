@@ -17,7 +17,6 @@ static int topbar             = 1;        /* 0 means bottom bar */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
-//static const unsigned int baralpha    = 255;	/* Bar opacity (0-255) */
 static const unsigned int baralpha    = 185;	/* Bar opacity (0-255) */
 static const unsigned int borderalpha = OPAQUE;	/* Borders (0xffU) */
 static char *fonts[] = {
@@ -26,7 +25,7 @@ static char *fonts[] = {
 //	"Noto Color Emoji:pixelsize=16:antialias=true:autohint=true: style=Regular", /* Emojis */
 	"JoyPixels:pixelsize=14:antialias=true:autohint=true"
 };
-/* Pywal, 8 bytes because xrdb macro asks for at least 8 (>7)*/
+/* Pywal */
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8], color6[8], color7[8], color8[8];
 static char bg_wal[8], fg_wal[8], cursor_wal[8];
 
@@ -49,9 +48,6 @@ static const unsigned int alphas[][3] = {
 	[SchemeLt]     = { OPAQUE,	baralpha,	borderalpha },
 	[SchemeStatus] = { OPAQUE,	baralpha,	borderalpha },
 	[SchemeTitle]  = { 255,		255,		255 },
-//	[SchemeImg]    = { 255,		255,		255 },
-	//[SchemeImg]    = { OPAQUE,	baralpha,	borderalpha },
-	//[SchemeTitle]  = { OPAQUE,	baralpha,	borderalpha },
 };
 
 /* tags */
@@ -310,7 +306,7 @@ static Key keys[] = {
 	{ MODKEY,		    XK_Print,	SHCMD("dmenurecord")		},
 	{ ShiftMask,		    XK_Print,	SHCMD("scrot")			},
 
-					/* LAYOUTS */
+				/* LAYOUTS */
 	{ MODKEY,		XK_backslash,   cyclelayout,	{.i = +1 }		},
 	{ MODKEY|ShiftMask,	XK_backslash,   cyclelayout,	{.i = -1 }		},
 //	{ MODKEY,			XK_t,	setlayout,	{.v = &layouts[0]} }, //monocle
@@ -320,6 +316,15 @@ static Key keys[] = {
 //	{ MODKEY,			XK_i,	setlayout,	{.v = &layouts[4]} }, //dwindle
 //	{ MODKEY|ShiftMask,		XK_f,	setlayout,	{.v = &layouts[5]} }, //deck
 //	{ MODKEY,			XK_f,	setlayout,	{.v = &layouts[6]} }, //centeredmaster
+
+				/* GAPS */
+	{ MODKEY,			XK_f,	incrgaps,	{.i = +3 }		},
+	{ MODKEY,			XK_g,	incrgaps,	{.i = -3 }		},
+	{ MODKEY,			XK_a,	togglegaps,		{0}		},
+	{ MODKEY|ControlMask,   	XK_a,	defaultgaps,		{0}		},
+	{ MODKEY|ShiftMask,		XK_a,	togglesmartgaps,	{0}		},
+	//{ MODKEY|ControlMask|ShiftMask,	XK_a,	toggleborder,	{0}		},
+//	{ MODKEY|ControlMask,           XK_o,	setcfact,	{.f =  0.00}		},
 
 				/* Media */
 	{ MODKEY|ShiftMask,		XK_minus,		SHCMD("mpc volume -3")	},
@@ -346,15 +351,6 @@ static Key keys[] = {
 	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev")			},
 	{ MODKEY,	XK_bracketright,	SHCMD("mpc next")			},
 	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")			},
-
-				/* GAPS */
-	{ MODKEY,			XK_f,	incrgaps,	{.i = +3 }		},
-	{ MODKEY,			XK_g,	incrgaps,	{.i = -3 }		},
-	{ MODKEY,			XK_a,	togglegaps,		{0}		},
-	{ MODKEY|ControlMask,   	XK_a,	defaultgaps,		{0}		},
-	{ MODKEY|ShiftMask,		XK_a,	togglesmartgaps,	{0}		},
-	//{ MODKEY|ControlMask|ShiftMask,	XK_a,	toggleborder,	{0}		},
-//	{ MODKEY|ControlMask,           XK_o,	setcfact,	{.f =  0.00}		},
 };
 
 /* button definitions
