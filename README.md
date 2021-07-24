@@ -1,7 +1,7 @@
 # Dwm
 My build of dwm
 
-![Image](PersonalBuild/rice.gif "dwm")
+![Image](rice.gif "dwm")
 
 ## dwm_random_wall
 This is a little script that changes the wallpaper to a random one and uses
