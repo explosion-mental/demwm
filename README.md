@@ -13,6 +13,18 @@ install` and `make unistall`).
 
 _Note_: you need **pywal**
 
+## Toggleable Features
+Planned to contain window icons and systray optionally.
+
+### Icons
+```
+make install -DICONS
+```
+or edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
+
+### Systray
+Working...
+
 ## Patches
 You can see them and 'unpatch' them if you want to.
 
@@ -36,4 +48,4 @@ Some little TODOS:
 - Gaps per tag instead of per monitor (Apr 04 2021)
 - Better way of handling Pywal colors (Jun 21 2021)
 - Window icons (Jul 22 2021)
-	* Icons on swallowed - unswalloed windows (Jul 23 2021)
+	* Icons on swallowed - unswallowed windows (Jul 23 2021)
