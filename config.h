@@ -14,6 +14,7 @@ static int swallowfloating    = 0;        /* 1 means swallow floating windows by
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int showbar            = 1;        /* 0 means no bar */
 static int topbar             = 1;        /* 0 means bottom bar */
+static const int barh         = 2;        /* 1 or more, means bar height */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
@@ -59,6 +60,8 @@ static const Rule rules[] = {
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 * tags, isfloating, isterminal, noswallow, isfakefullscreen
+	 * Order is actually important here (e.g. if .noswallow is before
+	 * .isterminal then it would not take effect)
 	 */
 	RULE(.class = "Gimp",		.tags = 1 << 7)
 	RULE(.class = "vlc",		.tags = 1 << 6)
@@ -69,16 +72,20 @@ static const Rule rules[] = {
 	RULE(.title = "Sxiv - walld",	.tags = 1 << 8)
 //	RULE(.class = "libreoffice",	.tags = 1 << 3)
 //	RULE(.title = "LibreOffice",	.isfloating = 1, .noswallow = 1)
+//	RULE(.class = "libreoffice",	.noswallow = 1)
 //	RULE(.class = "Firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
 	RULE(.class = "firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
 	RULE(.class = "Brave-browser",	.tags = 1 << 4, .isfakefullscreen = 1)
-	RULE(.class = "Video",       .isfloating = 1)
-	RULE(.class = "Pavucontrol", .isfloating = 1)
-	RULE(.class = "Pcmanfm",     .isfloating = 1)
+	RULE(.class = "Video",		.isfloating = 1)
+	RULE(.class = "Pavucontrol",	.isfloating = 1)
+	RULE(.class = "Pcmanfm",	.isfloating = 1)
+	RULE(.title = "mpvfloat",	.isfloating = 1)
+	RULE(.instance = "mpvfloat",	.isfloating = 1)
 //	RULE(.title = "pulsemixer",  .isfloating = 1)
 	RULE(.title = "About Mozilla Firefox",	.isfloating = 1)
 	RULE(.class = "St", .isterminal = 1)
-	RULE(.title = "Event Tester", .noswallow = 1) /* xev */
+	RULE(.title = "Event Tester",	.noswallow = 1) /* xev */
+	RULE(.title = "noswallow",	.noswallow = 1)
 	RULE(.title = "Firefox Update", .isfloating = 1)
 	RULE(.instance = "notes",	.tags = SPTAG(0), .isfloating = 1)
 	RULE(.instance = "calc" ,	.tags = SPTAG(1), .isfloating = 1)
@@ -290,10 +297,11 @@ static Key keys[] = {
 //	{ MODKEY,			XK_F2,	SHCMD("dmenu_man")			},
 //	{ MODKEY,	         	XK_F3,	SHCMD("dmenumount")			},
 	{ MODKEY,	         	XK_F3,	SHCMD("dmenumount")			},
-	{ MODKEY,		 	XK_F4,	SHCMD("syncthing & kill -55 $(pidof dwmblocks)") },
+	{ MODKEY,		 	XK_F4,	SHCMD("dmenuumount")			},
+//	{ MODKEY,		 	XK_F4,	SHCMD("syncthing & kill -55 $(pidof dwmblocks)") },
 //					XK_F5,
-	{ MODKEY,	         	XK_F6,	SHCMD("dmenumount")			},
-	{ MODKEY,		 	XK_F7,	SHCMD("dmenumountq")			},
+//	{ MODKEY,	         	XK_F6,	SHCMD("dmenumount")			},
+//	{ MODKEY,		 	XK_F7,	SHCMD("dmenumountq")			},
 //	{ MODKEY,	 		XK_F7,	SHCMD("st -e nvim -c VimwikiIndex") },
 	{ MODKEY,		 	XK_F8,	SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
 	{ MODKEY,			XK_F9,	SHCMD("setkeys & notify-send -t 2400 \
@@ -302,7 +310,9 @@ static Key keys[] = {
 	//{ MODKEY,			XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
 	{ MODKEY,                       XK_F11,	random_wall,		{0}	},
 	{ MODKEY,                       XK_F12,	xrdb,			{0}	},
-	{ 0,			    XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
+	//remove black bar on the screenshot %90 percent accuracy
+	{ 0, XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
+		magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
 	{ MODKEY,		    XK_Print,	SHCMD("dmenurecord")		},
 	{ ShiftMask,		    XK_Print,	SHCMD("scrot")			},
 

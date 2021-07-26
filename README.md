@@ -26,6 +26,8 @@ Some little TODOS:
 - getenv("TERMINAL")
 - DE-patch cfacts
 - integrate dwmblocks into dwm
+- make [hide vacant patch](https://dwm.suckless.org/patches/hide_vacant_tags/)
+  toggleable
 
 ## Mayor improvements:
 - xrdb patch finally working with pywal without restarting or recompiling (Mar

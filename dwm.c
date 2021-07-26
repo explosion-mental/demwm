@@ -623,6 +623,10 @@ swallow(Client *p, Client *c)
 	Window w = p->win;
 	p->win = c->win;
 	c->win = w;
+#ifdef ICONS
+	c->icon = NULL;
+	updateicon(p);
+#endif /* ICONS */
 	updatetitle(p);
 	XWindowChanges wc;
 	wc.border_width = p->bw;
@@ -645,6 +649,9 @@ unswallow(Client *c)
 
 	/* unfullscreen the client */
 	setfullscreen(c, 0);
+#ifdef ICONS
+	freeicon(c);
+#endif /* ICONS */
 	updatetitle(c);
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);
@@ -1337,7 +1344,6 @@ static uint32_t prealpha(uint32_t p) {
 	uint32_t g = (a * (p & 0x00FF00u)) >> 8u;
 	return (rb & 0xFF00FFu) | (g & 0x00FF00u) | ((~a) << 24u);
 }
-#define MAXICONAXIS 0xffffu
 XImage *
 geticonprop(Window win)
 {
@@ -1350,64 +1356,100 @@ geticonprop(Window win)
 		return NULL;
 	if (n == 0 || format != 32) { XFree(p); return NULL; }
 
-	unsigned long *bstp = NULL, w, h, sz;
+	unsigned long *bstp = NULL;
+	uint32_t w, h, sz;
 
 	{
 		const unsigned long *end = p + n;
 		unsigned long *i;
-		int bstd = INT_MAX, d, m;
-		for (i = p; i + 1 < end; ) {
-			w = *i++; h = *i++;
-			m = w > h ? w : h; sz = w * h;
-			if (m > MAXICONAXIS) break;
-			if ((i += sz) <= end && m >= ICONSIZE && (d = m - ICONSIZE) < bstd) { bstd = d; bstp = i - sz; }
-		}
-		if (!bstp) {
-			for (i = p; i + 1 < end; ) {
-				w = *i++; h = *i++;
-				m = w > h ? w : h; sz = w * h;
-				if (m > MAXICONAXIS) break;
-				if ((i += sz) <= end && (d = ICONSIZE - m) < bstd) { bstd = d; bstp = i - sz; }
+		uint32_t bstd = UINT32_MAX, d, m;
+		for (i = p; i < end - 1; i += sz) {
+			if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) {
+				XFree(p);
+				return NULL;
+			}
+			if ((sz = w * h) > end - i)
+				break;
+			if ((m = w > h ? w : h) >= ICONSIZE && (d = m - ICONSIZE) < bstd) {
+				bstd = d;
+				bstp = i;
 			}
 		}
-		if (!bstp) { XFree(p); return NULL; }
+		if (!bstp) {
+			for (i = p; i < end - 1; i += sz) {
+				if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) {
+					XFree(p);
+					return NULL;
+				}
+				if ((sz = w * h) > end - i)
+					break;
+				if ((d = ICONSIZE - (w > h ? w : h)) < bstd) {
+					bstd = d;
+					bstp = i;
+				}
+			}
+		}
+		if (!bstp) {
+			XFree(p);
+			return NULL;
+		}
 	}
 
-	w = *(bstp - 2); h = *(bstp - 1);
+	if ((w = *(bstp - 2)) == 0 || (h = *(bstp - 1)) == 0) {
+		XFree(p);
+		return NULL;
+	}
 
-	int icw, ich, icsz;
+	uint32_t icw, ich, icsz;
 	if (w <= h) {
 		ich = ICONSIZE; icw = w * ICONSIZE / h;
-		if (icw < 1) icw = 1;
-	}
-	else {
+		if (icw == 0)
+			icw = 1;
+	} else {
 		icw = ICONSIZE; ich = h * ICONSIZE / w;
-		if (ich < 1) ich = 1;
+		if (ich == 0)
+			ich = 1;
 	}
 	icsz = icw * ich;
 
-	int i;
+	uint32_t i;
 #if ULONG_MAX > UINT32_MAX
 	uint32_t *bstp32 = (uint32_t *)bstp;
-	for (sz = w * h, i = 0; i < sz; ++i) bstp32[i] = bstp[i];
+	for (sz = w * h, i = 0; i < sz; ++i)
+		bstp32[i] = bstp[i];
 #endif
-	uint32_t *icbuf = malloc(icsz << 2); if(!icbuf) { XFree(p); return NULL; }
-	if (w == icw && h == ich) memcpy(icbuf, bstp, icsz << 2);
+	uint32_t *icbuf = malloc(icsz << 2);
+	if (!icbuf) {
+		XFree(p);
+		return NULL;
+	}
+	if (w == icw && h == ich)
+		memcpy(icbuf, bstp, icsz << 2);
 	else {
 		Imlib_Image origin = imlib_create_image_using_data(w, h, (DATA32 *)bstp);
-		if (!origin) { XFree(p); free(icbuf); return NULL; }
+		if (!origin) {
+			XFree(p);
+			free(icbuf);
+			return NULL;
+		}
 		imlib_context_set_image(origin);
 		imlib_image_set_has_alpha(1);
 		Imlib_Image scaled = imlib_create_cropped_scaled_image(0, 0, w, h, icw, ich);
 		imlib_free_image_and_decache();
-		if (!scaled) { XFree(p); free(icbuf); return NULL; }
+		if (!scaled) {
+			XFree(p);
+			free(icbuf);
+			return NULL;
+		}
 		imlib_context_set_image(scaled);
 		imlib_image_set_has_alpha(1);
 		memcpy(icbuf, imlib_image_get_data_for_reading_only(), icsz << 2);
 		imlib_free_image_and_decache();
 	}
 	XFree(p);
-	for (i = 0; i < icsz; ++i) icbuf[i] = prealpha(icbuf[i]);
+	for (i = 0; i < icsz; ++i)
+		icbuf[i] = prealpha(icbuf[i]);
+
 	return XCreateImage(drw->dpy, drw->visual, drw->depth, ZPixmap, 0, (char *)icbuf, icw, ich, 32, 0);
 }
 void
@@ -2342,7 +2384,9 @@ setup(void)
 		die("no fonts could be loaded.");
 	lrpad = drw->fonts->h;
 	//bh = drw->fonts->h;
-	bh = drw->fonts->h + 2;
+	//bh = drw->fonts->h + 2;
+	/* prevent barh being < than font size */
+	bh = barh + drw->fonts->h;
 	updategeom();
 	/* init atoms */
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
