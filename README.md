@@ -28,7 +28,8 @@ Working...
 ## Patches
 You can see them and 'unpatch' them if you want to.
 
-_Little note:_ I don't use cfacts patch.
+Mines are:
+- shift-tools (shift windows,tags or both either with an active client or not)
 
 ## dwm.c
 dwm.def.c is not needed anymore. I'm happy with what I got.
@@ -36,10 +37,10 @@ dwm.def.c is not needed anymore. I'm happy with what I got.
 Some little TODOS:
 - systray toggleable with _#ifdef_ and _#endif_
 - getenv("TERMINAL")
-- DE-patch cfacts
-- integrate dwmblocks into dwm
-- make [hide vacant patch](https://dwm.suckless.org/patches/hide_vacant_tags/)
-  toggleable
+- depatch cfacts
+- integrate dwmblocks into dwm (prob not worth it)
+- <s>make [hide vacant patch](https://dwm.suckless.org/patches/hide_vacant_tags/)
+  toggleable</s>
 
 ## Mayor improvements:
 - xrdb patch finally working with pywal without restarting or recompiling (Mar
@@ -49,3 +50,4 @@ Some little TODOS:
 - Better way of handling Pywal colors (Jun 21 2021)
 - Window icons (Jul 22 2021)
 	* Icons on swallowed - unswallowed windows (Jul 23 2021)
+- toggleable hide vacants tags (Jul 28 2021)

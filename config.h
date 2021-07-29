@@ -1,6 +1,6 @@
 /* See LICENSE file for copyright and license details. */
 
-/* Appearance: colors on here are not used, see loadxrdb function on dwm.c */
+/* appearance */
 // These shouldn't exist and the size should be automatically by using the font size
 #define ICONSIZE 20   /* icon size */
 #define ICONSPACING 5 /* space between icon and title */
@@ -10,11 +10,12 @@ static unsigned int gappih    = 15;       /* horiz inner gap between windows */
 static unsigned int gappiv    = 20;       /* vert inner gap between windows */
 static unsigned int gappoh    = 15;       /* horiz outer gap between windows and screen edge */
 static unsigned int gappov    = 30;       /* vert outer gap between windows and screen edge */
+static int hidevacant         = 0;        /* 1 means hide vacant tags */
 static int swallowfloating    = 0;        /* 1 means swallow floating windows by default */
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int showbar            = 1;        /* 0 means no bar */
 static int topbar             = 1;        /* 0 means bottom bar */
-static const int barh         = 2;        /* 1 or more, means bar height */
+static const int barh         = 3;        /* 1 or more, means bar height */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
@@ -111,7 +112,7 @@ static int resizehints = 0;	/* 1 means respect size hints in tiled resizals */
 #define DECK
 //#define CENTEREDMASTER
 //#define BSTACKHORIZ
-//#define GRID
+#define GRID
 //#define NROWGRID
 //#define FORCE_VSPLIT 1	/* nrowgrid: force two clients to always split vertically */
 //#define HORIZGRID
@@ -125,14 +126,14 @@ static const Layout layouts[] = {
  	{ "[]=",	tile },			/* Master on left, slaves on right */
  	{ "🧐",		monocle },		/* All windows on top of eachother */
  	{ "{}",		alphamonocle },		/* monocle but windows aren't stacked */
-	{ ">M>",	centeredfloatmaster},	/* Centermaster but master floats */
 	//{ "TTT",	bstack },		/* Master on top, slaves on bottom */
 	{ "🐚",		spiral },		/* Fibonacci spiral */
 	//{ "[\\]",	dwindle },		/* Decreasing in size right and leftward */
 	{ "[D]",	deck },			/* Master on left, slaves in monocle mode on right */
+	{ ">M>",	centeredfloatmaster},	/* Centermaster but master floats */
 	//{ "|M|",	centeredmaster },	/* Master in middle, slaves on sides */
 	//{ "===",      bstackhoriz },		/* Bstack but slaves stacked "monocle"-like */
-	//{ "HHH",      grid },			/* windows in a grid */
+	{ "HHH",      grid },			/* windows in a grid */
 	//{ "###",      nrowgrid },		/* Gaplessgrid with no gaps, but not equal size */
 	//{ "---",      horizgrid },		/* Gaplessgrid but with horizontal order */
 	//{ ":::",      gaplessgrid },		/* grid ajusted in such that there are no gaps */
@@ -183,12 +184,13 @@ static const char *samevifm[]  = { "samedirvifm", NULL };
 
 /* scratchpads */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
+const char *spname[] = { "notes", "calc", "pre", "term", "music", "pulsemixer", "term" };
 static Sp scratchpads[7];
 const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL };
 const char *spcmd1[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
 const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
 const char *spcmd3[] = { "st", "-n", "term", "-g", "115x30" , NULL };
-const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27", "-e", "ncmpcpp", "-q", NULL };
+const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27",  "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "ncmpcpp", "-q", NULL };
 const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
 const char *spcmd6[] = { "samedir", "-n", "term", "-g", "115x30", NULL };
 
@@ -217,8 +219,8 @@ static Key keys[] = {
 //	{ MODKEY,		   XK_Num_Lock,	togglescratch,	{.ui = 1 } },/* bc */
 
 				/* Navigation */
-	{ MODKEY,			XK_j,	focusstack,	{ .i = INC(1) }	},
-	{ MODKEY|ShiftMask,		XK_j,	pushstack,	{ .i = INC(1) }	},
+	{ MODKEY,			XK_j,	focusstack,	{ .i = INC(1) }		},
+	{ MODKEY|ShiftMask,		XK_j,	pushstack,	{ .i = INC(1) }		},
 
 	{ MODKEY|ControlMask,		XK_j,	shifttag,	{ .i = -1 }		},
 	{ MODKEY|ControlMask|ShiftMask,	XK_j,  shifttagclients,	{ .i = -1 }		},
@@ -271,51 +273,6 @@ static Key keys[] = {
 	{ MODKEY|ControlMask,		XK_b,	nostatus,	{ .i = 1  }		},
 	{ MODKEY|ControlMask,		XK_n,	nostatus,	{ .i = -1 }		},
 
-			/* Custom bindings (may be better using shkd) */
-	{ MODKEY,			XK_b,	CMDCMD("Books001")		},
-	{ MODKEY|ShiftMask,		XK_u,	SHCMD("bookmenu")		},
-	{ MODKEY|ShiftMask,		XK_b,	SHCMD("Boletin001")		},
-	{ MODKEY,		        XK_c,	SHCMD("st -e calcurse")		},
-	{ MODKEY,	         	XK_z,	SHCMD("redyt -r")		},
-	{ MODKEY|ShiftMask,	      	XK_z,	SHCMD("walldown")		},
-	{ MODKEY,		    XK_grave,	SHCMD("dmenuunicode")		},
-	{ MODKEY|ShiftMask,	   XK_Return,	SHCMD("samedir &")		},
-//	{ MODKEY,	        XK_semicolon,	SHCMD("dmenu_mpc")		},
-//	{ MODKEY|ShiftMask,	    XK_slash,	SHCMD("tuxi -q")		},
-	{ MODKEY,			XK_u,	SHCMD("clipmagick")		},
-	{ MODKEY,			XK_y,	SHCMD("termyt -r")		},
-	{ MODKEY|ShiftMask,		XK_y,	SHCMD("dmenuhandler")		},
-	{ MODKEY,		    XK_slash,	SHCMD("dmenu_browser")		},
-	{ MODKEY|ShiftMask,	        XK_n,	SHCMD("xdotool click 1")	},
-	{ MODKEY,			XK_v,	SHCMD("killall xcompmgr || \
-						  	setsid xcompmgr &")	},
-	{ MODKEY,			XK_t,	SHCMD("testi")			},
-	{ MODKEY,		   XK_Escape,	SHCMD("sysfunctions")	},
-//{ MODKEY,	XK_e,	spawn,	SHCMD("st -t New-e newsboat -q; pkill -RTMIN+6 dwmblocks") },
-	{ MODKEY,			XK_r,	SHCMD("st -t NewsBoat -e newsboat -q") },
-//					XK_F1, Feen
-//	{ MODKEY,			XK_F2,	SHCMD("dmenu_man")			},
-//	{ MODKEY,	         	XK_F3,	SHCMD("dmenumount")			},
-	{ MODKEY,	         	XK_F3,	SHCMD("dmenumount")			},
-	{ MODKEY,		 	XK_F4,	SHCMD("dmenuumount")			},
-//	{ MODKEY,		 	XK_F4,	SHCMD("syncthing & kill -55 $(pidof dwmblocks)") },
-//					XK_F5,
-//	{ MODKEY,	         	XK_F6,	SHCMD("dmenumount")			},
-//	{ MODKEY,		 	XK_F7,	SHCMD("dmenumountq")			},
-//	{ MODKEY,	 		XK_F7,	SHCMD("st -e nvim -c VimwikiIndex") },
-	{ MODKEY,		 	XK_F8,	SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
-	{ MODKEY,			XK_F9,	SHCMD("setkeys & notify-send -t 2400 \
-		'Keyboard remapping⌨️ ' 'WAIT!\nRerunning <b>customs</b> shorcuts'")	},
-	{ MODKEY,			XK_F10,	SHCMD("setxkbmap -layout us -variant altgr-intl -option nodeadkeys & notify-send 'Keyboard⌨️ ' 'Keyboard remapping...\nRunning keyboard defaults, US altgr-intl variant with nodeadkeys...'") },
-	//{ MODKEY,			XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
-	{ MODKEY,                       XK_F11,	random_wall,		{0}	},
-	{ MODKEY,                       XK_F12,	xrdb,			{0}	},
-	//remove black bar on the screenshot %90 percent accuracy
-	{ 0, XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
-		magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
-	{ MODKEY,		    XK_Print,	SHCMD("dmenurecord")		},
-	{ ShiftMask,		    XK_Print,	SHCMD("scrot")			},
-
 				/* LAYOUTS */
 	{ MODKEY,		XK_backslash,   cyclelayout,	{.i = +1 }		},
 	{ MODKEY|ShiftMask,	XK_backslash,   cyclelayout,	{.i = -1 }		},
@@ -332,7 +289,8 @@ static Key keys[] = {
 	{ MODKEY,			XK_g,	incrgaps,	{.i = -3 }		},
 	{ MODKEY,			XK_a,	togglegaps,		{0}		},
 	{ MODKEY|ControlMask,   	XK_a,	defaultgaps,		{0}		},
-	{ MODKEY|ShiftMask,		XK_a,	togglesmartgaps,	{0}		},
+	{ MODKEY|ControlMask|ShiftMask,	XK_a,	togglesmartgaps,	{0}		},
+	{ MODKEY|ShiftMask,		XK_a,	togglevacant,		{0}		},
 	//{ MODKEY|ControlMask|ShiftMask,	XK_a,	toggleborder,	{0}		},
 //	{ MODKEY|ControlMask,           XK_o,	setcfact,	{.f =  0.00}		},
 
@@ -361,6 +319,50 @@ static Key keys[] = {
 	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev")			},
 	{ MODKEY,	XK_bracketright,	SHCMD("mpc next")			},
 	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")			},
+
+			/* Custom bindings (may be better using shkd) */
+	{ MODKEY,			XK_b,	CMDCMD("Books001")		},
+	{ MODKEY|ShiftMask,		XK_u,	SHCMD("bookmenu")		},
+	{ MODKEY|ShiftMask,		XK_b,	SHCMD("Boletin001")		},
+	{ MODKEY,		        XK_c,	SHCMD("st -e calcurse")		},
+	{ MODKEY,	         	XK_z,	SHCMD("redyt -r")		},
+	{ MODKEY|ShiftMask,	      	XK_z,	SHCMD("walldown")		},
+	{ MODKEY,		    XK_grave,	SHCMD("dmenuunicode")		},
+	{ MODKEY|ShiftMask,	   XK_Return,	SHCMD("samedir &")		},
+//	{ MODKEY,	        XK_semicolon,	SHCMD("dmenu_mpc")		},
+//	{ MODKEY|ShiftMask,	    XK_slash,	SHCMD("tuxi -q")		},
+	{ MODKEY,			XK_u,	SHCMD("clipmagick")		},
+	{ MODKEY,			XK_y,	SHCMD("termyt -r")		},
+	{ MODKEY|ShiftMask,		XK_y,	SHCMD("dmenuhandler")		},
+	{ MODKEY,		    XK_slash,	SHCMD("dmenu_browser")		},
+	{ MODKEY|ShiftMask,	        XK_n,	SHCMD("xdotool click 1")	},
+//	{ MODKEY,			XK_v,	SHCMD("killall xcompmgr || setsid xcompmgr &")	},
+	{ MODKEY,			XK_t,	SHCMD("testi")			},
+	{ MODKEY,		   XK_Escape,	SHCMD("sysfunctions")	},
+//{ MODKEY,	XK_e,	spawn,	SHCMD("st -t New-e newsboat -q; pkill -RTMIN+6 dwmblocks") },
+	{ MODKEY,			XK_r,	SHCMD("st -t NewsBoat -e newsboat -q") },
+//					XK_F1, Feen
+//	{ MODKEY,			XK_F2,	SHCMD("dmenu_man")			},
+//	{ MODKEY,	         	XK_F3,	SHCMD("dmenumount")			},
+	{ MODKEY,	         	XK_F3,	SHCMD("dmenumount")			},
+	{ MODKEY,		 	XK_F4,	SHCMD("dmenuumount")			},
+//	{ MODKEY,		 	XK_F4,	SHCMD("syncthing & kill -55 $(pidof dwmblocks)") },
+//					XK_F5,
+//	{ MODKEY,	         	XK_F6,	SHCMD("dmenumount")			},
+//	{ MODKEY,		 	XK_F7,	SHCMD("dmenumountq")			},
+//	{ MODKEY,	 		XK_F7,	SHCMD("st -e nvim -c VimwikiIndex") },
+	{ MODKEY,		 	XK_F8,	SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
+	{ MODKEY,			XK_F9,	SHCMD("setkeys & notify-send -t 2400 \
+		'Keyboard remapping⌨️ ' 'WAIT!\nRerunning <b>customs</b> shorcuts'")	},
+	{ MODKEY,			XK_F10,	SHCMD("setxkbmap -layout us -variant altgr-intl -option nodeadkeys & notify-send 'Keyboard⌨️ ' 'Keyboard remapping...\nRunning keyboard defaults, US altgr-intl variant with nodeadkeys...'") },
+	//{ MODKEY,			XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
+	{ MODKEY,                       XK_F11,	random_wall,		{0}	},
+	{ MODKEY,                       XK_F12,	xrdb,			{0}	},
+	//remove black bar on the screenshot %90 percent accuracy
+	{ 0, XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
+		magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
+	{ MODKEY,		    XK_Print,	SHCMD("dmenurecord")		},
+	{ ShiftMask,		    XK_Print,	SHCMD("scrot")			},
 };
 
 /* button definitions

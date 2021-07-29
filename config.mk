@@ -21,13 +21,7 @@ FREETYPEINC = /usr/include/freetype2
 #FREETYPEINC = ${X11INC}/freetype2
 #KVMLIB = -lkvm
 
-# cairo (images)
-#CAIROLIBS = `pkg-config --libs libconfuse xft cairo`
-#CAIROINC = `pkg-config --cflags cairo`
-#CAIROLIBS = -lcairo
-#CAIROINC = -lcairo
-
-# dwmblocks integrated (without icons)
+# dwmblocks integrated
 #DWMBLOCKS = -DDWMBLOCKS
 
 # Icons, comment if you don't want it
@@ -42,7 +36,7 @@ LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS} -lXrender -lX11-xcb -lx
 CPPFLAGS = -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${ICONS} ${DWMBLOCKS}
 #CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_C_SOURCE=2 -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS}
 #CFLAGS   = -g -std=c99 -pedantic -Wall -O0 ${INCS} ${CPPFLAGS}
-CFLAGS   = -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
+CFLAGS   = -std=c99 -march=native -pedantic -Wall -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
 LDFLAGS  = ${LIBS}
 
 # Solaris

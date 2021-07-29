@@ -328,6 +328,9 @@ static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void xrdb(const Arg *arg);
 static void xinitvisual();
 static void zoom(const Arg *arg);
+static int stackpos(const Arg *arg);
+static void pushstack(const Arg *arg);
+static void swaptags(const Arg *arg);
 
 /* vanitygaps */
 static int enablegaps = 1;	/* if not gaps per tag */
@@ -350,12 +353,10 @@ static void incrivgaps(const Arg *arg);*/
 static void random_wall(const Arg *arg);
 //static void toggletopbar(const Arg *arg);
 //static void toggleborder(const Arg *arg);
+static void togglevacant(const Arg *arg);
 static void reorganizetags(void);
 static void nostatus(const Arg *arg);
 static void spawncmd(const Arg *arg);
-static int stackpos(const Arg *arg);
-static void pushstack(const Arg *arg);
-static void swaptags(const Arg *arg);
 
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
@@ -672,7 +673,7 @@ unswallow(Client *c)
 void
 buttonpress(XEvent *e)
 {
-	unsigned int i, x, click;
+	unsigned int i, x, click, occ = 0;
 	Arg arg = {0};
 	Client *c;
 	Monitor *m;
@@ -687,9 +688,14 @@ buttonpress(XEvent *e)
 	}
 	if (ev->window == selmon->barwin) {
 		i = x = 0;
-		do
+			for (c = m->clients; c; c = c->next)
+				occ |= c->tags == 255 ? 0 : c->tags;
+			do {
+				/* do not reserve space for vacant tags */
+				if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
+					continue;
 			x += TEXTW(tags[i]);
-		while (ev->x >= x && ++i < LENGTH(tags));
+			} while (ev->x >= x && ++i < LENGTH(tags));
 		if (i < LENGTH(tags)) {
 			click = ClkTagBar;
 			arg.ui = 1 << i;
@@ -1094,12 +1100,17 @@ drawbar(Monitor *m)
 		drw_text(drw, m->ww - sw, 0, sw, bh, 0, stext, 0);
 	}
 	for (c = m->clients; c; c = c->next) {
-		occ |= c->tags;
+			occ |= c->tags == 255 && hidevacant ? 0 : c->tags;
 		if (c->isurgent)
 			urg |= c->tags;
 	}
 	x = 0;
 	for (i = 0; i < LENGTH(tags); i++) {
+		if (hidevacant) {
+			/* do not draw vacant tags */
+			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
+			continue;
+		}
 		w = TEXTW(tags[i]);
 	        if (urg & 1 << i )
 			drw_setscheme(drw, scheme[SchemeUrgent]);
@@ -1910,7 +1921,14 @@ resizeclient(Client *c, int x, int y, int w, int h)
 //		c->h = wc.height += c->bw * 2;
 //		wc.border_width = 0;
 //	}
-
+	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next))
+	    || &monocle == c->mon->lt[c->mon->sellt]->arrange)
+	    && !c->isfullscreen && !c->isfloating
+	    && NULL != c->mon->lt[c->mon->sellt]->arrange) {
+		c->w = wc.width += c->bw * 2;
+		c->h = wc.height += c->bw * 2;
+		wc.border_width = 0;
+	}
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
 //	if (c->fakefullscreen == 1)
@@ -2425,6 +2443,7 @@ setup(void)
 
 	/* init bars */
 	updatebars();
+	system("killall -q dwmblocks; dwmblocks &");
 	updatestatus();
 	/* supporting window for NetWMCheck */
 	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
@@ -2644,6 +2663,7 @@ sighup(int unused)
 {
 	Arg a = {.i = 1};
 	quit(&a);
+	focus(NULL);
 }
 
 void
@@ -2651,6 +2671,7 @@ sigterm(int unused)
 {
 	Arg a = {.i = 0};
 	quit(&a);
+	focus(NULL);
 }
 
 #ifndef __OpenBSD__
@@ -3481,6 +3502,13 @@ zoom(const Arg *arg)
 
 /* Customs */
 void
+togglevacant(const Arg *arg)
+{
+	hidevacant = !hidevacant;
+	focus(NULL);
+//	arrange(NULL);
+}
+void
 reorganizetags(void)
 {
 	Client *c;
@@ -3501,7 +3529,7 @@ reorganizetags(void)
 }
 
 static int oldborder;
-static void
+void
 toggleborder(const Arg *arg)
 {
 	Client *c;
@@ -3703,7 +3731,7 @@ main(int argc, char *argv[])
 	if (pledge("stdio rpath proc exec", NULL) == -1) die("pledge");
 #endif /* __OpenBSD__ */
 	scan();
-	system("killall -q dwmblocks; dwmblocks &");
+	//system("killall -q dwmblocks; dwmblocks &");
 	//if (restart) reorganizetags();
 	reorganizetags();	/* if more than 2 clients reorganize clients on restart*/
 	run();
