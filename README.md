@@ -11,8 +11,9 @@ My build of dwm
 - Different color schemes for Title, Status and Layout (added 4 more shemes on top of the other mentioned: Urgent - Notify - Indicator on/of)
 - Transparency on the bar
 - A beautiful looking config.h file (at least for my taste :)
-see:
- * [layouts.c](https://github.com/explosion-mental/Dwm/blob/main/layouts.c)
+
+
+see: [layouts.c](https://github.com/explosion-mental/Dwm/blob/main/layouts.c)
 
 ## dwm_random_wall
 This is a little script that changes the wallpaper to a random one and uses
