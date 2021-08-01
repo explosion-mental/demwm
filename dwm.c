@@ -143,7 +143,10 @@ struct Client {
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
 	unsigned int tags;
-	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen, isterminal, noswallow;
+	//int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen, isterminal, noswallow;
+	int isfixed, isurgent, neverfocus, oldstate;
+	/* rules */
+	int isfloating, isfullscreen, isterminal, noswallow;
 	int fakefullscreen;
 	pid_t pid;
 #ifdef ICONS
@@ -692,7 +695,7 @@ buttonpress(XEvent *e)
 				occ |= c->tags == 255 ? 0 : c->tags;
 			do {
 				/* do not reserve space for vacant tags */
-				if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
+				if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i) && hidevacant)
 					continue;
 			x += TEXTW(tags[i]);
 			} while (ev->x >= x && ++i < LENGTH(tags));
