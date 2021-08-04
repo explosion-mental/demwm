@@ -51,6 +51,8 @@ Some little TODOS:
 - <s>make [hide vacant patch](https://dwm.suckless.org/patches/hide_vacant_tags/)
   toggleable</s>
 - a better way of handling layouts at startup
+- Make gaps an option
+- toggle border
 
 ## Mayor improvements:
 - xrdb patch finally working with pywal without restarting or recompiling (Mar

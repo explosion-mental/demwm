@@ -15,11 +15,12 @@ static int swallowfloating    = 0;        /* 1 means swallow floating windows by
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int showbar            = 1;        /* 0 means no bar */
 static int topbar             = 1;        /* 0 means bottom bar */
-static const int barh         = 3;        /* 1 or more, means bar height */
+static const int barh         = 4;        /* 1 or more, means bar height */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
-static const unsigned int baralpha    = 185;	/* Bar opacity (0-255) */
+//static const unsigned int baralpha    = 185;	/* Bar opacity (0-255) */
+static const unsigned int baralpha    = 160;	/* Bar opacity (0-255) */
 static const unsigned int borderalpha = OPAQUE;	/* Borders (0xffU) */
 static char *fonts[] = {
 	"Hack Nerd Font:pixelsize=12:antialias=true:autohint=true", /* Powerline */
@@ -95,6 +96,7 @@ static const Rule rules[] = {
 	RULE(.instance = "music",	.tags = SPTAG(4), .isfloating = 1)
 	RULE(.instance = "pulsemixer",	.tags = SPTAG(5), .isfloating = 1)
 	RULE(.instance = "term",	.tags = SPTAG(6), .isfloating = 1)
+	RULE(.instance = "normal",	.tags = SPTAG(7))
 };
 
 /* layout(s) */
@@ -185,7 +187,7 @@ static const char *samevifm[]  = { "samedirvifm", NULL };
 /* scratchpads */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
 const char *spname[] = { "notes", "calc", "pre", "term", "music", "pulsemixer", "term" };
-static Sp scratchpads[7];
+static Sp scratchpads[8];
 const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL };
 const char *spcmd1[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
 const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
@@ -193,6 +195,7 @@ const char *spcmd3[] = { "st", "-n", "term", "-g", "115x30" , NULL };
 const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27",  "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "ncmpcpp", "-q", NULL };
 const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
 const char *spcmd6[] = { "samedir", "-n", "term", "-g", "115x30", NULL };
+const char *spcmd7[] = { "st", "-n", "normal", NULL };
 
 static Key keys[] = {
 	/* modifier(s)			key	function	argument */
@@ -216,6 +219,7 @@ static Key keys[] = {
 	SCRATCHKEYS(MODKEY,		XK_n,	/* music	*/	4)
 	SCRATCHKEYS(MODKEY|ShiftMask,	XK_p,	/* pulsemixer	*/	5)
 	SCRATCHKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	6)
+	SCRATCHKEYS(MODKEY|ControlMask,	XK_e,	/* samedir	*/	7)
 //	{ MODKEY,		   XK_Num_Lock,	togglescratch,	{.ui = 1 } },/* bc */
 
 				/* Navigation */
@@ -261,6 +265,8 @@ static Key keys[] = {
 	{ MODKEY,                  XK_period,	focusmon,	{ .i = +1 }		},
 	{ MODKEY,                       XK_0,	view,		{.ui = ~SPTAGMASK }	},
 	{ MODKEY|ShiftMask,             XK_0,	tag,		{.ui = ~SPTAGMASK }	},
+	{ MODKEY|ControlMask,		XK_0,	view,		{.ui = ~0 }		},
+	//{ MODKEY|ControlMask,		XK_0,	tag,		{.ui = ~0 }		},
 	  TAGKEYS(			XK_1,				0)
 	  TAGKEYS(			XK_2,				1)
 	  TAGKEYS(			XK_3,				2)
@@ -287,10 +293,10 @@ static Key keys[] = {
 				/* GAPS */
 	{ MODKEY,			XK_f,	incrgaps,	{.i = +3 }		},
 	{ MODKEY,			XK_g,	incrgaps,	{.i = -3 }		},
-	{ MODKEY,			XK_a,	togglegaps,		{0}		},
+	{ MODKEY|ShiftMask,		XK_a,	togglegaps,		{0}		},
 	{ MODKEY|ControlMask,   	XK_a,	defaultgaps,		{0}		},
 	{ MODKEY|ControlMask|ShiftMask,	XK_a,	togglesmartgaps,	{0}		},
-	{ MODKEY|ShiftMask,		XK_a,	togglevacant,		{0}		},
+	{ MODKEY,			XK_a,	togglevacant,		{0}		},
 	//{ MODKEY|ControlMask|ShiftMask,	XK_a,	toggleborder,	{0}		},
 //	{ MODKEY|ControlMask,           XK_o,	setcfact,	{.f =  0.00}		},
 

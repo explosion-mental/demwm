@@ -21,9 +21,6 @@ FREETYPEINC = /usr/include/freetype2
 #FREETYPEINC = ${X11INC}/freetype2
 #KVMLIB = -lkvm
 
-# dwmblocks integrated
-#DWMBLOCKS = -DDWMBLOCKS
-
 # Icons, comment if you don't want it
 ICONS = -DICONS
 IMLIB2LIBS = -lImlib2
@@ -33,7 +30,7 @@ INCS = -I${X11INC} -I${FREETYPEINC}
 LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS} -lXrender -lX11-xcb -lxcb -lxcb-res ${KVMLIB} ${IMLIB2LIBS}
 
 # flags
-CPPFLAGS = -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${ICONS} ${DWMBLOCKS}
+CPPFLAGS = -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${ICONS}
 #CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_C_SOURCE=2 -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS}
 #CFLAGS   = -g -std=c99 -pedantic -Wall -O0 ${INCS} ${CPPFLAGS}
 CFLAGS   = -std=c99 -march=native -pedantic -Wall -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}

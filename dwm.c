@@ -168,6 +168,7 @@ typedef struct {
 
 typedef struct {
 	const char *symbol;
+	//int addgaps;
 	void (*arrange)(Monitor *);
 } Layout;
 
@@ -691,14 +692,14 @@ buttonpress(XEvent *e)
 	}
 	if (ev->window == selmon->barwin) {
 		i = x = 0;
-			for (c = m->clients; c; c = c->next)
-				occ |= c->tags == 255 ? 0 : c->tags;
-			do {
-				/* do not reserve space for vacant tags */
-				if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i) && hidevacant)
-					continue;
+		for (c = m->clients; c; c = c->next)
+			occ |= c->tags == 255 ? 0 : c->tags;
+		do {
+			/* do not reserve space for vacant tags */
+			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i) && hidevacant)
+				continue;
 			x += TEXTW(tags[i]);
-			} while (ev->x >= x && ++i < LENGTH(tags));
+		} while (ev->x >= x && ++i < LENGTH(tags));
 		if (i < LENGTH(tags)) {
 			click = ClkTagBar;
 			arg.ui = 1 << i;
@@ -726,7 +727,7 @@ buttonpress(XEvent *e)
 		} else
 			click = ClkWinTitle;
 	} else if ((c = wintoclient(ev->window))) {
-		if (ev->button != Button4 && ev->button != Button5)
+		//if (ev->button != Button4 && ev->button != Button5)
 			focus(c);
 		restack(selmon);
 		XAllowEvents(dpy, ReplayPointer, CurrentTime);
@@ -769,7 +770,7 @@ cleanup(void)
 		drw_cur_free(drw, cursor[i]);
 	for (i = 0; i < LENGTH(colors); i++)
 		free(scheme[i]);
- 	free(scheme);
+ 	//free(scheme);
 	XDestroyWindow(dpy, wmcheckwin);
 	drw_free(drw);
 	XSync(dpy, False);
@@ -2666,7 +2667,6 @@ sighup(int unused)
 {
 	Arg a = {.i = 1};
 	quit(&a);
-	focus(NULL);
 }
 
 void
@@ -2674,7 +2674,6 @@ sigterm(int unused)
 {
 	Arg a = {.i = 0};
 	quit(&a);
-	focus(NULL);
 }
 
 #ifndef __OpenBSD__
@@ -2682,7 +2681,7 @@ void
 sigdwmblocks(const Arg *arg)
 {
 	union sigval sv;
-	sv.sival_int = (dwmblockssig << 8) | arg->i;
+	sv.sival_int = 0 | (dwmblockssig << 8) | arg->i;
 	if (!dwmblockspid)
 		if (getdwmblockspid() == -1)
 			return;
@@ -3157,22 +3156,14 @@ updatesizehints(Client *c)
 	c->isfixed = (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh);
 }
 
-#ifdef DWMBLOCKS
-#include "dwmblocks.c"
-#endif /* DWMBLOCKS */
-
 void
 updatestatus(void)
 {
-#ifdef DWMBLOCKS
-	dwmblocks();
-#else
 	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
 		strcpy(stext, " Welcome! :) ");
 	else
 		copyvalidchars(stext, rawstext);
 	drawbar(selmon);
-#endif /* DWMBLOCKS */
 }
 
 void
@@ -3508,7 +3499,8 @@ void
 togglevacant(const Arg *arg)
 {
 	hidevacant = !hidevacant;
-	focus(NULL);
+	drawbar(selmon);
+//	focus(NULL);
 //	arrange(NULL);
 }
 void
@@ -3516,8 +3508,7 @@ reorganizetags(void)
 {
 	Client *c;
 	unsigned int ui = 1;
-        int i = 0;
-	int n;
+        int n, i = 0;
 	for (n = 0, c = selmon->clients; c; c = c->next, n++);
 	for (c = selmon->clients; c; c = c->next) {
 		if (n > 2 && !((c->tags & SPTAGMASK) && c->isfloating)) {
