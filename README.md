@@ -29,10 +29,12 @@ _Note_: you need **pywal**
 Planned to contain window icons and systray optionally.
 
 ### Icons
-edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
+edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk),
+uncomment the line with `#ICONS`
 
 ### Systray
-Working...
+edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
+uncomment the line with `#SYSTRAY`
 
 ## Patches
 You can see them and 'unpatch' them if you want to.
