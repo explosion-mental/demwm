@@ -3,7 +3,9 @@
 /* appearance */
 // These shouldn't exist and the size should be automatically by using the font size
 #define ICONSIZE 20   /* icon size */
-#define ICONSPACING 5 /* space between icon and title */
+static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
+static const unsigned int systrayspacing = 2;   /* systray spacing */
+static const int systraypinningfailfirst = 1;   /* 1: if pinning fails, display systray on the first monitor, False: display systray on the last monitor*/
 static unsigned int borderpx  = 3;        /* border pixel of windows */
 static unsigned int snap      = 32;       /* snap pixel */
 static unsigned int gappih    = 15;       /* horiz inner gap between windows */
@@ -236,8 +238,10 @@ static Key keys[] = {
 
 	{ MODKEY,                       XK_h,	setmfact,	{ .f = -0.02 }		},
 	{ MODKEY|ShiftMask,		XK_h,	shiftboth,	{ .i = -1 }		},
+	{ MODKEY|ControlMask,		XK_h,	shiftswaptags,	{ .i = -1 }		},
 //	{ MODKEY|ShiftMask,             XK_h,	setcfact,	{ .f = +0.05 }		},
 //	{ MODKEY|ShiftMask,             XK_l,	setcfact,	{ .f = -0.05 }		},
+	{ MODKEY|ControlMask,		XK_l,	shiftswaptags,	{ .i = +1 }		},
 	{ MODKEY|ShiftMask,             XK_l,	shiftboth,	{ .i = +1 }		},
 	{ MODKEY,                       XK_l,	setmfact,	{ .f = +0.02 }		},
 
@@ -381,27 +385,30 @@ static Button buttons[] = {
 	{ ClkLtSymbol,          0,              Button5,        cyclelayout,    {.i = -1 } },
 //	{ ClkLtSymbol,          0,              Button4,        focusstack,	{.i = INC(1)} },
 //	{ ClkLtSymbol,          0,              Button5,        focusstack,	{.i = INC(-1)} },
+
 //	{ ClkWinTitle,          0,              Button1,	SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
-	{ ClkWinTitle,          0,              Button1,	SHCMD("maim -sDq ~/Downloads/$(date +'%d-%m_%I_%M_%S').png") },
+	{ ClkWinTitle,          0,              Button1,	SHCMD("maim -sDq ~/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
 	{ ClkWinTitle,          0,              Button2,	zoom,           {0} },
 	{ ClkWinTitle,          0,              Button2,	killclient,	{0} },
 	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -us -e 'mv $f ~/Downloads'") },
 	{ ClkWinTitle,          0,              Button4,        focusstack,	{.i = INC(1)} },
 	{ ClkWinTitle,          0,              Button5,        focusstack,	{.i = INC(-1)} },
+
 	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1 } },
 	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2 } },
 	{ ClkStatusText,        0,              Button3,        sigdwmblocks,   {.i = 3 } },
 	{ ClkStatusText,        0,              Button4,        sigdwmblocks,   {.i = 4 } },
 	{ ClkStatusText,        0,              Button5,        sigdwmblocks,   {.i = 5 } },
 	{ ClkStatusText,        ShiftMask,      Button1,        sigdwmblocks,   {.i = 6 } },
+
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
+
 	{ ClkTagBar,            0,              Button1,        view,           {0} },
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
-
 	{ ClkTagBar,            0,              Button4,	shiftview,	{ .i = +1 } },
 	{ ClkTagBar,            0,              Button5,	shiftview,	{ .i = -1 } },
 };
