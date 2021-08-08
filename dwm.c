@@ -1096,7 +1096,7 @@ createmon(void)
 			m->pertag->mfacts[i] = m->mfact;
 
 			/* init layouts */
-			m->pertag->ltidxs[i][0] = m->lt[0];
+			m->pertag->ltidxs[i][0] = m->lt[taglayouts[i - 1]];
 			m->pertag->ltidxs[i][1] = m->lt[1];
 			m->pertag->sellts[i] = m->sellt;
 
