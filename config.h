@@ -33,7 +33,6 @@ static char *fonts[] = {
 /* Pywal */
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8], color6[8], color7[8], color8[8];
 static char bg_wal[8], fg_wal[8], cursor_wal[8];
-
 static char *colors[][3]	      = {
 			/* fg		bg		border	    description		*/
 	[SchemeNorm]   = { fg_wal,	color0,		color0 }, /* Normal tags section */
