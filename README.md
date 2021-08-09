@@ -49,9 +49,14 @@ My little collection of patches, which aren't necessarily applied to this. You
 can see them and 'unpatch' them if you want to.
 
 Most of my modification aren't made a patch yet, but you can copy the url of
-the commit and then download it (e.g. `curl -sL
-https://github.com/explosion-mental/Dwm/commit/e2cecf69419f1b2533acb293f691726de63ab37d.patch
-> dwm-default-layouts-pertag.diff`), but here are some that I converted into a
+the commit and then download it.
+
+e.g.
+```
+curl -sL https://github.com/explosion-mental/Dwm/commit/d8e4af59c570c4b8ef36ef8942c58ab89921900f
+> dwm-default-layouts-pertag.diff
+```
+, but here are some that I converted into a
 patch:
 - shift-tools (shift windows,tags or both either with an active client or not)
 
