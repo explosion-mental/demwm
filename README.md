@@ -20,7 +20,7 @@ This is a little script that changes the wallpaper to a random one and uses
 pywal. By default my dwm build syncs all colors to pywal colors. You should
 **edit** the variable `img_path` to your actual path of wallpapers.
 
-Remember, the script is copied and removes automatically by the makefile (`make
+Remember, the script is copied and removed automatically by the makefile (`make
 install` and `make unistall`).
 
 _Note_: you need **pywal**

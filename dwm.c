@@ -1064,7 +1064,7 @@ createmon(void)
 	m->gappov = gappov;
 
 	//m->lt[0] = &layouts[0];
-	m->lt[0] = taglayouts[1] && taglayouts[1] < LENGTH(layouts) ? &layouts[taglayouts[1]] : &layouts[0];
+	m->lt[0] = taglayouts[0] && taglayouts[0] < LENGTH(layouts) ? &layouts[taglayouts[0]] : &layouts[0];
 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
 	//strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
 	strncpy(m->ltsymbol, taglayouts[1] && taglayouts[1] < LENGTH(layouts) ? layouts[taglayouts[1]].symbol : layouts[0].symbol, sizeof m->ltsymbol);
