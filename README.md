@@ -3,6 +3,8 @@ My build of dwm
 
 ![Image](rice.gif "dwm")
 
+# Documentation
+Yes.. Please look at the [docs](doc.md)
 # Features/patches
 - vanitygaps (some of the specific increase/decrease on horizontal or vertical functions are commented out since I use only the general one.)
 - [pywal](https://github.com/dylanaraps/pywal) color syncronization by default
@@ -39,6 +41,9 @@ uncomment the line with `#ICONS`
 ### Systray
 System Tray. Blueman, screenkeys, obs, etc on your bar. You should use this if
 you expect bar functionality like a Destop Enviroment.
+e.g
+- `nm-applet` will display NetworkManager systemtray
+- `pasystray` will display PulseAudio systemtray
 
 
 edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
