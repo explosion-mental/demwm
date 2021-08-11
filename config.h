@@ -63,10 +63,15 @@ static const Rule rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
+	 *	_NET_WM_WINDOW_TYPE(ATOM) = wintype
 	 * tags, isfloating, isterminal, noswallow, isfakefullscreen
 	 * Order is actually important here (e.g. if .noswallow is before
 	 * .isterminal then it would not take effect)
 	 */
+	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "DIALOG",	.isfloating = 1)
+	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "UTILITY",.isfloating = 1)
+	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "TOOLBAR",.isfloating = 1)
+	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "SPLASH",	.isfloating = 1)
 	RULE(.class = "Gimp",		.tags = 1 << 7)
 	RULE(.class = "vlc",		.tags = 1 << 6)
 	RULE(.class = "qutebrowser",	.tags = 1 << 5)
