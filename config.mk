@@ -28,15 +28,20 @@ IMLIB2LIBS = -lImlib2
 # Systray, comment if you don't want it
 SYSTRAY = -DSYSTRAY
 
+# Tag previews, comment if you don't want it
+TAG_PREVIEW = -DTAG_PREVIEW
+TAGNUM = -DTAGNUM=9	#number of tags you got
+
 # includes and libs
 INCS = -I${X11INC} -I${FREETYPEINC}
 LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS} -lXrender -lX11-xcb -lxcb -lxcb-res ${KVMLIB} ${IMLIB2LIBS}
 
 # flags
-CPPFLAGS = -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${ICONS} ${SYSTRAY}
+CPPFLAGS = -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${ICONS} ${SYSTRAY} ${TAG_PREVIEW} ${TAGNUM}
 #CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_C_SOURCE=2 -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS}
 #CFLAGS   = -g -std=c99 -pedantic -Wall -O0 ${INCS} ${CPPFLAGS}
-CFLAGS   = -std=c99 -O3 -march=native -pedantic -Wall -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
+CFLAGS   = -march=native -mtune=native -std=c99 -pedantic -Wall -Wno-deprecated-declarations -flto -O3 ${INCS} ${CPPFLAGS}
+#CFLAGS   = -std=c99 -O3 -march=native -pedantic -Wall -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
 LDFLAGS  = ${LIBS}
 
 # Solaris

@@ -6,6 +6,7 @@
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const unsigned int systrayspacing = 2;   /* systray spacing */
 static const int systraypinningfailfirst = 1;   /* 1: if pinning fails, display systray on the first monitor, False: display systray on the last monitor*/
+static const int scalepreview = 4;        /* Tag previews scaling */
 static unsigned int borderpx  = 3;        /* border pixel of windows */
 static unsigned int snap      = 32;       /* snap pixel */
 static unsigned int gappih    = 15;       /* horiz inner gap between windows */
@@ -39,7 +40,7 @@ static char *colors[][3]	      = {
 	[SchemeSel]    = { color0,	color1,		color2 }, /* Selected tag*/
 	[SchemeLt]     = { color2,	color0,		NULL },   /* Layout*/
 	[SchemeTitle]  = { color0,	color2,		NULL },   /* window title*/
-	[SchemeStatus] = { color3,	color0,		NULL },   /* StatusBar*/
+	[SchemeStatus] = { color3,	color0,		color0 },   /* StatusBar*/
 	[SchemeUrgent] = { fg_wal,	color0,		fg_wal }, /* background color for urgent tag*/
 	[SchemeNotify] = { fg_wal,	color0,		NULL },   /* Little red bar on urgent tag*/
 	[SchemeIndOn]  = { color4,	color0,		NULL },   /* rectangle on active tag*/
@@ -79,17 +80,19 @@ static const Rule rules[] = {
 //	RULE(.class = "Firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
 	RULE(.class = "firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
 	RULE(.class = "Brave-browser",	.tags = 1 << 4, .isfakefullscreen = 1)
-	RULE(.class = "Video",		.isfloating = 1)
 	RULE(.class = "Pavucontrol",	.isfloating = 1)
 	RULE(.class = "Pcmanfm",	.isfloating = 1)
-	RULE(.title = "mpvfloat",	.isfloating = 1)
-	RULE(.instance = "mpvfloat",	.isfloating = 1)
 //	RULE(.title = "pulsemixer",  .isfloating = 1)
 	RULE(.title = "About Mozilla Firefox",	.isfloating = 1)
 	RULE(.class = "St", .isterminal = 1)
 	RULE(.title = "Event Tester",	.noswallow = 1) /* xev */
-	RULE(.title = "noswallow",	.noswallow = 1)
 	RULE(.title = "Firefox Update", .isfloating = 1)
+	//customs
+	RULE(.class = "Video",		.isfloating = 1)
+	RULE(.title = "noswallow",	.noswallow = 1)
+	RULE(.title = "mpvfloat",	.isfloating = 1)
+	RULE(.instance = "mpvfloat",	.isfloating = 1)
+
 	RULE(.instance = "notes",	.tags = SPTAG(0), .isfloating = 1)
 	RULE(.instance = "calc" ,	.tags = SPTAG(1), .isfloating = 1)
 	RULE(.instance = "pre"  ,	.tags = SPTAG(2), .isfloating = 1)
@@ -98,6 +101,7 @@ static const Rule rules[] = {
 	RULE(.instance = "pulsemixer",	.tags = SPTAG(5), .isfloating = 1)
 	RULE(.instance = "term",	.tags = SPTAG(6), .isfloating = 1)
 	RULE(.instance = "normal",	.tags = SPTAG(7))
+	RULE(.instance = "emacsfloat",	.tags = SPTAG(8), .isfloating = 1)
 };
 
 /* layout(s) */
@@ -155,14 +159,6 @@ static const Layout layouts[] = {
 	{ MODKEY|ControlMask,           KEY,	toggleview,     { .ui = 1 << TAG } }, \
 	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,      { .ui = 1 << TAG } }, \
 	{ MODKEY|Mod1Mask,		KEY,	swaptags,	{ .ui = 1 << TAG } },
-
-/*#define SHIFTKEYS(KEY,NUM) \
-//	{ MODKEY|ShiftMask,             KEY,     shifttag,	  {.i = NUM } }, \
-//	{ MODKEY|ControlMask,           KEY,     shiftboth,	  {.i = NUM } }, \
-//	{ MODKEY|ControlMask|ShiftMask, KEY,     shifttagclients, {.i = NUM } },
-//	{ MODKEY,                       KEY,     shiftACTION##, {.i = 2 } },
-//	{ MODKEY,                       KEY,     shiftACTION##, {.i = -1 } }, */
-
 #define SCRATCHKEYS(MOD,KEY,NUM) \
 	{ MOD,			KEY,	togglescratch,	{ .ui = NUM } },
 /* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd? */
@@ -189,7 +185,7 @@ static const char *samevifm[]  = { "samedirvifm", NULL };
 /* scratchpads */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
 const char *spname[] = { "notes", "calc", "pre", "term", "music", "pulsemixer", "term" };
-static Sp scratchpads[8];
+static Sp scratchpads[9];
 const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL };
 const char *spcmd1[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
 const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
@@ -198,6 +194,7 @@ const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27",  "-f", "SauceCodeP
 const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
 const char *spcmd6[] = { "samedir", "-n", "term", "-g", "115x30", NULL };
 const char *spcmd7[] = { "st", "-n", "normal", NULL };
+const char *spcmd8[] = { "emacs", "--name", "emacsfloat", "-g", "115x30", NULL };
 
 static Key keys[] = {
 	/* modifier(s)			key	function	argument */
@@ -214,14 +211,15 @@ static Key keys[] = {
 //	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn,		{ .v = passmenu }	},
 	{ MODKEY|ShiftMask,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
 	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
-	SCRATCHKEYS(MODKEY,		XK_e,	/* notes	*/	0)
+	//SCRATCHKEYS(MODKEY,		XK_e,	/* notes	*/	0)
 	SCRATCHKEYS(MODKEY,		XK_x,	/* calculator	*/	1)
 	SCRATCHKEYS(MODKEY|ControlMask,	XK_s,	/* uni		*/	2)
 	SCRATCHKEYS(MODKEY,		XK_s,	/* terminal	*/	3)
 	SCRATCHKEYS(MODKEY,		XK_n,	/* music	*/	4)
 	SCRATCHKEYS(MODKEY|ShiftMask,	XK_p,	/* pulsemixer	*/	5)
 	SCRATCHKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	6)
-	SCRATCHKEYS(MODKEY|ControlMask,	XK_e,	/* samedir	*/	7)
+	SCRATCHKEYS(MODKEY|ControlMask,	XK_e,	/* stnormal	*/	7)
+	SCRATCHKEYS(MODKEY,		XK_v,	/* emacs	*/	8)
 //	{ MODKEY,		   XK_Num_Lock,	togglescratch,	{.ui = 1 } },/* bc */
 
 				/* Navigation */
