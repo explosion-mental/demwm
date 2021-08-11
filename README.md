@@ -3,8 +3,9 @@ My build of dwm
 
 ![Image](rice.gif "dwm")
 
-# Documentation
+# config.h?...
 Yes.. Please look at the [docs](doc.md)
+
 # Features/patches
 - vanitygaps (some of the specific increase/decrease on horizontal or vertical functions are commented out since I use only the general one.)
 - [pywal](https://github.com/dylanaraps/pywal) color syncronization by default
@@ -76,6 +77,8 @@ dwm.def.c is not needed anymore. I'm happy with what I got.
 
 Some little TODOS:
 - toggle border
+- Make 'tag previews' more solid
+- Make systray background more solid
 - <s>systray toggleable with _#ifdef_ and _#endif_</s>
 - depatch cfacts
 - <s>make [hide vacant patch](https://dwm.suckless.org/patches/hide_vacant_tags/)
@@ -98,3 +101,4 @@ Some wishing pains:
 	* Icons on swallowed - unswallowed windows (Jul 23 2021)
 - toggleable hide vacants tags (Jul 28 2021)
 - System Tray (Aug 06 2021)
+- Tag previews (Aug 10 2021)
