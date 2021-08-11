@@ -49,6 +49,12 @@ e.g
 edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
 uncomment the line with `#SYSTRAY`
 
+### Tag Previews
+Hover your mouse over a tag (you have had it viewed first) and look the contents of it.
+
+edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
+uncomment the line with `#TAG_PREVIEW`
+
 ## Patches
 My little collection of patches, which aren't necessarily applied to this. You
 can see them and 'unpatch' them if you want to.
