@@ -1,18 +1,18 @@
 
 # Table of Contents
 
-1.  [spawn](#org28516e2)
-2.  [killclient](#org27a2975)
-3.  [TAGKEYS](#org6f7c203)
-4.  [setmfact](#org38775e2)
-5.  [togglebar](#orga26c86b)
-6.  [focusmon](#org3d99d84)
-7.  [tagmon](#org892ca03)
+1.  [spawn](#org6b15252)
+2.  [killclient](#orga807164)
+3.  [TAGKEYS](#orgccf65af)
+4.  [setmfact](#org642a0c4)
+5.  [togglebar](#orgb0de561)
+6.  [focusmon](#org1aac5af)
+7.  [tagmon](#org3b9f767)
 
 Here are most of the functions that the **user** has to touch.
 
 
-<a id="org28516e2"></a>
+<a id="org6b15252"></a>
 
 # spawn
 
@@ -30,13 +30,13 @@ It takes a *void* argument (a variable) or by using the macro **SHCMD**.
 
     static const char *termcmd[] = { terminalcmd, NULL };
     static Key keys[] = {
-    	/* modifier(s)     key          function        argument        */
-    	{ MODKEY,		   XK_Return,	spawn,		{ .v = termcmd }	},
-    	{ MODKEY,          XK_w,        SHCMD("$BROWSER")               },
+    	/* modifier(s)      key         function        argument        */
+    	{ MODKEY            XK_Return,  spawn,      { .v = termcmd }    },
+    	{ MODKEY            XK_w,       SHCMD("$BROWSER")               },
     };
 
 
-<a id="org27a2975"></a>
+<a id="orga807164"></a>
 
 # killclient
 
@@ -57,7 +57,7 @@ or
     { MODKEY,	                XK_q,	killclient,		{ .v = NULL }		},
 
 
-<a id="org6f7c203"></a>
+<a id="orgccf65af"></a>
 
 # TAGKEYS
 
@@ -74,7 +74,7 @@ or
 ## toggletag
 
 
-<a id="org38775e2"></a>
+<a id="org642a0c4"></a>
 
 # setmfact
 
@@ -92,7 +92,7 @@ It takes an *integer* argument and its bidirectional.
     { MODKEY,                       XK_l,	setmfact,	{ .f = +0.02 }		},
 
 
-<a id="orga26c86b"></a>
+<a id="orgb0de561"></a>
 
 # togglebar
 
@@ -109,7 +109,7 @@ No argument needed.
     { MODKEY|ControlMask,	    XK_grave,	togglebar,		{0}		},
 
 
-<a id="org3d99d84"></a>
+<a id="org1aac5af"></a>
 
 # focusmon
 
@@ -129,7 +129,7 @@ It takes an *integer* argument and its bidirectional.
     { MODKEY,                  XK_period,	focusmon,	{ .i = +1 }		},
 
 
-<a id="org892ca03"></a>
+<a id="org3b9f767"></a>
 
 # tagmon
 
