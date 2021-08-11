@@ -1,15 +1,16 @@
-From ec05e7ff2c975c132707561b8290d63f4f801d86 Mon Sep 17 00:00:00 2001
+From 7381bf4e11b76ad8f51c94bd226296bf971ad430 Mon Sep 17 00:00:00 2001
 From: explosion-mental <explosion0mental@gmail.com>
-Date: Wed, 11 Aug 2021 17:16:11 -0500
-Subject: [PATCH] Tag preview patch This is a patch extracted from
+Date: Wed, 11 Aug 2021 17:28:32 -0500
+Subject: [PATCH] Tag preview This is a patch extracted from
  https://github.com/siduck76/chadwm build. First view a tag with at least a
  client, then move to any other tag. Finally hover you mouse over the tag you
  were previously and you got a tag preview.
 
 ---
  config.def.h |   1 +
+ config.mk    |   5 +-
  dwm.c        | 157 +++++++++++++++++++++++++++++++++++++++++++--------
- 2 files changed, 136 insertions(+), 22 deletions(-)
+ 3 files changed, 140 insertions(+), 23 deletions(-)
 
 diff --git a/config.def.h b/config.def.h
 index 1c0b587..81a3d3d 100644
@@ -23,6 +24,24 @@ index 1c0b587..81a3d3d 100644
  static const int showbar            = 1;        /* 0 means no bar */
  static const int topbar             = 1;        /* 0 means bottom bar */
  static const char *fonts[]          = { "monospace:size=10" };
+diff --git a/config.mk b/config.mk
+index 6d36cb7..70b2a3a 100644
+--- a/config.mk
++++ b/config.mk
+@@ -20,9 +20,12 @@ FREETYPEINC = /usr/include/freetype2
+ # OpenBSD (uncomment)
+ #FREETYPEINC = ${X11INC}/freetype2
+ 
++# Tag previews are done with Imlib2
++IMLIB2LIBS = -lImlib2
++
+ # includes and libs
+ INCS = -I${X11INC} -I${FREETYPEINC}
+-LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}
++LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS} ${IMLIB2LIBS}
+ 
+ # flags
+ CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_C_SOURCE=2 -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS}
 diff --git a/dwm.c b/dwm.c
 index 4465af1..aafdccc 100644
 --- a/dwm.c
