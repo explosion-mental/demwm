@@ -77,7 +77,7 @@ dwm.def.c is not needed anymore. I'm happy with what I got.
 
 Some little TODOS:
 - toggle border
-- Make 'tag previews' more solid
+- Make 'tag previews' more solid and prevent from previewing the preview in the preview...
 - Make systray background more solid
 - <s>systray toggleable with _#ifdef_ and _#endif_</s>
 - depatch cfacts
@@ -88,7 +88,7 @@ Some little TODOS:
 Some wishing pains:
 - integrate dwmblocks into dwm (prob not worth it)
 - Make gaps an option(?)
-- getenv("TERMINAL")
+- <s>getenv("TERMINAL")<s>
 
 ## Mayor improvements:
 - xrdb patch finally working with pywal without restarting or recompiling (Mar
