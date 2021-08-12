@@ -2182,7 +2182,9 @@ manage(Window w, XWindowAttributes *wa)
 	if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
 		c->mon = t->mon;
 		c->tags = t->tags;
-		c->alwaysontop = 1;
+		//Since I don't use the rule  alwaysontop, this makes trasient
+		//windows on top of 'pop up' windows, which isn't desirable.
+		//c->alwaysontop = 1;
 	} else {
 		c->mon = selmon;
 		applyrules(c);
