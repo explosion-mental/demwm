@@ -789,9 +789,9 @@ buttonpress(XEvent *e)
 		} else if (ev->x < x + blw)
 			click = ClkLtSymbol;
 	#ifdef SYSTRAY
-		else if (ev->x > (x = selmon->ww - TEXTW(stext) + lrpad - getsystraywidth())) {
+		else if (ev->x > (x = selmon->ww - (int)TEXTW(stext) + lrpad - getsystraywidth())) {
 	#else
-		else if (ev->x > (x = selmon->ww - TEXTW(stext) + lrpad)) {
+		else if (ev->x > (x = selmon->ww - (int)TEXTW(stext) + lrpad)) {
 	#endif /* SYSTRAY */
 			click = ClkStatusText;
 
@@ -1240,7 +1240,7 @@ dirtomon(int dir)
 void
 drawbar(Monitor *m)
 {
-	int x, w, sw = 0;
+	int x, w, tw = 0;
 	int boxs = drw->fonts->h / 9;
 	int boxw = drw->fonts->h / 9;
 	unsigned int i, occ = 0, urg = 0;
@@ -1258,11 +1258,11 @@ drawbar(Monitor *m)
 	if (m == selmon) { /* status is only drawn on selected monitor */
 		//drw_setscheme(drw, scheme[SchemeNorm]);
 		drw_setscheme(drw, scheme[SchemeStatus]);
-		sw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
+		tw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
 #ifdef SYSTRAY
-		drw_text(drw, m->ww - sw - stw, 0, sw, bh, 0, stext, 0);
+		drw_text(drw, m->ww - tw - stw, 0, tw, bh, 0, stext, 0);
 #else
-		drw_text(drw, m->ww - sw, 0, sw, bh, 0, stext, 0);
+		drw_text(drw, m->ww - tw, 0, tw, bh, 0, stext, 0);
 #endif /* SYSTRAY */
 	}
 
@@ -1316,9 +1316,9 @@ drawbar(Monitor *m)
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
 #ifdef SYSTRAY
-	if ((w = m->ww - sw - stw - x) > bh) {
+	if ((w = m->ww - tw - stw - x) > bh) {
 #else
-	if ((w = m->ww - sw - x) > bh) {
+	if ((w = m->ww - tw - x) > bh) {
 #endif /* SYSTRAY */
 		if (m->sel) {
 			/* Scheme Title patch */
@@ -2493,8 +2493,8 @@ resizeclient(Client *c, int x, int y, int w, int h)
 
 	/* don't draw borders if monocle/alphamonocle/only 1 client */
 	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next))
-	    || &monocle == c->mon->lt[c->mon->sellt]->arrange
-	    || &alphamonocle == c->mon->lt[c->mon->sellt]->arrange)
+	    || (&monocle == c->mon->lt[c->mon->sellt]->arrange
+	    || &alphamonocle == c->mon->lt[c->mon->sellt]->arrange))
 	    && (c->fakefullscreen == 1 || !c->isfullscreen)
 	    && !c->isfloating
 	    && NULL != c->mon->lt[c->mon->sellt]->arrange) {
@@ -3421,7 +3421,12 @@ togglefloating(const Arg *arg)
 		return;
 	c->isfloating = !c->isfloating || c->isfixed;
 	if (selmon->sel->isfloating)
-		resize(c, c->x, c->y, c->w, c->h, 0);
+		//resize(c, c->x, c->y, c->w, c->h, 0);
+		resize(selmon->sel, selmon->sel->x, selmon->sel->y,
+ 			selmon->sel->w, selmon->sel->h, 0);
+//	selmon->sel->x = selmon->sel->mon->mx + (selmon->sel->mon->mw - WIDTH(selmon->sel)) / 2;
+//	selmon->sel->y = selmon->sel->mon->my + (selmon->sel->mon->mh - HEIGHT(selmon->sel)) / 2;
+
 	arrange(c->mon);
 }
 
