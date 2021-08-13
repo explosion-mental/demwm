@@ -2491,21 +2491,12 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	c->oldh = c->h; c->h = wc.height = h;
  	wc.border_width = c->bw;
 
-	/* if monocle don't draw borders */
-// 	if ((c->mon->lt[c->mon->sellt]->arrange == monocle || c->mon->lt[c->mon->sellt]->arrange == alphamonocle) && !c->isfloating)
-//		wc.border_width = 0;
-//	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next))
-//		|| &monocle == c->mon->lt[c->mon->sellt]->arrange)
-//		&& (c->fakefullscreen == 1 || !c->isfullscreen)
-//		&& !c->isfloating
-//		&& c->mon->lt[c->mon->sellt]->arrange) {
-//		c->w = wc.width += c->bw * 2;
-//		c->h = wc.height += c->bw * 2;
-//		wc.border_width = 0;
-//	}
+	/* don't draw borders if monocle/alphamonocle/only 1 client */
 	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next))
-	    || &monocle == c->mon->lt[c->mon->sellt]->arrange)
-	    && !c->isfullscreen && !c->isfloating
+	    || &monocle == c->mon->lt[c->mon->sellt]->arrange
+	    || &alphamonocle == c->mon->lt[c->mon->sellt]->arrange)
+	    && (c->fakefullscreen == 1 || !c->isfullscreen)
+	    && !c->isfloating
 	    && NULL != c->mon->lt[c->mon->sellt]->arrange) {
 		c->w = wc.width += c->bw * 2;
 		c->h = wc.height += c->bw * 2;
@@ -2513,6 +2504,8 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	}
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
+	/* since enternotify is deleted (because I don't use the mouse and I
+	 * don't want the focus on the cursor, this section is not needed */
 //	if (c->fakefullscreen == 1)
 		/* Exception: if the client was in actual fullscreen and we
 		 * exit out to fake fullscreen mode, then the focus would drift
