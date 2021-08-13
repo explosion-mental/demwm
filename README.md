@@ -3,8 +3,9 @@ My build of dwm
 
 ![Image](rice.gif "dwm")
 
-# config.h?...
-Yes.. Please look at the [docs](doc.md)
+# Recommendations
+- Before updating (`git pull`), change your configs (config.h) to config.def.h
+- Please look at the [docs](doc.md)
 
 # Features/patches
 - vanitygaps (some of the specific increase/decrease on horizontal or vertical functions are commented out since I use only the general one.)
@@ -29,7 +30,7 @@ install` and `make unistall`).
 _Note_: you need **pywal**
 
 ## Toggleable Features
-Here are the "Too bloated" features which doesn't affect the workflow, but
+Here are the "too bloated" features which doesn't affect the workflow, but
 sometimes are nice.
 
 ### Icons
