@@ -1276,9 +1276,11 @@ drawbar(Monitor *m)
 	}
 	x = 0;
 	for (i = 0; i < LENGTH(tags); i++) {
+		//if (hidevacant && m == selmon) {
+		/* apply 'hidevacant' only to the selected monitor */
 		if (hidevacant) {
 			/* do not draw vacant tags */
-			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
+			if (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i))
 			continue;
 		}
 		w = TEXTW(tags[i]);
@@ -2208,8 +2210,8 @@ manage(Window w, XWindowAttributes *wa)
 	XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
 	configure(c); /* propagates border_width, if size doesn't change */
 	////updatewindowtype(c);
-	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMStateAbove])
-		c->alwaysontop = 1;
+//	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMStateAbove])
+//		c->alwaysontop = 1;
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMFullscreen])
 		setfullscreen(c, 1);
 	updatesizehints(c);
@@ -3423,6 +3425,7 @@ togglefloating(const Arg *arg)
 		//resize(c, c->x, c->y, c->w, c->h, 0);
 		resize(selmon->sel, selmon->sel->x, selmon->sel->y,
  			selmon->sel->w, selmon->sel->h, 0);
+
 	selmon->sel->x = selmon->sel->mon->mx + (selmon->sel->mon->mw - WIDTH(selmon->sel)) / 2;
 	selmon->sel->y = selmon->sel->mon->my + (selmon->sel->mon->mh - HEIGHT(selmon->sel)) / 2;
 
