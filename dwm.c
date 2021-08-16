@@ -2952,18 +2952,20 @@ setlayout(const Arg *arg)
 		drawbar(selmon);
 }
 
-//void setcfact(const Arg *arg) {
+//void
+//setcfact(const Arg *arg)
+//{
 //	float f;
 //	Client *c;
 //
 //	c = selmon->sel;
 //
-//	if(!arg || !c || !selmon->lt[selmon->sellt]->arrange)
+//	if (!arg || !c || !selmon->lt[selmon->sellt]->arrange)
 //		return;
 //	f = arg->f + c->cfact;
-//	if(arg->f == 0.0)
+//	if (arg->f == 0.0)
 //		f = 1.0;
-//	else if(f < 0.25 || f > 4.0)
+//	else if (f < 0.25 || f > 4.0)
 //		return;
 //	c->cfact = f;
 //	arrange(selmon);
@@ -2979,7 +2981,7 @@ setmfact(const Arg *arg)
 		return;
 	f = arg->f < 1.0 ? arg->f + selmon->mfact : arg->f - 1.0;
 //	if (f < 0.1 || f > 0.9)
-	if(f < 0.05 || f > 0.95)
+	if (f < 0.05 || f > 0.95)
 		return;
 	if (pertag)
 		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag] = f;
