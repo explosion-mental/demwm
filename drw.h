@@ -24,6 +24,9 @@ typedef struct {
 	unsigned int depth;
 	Colormap cmap;
 	Drawable drawable;
+	#ifdef ICONS
+	Picture picture;
+	#endif /* ICONS */
 	GC gc;
 	Clr *scheme;
 	Fnt *fonts;
@@ -60,7 +63,9 @@ void drw_setscheme(Drw *drw, Clr *scm);
 void drw_rect(Drw *drw, int x, int y, unsigned int w, unsigned int h, int filled, int invert);
 int drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text, int invert);
 #ifdef ICONS
-void drw_img(Drw *drw, int x, int y, XImage *img, uint32_t *tmp);
+Picture drw_picture_create_resized(Drw *drw, char *src, unsigned int src_w, unsigned int src_h, unsigned int dst_w, unsigned int dst_h);
+void drw_pic(Drw *drw, int x, int y, unsigned int w, unsigned int h, Picture pic);
+//void drw_img(Drw *drw, int x, int y, XImage *img, uint32_t *tmp);
 //void drw_img(Drw *drw, int x, int y, int invert, XImage *img, uint32_t *tmp);
 #endif /* ICONS */
 

@@ -45,10 +45,12 @@
 #include <X11/Xlib-xcb.h>
 #include <xcb/res.h>
 #include <X11/XF86keysym.h>	/* XF86 Keys */
-#if ICONS || TAG_PREVIEW
+#ifdef TAG_PREVIEW
+#include <Imlib2.h>
+#endif /* TAG_PREVIEW */
+#ifdef ICONS
 #include <limits.h>
 #include <stdint.h>
-#include <Imlib2.h>
 #endif /* ICONS */
 
 #include "drw.h"
@@ -182,7 +184,8 @@ struct Client {
 	int fakefullscreen;
 	pid_t pid;
 #ifdef ICONS
-	XImage *icon;
+	//XImage *icon;
+	unsigned int icw, ich; Picture icon;
 #endif /* ICONS */
 	int alwaysontop;
 	Client *next;
@@ -298,7 +301,8 @@ static void focusstack(const Arg *arg);
 static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 #ifdef ICONS
-static XImage *geticonprop(Window win);
+static Picture geticonprop(Window w, unsigned int *icw, unsigned int *ich);
+//static XImage *geticonprop(Window win);
 static void freeicon(Client *c);
 static void updateicon(Client *c);
 #endif /* ICONS */
@@ -706,7 +710,7 @@ swallow(Client *p, Client *c)
 	p->win = c->win;
 	c->win = w;
 #ifdef ICONS
-	c->icon = NULL;
+	//c->icon = NULL;
 	updateicon(p);
 #endif /* ICONS */
 	updatetitle(p);
@@ -1327,11 +1331,15 @@ drawbar(Monitor *m)
 			//drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
 			drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]);
 #ifdef ICONS
-			drw_text(drw, x, 0, w, bh, m->sel->icon ? m->sel->icon->width + 2 : lrpad / 2, m->sel->name, 0);
-			//enum { SIZE = 4096} ;
-			static uint32_t tmp[ICONSIZE * ICONSIZE];
+
+			//drw_text(drw, x, 0, w, bh, lrpad / 2 + (m->sel->icon ? m->sel->icw + ICONSPACING : 0), m->sel->name, 0);
+			drw_text(drw, x, 0, w, bh, m->sel->icon ? m->sel->icw + 2 : lrpad / 2, m->sel->name, 0);
 			if (m->sel->icon)
-				drw_img(drw, x, (bh - m->sel->icon->height) / 2, m->sel->icon, tmp);
+				drw_pic(drw, x, (bh - m->sel->ich) / 2, m->sel->icw, m->sel->ich, m->sel->icon);
+			//enum { SIZE = 4096} ;
+			//static uint32_t tmp[ICONSIZE * ICONSIZE];
+			//if (m->sel->icon)
+			//	drw_img(drw, x, (bh - m->sel->icon->height) / 2, m->sel->icon, tmp);
 				//Icon with right padding
 				//drw_img(drw, x + lrpad / 2, (bh - m->sel->icon->height) / 2, m->sel->icon, tmp);
 				//Icon without right padding
@@ -1879,10 +1887,11 @@ static uint32_t prealpha(uint32_t p) {
 	uint8_t a = p >> 24u;
 	uint32_t rb = (a * (p & 0xFF00FFu)) >> 8u;
 	uint32_t g = (a * (p & 0x00FF00u)) >> 8u;
-	return (rb & 0xFF00FFu) | (g & 0x00FF00u) | ((~a) << 24u);
+	return (rb & 0xFF00FFu) | (g & 0x00FF00u) | (a << 24u);
 }
-XImage *
-geticonprop(Window win)
+
+Picture
+geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 {
 	int format;
 	unsigned long n, extra, *p = NULL;
@@ -1890,118 +1899,178 @@ geticonprop(Window win)
 
 	if (XGetWindowProperty(dpy, win, netatom[NetWMIcon], 0L, LONG_MAX, False, AnyPropertyType,
 						   &real, &format, &n, &extra, (unsigned char **)&p) != Success)
-		return NULL;
-	if (n == 0 || format != 32) { XFree(p); return NULL; }
+		return None;
+	if (n == 0 || format != 32) { XFree(p); return None; }
 
 	unsigned long *bstp = NULL;
 	uint32_t w, h, sz;
-
 	{
-		const unsigned long *end = p + n;
-		unsigned long *i;
+		unsigned long *i; const unsigned long *end = p + n;
 		uint32_t bstd = UINT32_MAX, d, m;
 		for (i = p; i < end - 1; i += sz) {
-			if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) {
-				XFree(p);
-				return NULL;
-			}
-			if ((sz = w * h) > end - i)
-				break;
-			if ((m = w > h ? w : h) >= ICONSIZE && (d = m - ICONSIZE) < bstd) {
-				bstd = d;
-				bstp = i;
-			}
+			if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) { XFree(p); return None; }
+			if ((sz = w * h) > end - i) break;
+			if ((m = w > h ? w : h) >= ICONSIZE && (d = m - ICONSIZE) < bstd) { bstd = d; bstp = i; }
 		}
 		if (!bstp) {
 			for (i = p; i < end - 1; i += sz) {
-				if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) {
-					XFree(p);
-					return NULL;
-				}
-				if ((sz = w * h) > end - i)
-					break;
-				if ((d = ICONSIZE - (w > h ? w : h)) < bstd) {
-					bstd = d;
-					bstp = i;
-				}
+				if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) { XFree(p); return None; }
+				if ((sz = w * h) > end - i) break;
+				if ((d = ICONSIZE - (w > h ? w : h)) < bstd) { bstd = d; bstp = i; }
 			}
 		}
-		if (!bstp) {
-			XFree(p);
-			return NULL;
-		}
+		if (!bstp) { XFree(p); return None; }
 	}
 
-	if ((w = *(bstp - 2)) == 0 || (h = *(bstp - 1)) == 0) {
-		XFree(p);
-		return NULL;
-	}
+	if ((w = *(bstp - 2)) == 0 || (h = *(bstp - 1)) == 0) { XFree(p); return None; }
 
-	uint32_t icw, ich, icsz;
+	uint32_t icw, ich;
 	if (w <= h) {
 		ich = ICONSIZE; icw = w * ICONSIZE / h;
-		if (icw == 0)
-			icw = 1;
-	} else {
-		icw = ICONSIZE; ich = h * ICONSIZE / w;
-		if (ich == 0)
-			ich = 1;
+		if (icw == 0) icw = 1;
 	}
-	icsz = icw * ich;
-
-	uint32_t i;
-#if ULONG_MAX > UINT32_MAX
-	uint32_t *bstp32 = (uint32_t *)bstp;
-	for (sz = w * h, i = 0; i < sz; ++i)
-		bstp32[i] = bstp[i];
-#endif
-	uint32_t *icbuf = malloc(icsz << 2);
-	if (!icbuf) {
-		XFree(p);
-		return NULL;
-	}
-	if (w == icw && h == ich)
-		memcpy(icbuf, bstp, icsz << 2);
 	else {
-		Imlib_Image origin = imlib_create_image_using_data(w, h, (DATA32 *)bstp);
-		if (!origin) {
-			XFree(p);
-			free(icbuf);
-			return NULL;
-		}
-		imlib_context_set_image(origin);
-		imlib_image_set_has_alpha(1);
-		Imlib_Image scaled = imlib_create_cropped_scaled_image(0, 0, w, h, icw, ich);
-		imlib_free_image_and_decache();
-		if (!scaled) {
-			XFree(p);
-			free(icbuf);
-			return NULL;
-		}
-		imlib_context_set_image(scaled);
-		imlib_image_set_has_alpha(1);
-		memcpy(icbuf, imlib_image_get_data_for_reading_only(), icsz << 2);
-		imlib_free_image_and_decache();
+		icw = ICONSIZE; ich = h * ICONSIZE / w;
+		if (ich == 0) ich = 1;
 	}
-	XFree(p);
-	for (i = 0; i < icsz; ++i)
-		icbuf[i] = prealpha(icbuf[i]);
+	*picw = icw; *pich = ich;
 
-	return XCreateImage(drw->dpy, drw->visual, drw->depth, ZPixmap, 0, (char *)icbuf, icw, ich, 32, 0);
+	uint32_t i, *bstp32 = (uint32_t *)bstp;
+	for (sz = w * h, i = 0; i < sz; ++i) bstp32[i] = prealpha(bstp[i]);
+
+	Picture ret = drw_picture_create_resized(drw, (char *)bstp, w, h, icw, ich);
+	XFree(p);
+
+	return ret;
 }
+
+//static uint32_t prealpha(uint32_t p) {
+//	uint8_t a = p >> 24u;
+//	uint32_t rb = (a * (p & 0xFF00FFu)) >> 8u;
+//	uint32_t g = (a * (p & 0x00FF00u)) >> 8u;
+//	return (rb & 0xFF00FFu) | (g & 0x00FF00u) | ((~a) << 24u);
+//}
+//XImage *
+//geticonprop(Window win)
+//{
+//	int format;
+//	unsigned long n, extra, *p = NULL;
+//	Atom real;
+//
+//	if (XGetWindowProperty(dpy, win, netatom[NetWMIcon], 0L, LONG_MAX, False, AnyPropertyType,
+//						   &real, &format, &n, &extra, (unsigned char **)&p) != Success)
+//		return NULL;
+//	if (n == 0 || format != 32) { XFree(p); return NULL; }
+//
+//	unsigned long *bstp = NULL;
+//	uint32_t w, h, sz;
+//
+//	{
+//		const unsigned long *end = p + n;
+//		unsigned long *i;
+//		uint32_t bstd = UINT32_MAX, d, m;
+//		for (i = p; i < end - 1; i += sz) {
+//			if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) {
+//				XFree(p);
+//				return NULL;
+//			}
+//			if ((sz = w * h) > end - i)
+//				break;
+//			if ((m = w > h ? w : h) >= ICONSIZE && (d = m - ICONSIZE) < bstd) {
+//				bstd = d;
+//				bstp = i;
+//			}
+//		}
+//		if (!bstp) {
+//			for (i = p; i < end - 1; i += sz) {
+//				if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) {
+//					XFree(p);
+//					return NULL;
+//				}
+//				if ((sz = w * h) > end - i)
+//					break;
+//				if ((d = ICONSIZE - (w > h ? w : h)) < bstd) {
+//					bstd = d;
+//					bstp = i;
+//				}
+//			}
+//		}
+//		if (!bstp) {
+//			XFree(p);
+//			return NULL;
+//		}
+//	}
+//
+//	if ((w = *(bstp - 2)) == 0 || (h = *(bstp - 1)) == 0) {
+//		XFree(p);
+//		return NULL;
+//	}
+//
+//	uint32_t icw, ich, icsz;
+//	if (w <= h) {
+//		ich = ICONSIZE; icw = w * ICONSIZE / h;
+//		if (icw == 0)
+//			icw = 1;
+//	} else {
+//		icw = ICONSIZE; ich = h * ICONSIZE / w;
+//		if (ich == 0)
+//			ich = 1;
+//	}
+//	icsz = icw * ich;
+//
+//	uint32_t i;
+//#if ULONG_MAX > UINT32_MAX
+//	uint32_t *bstp32 = (uint32_t *)bstp;
+//	for (sz = w * h, i = 0; i < sz; ++i)
+//		bstp32[i] = bstp[i];
+//#endif
+//	uint32_t *icbuf = malloc(icsz << 2);
+//	if (!icbuf) {
+//		XFree(p);
+//		return NULL;
+//	}
+//	if (w == icw && h == ich)
+//		memcpy(icbuf, bstp, icsz << 2);
+//	else {
+//		Imlib_Image origin = imlib_create_image_using_data(w, h, (DATA32 *)bstp);
+//		if (!origin) {
+//			XFree(p);
+//			free(icbuf);
+//			return NULL;
+//		}
+//		imlib_context_set_image(origin);
+//		imlib_image_set_has_alpha(1);
+//		Imlib_Image scaled = imlib_create_cropped_scaled_image(0, 0, w, h, icw, ich);
+//		imlib_free_image_and_decache();
+//		if (!scaled) {
+//			XFree(p);
+//			free(icbuf);
+//			return NULL;
+//		}
+//		imlib_context_set_image(scaled);
+//		imlib_image_set_has_alpha(1);
+//		memcpy(icbuf, imlib_image_get_data_for_reading_only(), icsz << 2);
+//		imlib_free_image_and_decache();
+//	}
+//	XFree(p);
+//	for (i = 0; i < icsz; ++i)
+//		icbuf[i] = prealpha(icbuf[i]);
+//
+//	return XCreateImage(drw->dpy, drw->visual, drw->depth, ZPixmap, 0, (char *)icbuf, icw, ich, 32, 0);
+//}
 void
 freeicon(Client *c)
 {
 	if (c->icon) {
-		XDestroyImage(c->icon);
-		c->icon = NULL;
+		XRenderFreePicture(dpy, c->icon);
+		c->icon = None;
 	}
 }
 void
 updateicon(Client *c)
 {
 	freeicon(c);
-	c->icon = geticonprop(c->win);
+	c->icon = geticonprop(c->win, &c->icw, &c->ich);
 }
 #endif /* ICONS */
 
@@ -2180,7 +2249,6 @@ manage(Window w, XWindowAttributes *wa)
 	c->cfact = 1.0;
 
 #ifdef ICONS
-	c->icon = NULL;
 	updateicon(c);
 #endif /* ICONS */
 	updatetitle(c);
