@@ -1910,13 +1910,13 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 		for (i = p; i < end - 1; i += sz) {
 			if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) { XFree(p); return None; }
 			if ((sz = w * h) > end - i) break;
-			if ((m = w > h ? w : h) >= ICONSIZE && (d = m - ICONSIZE) < bstd) { bstd = d; bstp = i; }
+			if ((m = w > h ? w : h) >= bh && (d = m - bh) < bstd) { bstd = d; bstp = i; }
 		}
 		if (!bstp) {
 			for (i = p; i < end - 1; i += sz) {
 				if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) { XFree(p); return None; }
 				if ((sz = w * h) > end - i) break;
-				if ((d = ICONSIZE - (w > h ? w : h)) < bstd) { bstd = d; bstp = i; }
+				if ((d = bh - (w > h ? w : h)) < bstd) { bstd = d; bstp = i; }
 			}
 		}
 		if (!bstp) { XFree(p); return None; }
@@ -1926,11 +1926,11 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 
 	uint32_t icw, ich;
 	if (w <= h) {
-		ich = ICONSIZE; icw = w * ICONSIZE / h;
+		ich = bh; icw = w * bh / h;
 		if (icw == 0) icw = 1;
 	}
 	else {
-		icw = ICONSIZE; ich = h * ICONSIZE / w;
+		icw = bh; ich = h * bh / w;
 		if (ich == 0) ich = 1;
 	}
 	*picw = icw; *pich = ich;
