@@ -29,8 +29,8 @@ IMLIB2LIBS = -lImlib2
 SYSTRAY = -DSYSTRAY
 
 # Tag previews, comment if you don't want it
-TAG_PREVIEW = -DTAG_PREVIEW
-TAGNUM = -DTAGNUM=9	#number of tags you got
+#TAG_PREVIEW = -DTAG_PREVIEW
+#TAGNUM = -DTAGNUM=9	#number of tags you got
 
 # includes and libs
 INCS = -I${X11INC} -I${FREETYPEINC}

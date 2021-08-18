@@ -1461,6 +1461,8 @@ focusmon(const Arg *arg)
 	selmon = m;
 	unfocus(sel, 0, NULL);
 	focus(NULL);
+	if (selmon->sel)
+		XWarpPointer(dpy, None, selmon->sel->win, 0, 0, 0, 0, selmon->sel->w/2, selmon->sel->h/2);
 }
 
 void
