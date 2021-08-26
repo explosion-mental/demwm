@@ -73,7 +73,6 @@ incrivgaps(const Arg *arg)
 
 /* Tile layout + gaps */
 #ifdef TILE
-static void tile(Monitor *m);
 static void
 tile(Monitor *m)
 {
@@ -123,8 +122,8 @@ tile(Monitor *m)
 
 /* Monocle */
 #ifdef MONOCLE
-static void monocle(Monitor *m);
-void
+//static void monocle(Monitor *m);
+static void
 monocle(Monitor *m)
 {
 	unsigned int n;
@@ -147,8 +146,8 @@ monocle(Monitor *m)
  * rather than all windows stacked on top of each other.
 */
 #ifdef ALPHAMONOCLE
-static void monocle(Monitor *m);
-void
+//static void monocle(Monitor *m);
+static void
 alphamonocle(Monitor *m)
 {
 	unsigned int n;
@@ -176,8 +175,8 @@ alphamonocle(Monitor *m)
  * same as master on center but is floating
  */
 #ifdef CENTEREDFLOATMASTER
-static void centeredfloatmaster(Monitor *m);
-void
+//static void centeredfloatmaster(Monitor *m);
+static void
 centeredfloatmaster(Monitor *m)
 {
 	unsigned int i, n;
@@ -239,8 +238,8 @@ centeredfloatmaster(Monitor *m)
  * https://dwm.suckless.org/patches/deck/
  */
 #ifdef DECK
-static void deck(Monitor *m);
-void
+//static void deck(Monitor *m);
+static void
 deck(Monitor *m)
 {
 	unsigned int i, n;
@@ -285,7 +284,7 @@ deck(Monitor *m)
  * Fibonacci layout + gaps
  * https://dwm.suckless.org/patches/fibonacci/
  */
-void
+static void
 fibonacci(Monitor *m, int s)
 {
 	unsigned int i, n;
@@ -378,8 +377,8 @@ fibonacci(Monitor *m, int s)
  * Decreasing in size right and leftward
  */
 #ifdef DWINDLE
-static void dwindle(Monitor *m);
-void
+//static void dwindle(Monitor *m);
+static void
 dwindle(Monitor *m)
 {
 	fibonacci(m, 1);
@@ -387,8 +386,8 @@ dwindle(Monitor *m)
 #endif /* DWINDLE */
 
 #ifdef SPIRAL
-static void spiral(Monitor *m);
-void
+//static void spiral(Monitor *m);
+static void
 spiral(Monitor *m)
 {
 	fibonacci(m, 0);
@@ -403,8 +402,8 @@ spiral(Monitor *m)
  * https://dwm.suckless.org/patches/gaplessgrid/
  */
 #ifdef GAPLESSGRID
-static void gaplessgrid(Monitor *m);
-void
+//static void gaplessgrid(Monitor *m);
+static void
 gaplessgrid(Monitor *m)
 {
 	unsigned int i, n;
@@ -459,8 +458,8 @@ gaplessgrid(Monitor *m)
  * https://dwm.suckless.org/patches/gridmode/
  */
 #ifdef GRID
-static void grid(Monitor *m);
-void
+//static void grid(Monitor *m);
+static void
 grid(Monitor *m)
 {
 	unsigned int i, n;
@@ -496,8 +495,8 @@ grid(Monitor *m)
  * https://dwm.suckless.org/patches/horizgrid/
  */
 #ifdef HORIZGRID
-static void horizgrid(Monitor *m);
-void
+//static void horizgrid(Monitor *m);
+static void
 horizgrid(Monitor *m)
 {
 	Client *c;
@@ -565,8 +564,8 @@ horizgrid(Monitor *m)
  * https://dwm.suckless.org/patches/nrowgrid/
  */
 #ifdef NROWGRID
-static void nrowgrid(Monitor *m);
-void
+//static void nrowgrid(Monitor *m);
+static void
 nrowgrid(Monitor *m)
 {
 	unsigned int n;
@@ -626,7 +625,7 @@ nrowgrid(Monitor *m)
  * https://dwm.suckless.org/patches/bottomstack/
  */
 #ifdef BSTACK
-static void bstack(Monitor *m);
+//static void bstack(Monitor *m);
 static void
 bstack(Monitor *m)
 {
@@ -670,7 +669,7 @@ bstack(Monitor *m)
 #endif /* BSTACK */
 
 #ifdef BSTACKHORIZ
-static void bstackhoriz(Monitor *m);
+//static void bstackhoriz(Monitor *m);
 static void
 bstackhoriz(Monitor *m)
 {
@@ -719,8 +718,8 @@ bstackhoriz(Monitor *m)
  * https://dwm.suckless.org/patches/centeredmaster/
  */
 #ifdef CENTEREDMASTER
-static void centeredmaster(Monitor *m);
-void
+//static void centeredmaster(Monitor *m);
+static void
 centeredmaster(Monitor *m)
 {
 	unsigned int i, n;

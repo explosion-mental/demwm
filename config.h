@@ -20,9 +20,8 @@ static const int barh         = 4;        /* 1 or more, means bar height */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
-//static const unsigned int baralpha    = 185;	/* Bar opacity (0-255) */
-static const unsigned int baralpha    = 160;	/* Bar opacity (0-255) */
-static const unsigned int borderalpha = OPAQUE;	/* Borders (0xffU) */
+static const unsigned int baralpha    = 160;	/* bar opacity from 0 to 255, default is 185*/
+static const unsigned int borderalpha = OPAQUE;	/* borders, default is 0xffU (OPAQUE) */
 static char *fonts[] = {
 	"Hack Nerd Font:pixelsize=12:antialias=true:autohint=true", /* Powerline */
 //	"SauceCodePro Nerd Font:pixelsize=14:antialias=true:autohint=true",
