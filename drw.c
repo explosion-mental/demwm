@@ -315,13 +315,14 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 		if (utf8strlen) {
 			drw_font_getexts(usedfont, utf8str, utf8strlen, &ew, NULL);
 			/* shorten text if necessary */
-			//for (len = MIN(utf8strlen, sizeof(buf) - 1); len && ew > w; len--)
-			//	drw_font_getexts(usedfont, utf8str, len, &ew, NULL);
-			if (ew > w)
-				for (ew = 0, len = 0; ew < w - lpad * 2 && len < MIN(utf8strlen, sizeof(buf) - 1); len++)
-					drw_font_getexts(usedfont, utf8str, len, &ew, NULL);
-			else
-				len = MIN(utf8strlen, sizeof(buf) - 1);
+			for (len = MIN(utf8strlen, sizeof(buf) - 1); len && ew > w; len--)
+				drw_font_getexts(usedfont, utf8str, len, &ew, NULL);
+			//https://git.suckless.org/dwm/commit/a786211d6cb794fba0ea406d86002c7618998afc.html
+			//if (ew > w)
+			//	for (ew = 0, len = 0; ew < w - lpad * 2 && len < MIN(utf8strlen, sizeof(buf) - 1); len++)
+			//		drw_font_getexts(usedfont, utf8str, len, &ew, NULL);
+			//else
+			//	len = MIN(utf8strlen, sizeof(buf) - 1);
 
 			if (len) {
 				memcpy(buf, utf8str, len);
