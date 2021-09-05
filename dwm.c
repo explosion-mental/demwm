@@ -44,7 +44,10 @@
 #include <X11/Xft/Xft.h>
 #include <X11/Xlib-xcb.h>
 #include <xcb/res.h>
-#include <X11/XF86keysym.h>	/* XF86 Keys */
+#ifdef __OpenBSD__
+#include <sys/sysctl.h>
+#include <kvm.h>
+#endif /* __OpenBSD */
 #ifdef TAG_PREVIEW
 #include <Imlib2.h>
 #endif /* TAG_PREVIEW */
@@ -55,6 +58,7 @@
 
 #include "drw.h"
 #include "util.h"
+#include <X11/XF86keysym.h>	/* XF86 Keys */
 
 /* macros */
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
@@ -326,6 +330,7 @@ static Monitor *recttomon(int x, int y, int w, int h);
 static void resize(Client *c, int x, int y, int w, int h, int interact);
 static void resizeclient(Client *c, int x, int y, int w, int h);
 static void resizemouse(const Arg *arg);
+static void resizemousescroll(const Arg *arg);
 static void restack(Monitor *m);
 static void run(void);
 static void scan(void);
@@ -402,11 +407,18 @@ static int xerror(Display *dpy, XErrorEvent *ee);
 static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void xrdb(const Arg *arg);
-static void xinitvisual();
+static void xinitvisual(void);
 static void zoom(const Arg *arg);
 static int stackpos(const Arg *arg);
 static void pushstack(const Arg *arg);
 static void swaptags(const Arg *arg);
+
+static void scratchpad_hide(const Arg *arg);
+static void scratchpad_remove(const Arg *arg);
+static void scratchpad_show(const Arg *arg);
+static void scratchpad_show_client(Client * c);
+static int scratchpad_last_showed_is_killed (void);
+static void scratchpad_show_first(void);
 
 /* vanitygaps */
 static int enablegaps = 1;	/* if not gaps per tag */
@@ -487,7 +499,6 @@ static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
-
 static xcb_connection_t *xcon;
 
 /* alpha */
@@ -496,13 +507,32 @@ static Visual *visual;
 static int depth;
 static Colormap cmap;
 
-static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() (monitor) */
-
+static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 //char terminalcmd[1024];
 //static char *terminalcmd;
 
+/* Undefined in X11/X.h buttons that are actualy exist and correspond to
+ * horizontal scroll */
+#define Button6		6
+#define Button7		7
+
+static Client *scratchpad_last_showed = NULL;
+static const int scrollargs[4][2];
+
 /* configuration, allows nested code to access above variables */
 #include "config.h"
+
+/* resizemousescroll direction argument list */
+static const int scrollargs[][2] = {
+	/* width change         height change */
+	{ -scrollsensetivity,	0 },
+	{ +scrollsensetivity,	0 },
+	{ 0, 			-scrollsensetivity },
+	{ 0, 			+scrollsensetivity },
+};
+
+
+#define SCRATCHPAD_MASK (1u << sizeof tags / sizeof * tags)
 
 /* scratchpads */
 static Sp scratchpads[] = { {spcmd0}, {spcmd1}, {spcmd2}, {spcmd3}, {spcmd4}, {spcmd5}, {spcmd6} };
@@ -559,8 +589,8 @@ applyrules(Client *c)
 		r = &rules[i];
 		if ((!r->title || strstr(c->name, r->title))
 		&& (!r->class || strstr(class, r->class))
-		//&& (!r->instance || strstr(instance, r->instance)))
 		&& (!r->role || strstr(role, r->role))
+		//&& (!r->instance || strstr(instance, r->instance)))
 		&& (!r->instance || strstr(instance, r->instance))
 		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False)))
 		{
@@ -694,7 +724,6 @@ swallow(Client *p, Client *c)
 	if (c->noswallow || c->isterminal)
 		return;
 	if (c->noswallow && !swallowfloating && c->isfloating)
-	//if (!swallowfloating && c->isfloating)
 		return;
 
 	detach(c);
@@ -710,15 +739,17 @@ swallow(Client *p, Client *c)
 	p->win = c->win;
 	c->win = w;
 #ifdef ICONS
-	//c->icon = NULL;
 	updateicon(p);
 #endif /* ICONS */
 	updatetitle(p);
-	XWindowChanges wc;
-	wc.border_width = p->bw;
-	XConfigureWindow(dpy, p->win, CWBorderWidth, &wc);
+
 	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
-	XSetWindowBorder(dpy, p->win, scheme[SchemeNorm][ColBorder].pixel);
+
+//	XWindowChanges wc;
+//	wc.border_width = p->bw;
+//	XConfigureWindow(dpy, p->win, CWBorderWidth, &wc);
+//	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
+//	XSetWindowBorder(dpy, p->win, scheme[SchemeNorm][ColBorder].pixel);
 
 	arrange(p->mon);
 	configure(p);
@@ -742,13 +773,14 @@ unswallow(Client *c)
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);
 
-	XWindowChanges wc;
-	wc.border_width = c->bw;
-	XConfigureWindow(dpy, c->win, CWBorderWidth, &wc);
 
 	XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 
-	XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
+//	XWindowChanges wc;
+//	wc.border_width = c->bw;
+//	XConfigureWindow(dpy, c->win, CWBorderWidth, &wc);
+//	XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
+//	XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
 
 	setclientstate(c, NormalState);
 	focus(NULL);
@@ -820,7 +852,7 @@ buttonpress(XEvent *e)
 	} else if ((c = wintoclient(ev->window))) {
 		//if (ev->button != Button4 && ev->button != Button5)
 			focus(c);
-		//restack(selmon);
+		restack(selmon);
 		XAllowEvents(dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
 	}
@@ -1281,19 +1313,17 @@ drawbar(Monitor *m)
 	for (i = 0; i < LENGTH(tags); i++) {
 		//if (hidevacant && m == selmon) {
 		/* apply 'hidevacant' only to the selected monitor */
-		if (hidevacant) {
-			/* do not draw vacant tags */
-			if (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i))
+		/* do not draw vacant tags */
+		if (hidevacant && (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i)))
 			continue;
-		}
 		w = TEXTW(tags[i]);
-	        if (urg & 1 << i )
+	        if (urg & 1 << i)
 			drw_setscheme(drw, scheme[SchemeUrgent]);
 		else
 			drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
 		drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], 0);
 		if (occ & 1 << i) {
-			if (urg & 1 << i ) {
+			if (urg & 1 << i) {
 				/* Urgent underline (which is on top) */
 				drw_setscheme(drw, scheme[SchemeNotify]);
                 		drw_rect(drw, x, 0, w, boxw, 1, 0);
@@ -1307,7 +1337,7 @@ drawbar(Monitor *m)
 	}
 	/* Monocle, count clients if there are more than one */
 	if (m->lt[m->sellt]->arrange == monocle) {
-		for(a = 0, s = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), a++)
+		for (a = 0, s = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), a++)
 			if (c == m->stack)
 				s = a;
 		if (!s && a)
@@ -1316,8 +1346,7 @@ drawbar(Monitor *m)
 			snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d/%d]", s, a);
 	}
 	w = blw = TEXTW(m->ltsymbol);
-	drw_setscheme(drw, scheme[SchemeLt]);
-	//drw_setscheme(drw, scheme[SchemeNorm]);
+	drw_setscheme(drw, scheme[SchemeLt]); //scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
 #ifdef SYSTRAY
@@ -1470,8 +1499,9 @@ focusmon(const Arg *arg)
 	selmon = m;
 	unfocus(sel, 0, NULL);
 	focus(NULL);
-	if (selmon->sel)
-		XWarpPointer(dpy, None, selmon->sel->win, 0, 0, 0, 0, selmon->sel->w/2, selmon->sel->h/2);
+	XWarpPointer(dpy, None, m->barwin, 0, 0, 0, 0, m->mw / 2, m->mh / 2);
+//	if (selmon->sel)
+//		XWarpPointer(dpy, None, selmon->sel->win, 0, 0, 0, 0, selmon->sel->w/2, selmon->sel->h/2);
 }
 
 void
@@ -2089,8 +2119,7 @@ void
 loadxrdb(void)
 {
 	Display *display;
-	char *resm;
-	char *type;
+	char *resm, *type;
 	XrmValue value;
 	XrmDatabase xrdb;
 
@@ -2175,7 +2204,7 @@ manage(Window w, XWindowAttributes *wa)
 	updatesizehints(c);
 	updatewmhints(c);
 
-	/* always center */
+	/* always center (at least floating) */
 	c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
 	c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
 
@@ -2226,6 +2255,8 @@ maprequest(XEvent *e)
 	}
 #endif /* SYSTRAY */
 	if (!XGetWindowAttributes(dpy, ev->window, &wa))
+		return;
+	if (!wa.depth) //https://github.com/bakkeby/patches/commit/67c8bcefafbed8d0f122bb91b6d253919727b60e
 		return;
 	if (wa.override_redirect)
 		return;
@@ -2547,6 +2578,47 @@ resizemouse(const Arg *arg)
 	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0,
 		      horizcorner ? (-c->bw) : (c->w + c->bw - 1),
 		      vertcorner ? (-c->bw) : (c->h + c->bw - 1));
+	XUngrabPointer(dpy, CurrentTime);
+	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
+	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
+		sendmon(c, m);
+		selmon = m;
+		focus(NULL);
+	}
+}
+
+void
+resizemousescroll(const Arg *arg)
+{
+	int nw, nh;
+	Client *c;
+	Monitor *m;
+	XEvent ev;
+	int dw = *((int*)arg->v + 1);
+	int dh = *(int*)arg->v;
+
+	if (!(c = selmon->sel))
+		return;
+	if (c->isfullscreen && c->fakefullscreen != 1) /* no support resizing fullscreen windows by mouse */
+		return;
+	if (!c->isfloating && selmon->lt[selmon->sellt]->arrange)
+		togglefloating(NULL);
+	restack(selmon);
+	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
+		None, cursor[CurResize]->cursor, CurrentTime) != GrabSuccess)
+		return;
+	nw = MAX(c->w + dw, 1);
+	nh = MAX(c->h + dh, 1);
+	//if (c->mon->wx + nw >= selmon->wx && c->mon->wx + nw <= selmon->wx + selmon->ww
+	//&& c->mon->wy + nh >= selmon->wy && c->mon->wy + nh <= selmon->wy + selmon->wh)
+	//{
+	//	if (!c->isfloating && selmon->lt[selmon->sellt]->arrange
+	//	&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap))
+	//		togglefloating(NULL);
+	//}
+	if (!selmon->lt[selmon->sellt]->arrange || c->isfloating)
+		resize(c, c->x, c->y, nw, nh, 1);
+	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1, c->h + c->bw - 1);
 	XUngrabPointer(dpy, CurrentTime);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
@@ -3210,12 +3282,13 @@ showhide(Client *c)
 		return;
 	if (ISVISIBLE(c)) {
 		/* if scratchpad center */
-		if ((c->tags & SPTAGMASK) && c->isfloating) {
-			//if (scratchpads[0].cmd) {
-			c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
-			c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
-			//}
-		}
+		//With these commented out scratchpad can be tiled and the float position is saved
+		//if (((c->tags == SCRATCHPAD_MASK) || (c->tags & SPTAGMASK)) && c->isfloating) {
+		//	//if (scratchpads[0].cmd) {
+		//	c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
+		//	c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
+		//	//}
+		//}
 		/* show clients top down */
 		XMoveWindow(dpy, c->win, c->x, c->y);
 		if ((!c->mon->lt[c->mon->sellt]->arrange || c->isfloating) && !c->isfullscreen)
@@ -3540,6 +3613,8 @@ unmanage(Client *c, int destroyed)
 		XSetErrorHandler(xerror);
 		XUngrabServer(dpy);
 	}
+	if (scratchpad_last_showed == c)
+		scratchpad_last_showed = NULL;
 	free(c);
 
 	if (!s) {
@@ -3831,7 +3906,7 @@ updatewmhints(Client *c)
 }
 
 void
-xinitvisual()
+xinitvisual(void)
 {
 	XVisualInfo *infos;
 	XRenderPictFormat *fmt;
@@ -3921,9 +3996,9 @@ view(const Arg *arg)
 pid_t
 winpid(Window w)
 {
-
 	pid_t result = 0;
 
+#ifdef __linux__
 	xcb_res_client_id_spec_t spec = {0};
 	spec.client = w;
 	spec.mask = XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID;
@@ -3950,6 +4025,23 @@ winpid(Window w)
 	if (result == (pid_t)-1)
 		result = 0;
 
+#endif /* __linux__ */
+
+#ifdef __OpenBSD__
+        Atom type;
+        int format;
+        unsigned long len, bytes;
+        unsigned char *prop;
+        pid_t ret;
+
+        if (XGetWindowProperty(dpy, w, XInternAtom(dpy, "_NET_WM_PID", 0), 0, 1, False, AnyPropertyType, &type, &format, &len, &bytes, &prop) != Success || !prop)
+               return 0;
+
+        ret = *(pid_t*)prop;
+        XFree(prop);
+        result = ret;
+
+#endif /* __OpenBSD__ */
 	return result;
 }
 
@@ -4015,12 +4107,10 @@ swallowingclient(Window w)
 	Client *c;
 	Monitor *m;
 
-	for (m = mons; m; m = m->next) {
-		for (c = m->clients; c; c = c->next) {
+	for (m = mons; m; m = m->next)
+		for (c = m->clients; c; c = c->next)
 			if (c->swallowing && c->swallowing->win == w)
 				return c;
-		}
-	}
 
 	return NULL;
 }
@@ -4117,6 +4207,92 @@ zoom(const Arg *arg)
 			return;
 	pop(c);
 }
+
+
+
+
+/* dynamic scratchpads */
+void
+scratchpad_hide(const Arg *arg)
+{
+	if (selmon->sel) {
+		selmon->sel->tags = SCRATCHPAD_MASK;
+		selmon->sel->isfloating = 1;
+		focus(NULL);
+		arrange(selmon);
+	}
+}
+int
+scratchpad_last_showed_is_killed(void)
+{
+	int killed = 1;
+	for (Client *c = selmon->clients; c != NULL; c = c->next)
+		if (c == scratchpad_last_showed) {
+			killed = 0;
+			break;
+		}
+	return killed;
+}
+void
+scratchpad_remove(const Arg *arg)
+{
+	if (selmon->sel && scratchpad_last_showed != NULL && selmon->sel == scratchpad_last_showed)
+		scratchpad_last_showed = NULL;
+}
+void
+scratchpad_show(const Arg *arg)
+{
+	Client *c;
+	if (scratchpad_last_showed == NULL || scratchpad_last_showed_is_killed())
+		scratchpad_show_first();
+	else {
+		if (scratchpad_last_showed->tags != SCRATCHPAD_MASK) {
+			scratchpad_last_showed -> tags = SCRATCHPAD_MASK;
+			focus(NULL);
+			arrange(selmon);
+		} else {
+			int found_current = 0;
+			int found_next = 0;
+			for (c = selmon->clients; c != NULL; c = c->next) {
+				if (found_current == 0) {
+					if (c == scratchpad_last_showed) {
+						found_current = 1;
+						continue;
+					}
+				} else {
+					if (c->tags == SCRATCHPAD_MASK) {
+						found_next = 1;
+						scratchpad_show_client (c);
+						break;
+					}
+				}
+			}
+			if (found_next == 0)
+				scratchpad_show_first ();
+		}
+	}
+}
+void
+scratchpad_show_client(Client *c)
+{
+	scratchpad_last_showed = c;
+	c->tags = selmon->tagset[selmon->seltags];
+	focus(c);
+	arrange(selmon);
+}
+void
+scratchpad_show_first(void)
+{
+	for (Client *c = selmon->clients; c != NULL; c = c->next) {
+		if (c->tags == SCRATCHPAD_MASK) {
+			scratchpad_show_client (c);
+			break;
+		}
+	}
+}
+
+
+
 
 /* Customs */
 void
@@ -4388,7 +4564,7 @@ main(int argc, char *argv[])
 	//if (restart) restcol = 1;
 	setup();
 #ifdef __OpenBSD__
-	if (pledge("stdio rpath proc exec", NULL) == -1) die("pledge");
+	if (pledge("stdio rpath proc exec ps", NULL) == -1) die("pledge");
 #endif /* __OpenBSD__ */
 	scan();
 	//system("killall -q dwmblocks; dwmblocks &");

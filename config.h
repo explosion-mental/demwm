@@ -4,9 +4,8 @@
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const unsigned int systrayspacing = 2;   /* systray spacing */
 static const int systraypinningfailfirst = 1;   /* 1: if pinning fails, display systray on the first monitor, False: display systray on the last monitor*/
-static const int scalepreview = 4;        /* Tag previews scaling */
 static unsigned int borderpx  = 3;        /* border pixel of windows */
-static unsigned int snap      = 32;       /* snap pixel */
+static unsigned int snap      = 10;       /* snap pixel */
 static unsigned int gappih    = 15;       /* horiz inner gap between windows */
 static unsigned int gappiv    = 20;       /* vert inner gap between windows */
 static unsigned int gappoh    = 15;       /* horiz outer gap between windows and screen edge */
@@ -20,6 +19,8 @@ static const int barh         = 4;        /* 1 or more, means bar height */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
+static const int scalepreview = 4;        /* tag previews scaling */
+static const int scrollsensetivity    = 30;	/* 1 means resize window by 1 pixel for each scroll event */
 static const unsigned int baralpha    = 160;	/* bar opacity from 0 to 255, default is 185*/
 static const unsigned int borderalpha = OPAQUE;	/* borders, default is 0xffU (OPAQUE) */
 static char *fonts[] = {
@@ -104,7 +105,7 @@ static const Rule rules[] = {
 	RULE(.instance = "pulsemixer",	.tags = SPTAG(5), .isfloating = 1)
 	RULE(.instance = "term",	.tags = SPTAG(6), .isfloating = 1)
 	RULE(.instance = "normal",	.tags = SPTAG(7))
-	RULE(.instance = "emacsfloat",	.tags = SPTAG(8), .isfloating = 1)
+	//RULE(.instance = "emacsfloat",	.tags = SPTAG(8), .isfloating = 1)
 };
 
 /* layout(s) */
@@ -196,8 +197,7 @@ const char *spcmd3[] = { "st", "-n", "term", "-g", "115x30" , NULL };
 const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27",  "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "ncmpcpp", "-q", NULL };
 const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
 const char *spcmd6[] = { "samedir", "-n", "term", "-g", "115x30", NULL };
-const char *spcmd7[] = { "st", "-n", "normal", NULL };
-const char *spcmd8[] = { "emacs", "--name", "emacsfloat", "-g", "115x30", NULL };
+//const char *spcmd7[] = { "st", "-n", "normal", NULL };
 
 static Key keys[] = {
 	/* modifier(s)			key	function	argument */
@@ -221,8 +221,11 @@ static Key keys[] = {
 	SCRATCHKEYS(MODKEY,		XK_n,	/* music	*/	4)
 	SCRATCHKEYS(MODKEY|ShiftMask,	XK_p,	/* pulsemixer	*/	5)
 	SCRATCHKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	6)
-	SCRATCHKEYS(MODKEY|ControlMask,	XK_e,	/* stnormal	*/	7)
-	SCRATCHKEYS(MODKEY,		XK_v,	/* emacs	*/	8)
+	//SCRATCHKEYS(MODKEY|ControlMask,	XK_e,	/* stnormal	*/	7)
+	{ MODKEY|ControlMask,		XK_v,	scratchpad_remove,	{0} },
+	{ MODKEY,                       XK_v,	scratchpad_show,	{0} },
+	{ MODKEY|ShiftMask,             XK_v,	scratchpad_hide,	{0} },
+	//{ MODKEY|ControlMask,          	XK_v,	scratchpad_remove,	{0} },
 //	{ MODKEY,		   XK_Num_Lock,	togglescratch,	{.ui = 1 } },/* bc */
 
 				/* Navigation */
@@ -310,12 +313,12 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,		XK_equal,		SHCMD("mpc volume +3")	},
 	{ MODKEY|ShiftMask,		XK_bracketleft,		SHCMD("mpc seek -10")	},
 	{ MODKEY|ShiftMask,		XK_bracketright,	SHCMD("mpc seek +10")	},
-{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioMute,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
 { MODKEY,	XK_minus,	SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
 { MODKEY,	XK_equal,	SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
 { MODKEY,	 XK_BackSpace,	SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
+{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
+{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
+{ 0, XF86XK_AudioMute,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
 //{ 0,	XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 //{ 0, XF86XK_ScreenSaver,		SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
 //	{ 0,	XF86XK_AudioStop,		SHCMD("mpc toggle)		},
@@ -326,6 +329,7 @@ static Key keys[] = {
 	{ 0,	XF86XK_AudioPlay,		SHCMD("mpc toggle")			},
 	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev")			},
 	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next")			},
+	//{ 0,	XF86XK_RFKill,			random_wall, {0}		},
 	{ MODKEY,		XK_p,		SHCMD("mpc toggle")			},
 	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev")			},
 	{ MODKEY,	XK_bracketright,	SHCMD("mpc next")			},
@@ -405,6 +409,12 @@ static Button buttons[] = {
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
+	{ ClkClientWin,         MODKEY,         Button4,        resizemousescroll, {.v = &scrollargs[0]} },
+	{ ClkClientWin,         MODKEY,         Button5,        resizemousescroll, {.v = &scrollargs[1]} },
+	{ ClkClientWin,         MODKEY,         Button6,        resizemousescroll, {.v = &scrollargs[2]} },
+	{ ClkClientWin,         MODKEY,         Button7,        resizemousescroll, {.v = &scrollargs[3]} },
+//	{ ClkClientWin,   MODKEY|ShiftMask,     Button4,        focusstack,	{.i = INC(1) } },
+//	{ ClkClientWin,   MODKEY|ShiftMask,     Button5,        focusstack,	{.i = INC(-1) } },
 
 	{ ClkTagBar,            0,              Button1,        view,           {0} },
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },

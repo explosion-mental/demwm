@@ -1,22 +1,23 @@
 
 # Table of Contents
 
-1.  [TAGKEYS](#orgacebd07)
-2.  [spawn](#orgf88fee3)
-3.  [killclient](#org54d024f)
-4.  [focusstack](#orge7699ff)
-5.  [setmfact](#orgc51e595)
-6.  [zoom](#org0f3d9dd)
-7.  [togglebar](#org18c433a)
-8.  [togglefloating](#org834ed1b)
-9.  [focusmon](#org0068a82)
-10. [tagmon](#orgea59c8d)
-11. [incnmaster](#org08398b0)
+1.  [TAGKEYS](#org004ce04)
+2.  [spawn](#org77dcd86)
+3.  [killclient](#org40e491c)
+4.  [focusstack](#org8856c7e)
+5.  [setmfact](#org544e95a)
+6.  [zoom](#org45a3b63)
+7.  [togglebar](#org4f3ca3c)
+8.  [togglefloating](#org4987883)
+9.  [focusmon](#orga641de8)
+10. [tagmon](#org0292be9)
+11. [incnmaster](#org520ef38)
+12. [Scratchpads](#org439a58b)
 
 Here are most of the functions that the **user** has to touch.
 
 
-<a id="orgacebd07"></a>
+<a id="org004ce04"></a>
 
 # TAGKEYS
 
@@ -43,7 +44,7 @@ Like view but it can stack, meaning you can &rsquo;view&rsquo; multiple tags. Th
 Like tag but it can stack, meaning you can &rsquo;tag&rsquo; multiple tags. This is toggleable.
 
 
-<a id="orgf88fee3"></a>
+<a id="org77dcd86"></a>
 
 # spawn
 
@@ -67,7 +68,7 @@ It takes a *void* argument (a variable) or by using the macro **SHCMD**.
     };
 
 
-<a id="org54d024f"></a>
+<a id="org40e491c"></a>
 
 # killclient
 
@@ -88,7 +89,7 @@ or
     { MODKEY,	                XK_q,	killclient,		{ .v = NULL }		},
 
 
-<a id="orge7699ff"></a>
+<a id="org8856c7e"></a>
 
 # focusstack
 
@@ -106,7 +107,7 @@ It takes an *integer* argument and its bidirectional.
     { MODKEY,		XK_k,	focusstack,	{ .i = -1 }	},
 
 
-<a id="orgc51e595"></a>
+<a id="org544e95a"></a>
 
 # setmfact
 
@@ -124,7 +125,7 @@ It takes an *integer* argument and its bidirectional.
     { MODKEY,                       XK_l,	setmfact,	{ .f = +0.02 }		},
 
 
-<a id="org0f3d9dd"></a>
+<a id="org45a3b63"></a>
 
 # zoom
 
@@ -141,7 +142,7 @@ It takes no argument.
     { MODKEY,                       XK_w,	zoom,			{0}		},
 
 
-<a id="org18c433a"></a>
+<a id="org4f3ca3c"></a>
 
 # togglebar
 
@@ -158,7 +159,7 @@ No argument needed.
     { MODKEY|ControlMask,	    XK_grave,	togglebar,		{0}		},
 
 
-<a id="org834ed1b"></a>
+<a id="org4987883"></a>
 
 # togglefloating
 
@@ -175,7 +176,7 @@ It takes no argument.
     { MODKEY|ShiftMask,     XK_space,	togglefloating,		{0}		},
 
 
-<a id="org0068a82"></a>
+<a id="orga641de8"></a>
 
 # focusmon
 
@@ -195,7 +196,7 @@ It takes an *integer* argument and its bidirectional.
     { MODKEY,                  XK_period,	focusmon,	{ .i = +1 }		},
 
 
-<a id="orgea59c8d"></a>
+<a id="org0292be9"></a>
 
 # tagmon
 
@@ -217,7 +218,7 @@ It takes an *integer* argument and its bidirectional.
     { MODKEY|ShiftMask,        XK_period,	tagmon,		{ .i = +1 }		},
 
 
-<a id="org08398b0"></a>
+<a id="org520ef38"></a>
 
 # incnmaster
 
@@ -235,4 +236,19 @@ It takes an *integer* argument and its bidirectional.
     { MODKEY|ShiftMask, XK_semicolon,	incnmaster,	{ .i = -1 }		},
 
 Here `MODKEY + ;` adds the first window on the slave stack and `MODKEY + Shift + ;` retrieves the last window on the master stack to the slave stack.
+
+
+<a id="org439a58b"></a>
+
+# Scratchpads
+
+I have two patches: *scratchpads* and *dynamic scratchpads*. Both of these do different functions so they work well so here goes a bit of explanation:
+
+
+## scratchpads
+
+Allows you  to *store* a client on a tag that isn&rsquo;t visible. When you call that client by pressing a keybinding you basically **toggleview** that tag and you will see the client store.
+
+
+## dynamic scratchpads
 
