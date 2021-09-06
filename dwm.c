@@ -401,7 +401,6 @@ static void updatenumlockmask(void);
 static void updatesizehints(Client *c);
 static void updatestatus(void);
 static void updatetitle(Client *c);
-//static void updatewindowtype(Client *c);
 static void updatewmhints(Client *c);
 static void view(const Arg *arg);
 static Client *wintoclient(Window w);
@@ -1278,17 +1277,13 @@ drawbar(Monitor *m)
 	unsigned int a = 0, s = 0;
 	Client *c;
 
-#ifdef SYSTRAY
-//	int stw = 0;	/* SystemTray Width */
-//	if (m == systraytomon(m))
-//		stw = getsystraywidth();
+	#ifdef SYSTRAY
 	int stw = m == systraytomon(m) ? getsystraywidth() : 0;
-#endif /* SYSTRAY */
+	#endif /* SYSTRAY */
 
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) { /* status is only drawn on selected monitor */
-		//drw_setscheme(drw, scheme[SchemeNorm]);
-		drw_setscheme(drw, scheme[SchemeStatus]);
+		drw_setscheme(drw, scheme[SchemeStatus]);//[SchemeNorm]);
 		tw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
 #ifdef SYSTRAY
 		drw_text(drw, m->ww - tw - stw, 0, tw, bh, 0, stext, 0);
@@ -1297,11 +1292,12 @@ drawbar(Monitor *m)
 #endif /* SYSTRAY */
 	}
 
-#ifdef SYSTRAY
+	#ifdef SYSTRAY
 	resizebarwin(m);
-#endif /* SYSTRAY */
+	#endif /* SYSTRAY */
+
 	for (c = m->clients; c; c = c->next) {
-			occ |= c->tags == 255 && hidevacant ? 0 : c->tags;
+		occ |= c->tags == 255 && hidevacant ? 0 : c->tags;
 		if (c->isurgent)
 			urg |= c->tags;
 	}
@@ -1309,7 +1305,6 @@ drawbar(Monitor *m)
 	for (i = 0; i < LENGTH(tags); i++) {
 		//if (hidevacant && m == selmon) {
 		/* apply 'hidevacant' only to the selected monitor */
-		/* do not draw vacant tags */
 		if (hidevacant && (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i)))
 			continue;
 		w = TEXTW(tags[i]);
@@ -1345,32 +1340,21 @@ drawbar(Monitor *m)
 	drw_setscheme(drw, scheme[SchemeLt]); //scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
-#ifdef SYSTRAY
-	if ((w = m->ww - tw - stw - x) > bh) {
-#else
-	if ((w = m->ww - tw - x) > bh) {
-#endif /* SYSTRAY */
+	if ((w = m->ww - tw
+	#ifdef SYSTRAY
+		- stw
+	#endif /* SYSTRAY */
+		- x) > bh) {
 		if (m->sel) {
-			/* Scheme Title patch */
-			//drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
-			drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]);
-#ifdef ICONS
-
-			//drw_text(drw, x, 0, w, bh, lrpad / 2 + (m->sel->icon ? m->sel->icw + ICONSPACING : 0), m->sel->name, 0);
+			drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]); //[m == selmon ? SchemeSel : SchemeNorm]);
+		#ifdef ICONS
 			drw_text(drw, x, 0, w, bh, m->sel->icon ? m->sel->icw + 2 : lrpad / 2, m->sel->name, 0);
 			//drw_text(drw, x, 0, w, bh, lrpad / 2 + (m->sel->icw ? m->sel->icw + 2 : 0), m->sel->name, 0);
 			if (m->sel->icon)
 				drw_pic(drw, x, (bh - m->sel->ich) / 2, m->sel->icw, m->sel->ich, m->sel->icon);
-			//enum { SIZE = 4096} ;
-			//static uint32_t tmp[ICONSIZE * ICONSIZE];
-			//if (m->sel->icon)
-			//	drw_img(drw, x, (bh - m->sel->icon->height) / 2, m->sel->icon, tmp);
-				//Icon with right padding
-				//drw_img(drw, x + lrpad / 2, (bh - m->sel->icon->height) / 2, m->sel->icon, tmp);
-				//Icon without right padding
-#else
+		#else
 			drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
-#endif /* ICONS */
+		#endif /* ICONS */
 			if (m->sel->isfloating)
 				drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
 		} else {
@@ -1462,9 +1446,14 @@ focus(Client *c)
 			wc.sibling = c->mon->barwin;
 			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 			//c->alwaysontop = 1;
-			/* Move all visible floating windows that are not marked as on top below the current window */
+			/* Move all visible floating windows that are not marked as on top, below the bar window */
 			wc.stack_mode = Below;
-			wc.sibling = c->win;
+			/* since most floating 'pop ups' get focus
+			 * automatically, there is no need to raise (or when
+			 * switching tags, re-raise) the floating windows if
+			 * the user has already changed the focus to the tiled
+			 * window. */
+			wc.sibling = c->mon->barwin;//c->win;
 			for (f = c->mon->stack; f; f = f->snext)
 				if (f != c && f->isfloating && ISVISIBLE(f) && !f->alwaysontop) {
 					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
@@ -1720,9 +1709,6 @@ updatepreview(void)
 		.colormap = cmap
 	};
 	for (m = mons; m; m = m->next) {
-//		m->tagwin = XCreateWindow(dpy, root, m->wx, m->by + bh, m->mw / 4, m->mh / 4, 0,
-//				DefaultDepth(dpy, screen), CopyFromParent, DefaultVisual(dpy, screen),
-//				CWOverrideRedirect|CWBackPixmap|CWEventMask, &wa);
 		m->tagwin = XCreateWindow(dpy, root, m->wx, m->by + bh, m->ww / 4, m->mh / 4, 0, depth,
 		                          InputOutput, visual,
 		                          CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask, &wa);
@@ -1934,9 +1920,6 @@ updatesystray(void)
 	XConfigureWindow(dpy, systray->win, CWX|CWY|CWWidth|CWHeight|CWSibling|CWStackMode, &wc);
 	XMapWindow(dpy, systray->win);
 	XMapSubwindows(dpy, systray->win);
-	/* redraw background */
-	//XSetForeground(dpy, drw->gc, scheme[SchemeStatus][ColBg].pixel);
-	//XFillRectangle(dpy, systray->win, drw->gc, 0, 0, w, bh);
 	XSync(dpy, False);
 	//drawbar(m);
 }
@@ -2261,8 +2244,8 @@ manage(Window w, XWindowAttributes *wa)
 	if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
 		c->mon = t->mon;
 		c->tags = t->tags;
-		//Since I don't use the rule  alwaysontop, this makes trasient
-		//windows on top of 'pop up' windows, which isn't desirable.
+		/* since I don't use the rule  alwaysontop, this makes trasient
+		 * windows on top of 'pop up' windows, which isn't desirable. */
 		//c->alwaysontop = 1;
 	} else {
 		c->mon = selmon;
@@ -2285,7 +2268,6 @@ manage(Window w, XWindowAttributes *wa)
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
 	configure(c); /* propagates border_width, if size doesn't change */
-	////updatewindowtype(c);
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMStateAbove])
 		c->alwaysontop = 1;
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMFullscreen])
@@ -2537,8 +2519,6 @@ propertynotify(XEvent *e)
 				drawbar(c->mon);
 		}
 #endif /* ICONS */
-		//if (ev->atom == netatom[NetWMWindowType])
-		//	updatewindowtype(c);
 	}
 }
 
@@ -2830,8 +2810,7 @@ setgaps(int oh, int ov, int ih, int iv)
 	selmon->gappov = ov;
 	selmon->gappih = ih;
 	selmon->gappiv = iv;
-	if (gapspertag)
-	/* Pertag gaps */
+	if (gapspertag) /* Pertag gaps */
 		selmon->pertag->gaps[selmon->pertag->curtag] =
 			((oh & 0xFF) << 0) | ((ov & 0xFF) << 8) | ((ih & 0xFF) << 16) | ((iv & 0xFF) << 24);
 	arrange(selmon);
@@ -3970,18 +3949,6 @@ updatetitle(Client *c)
 		strcpy(c->name, broken);
 }
 
-/*void
-updatewindowtype(Client *c)
-{
-	Atom state = getatomprop(c, netatom[NetWMState]);
-	Atom wtype = getatomprop(c, netatom[NetWMWindowType]);
-
-	if (state == netatom[NetWMFullscreen])
-		setfullscreen(c, 1);
-	if (wtype == netatom[NetWMWindowTypeDialog])
-		c->isfloating = 1;
-}*/
-
 void
 updatewmhints(Client *c)
 {
@@ -4046,10 +4013,8 @@ view(const Arg *arg)
 	int i;
 	unsigned int tmptag;
 
-//	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
 	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
-		/* toggletag patch */
-		//view(&((Arg) { .ui = 0 }));
+		//view(&((Arg) { .ui = 0 })); /* toggletag patch */
  		return;
 #ifdef TAG_PREVIEW
          switchtag();

@@ -76,6 +76,7 @@ patch:
 dwm.def.c is not needed anymore. I'm happy with what I got.
 
 ## Some little TODOS:
+- _fancybar_ only for floating windows
 - toggle border
 - Make 'tag previews' more solid and prevent from previewing the preview in the preview...
 - Make systray background more solid
