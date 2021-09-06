@@ -38,6 +38,7 @@ static char *colors[][3]	      = {
 	[SchemeSel]    = { color0,	color1,		color2 }, /* Selected tag*/
 	[SchemeLt]     = { color2,	color0,		NULL },   /* Layout*/
 	[SchemeTitle]  = { color0,	color2,		NULL },   /* window title*/
+	[SchemeSys]    = { color0,	color0,		color0 },   /* window title*/
 	[SchemeStatus] = { color3,	color0,		color0 },   /* StatusBar*/
 	[SchemeUrgent] = { fg_wal,	color0,		fg_wal }, /* background color for urgent tag*/
 	[SchemeNotify] = { fg_wal,	color0,		NULL },   /* Little red bar on urgent tag*/
@@ -51,6 +52,7 @@ static const unsigned int alphas[][3] = {
 	[SchemeLt]     = { OPAQUE,	baralpha,	borderalpha },
 	[SchemeStatus] = { OPAQUE,	baralpha,	borderalpha },
 	[SchemeTitle]  = { 255,		255,		255 },
+	[SchemeSys]    = { 255,		255,		255 },
 };
 
 /* tags */
@@ -229,16 +231,16 @@ static Key keys[] = {
 //	{ MODKEY,		   XK_Num_Lock,	togglescratch,	{.ui = 1 } },/* bc */
 
 				/* Navigation */
-	{ MODKEY,			XK_j,	focusstack,	{ .i = INC(1) }		},
-	{ MODKEY|ShiftMask,		XK_j,	pushstack,	{ .i = INC(1) }		},
+	{ MODKEY,			XK_j,	focusstack,	{ .i = 1 }		},
+	{ MODKEY|ShiftMask,		XK_j,	pushstack,	{ .i = 1 }		},
 
 	{ MODKEY|ControlMask,		XK_j,	shifttag,	{ .i = -1 }		},
 	{ MODKEY|ControlMask|ShiftMask,	XK_j,  shifttagclients,	{ .i = -1 }		},
 	{ MODKEY|ControlMask|ShiftMask,	XK_k,  shifttagclients,	{ .i = +1 }		},
 	{ MODKEY|ControlMask,		XK_k,	shifttag,	{ .i = +1 }		},
 
-	{ MODKEY|ShiftMask,		XK_k,	pushstack,	{ .i = INC(-1) }	},
-	{ MODKEY,                       XK_k,	focusstack,	{ .i = INC(-1) }	},
+	{ MODKEY|ShiftMask,		XK_k,	pushstack,	{ .i = -1 }		},
+	{ MODKEY,                       XK_k,	focusstack,	{ .i = -1 }		},
 
 	{ MODKEY,                       XK_h,	setmfact,	{ .f = -0.02 }		},
 	{ MODKEY|ShiftMask,		XK_h,	shiftboth,	{ .i = -1 }		},
@@ -260,7 +262,7 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,         XK_space,	togglefloating,		{0}		},
 	{ MODKEY,                       XK_F1,	fullscreen,		{0}		},
 	{ MODKEY|ControlMask,        	XK_F1,	fakefullscreen,		{0}		},
-	{ MODKEY,                       XK_w,	zoom,			{0}		},
+	{ MODKEY,                       XK_w,	zoomswap,		{0}		},
 	{ MODKEY,	              XK_Tab,	view,			{0}		},
 	{ MODKEY,	            XK_space,	view,			{0}		},
 	{ MODKEY|ControlMask,	    XK_grave,	togglebar,		{0}		},
@@ -388,16 +390,16 @@ static Button buttons[] = {
 	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
 	{ ClkLtSymbol,          0,              Button4,        cyclelayout,    {.i = +1 } },
 	{ ClkLtSymbol,          0,              Button5,        cyclelayout,    {.i = -1 } },
-//	{ ClkLtSymbol,          0,              Button4,        focusstack,	{.i = INC(1)} },
-//	{ ClkLtSymbol,          0,              Button5,        focusstack,	{.i = INC(-1)} },
+//	{ ClkLtSymbol,          0,              Button4,        focusstack,	{.i = +1} },
+//	{ ClkLtSymbol,          0,              Button5,        focusstack,	{.i = -1} },
 
 //	{ ClkWinTitle,          0,              Button1,	SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 	{ ClkWinTitle,          0,              Button1,	SHCMD("maim -sDq ~/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
-	{ ClkWinTitle,          0,              Button2,	zoom,           {0} },
+	{ ClkWinTitle,          0,              Button2,	zoomswap,       {0} },
 	{ ClkWinTitle,          0,              Button2,	killclient,	{0} },
 	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -us -e 'mv $f ~/Downloads'") },
-	{ ClkWinTitle,          0,              Button4,        focusstack,	{.i = INC(1)} },
-	{ ClkWinTitle,          0,              Button5,        focusstack,	{.i = INC(-1)} },
+	{ ClkWinTitle,          0,              Button4,        focusstack,	{.i = 1} },
+	{ ClkWinTitle,          0,              Button5,        focusstack,	{.i = -1} },
 
 	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1 } },
 	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2 } },
@@ -413,8 +415,8 @@ static Button buttons[] = {
 	{ ClkClientWin,         MODKEY,         Button5,        resizemousescroll, {.v = &scrollargs[1]} },
 	{ ClkClientWin,         MODKEY,         Button6,        resizemousescroll, {.v = &scrollargs[2]} },
 	{ ClkClientWin,         MODKEY,         Button7,        resizemousescroll, {.v = &scrollargs[3]} },
-//	{ ClkClientWin,   MODKEY|ShiftMask,     Button4,        focusstack,	{.i = INC(1) } },
-//	{ ClkClientWin,   MODKEY|ShiftMask,     Button5,        focusstack,	{.i = INC(-1) } },
+//	{ ClkClientWin,   MODKEY|ShiftMask,     Button4,        focusstack,	{.i = 1 } },
+//	{ ClkClientWin,   MODKEY|ShiftMask,     Button5,        focusstack,	{.i = -1 } },
 
 	{ ClkTagBar,            0,              Button1,        view,           {0} },
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
