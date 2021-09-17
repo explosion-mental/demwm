@@ -4,7 +4,7 @@
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const unsigned int systrayspacing = 2;   /* systray spacing */
 static const int systraypinningfailfirst = 1;   /* 1: if pinning fails, display systray on the first monitor, False: display systray on the last monitor*/
-static unsigned int borderpx  = 3;        /* border pixel of windows */
+static unsigned int borderpx  = 4;        /* border pixel of windows */
 static unsigned int snap      = 10;       /* snap pixel */
 static unsigned int gappih    = 15;       /* horiz inner gap between windows */
 static unsigned int gappiv    = 20;       /* vert inner gap between windows */
@@ -24,7 +24,10 @@ static const int scrollsensetivity    = 30;	/* 1 means resize window by 1 pixel 
 static const unsigned int baralpha    = 160;	/* bar opacity from 0 to 255, default is 185*/
 static const unsigned int borderalpha = OPAQUE;	/* borders, default is 0xffU (OPAQUE) */
 static char *fonts[] = {
-	"Hack Nerd Font:pixelsize=12:antialias=true:autohint=true", /* Powerline */
+	"Monofur Nerd Font:pixelsize=14:antialias=true:autohint=true", /* Mono */
+//	"JetBrains Mono Medium:pixelsize=12:antialias=true:autohint=true", /* Mono */
+//	"Hack Nerd Font:pixelsize=12:antialias=true:autohint=true", /* Powerline */
+//	"Hack Nerd Font:style=bold:pixelsize=12:antialias=true:autohint=true", /* Powerline */
 //	"SauceCodePro Nerd Font:pixelsize=14:antialias=true:autohint=true",
 //	"Noto Color Emoji:pixelsize=16:antialias=true:autohint=true: style=Regular", /* Emojis */
 	"JoyPixels:pixelsize=14:antialias=true:autohint=true"
@@ -48,7 +51,7 @@ static char *colors[][3]	      = {
 static const unsigned int alphas[][3] = {
 			/* fg		bg		border     */
 	[SchemeNorm]   = { OPAQUE,	baralpha,	0 },
-	[SchemeSel]    = { OPAQUE,	baralpha,	borderalpha },
+	[SchemeSel]    = { OPAQUE,	baralpha,	OPAQUE },
 	[SchemeLt]     = { OPAQUE,	baralpha,	borderalpha },
 	[SchemeStatus] = { OPAQUE,	baralpha,	borderalpha },
 	[SchemeTitle]  = { 255,		255,		255 },
@@ -184,7 +187,8 @@ static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL
 EXEC(termcmd, "st")
 static const char *syncthing[] = { "surf", "127.0.0.1:1210", NULL };
 static const char *web[]       = { "surf", "start.duckduckgo.com", NULL };
-static const char *vifm[]      = { "sh",  "-c", "st -t 'FileManager🗄️' -e vifmrun", NULL };
+//static const char *vifm[]      = { "sh",  "-c", "st -t 'FileManager🗄️' -e vifmrun", NULL };
+static const char *vifm[]      = { "st", "-e", "vifmrun", NULL };
 static const char *samevifm[]  = { "samedirvifm", NULL };
 //EXEC(samedmenu, "samedirmenu"
 
@@ -197,7 +201,7 @@ const char *spcmd1[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "5
 const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
 const char *spcmd3[] = { "st", "-n", "term", "-g", "115x30" , NULL };
 const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27",  "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "ncmpcpp", "-q", NULL };
-const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "110x28", "-e", "pulsemixer", NULL };
+const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "100x25", "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "pulsemixer", NULL };
 const char *spcmd6[] = { "samedir", "-n", "term", "-g", "115x30", NULL };
 //const char *spcmd7[] = { "st", "-n", "normal", NULL };
 
@@ -386,14 +390,22 @@ static Key keys[] = {
  * click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static Button buttons[] = {
 	/* click                event mask      button          function        argument */
-	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
-	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
+	{ ClkTagBar,            0,              Button1,        view,           {0} },
+	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
+	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
+	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
+	{ ClkTagBar,            0,              Button4,	shiftview,	{ .i = +1 } },
+	{ ClkTagBar,            0,              Button5,	shiftview,	{ .i = -1 } },
+
+	{ ClkLtSymbol,          0,              Button1,        togglegaps,     {0} },
+	{ ClkLtSymbol,          0,              Button3,        togglevacant,   {0} },
+//	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
+//	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
 	{ ClkLtSymbol,          0,              Button4,        cyclelayout,    {.i = +1 } },
 	{ ClkLtSymbol,          0,              Button5,        cyclelayout,    {.i = -1 } },
 //	{ ClkLtSymbol,          0,              Button4,        focusstack,	{.i = +1} },
 //	{ ClkLtSymbol,          0,              Button5,        focusstack,	{.i = -1} },
 
-//	{ ClkWinTitle,          0,              Button1,	SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 	{ ClkWinTitle,          0,              Button1,	SHCMD("maim -sDq ~/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
 	{ ClkWinTitle,          0,              Button2,	zoomswap,       {0} },
 	{ ClkWinTitle,          0,              Button2,	killclient,	{0} },
@@ -417,11 +429,4 @@ static Button buttons[] = {
 	{ ClkClientWin,         MODKEY,         Button7,        resizemousescroll, {.v = &scrollargs[3]} },
 //	{ ClkClientWin,   MODKEY|ShiftMask,     Button4,        focusstack,	{.i = 1 } },
 //	{ ClkClientWin,   MODKEY|ShiftMask,     Button5,        focusstack,	{.i = -1 } },
-
-	{ ClkTagBar,            0,              Button1,        view,           {0} },
-	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
-	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
-	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
-	{ ClkTagBar,            0,              Button4,	shiftview,	{ .i = +1 } },
-	{ ClkTagBar,            0,              Button5,	shiftview,	{ .i = -1 } },
 };

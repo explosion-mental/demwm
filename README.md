@@ -73,20 +73,20 @@ patch:
 - shift-tools (shift windows,tags or both either with an active client or not)
 
 # What's Next?
-dwm.def.c is not needed anymore. I'm happy with what I got.
+Currently I don't wish more 'features' but here are some ideas, which is always good.
 
 ## Some little TODOS:
-- _fancybar_ only for floating windows
 - toggle border
-- Make 'tag previews' more solid and prevent from previewing the preview in the preview...
-- Make systray background more solid
+- Make _tag previews_ more solid and prevent from being shown in the preview of the preview...
+- Make _systray_ background more solid
+- depatch cfacts(?)
 - <s>systray toggleable with _#ifdef_ and _#endif_</s>
-- depatch cfacts
 - <s>make [hide vacant patch](https://dwm.suckless.org/patches/hide_vacant_tags/)
   toggleable</s>
 - <s>a better way of handling layouts at startup</s>
 
 ## Some wishing pains:
+- pertag cursor position. Save the state of the cursor position between tags.
 - integrate dwmblocks into dwm (prob not worth it)
 - Make gaps an option(?)
 - <s>getenv("TERMINAL")</s>
