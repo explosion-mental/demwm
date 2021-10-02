@@ -21,8 +21,9 @@ static const int pertagbar    = 0;        /* 0 means using pertag, but with the 
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
 static const int scalepreview = 4;        /* tag previews scaling */
 static const int scrollsensetivity    = 30;	/* 1 means resize window by 1 pixel for each scroll event */
-static const unsigned int baralpha    = 160;	/* bar opacity from 0 to 255, default is 185*/
+static const unsigned int baralpha    = 120;	/* bar opacity from 0 to 255, default is 185*/
 static const unsigned int borderalpha = OPAQUE;	/* borders, default is 0xffU (OPAQUE) */
+
 static char *fonts[] = {
 	"Monofur Nerd Font:pixelsize=14:antialias=true:autohint=true", /* Mono */
 //	"JetBrains Mono Medium:pixelsize=12:antialias=true:autohint=true", /* Mono */
@@ -36,26 +37,26 @@ static char *fonts[] = {
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8], color6[8], color7[8], color8[8];
 static char bg_wal[8], fg_wal[8], cursor_wal[8];
 static char *colors[][3]	      = {
-			/* fg		bg		border	    description		*/
-	[SchemeNorm]   = { fg_wal,	color0,		color0 }, /* Normal tags section */
-	[SchemeSel]    = { color0,	color1,		color2 }, /* Selected tag*/
-	[SchemeLt]     = { color2,	color0,		NULL },   /* Layout*/
-	[SchemeTitle]  = { color0,	color2,		NULL },   /* window title*/
-	[SchemeSys]    = { color0,	color0,		color0 },   /* window title*/
-	[SchemeStatus] = { color3,	color0,		color0 },   /* StatusBar*/
-	[SchemeUrgent] = { fg_wal,	color0,		fg_wal }, /* background color for urgent tag*/
-	[SchemeNotify] = { fg_wal,	color0,		NULL },   /* Little red bar on urgent tag*/
-	[SchemeIndOn]  = { color4,	color0,		NULL },   /* rectangle on active tag*/
-	[SchemeIndOff] = { color2,	color0,		NULL },   /* rectablge on def tag*/
+			/* fg		bg		border	     description         */
+	[SchemeNorm]   = { fg_wal,	color0,		color0 }, /* normal tags section */
+	[SchemeSel]    = { color0,	color1,		color2 }, /* selected tag */
+	[SchemeUrgent] = { fg_wal,	color0,		fg_wal }, /* urgent tag */
+	[SchemeLt]     = { color2,	color0,		NULL },   /* layout */
+	[SchemeTitle]  = { color0,	color2,		NULL },   /* window title */
+	[SchemeStatus] = { fg_wal,	color0,		NULL },   /* status bar */
+	[SchemeSys]    = { color0,	color0,		color0 }, /* system tray */
+	[SchemeNotify] = { fg_wal,	color0,		NULL },   /* little red bar on urgent tag */
+	[SchemeIndOn]  = { color4,	color0,		NULL },   /* rectangle on sel tag */
+	[SchemeIndOff] = { color2,	color0,		NULL },   /* rectangle on norm tag */
 };
 static const unsigned int alphas[][3] = {
 			/* fg		bg		border     */
 	[SchemeNorm]   = { OPAQUE,	baralpha,	0 },
 	[SchemeSel]    = { OPAQUE,	baralpha,	OPAQUE },
 	[SchemeLt]     = { OPAQUE,	baralpha,	borderalpha },
+	[SchemeTitle]  = { OPAQUE,	OPAQUE,		0 },
 	[SchemeStatus] = { OPAQUE,	baralpha,	borderalpha },
-	[SchemeTitle]  = { 255,		255,		255 },
-	[SchemeSys]    = { 255,		255,		255 },
+	[SchemeSys]    = { baralpha,	baralpha,	baralpha },
 };
 
 /* tags */
@@ -130,8 +131,8 @@ static int resizehints = 0;	/* 1 means respect size hints in tiled resizals */
 //#define CENTEREDMASTER
 //#define BSTACKHORIZ
 #define GRID
-//#define NROWGRID
-//#define FORCE_VSPLIT 1	/* nrowgrid: force two clients to always split vertically */
+#define NROWGRID
+#define FORCE_VSPLIT 1	/* nrowgrid: force two clients to always split vertically */
 //#define HORIZGRID
 //#define GAPLESSGRID
 //#define PIDGIN
@@ -150,8 +151,8 @@ static const Layout layouts[] = {
 	{ ">M>",	centeredfloatmaster},	/* Centermaster but master floats */
 	//{ "|M|",	centeredmaster },	/* Master in middle, slaves on sides */
 	//{ "===",      bstackhoriz },		/* Bstack but slaves stacked "monocle"-like */
-	{ "HHH",      grid },			/* windows in a grid */
-	//{ "###",      nrowgrid },		/* Gaplessgrid with no gaps, but not equal size */
+	//{ "HHH",      grid },			/* windows in a grid */
+	{ "###",      nrowgrid },		/* Gaplessgrid with no gaps, but not equal size */
 	//{ "---",      horizgrid },		/* Gaplessgrid but with horizontal order */
 	//{ ":::",      gaplessgrid },		/* grid ajusted in such that there are no gaps */
 	//{ "🐷", 	pidgin },		/* Basically grid? */
@@ -176,7 +177,7 @@ static const Layout layouts[] = {
 #define CMDCMD(cmd) 	spawncmd,{ .v = cmd }
 /* macro for any dmenu commands, colorize them */
 #define DMENUARGS "-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
-/* Helper for defining commands */
+/* macro defining commands */
 #define EXEC(name,cmd)	static const char *name[] = { "/bin/sh", "-c", cmd, NULL };
 /* commands */
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
@@ -187,7 +188,6 @@ static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL
 EXEC(termcmd, "st")
 static const char *syncthing[] = { "surf", "127.0.0.1:1210", NULL };
 static const char *web[]       = { "surf", "start.duckduckgo.com", NULL };
-//static const char *vifm[]      = { "sh",  "-c", "st -t 'FileManager🗄️' -e vifmrun", NULL };
 static const char *vifm[]      = { "st", "-e", "vifmrun", NULL };
 static const char *samevifm[]  = { "samedirvifm", NULL };
 //EXEC(samedmenu, "samedirmenu"
@@ -200,7 +200,7 @@ const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/fabe
 const char *spcmd1[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
 const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
 const char *spcmd3[] = { "st", "-n", "term", "-g", "115x30" , NULL };
-const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27",  "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "ncmpcpp", "-q", NULL };
+const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27",  "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", "-e", "ncmpcpp", "-q", NULL };
 const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "100x25", "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "pulsemixer", NULL };
 const char *spcmd6[] = { "samedir", "-n", "term", "-g", "115x30", NULL };
 //const char *spcmd7[] = { "st", "-n", "normal", NULL };
@@ -220,7 +220,7 @@ static Key keys[] = {
 //	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn,		{ .v = passmenu }	},
 	{ MODKEY|ShiftMask,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
 	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
-	//SCRATCHKEYS(MODKEY,		XK_e,	/* notes	*/	0)
+	SCRATCHKEYS(MODKEY,		XK_e,	/* notes	*/	0)
 	SCRATCHKEYS(MODKEY,		XK_x,	/* calculator	*/	1)
 	SCRATCHKEYS(MODKEY|ControlMask,	XK_s,	/* uni		*/	2)
 	SCRATCHKEYS(MODKEY,		XK_s,	/* terminal	*/	3)
@@ -235,7 +235,7 @@ static Key keys[] = {
 //	{ MODKEY,		   XK_Num_Lock,	togglescratch,	{.ui = 1 } },/* bc */
 
 				/* Navigation */
-	{ MODKEY,			XK_j,	focusstack,	{ .i = 1 }		},
+	{ MODKEY,			XK_j,	focusstack,	{ .i = -1 }		},
 	{ MODKEY|ShiftMask,		XK_j,	pushstack,	{ .i = 1 }		},
 
 	{ MODKEY|ControlMask,		XK_j,	shifttag,	{ .i = -1 }		},
@@ -244,7 +244,7 @@ static Key keys[] = {
 	{ MODKEY|ControlMask,		XK_k,	shifttag,	{ .i = +1 }		},
 
 	{ MODKEY|ShiftMask,		XK_k,	pushstack,	{ .i = -1 }		},
-	{ MODKEY,                       XK_k,	focusstack,	{ .i = -1 }		},
+	{ MODKEY,                       XK_k,	focusstack,	{ .i = +1 }		},
 
 	{ MODKEY,                       XK_h,	setmfact,	{ .f = -0.02 }		},
 	{ MODKEY|ShiftMask,		XK_h,	shiftboth,	{ .i = -1 }		},
@@ -322,8 +322,8 @@ static Key keys[] = {
 { MODKEY,	XK_minus,	SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
 { MODKEY,	XK_equal,	SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
 { MODKEY,	 XK_BackSpace,	SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
+{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 2; kill -44 $(pidof dwmblocks)") },
+{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2; kill -44 $(pidof dwmblocks)") },
 { 0, XF86XK_AudioMute,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
 //{ 0,	XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 //{ 0, XF86XK_ScreenSaver,		SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
