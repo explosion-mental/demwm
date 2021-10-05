@@ -3150,7 +3150,7 @@ setup(void)
 
 	/* init bars */
 	updatebars();
-	system("killall -q dwmblocks; dwmblocks &");
+	if (dwmblocks) system("killall -q dwmblocks; dwmblocks &");
 	updatestatus();
 	#ifdef TAG_PREVIEW
 	updatepreview(); //Is this for the current tag?

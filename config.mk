@@ -17,8 +17,10 @@ XINERAMAFLAGS = -DXINERAMA
 # freetype
 FREETYPELIBS = -lfontconfig -lXft
 FREETYPEINC = /usr/include/freetype2
+
 # OpenBSD (uncomment)
 #FREETYPEINC = ${X11INC}/freetype2
+#kvm to swallow on bsd
 #KVMLIB = -lkvm
 
 # Icons, comment if you don't want it
@@ -32,15 +34,17 @@ SYSTRAY = -DSYSTRAY
 #TAG_PREVIEW = -DTAG_PREVIEW
 #TAGNUM = -DTAGNUM=9	#number of tags you got
 
+# XCB libs, required by swallow
+XCBLIBS = -lX11-xcb -lxcb -lxcb-res
+
 # includes and libs
 INCS = -I${X11INC} -I${FREETYPEINC}
-LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS} -lXrender -lX11-xcb -lxcb -lxcb-res ${KVMLIB} ${IMLIB2LIBS}
+LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS} -lXrender ${XCBLIBS} ${KVMLIB} ${IMLIB2LIBS}
 
 # flags
 CPPFLAGS = -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${ICONS} ${SYSTRAY} ${TAG_PREVIEW} ${TAGNUM}
-#CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_C_SOURCE=2 -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS}
 #CFLAGS   = -g -std=c99 -pedantic -Wall -O0 ${INCS} ${CPPFLAGS}
-CFLAGS   = -march=native -mtune=native -std=c99 -pedantic -Wall -Wno-deprecated-declarations -flto -O3 ${INCS} ${CPPFLAGS}
+CFLAGS   = -march=native -mtune=native -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Wno-unused-function -flto -O3 ${INCS} ${CPPFLAGS}
 #CFLAGS   = -std=c99 -O3 -march=native -pedantic -Wall -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
 LDFLAGS  = ${LIBS}
 

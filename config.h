@@ -16,6 +16,7 @@ static int smartgaps          = 0;        /* 1 means no outer gap when there is 
 static int showbar            = 1;        /* 0 means no bar */
 static int topbar             = 1;        /* 0 means bottom bar */
 static const int barh         = 4;        /* 1 or more, means bar height */
+static const int dwmblocks    = 1;        /* 1 means use and start dwmblocks */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
