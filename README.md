@@ -8,16 +8,17 @@ My build of dwm
 - Xcb header files for the `swallow patch`.
 ## Optional
 - [pywal](https://github.com/dylanaraps/pywal)
- + If not you will have to define (instead of declaring) the colors variable
+	* If not you will have to define (instead of declaring) the colors
+	  variable
 - [libxft-bgra](https://github.com/uditkarode/libxft-bgra)
- + The `tags[]` array has emojis, replacing the unicode characters to
-   non-unicode will make independant of libxft-bgra.
-   [line](https://github.com/explosion-mental/Dwm/blob/410c01096547f3400d9afad7a091e3cb8c11397e/config.h#L63)
+	* The `tags[]` array has emojis, replacing the unicode characters to
+	  non-unicode will make independant of libxft-bgra.
+	  [line](https://github.com/explosion-mental/Dwm/blob/410c01096547f3400d9afad7a091e3cb8c11397e/config.h#L63)
 - xwallpaper
- + You can use other program to set the wallpaper,
-   [see](https://github.com/explosion-mental/Dwm/blob/main/dwm_random_wall)
+	* You can use other program to set the wallpaper,
+	  [see](https://github.com/explosion-mental/Dwm/blob/main/dwm_random_wall)
 - dwmblocks
- + You can disable/enable autostarting dwmblocks on `config.h`
+	* You can disable/enable autostarting dwmblocks on `config.h`
 
 # Recommendations
 - Before updating (`git pull`), change your configs (config.h) to config.def.h
