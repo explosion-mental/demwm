@@ -68,7 +68,7 @@
 #define ISVISIBLE(C)            ((C->tags & C->mon->tagset[C->mon->seltags]))
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
-#define OPAQUE                  0xffU	/* Borders */
+#define OPAQUE                  0xffU	/* borders */
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
 /* scratchpad */
@@ -1241,27 +1241,25 @@ dirtomon(int dir)
 void
 drawbar(Monitor *m)
 {
-	int x, w, tw = 0;
+	int x = 0, w, tw = 0;
 	int boxs = drw->fonts->h / 9;
 	int boxw = drw->fonts->h / 6 + 2;
 	unsigned int i, occ = 0, urg = 0;
 	unsigned int a = 0, s = 0;
 	Client *c;
+	char *tagsalt[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+	int bw = m->ww - tw; /* bar width */
+
 
 	#ifdef SYSTRAY
-	int stw = m == systraytomon(m) ? getsystraywidth() : 0;
-	//int m->ww = m->ww - stw
+	bw -= m == systraytomon(m) ? getsystraywidth() : 0;
 	#endif /* SYSTRAY */
 
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) { /* status is only drawn on selected monitor */
 		drw_setscheme(drw, scheme[SchemeStatus]);//[SchemeNorm]);
 		tw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
-#ifdef SYSTRAY
-		drw_text(drw, m->ww - tw - stw, 0, tw, bh, 0, stext, 0);
-#else
-		drw_text(drw, m->ww - tw, 0, tw, bh, 0, stext, 0);
-#endif /* SYSTRAY */
+		drw_text(drw, bw - tw, 0, tw, bh, 0, stext, 0);
 	}
 
 	#ifdef SYSTRAY
@@ -1273,31 +1271,29 @@ drawbar(Monitor *m)
 		if (c->isurgent)
 			urg |= c->tags;
 	}
-	x = 0;
 	for (i = 0; i < LENGTH(tags); i++) {
 		/* apply 'hidevacant' only to the selected monitor */
 		if (hidevacant && (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i)))
 			continue;
-		w = TEXTW(tags[i]);
+		w = TEXTW(hidevacant ? tagsalt[i] : tags[i]);
 	        if (urg & 1 << i)
 			drw_setscheme(drw, scheme[SchemeUrgent]);
 		else
 			drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
-		drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], 0);
-		if (occ & 1 << i) {
+		drw_text(drw, x, 0, w, bh, lrpad / 2, hidevacant ? tagsalt[i] : tags[i], urg & 1 << i);
+		if (occ & 1 << i && !hidevacant) { /* don't draw these when hidevacant */
 			if (urg & 1 << i) {
-				/* Urgent underline (which is on top) */
+				/* urgent underline (top of tag) */
 				drw_setscheme(drw, scheme[SchemeNotify]);
                 		drw_rect(drw, x, 0, w, boxs, 1, 0);
-				//drw_rect(drw, x + boxw, bh - boxw/2, w - ( 2 * boxw + 1), boxw/2,
 			}
-			/* Normal underline (IndOn/Off) */
+			/* normal underline (IndOn/Off) */
 			drw_setscheme(drw, scheme[(m == selmon && selmon->sel && selmon->sel->tags & 1 << i) ? SchemeIndOn : SchemeIndOff]);
 			drw_rect(drw, x, bh - boxs - 1, w, boxs + 1, 1, 0);
 		}
 		x += w;
 	}
-	/* Monocle, count clients if there are more than one */
+	/* monocle, count clients if there are more than one */
 	if (m->lt[m->sellt]->arrange == monocle) {
 		for (a = 0, s = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), a++)
 			if (c == m->stack)
@@ -1311,11 +1307,7 @@ drawbar(Monitor *m)
 	drw_setscheme(drw, scheme[SchemeLt]); //scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
-	if ((w = m->ww - tw
-	#ifdef SYSTRAY
-		- stw
-	#endif /* SYSTRAY */
-		- x) > bh) {
+	if ((w = bw - tw - x) > bh) {
 		if (m->sel) {
 			drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]); //[m == selmon ? SchemeSel : SchemeNorm]);
 		#ifdef ICONS
@@ -1326,31 +1318,26 @@ drawbar(Monitor *m)
 			drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
 		#endif /* ICONS */
 			if (m->sel->isfloating)
-				drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
+				drw_rect(drw, bw - tw - boxw - 1, boxs, boxw, boxw, m->sel->isfixed, 0);
 		} else {
 			drw_setscheme(drw, scheme[SchemeNorm]);
 			drw_rect(drw, x, 0, w, bh, 1, 1);
 		}
 	}
-#ifdef SYSTRAY
-	drw_map(drw, m->barwin, 0, 0, m->ww - stw, bh);
-#else
-	drw_map(drw, m->barwin, 0, 0, m->ww, bh);
-#endif /* SYSTRAY */
+	drw_map(drw, m->barwin, 0, 0, bw, bh);
 }
 
 void
 drawbars(void)
 {
 	Monitor *m;
-
-#ifdef SYSTRAY
+//#ifdef SYSTRAY
 	/* Clear status bar to avoid artifacts beneath systray icons */
 	/* FIXME this makes switching tags too flashy... should I be worried? */
 //	drw_setscheme(drw, scheme[SchemeNorm]);
 //	drw_rect(drw, 0, 0, selmon->ww, bh, 1, 1);
 //	drw_map(drw, selmon->barwin, 0, 0, selmon->ww, bh);
-#endif /* SYSTRAY */
+//#endif /* SYSTRAY */
 	for (m = mons; m; m = m->next)
 		drawbar(m);
 //#ifdef SYSTRAY
