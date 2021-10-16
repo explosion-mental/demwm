@@ -106,9 +106,9 @@ enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel, SchemeTitle, SchemeLt,
-       SchemeStatus, SchemeIndOff, SchemeIndOn, SchemeUrgent,
-       SchemeNotify, SchemeImg, SchemeSys }; /* color schemes */
+enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
+       SchemeStatus, SchemeIndOff, SchemeIndOn,
+       SchemeNotify, SchemeSys }; /* color schemes */
 enum { NetSupported, NetWMName,
 #ifdef ICONS
        NetWMIcon,
@@ -245,6 +245,12 @@ typedef struct {
 //	const char *name;
 	const void *cmd;
 } Sp;
+
+typedef struct {
+	char *color;
+	const unsigned int alpha;
+} Bordercolor;
+
 
 /* function declarations */
 static void applyrules(Client *c);
@@ -465,6 +471,7 @@ static Atom wmatom[WMLast], netatom[NetLast];
 static int running = 1, restart = 0;
 static Cur *cursor[CurLast];
 static Clr **scheme;
+static Clr **borderscheme;
 static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
@@ -1387,7 +1394,8 @@ focus(Client *c)
 		detachstack(c);
 		attachstack(c);
 		grabbuttons(c, 1);
-		XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
+		//XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
+		XSetWindowBorder(dpy, c->win, borderscheme[BorderSel][0].pixel);
 		setfocus(c);
 		if (c->mon->lt[c->mon->sellt]->arrange) {
 			/* Move all visible tiled clients that are not marked as on top below the bar window */
@@ -2250,7 +2258,8 @@ manage(Window w, XWindowAttributes *wa)
 
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
-	XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
+	//XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
+	XSetWindowBorder(dpy, w, borderscheme[BorderNorm][0].pixel);
 	configure(c); /* propagates border_width, if size doesn't change */
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMStateAbove])
 		c->alwaysontop = 1;
@@ -3150,10 +3159,23 @@ setup(void)
 
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
+	borderscheme = ecalloc(LENGTH(bordercolors), sizeof(Clr *));
+	size_t j;
+
 	/* If restarting keep the wallpaper, else refresh */
 	if (restart) {
 		for (i = 0; i < LENGTH(colors); i++)
-			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
+
+		//for (i = 0; i < LENGTH(bordercolors); i++)
+		//	borderscheme[i] = drw_scm_create(drw, bordercolors[i].color, bordercolors[i].alpha, 2);
+
+		//Clr *ret = ecalloc(2, sizeof(XftColor));
+
+		for (j = 0; j < 2; j++) {
+			drw_clr_create(drw, borderscheme[j], bordercolors[j].color, bordercolors[j].alpha);
+		}
+
 	} else {
 		//random_wall(NULL);
 		system("dwm_random_wall");
@@ -3634,7 +3656,7 @@ unfocus(Client *c, int setfocus)
 	grabbuttons(c, 0);
 	//c->alwaysontop = 0;
 	//XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
-	XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
+	XSetWindowBorder(dpy, c->win, borderscheme[BorderNorm][0].pixel);
 	if (setfocus) {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
@@ -3948,7 +3970,8 @@ updatewmhints(Client *c)
 			c->isurgent = (wmh->flags & XUrgencyHint) ? 1 : 0;
 			/* Set border to urgent */
 			if (c->isurgent)
-				XSetWindowBorder(dpy, c->win, scheme[SchemeUrgent][ColBorder].pixel);
+				//XSetWindowBorder(dpy, c->win, scheme[SchemeUrgent][ColBorder].pixel);
+				XSetWindowBorder(dpy, c->win, borderscheme[BorderUrg][0].pixel);
 		}
 		if (wmh->flags & InputHint)
 			c->neverfocus = !wmh->input;
@@ -4240,7 +4263,16 @@ xrdb(const Arg *arg)
 	loadxrdb();
 	int i;
 	for (i = 0; i < LENGTH(colors); i++)
-  		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+  		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
+	//borderscheme = drw_scm_create(drw, bordercolors[1], bordercolors[2], 2);
+
+
+	Clr *ret = ecalloc(2, sizeof(XftColor));
+	for (size_t j = 0; j < 2; j++) {
+		drw_clr_create(drw, &ret[j], bordercolors[j].color, bordercolors[j].alpha);
+		borderscheme[j] = &ret[j];
+	}
+
 	drawbar(selmon);
 	focus(NULL);
 	arrange(NULL);

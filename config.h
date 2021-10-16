@@ -14,7 +14,7 @@ static int swallowfloating    = 0;        /* 1 means swallow floating windows by
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int showbar            = 1;        /* 0 means no bar */
 static int topbar             = 1;        /* 0 means bottom bar */
-static const int barh         = 4;        /* 1 or more, means bar height */
+static const int barh         = 4;        /* 1 or more means bar height */
 static const int dwmblocks    = 1;        /* 1 means use and start dwmblocks */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
@@ -36,27 +36,44 @@ static char *fonts[] = {
 /* Pywal */
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8], color6[8], color7[8], color8[8];
 static char bg_wal[8], fg_wal[8], cursor_wal[8];
-static char *colors[][3]	      = {
-			/* fg		bg		border	     description         */
-	[SchemeNorm]   = { fg_wal,	color0,		color0 }, /* normal tags section */
-	[SchemeSel]    = { color0,	color1,		color2 }, /* selected tag */
-	[SchemeUrgent] = { fg_wal,	color0,		fg_wal }, /* urgent tag */
-	[SchemeLt]     = { color2,	color0,		NULL },   /* layout */
-	[SchemeTitle]  = { color0,	color2,		NULL },   /* window title */
-	[SchemeStatus] = { fg_wal,	color0,		NULL },   /* status bar */
-	[SchemeSys]    = { color0,	color0,		color0 }, /* system tray */
-	[SchemeNotify] = { fg_wal,	color0,		NULL },   /* little red bar on urgent tag */
-	[SchemeIndOn]  = { color4,	color0,		NULL },   /* rectangle on sel tag */
-	[SchemeIndOff] = { color2,	color0,		NULL },   /* rectangle on norm tag */
+
+//static char *BorderNorm[] = {color0};
+//static char *BorderSel[]  = {color2};
+//static char *BorderUrg[]  = {fg_wal};
+
+//static char *borderal = "255";	/* borders, default is 0xffU (OPAQUE) */
+
+enum { BorderNorm, BorderSel, BorderUrg };
+
+static const Bordercolor bordercolors[]	= {
+			/* border	alpha                description         */
+	[BorderNorm]   = { color0,	0 }, /* normal tags section */
+	[BorderSel]    = { color2,	borderalpha }, /* selected tag */
+	[BorderUrg]    = { fg_wal,	borderalpha }, /* selected tag */
 };
-static const unsigned int alphas[][3] = {
-			/* fg		bg		border     */
-	[SchemeNorm]   = { OPAQUE,	baralpha,	0 },
-	[SchemeSel]    = { OPAQUE,	baralpha,	OPAQUE },
-	[SchemeLt]     = { OPAQUE,	baralpha,	borderalpha },
-	[SchemeTitle]  = { OPAQUE,	OPAQUE,		0 },
-	[SchemeStatus] = { OPAQUE,	baralpha,	borderalpha },
-	[SchemeSys]    = { baralpha,	baralpha,	baralpha },
+static char *colors[][2]	        = {
+			/* fg		bg           description         */
+	[SchemeNorm]   = { fg_wal,	color0 }, /* normal tags section */
+	[SchemeSel]    = { color0,	color1 }, /* selected tag */
+	[SchemeUrgent] = { fg_wal,	color0 }, /* urgent tag */
+	[SchemeLt]     = { fg_wal,	color0 }, /* layout */
+	[SchemeTitle]  = { color0,	color2 }, /* window title */
+	[SchemeStatus] = { fg_wal,	color0 }, /* status bar */
+	[SchemeSys]    = { color0,	color0 }, /* system tray */
+	[SchemeNotify] = { fg_wal,	color0 }, /* little red bar on urgent tag */
+	[SchemeIndOn]  = { color4,	color0 }, /* rectangle on sel tag */
+	[SchemeIndOff] = { color2,	color0 }, /* rectangle on norm tag */
+};
+static const unsigned int alphas[][2]   = {
+			/* fg		bg	 */
+	[SchemeNorm]   = { OPAQUE,	baralpha },
+	[SchemeSel]    = { OPAQUE,	baralpha },
+	[SchemeLt]     = { OPAQUE,	baralpha },
+	[SchemeTitle]  = { OPAQUE,	OPAQUE,	 },
+	[SchemeStatus] = { OPAQUE,	baralpha },
+	[SchemeSys]    = { baralpha,	baralpha },
+	//[BorderNorm]    = { baralpha,	baralpha,	OPAQUE },
+	//[BorderSel]     = { baralpha,	baralpha,	OPAQUE },
 };
 
 /* tags */
