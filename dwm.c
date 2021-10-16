@@ -470,8 +470,7 @@ static unsigned long systrayorientation = 0; /* _NET_SYSTEM_TRAY_ORIENTATION_HOR
 static Atom wmatom[WMLast], netatom[NetLast];
 static int running = 1, restart = 0;
 static Cur *cursor[CurLast];
-static Clr **scheme;
-static Clr **borderscheme;
+static Clr **scheme, **borderscheme;
 static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
@@ -878,7 +877,10 @@ cleanup(void)
 		drw_cur_free(drw, cursor[i]);
 	for (i = 0; i < LENGTH(colors); i++)
 		free(scheme[i]);
+	for (i = 0; i < LENGTH(bordercolors); i++)
+		free(borderscheme[i]);
  	free(scheme);
+ 	free(borderscheme);
 	XDestroyWindow(dpy, wmcheckwin);
 	drw_free(drw);
 	XSync(dpy, False);
@@ -3167,14 +3169,8 @@ setup(void)
 		for (i = 0; i < LENGTH(colors); i++)
 			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
 
-		//for (i = 0; i < LENGTH(bordercolors); i++)
-		//	borderscheme[i] = drw_scm_create(drw, bordercolors[i].color, bordercolors[i].alpha, 2);
-
-		//Clr *ret = ecalloc(2, sizeof(XftColor));
-
-		for (j = 0; j < 2; j++) {
+		for (j = 0; j < LENGTH(bordercolors); j++)
 			drw_clr_create(drw, borderscheme[j], bordercolors[j].color, bordercolors[j].alpha);
-		}
 
 	} else {
 		//random_wall(NULL);
@@ -4262,13 +4258,14 @@ xrdb(const Arg *arg)
 {
 	loadxrdb();
 	int i;
+	size_t j;
 	for (i = 0; i < LENGTH(colors); i++)
   		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
 	//borderscheme = drw_scm_create(drw, bordercolors[1], bordercolors[2], 2);
 
 
-	Clr *ret = ecalloc(2, sizeof(XftColor));
-	for (size_t j = 0; j < 2; j++) {
+	Clr *ret = ecalloc(LENGTH(bordercolors), sizeof(XftColor));
+	for (j = 0; j < 2; j++) {
 		drw_clr_create(drw, &ret[j], bordercolors[j].color, bordercolors[j].alpha);
 		borderscheme[j] = &ret[j];
 	}
