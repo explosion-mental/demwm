@@ -2,7 +2,6 @@
 
 /* appearance */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
-static const unsigned int systrayspacing = 2;   /* systray spacing */
 static const int systraypinningfailfirst = 1;   /* 1: if pinning fails, display systray on the first monitor, False: display systray on the last monitor*/
 static unsigned int borderpx  = 4;        /* border pixel of windows */
 static unsigned int snap      = 10;       /* snap pixel */
