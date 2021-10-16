@@ -1710,22 +1710,22 @@ switchtag(void)
 	//		if (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i))
 	//		continue;
 	//	}
-		if (occ & 1 << i) {
-			image = imlib_create_image(sw, sh);
-			imlib_context_set_image(image);
-			imlib_context_set_display(dpy);
-			imlib_image_set_has_alpha(1);
-			imlib_context_set_blend(0);
-			imlib_context_set_visual(visual);
+			if (occ & 1 << i) {
+				image = imlib_create_image(sw, sh);
+				imlib_context_set_image(image);
+				imlib_context_set_display(dpy);
+				imlib_image_set_has_alpha(1);
+				imlib_context_set_blend(0);
+				imlib_context_set_visual(visual);
 
-			//imlib_context_set_visual(drw->visual);
-			imlib_context_set_drawable(root);
-			// screen size (m{x,y,w,h}) -> window areas, without the bar (w{x,y,w,h})
-			imlib_copy_drawable_to_image(0, selmon->wx, selmon->wy, selmon->ww ,selmon->wh, 0, 0, 1);
-			selmon->tagmap[i] = XCreatePixmap(dpy, selmon->tagwin, selmon->mw / scalepreview, selmon->mh / scalepreview, depth);
-			imlib_context_set_drawable(selmon->tagmap[i]);
-			imlib_render_image_part_on_drawable_at_size(0, 0, selmon->mw, selmon->mh, 0, 0, selmon->mw / scalepreview, selmon->mh / scalepreview);
-			imlib_free_image();
+				//imlib_context_set_visual(drw->visual);
+				imlib_context_set_drawable(root);
+				// screen size (m{x,y,w,h}) -> window areas, without the bar (w{x,y,w,h})
+				imlib_copy_drawable_to_image(0, selmon->wx, selmon->wy, selmon->ww ,selmon->wh, 0, 0, 1);
+				selmon->tagmap[i] = XCreatePixmap(dpy, selmon->tagwin, selmon->mw / scalepreview, selmon->mh / scalepreview, depth);
+				imlib_context_set_drawable(selmon->tagmap[i]);
+				imlib_render_image_part_on_drawable_at_size(0, 0, selmon->mw, selmon->mh, 0, 0, selmon->mw / scalepreview, selmon->mh / scalepreview);
+				imlib_free_image();
 			}
 		}
 	}
@@ -4497,6 +4497,11 @@ swaptags(const Arg *arg)
 //void
 //random_wall(const Arg *arg)
 //{
+	//char *img = "/home/faber/Media/Pictures/Wallpapers";
+	//char *bgloc = "${XDG_DATA_HOME:-$HOME/.local/share/}/bg";
+	//symlink()
+
+	//img_path="$HOME/Media/Pictures/Wallpapers"
 ////	const char bglock = "";
 ////	if ((bclock = getenv("XDG_DATA_HOME/bg")) == NULL)
 ////		bglock = getenv("HOME/.local/bg");
@@ -4504,6 +4509,12 @@ swaptags(const Arg *arg)
 //	//wait(NULL);
 //	system("dwm_random_wall");
 //	xrdb(NULL);
+	//char cmd[50];
+	//if (tag)
+	//	snprintf(cmd, sizeof(cmd), "%s --hide --show %d &", preview_path, tag);
+	//else
+	//	snprintf(cmd, sizeof(cmd), "%s --hide &", preview_path);
+	//system(cmd);
 //}
 void
 random_wall(const Arg *arg)
@@ -4517,6 +4528,7 @@ random_wall(const Arg *arg)
 		exit(EXIT_SUCCESS);
 	} else {
 	/* Parent */
+		//we wait so when the bar is updated at the exact same time when the wallpaper is set
 		wait(NULL);
 		xrdb(NULL);
 	}
