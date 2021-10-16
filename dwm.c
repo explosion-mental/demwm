@@ -82,8 +82,7 @@
 #define XRDB_LOAD_COLOR(R,V) \
 	if (XrmGetResource(xrdb, R, NULL, &type, &value) == True) { \
 		if (strnlen(value.addr, 8) == 7 && value.addr[0] == '#') { \
-                	int i = 1; \
-			for (; i <= 6; i++) { \
+			for (i = 1; i <= 6; i++) { \
                                 if (value.addr[i] < 48) break; \
                                 if (value.addr[i] > 57 && value.addr[i] < 65) break; \
                                 if (value.addr[i] > 70 && value.addr[i] < 97) break; \
@@ -296,6 +295,7 @@ static void incnmaster(const Arg *arg);
 static void keypress(XEvent *e);
 static void killclient(const Arg *arg);
 static void losefullscreen(Client *next);
+static void loadcolors(int fallback);
 static void loadxrdb(void);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
@@ -2181,6 +2181,42 @@ losefullscreen(Client *next)
 		setfullscreen(sel, 0);
 }
 
+/* Wrapper function to load colors, since it appears at least 3 times. The
+ * logic is: if 'fallback' value is 0, load the colors normally (pywal); but if
+ * it does has a value, then use fallback colors */
+void
+loadcolors(int fallback)
+{
+	int i;
+	size_t j;
+
+	if (fallback) { /* fallback colors */
+		strcpy(bg_wal, "#222222");
+		strcpy(fg_wal, "#222222");
+		strcpy(color0, "#222222");
+		strcpy(color1, "#222222");
+		strcpy(color2, "#222222");
+		strcpy(color3, "#222222");
+		strcpy(color4, "#222222");
+		strcpy(color5, "#222222");
+		strcpy(color6, "#222222");
+		strcpy(color7, "#222222");
+		strcpy(color8, "#222222");
+		strcpy(cursor_wal, "#222222");
+	} else { /* allocate colors */
+		Clr *ret = ecalloc(LENGTH(bordercolors), sizeof(XftColor));
+
+		/* colors and alpha values */
+		for (i = 0; i < LENGTH(colors); i++)
+			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
+		/* bordercolors and alpha values */
+		for (j = 0; j < LENGTH(bordercolors); j++) {
+			drw_clr_create(drw, &ret[j], bordercolors[j].color, bordercolors[j].alpha);
+			borderscheme[j] = &ret[j];
+		}
+	}
+}
+
 void
 loadxrdb(void)
 {
@@ -2188,6 +2224,7 @@ loadxrdb(void)
 	char *resm, *type;
 	XrmValue value;
 	XrmDatabase xrdb;
+	int i; //for the macro
 
 	display = XOpenDisplay(NULL);
 	resm = XResourceManagerString(display);
@@ -2208,7 +2245,8 @@ loadxrdb(void)
 		XRDB_LOAD_COLOR("color7", color7);
 		XRDB_LOAD_COLOR("color8", color8);
  		XrmDestroyDatabase(xrdb);	/* Fix memory leaks */
-	}
+	} else
+		loadcolors(1);
 	XCloseDisplay(display);
 }
 
@@ -3098,7 +3136,6 @@ setmfact(const Arg *arg)
 void
 setup(void)
 {
-	int i;
 	XSetWindowAttributes wa;
 	Atom utf8string;
 
@@ -3154,6 +3191,7 @@ setup(void)
 	xatom[Xembed]                  = XInternAtom(dpy, "_XEMBED", False);
 	xatom[XembedInfo]              = XInternAtom(dpy, "_XEMBED_INFO", False);
 	#endif /* SYSTRAY */
+
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
 	cursor[CurResize] = drw_cur_create(drw, XC_sizing);
@@ -3162,19 +3200,13 @@ setup(void)
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 	borderscheme = ecalloc(LENGTH(bordercolors), sizeof(Clr *));
-	size_t j;
 
-	/* If restarting keep the wallpaper, else refresh */
-	if (restart) {
-		for (i = 0; i < LENGTH(colors); i++)
-			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
-
-		for (j = 0; j < LENGTH(bordercolors); j++)
-			drw_clr_create(drw, borderscheme[j], bordercolors[j].color, bordercolors[j].alpha);
-
-	} else {
-		//random_wall(NULL);
-		system("dwm_random_wall");
+	/* FIXME if restarting keep the wallpaper the same, else refresh */
+	if (restart)
+		loadcolors(0);
+	else {
+		if (system("dwm_random_wall") != 0)
+			loadcolors(1);
 		xrdb(NULL);
 	}
 
@@ -4257,18 +4289,7 @@ void
 xrdb(const Arg *arg)
 {
 	loadxrdb();
-	int i;
-	size_t j;
-	for (i = 0; i < LENGTH(colors); i++)
-  		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
-	//borderscheme = drw_scm_create(drw, bordercolors[1], bordercolors[2], 2);
-
-
-	Clr *ret = ecalloc(LENGTH(bordercolors), sizeof(XftColor));
-	for (j = 0; j < 2; j++) {
-		drw_clr_create(drw, &ret[j], bordercolors[j].color, bordercolors[j].alpha);
-		borderscheme[j] = &ret[j];
-	}
+	loadcolors(0);
 
 	drawbar(selmon);
 	focus(NULL);
