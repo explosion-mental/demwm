@@ -294,6 +294,7 @@ static void grabkeys(void);
 static void incnmaster(const Arg *arg);
 static void keypress(XEvent *e);
 static void killclient(const Arg *arg);
+static void losefullscreen(Client *next);
 static void loadxrdb(void);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
@@ -367,7 +368,7 @@ static void fullscreen(const Arg *arg);
 static void togglescratch(const Arg *arg);
 static void toggletag(const Arg *arg);
 static void toggleview(const Arg *arg);
-static void unfocus(Client *c, int setfocus, Client *nextfocus);
+static void unfocus(Client *c, int setfocus);
 static void unmanage(Client *c, int destroyed);
 static void unmapnotify(XEvent *e);
 static void updatebarpos(Monitor *m);
@@ -771,7 +772,7 @@ buttonpress(XEvent *e)
 	click = ClkRootWin;
 	/* focus monitor if necessary */
 	if ((m = wintomon(ev->window)) && m != selmon) {
-		unfocus(selmon->sel, 1, NULL);
+		unfocus(selmon->sel, 1);
 		selmon = m;
 		focus(NULL);
 	}
@@ -1377,8 +1378,11 @@ focus(Client *c)
 	XWindowChanges wc;
 	if (!c || !ISVISIBLE(c))
 		for (c = selmon->stack; c && !ISVISIBLE(c); c = c->snext);
-	if (selmon->sel && selmon->sel != c)
-		unfocus(selmon->sel, 0, c);
+	if (selmon->sel && selmon->sel != c) {
+		//if we don't losefullscreen we can stack fullscren clients
+		//losefullscreen(c);
+		unfocus(selmon->sel, 0);
+	}
 	if (c) {
 		if (c->mon != selmon)
 			selmon = c->mon;
@@ -1454,7 +1458,7 @@ focusmon(const Arg *arg)
 		return;
 	sel = selmon->sel;
 	selmon = m;
-	unfocus(sel, 0, NULL);
+	unfocus(sel, 0);
 	focus(NULL);
 	XWarpPointer(dpy, None, m->barwin, 0, 0, 0, 0, m->mw / 2, m->mh / 2);
 }
@@ -1463,6 +1467,15 @@ void
 focusstack(const Arg *arg)
 {
 	Client *c = NULL, *i;
+
+	/* Note that this patch is made for dwm 6.2. If applying this on top of
+	 * the latest master then the
+	 * https://dwm.suckless.org/patches/alwaysfullscreen/ patch has been
+	 * merged upstream, which prevents focus to drift from windows that are
+	 * in fake fullscreen. To address this issue use this if statement
+	 * instead:
+	 if (!selmon->sel || (selmon->sel->isfullscreen && selmon->sel->fakefullscreen != 1))
+	 */
 
 	if (!selmon->sel)
 		return;
@@ -2142,6 +2155,16 @@ killclient(const Arg *arg)
 }
 
 void
+losefullscreen(Client *next)
+{
+	Client *sel = selmon->sel;
+	if (!sel || !next)
+		return;
+	if (sel->isfullscreen && sel->fakefullscreen != 1 && ISVISIBLE(sel) && sel->mon == next->mon && !next->isfloating)
+		setfullscreen(sel, 0);
+}
+
+void
 loadxrdb(void)
 {
 	Display *display;
@@ -2245,8 +2268,10 @@ manage(Window w, XWindowAttributes *wa)
 		(unsigned char *) &(c->win), 1);
 	XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w, c->h); /* some windows require this */
 	setclientstate(c, NormalState);
-	if (c->mon == selmon)
-		unfocus(selmon->sel, 0, c);
+	if (c->mon == selmon) {
+		losefullscreen(c);
+		unfocus(selmon->sel, 0);
+	}
 	c->mon->sel = c;
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);
@@ -2329,7 +2354,7 @@ motionnotify(XEvent *e)
 	if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon && mon) {
 		sel = selmon->sel;
 		selmon = m;
-		unfocus(sel, 1, NULL);
+		unfocus(sel, 1);
 		focus(NULL);
 	}
 	mon = m;
@@ -2732,7 +2757,7 @@ sendmon(Client *c, Monitor *m)
 {
 	if (c->mon == m)
 		return;
-	unfocus(c, 1, NULL);
+	unfocus(c, 1);
 	detach(c);
 	detachstack(c);
 	c->mon = m;
@@ -3483,20 +3508,19 @@ fakefullscreen(const Arg *arg)
 void
 togglefloating(const Arg *arg)
 {
-	if (!selmon->sel)
+	Client *c = selmon->sel;
+	if (!c)
 		return;
-	if (selmon->sel->isfullscreen && selmon->sel->fakefullscreen != 1) /* no support for fullscreen windows */
+	if (c->isfullscreen && c->fakefullscreen != 1) /* no support for fullscreen windows */
 		return;
-	selmon->sel->isfloating = !selmon->sel->isfloating || selmon->sel->isfixed;
+	c->isfloating = !c->isfloating || c->isfixed;
 	if (selmon->sel->isfloating)
-		//resize(c, c->x, c->y, c->w, c->h, 0);
-		resize(selmon->sel, selmon->sel->x, selmon->sel->y,
- 			selmon->sel->w, selmon->sel->h, 0);
+		resize(c, c->x, c->y, c->w, c->h, 0);
 
-	selmon->sel->x = selmon->sel->mon->mx + (selmon->sel->mon->mw - WIDTH(selmon->sel)) / 2;
-	selmon->sel->y = selmon->sel->mon->my + (selmon->sel->mon->mh - HEIGHT(selmon->sel)) / 2;
+	c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
+	c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
 
-	arrange(selmon);
+	arrange(c->mon);
 }
 
 void
@@ -3594,15 +3618,17 @@ toggleview(const Arg *arg)
 }
 
 void
-unfocus(Client *c, int setfocus, Client *nextfocus)
+unfocus(Client *c, int setfocus)
 {
 	if (!c)
 		return;
-	if (c->isfullscreen && ISVISIBLE(c) && c->mon == selmon && nextfocus && !nextfocus->isfloating)
-		if (c->fakefullscreen != 1)
-			setfullscreen(c, 0);
+	//quit fullscreen while changing the focus
+	//if (c->isfullscreen && ISVISIBLE(c) && c->mon == selmon && nextfocus && !nextfocus->isfloating)
+		//if (c->fakefullscreen != 1)
+		//	setfullscreen(c, 0);
 	grabbuttons(c, 0);
 	//c->alwaysontop = 0;
+	//XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
 	XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
 	if (setfocus) {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
@@ -4053,7 +4079,9 @@ winpid(Window w)
         unsigned char *prop;
         pid_t ret;
 
-        if (XGetWindowProperty(dpy, w, XInternAtom(dpy, "_NET_WM_PID", 0), 0, 1, False, AnyPropertyType, &type, &format, &len, &bytes, &prop) != Success || !prop)
+	if (XGetWindowProperty(dpy, w, XInternAtom(dpy, "_NET_WM_PID", 0), 0,
+				1, False, AnyPropertyType, &type, &format,
+				&len, &bytes, &prop) != Success || !prop)
                return 0;
 
         ret = *(pid_t*)prop;
