@@ -43,7 +43,7 @@ static const Bordercolor bordercolors[]	= {
 	[BorderSel]    = { color2,	borderalpha }, /* selected tag */
 	[BorderUrg]    = { fg_wal,	borderalpha }, /* selected tag */
 };
-static char *colors[][2]	        = {
+static const char *colors[][2]	        = {
 			/* fg		bg           description         */
 	[SchemeNorm]   = { fg_wal,	color0 }, /* normal tags section */
 	[SchemeSel]    = { color0,	color1 }, /* selected tag */

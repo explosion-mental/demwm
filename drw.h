@@ -48,8 +48,8 @@ void drw_font_getexts(Fnt *font, const char *text, unsigned int len, unsigned in
 //void drw_clr_create(Drw *drw, Clr *dest, const char *clrname);
 void drw_clr_create(Drw *drw, Clr *dest, const char *clrname, unsigned int alpha);
 //Clr *drw_scm_create(Drw *drw, char *clrnames[], size_t clrcount);
-Clr *drw_scm_create(Drw *drw, char *clrnames[], const unsigned int alphas[], size_t clrcount);
-/* Had to change "const char *clrnames[]" to "char *clrname[]" on drw.h and drw.c */
+Clr *drw_scm_create(Drw *drw, const char *clrnames[], const unsigned int alphas[], size_t clrcount);
+/* Had to change "const char *clrnames[]" to "char *clrname[]" on drw.h and drw.c */ //why?
 
 /* Cursor abstraction */
 Cur *drw_cur_create(Drw *drw, int shape);
