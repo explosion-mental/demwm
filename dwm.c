@@ -105,6 +105,7 @@ enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
+enum { BorderNorm, BorderSel, BorderUrg }; /* border schemes */
 enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
        SchemeStatus, SchemeIndOff, SchemeIndOn,
        SchemeNotify, SchemeSys }; /* color schemes */
@@ -2390,11 +2391,10 @@ motionnotify(XEvent *e)
 			if ((i + 1) != selmon->previewshow && !(selmon->tagset[selmon->seltags] & 1 << i)) {
 	     			selmon->previewshow = i + 1;
 	     			showtagpreview(i);
-			}
-		else if (selmon->tagset[selmon->seltags] & 1 << i) {
+			} else if (selmon->tagset[selmon->seltags] & 1 << i) {
 				selmon->previewshow = 0;
 				showtagpreview(0);
-		  }
+		  	}
 		} else if (selmon->previewshow != 0) {
 	     		selmon->previewshow = 0;
 	     		showtagpreview(0);

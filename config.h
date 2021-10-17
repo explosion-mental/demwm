@@ -37,17 +37,9 @@ static char *fonts[] = {
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8], color6[8], color7[8], color8[8];
 static char bg_wal[8], fg_wal[8], cursor_wal[8];
 
-//static char *BorderNorm[] = {color0};
-//static char *BorderSel[]  = {color2};
-//static char *BorderUrg[]  = {fg_wal};
-
-//static char *borderal = "255";	/* borders, default is 0xffU (OPAQUE) */
-
-enum { BorderNorm, BorderSel, BorderUrg };
-
 static const Bordercolor bordercolors[]	= {
 			/* border	alpha                description         */
-	[BorderNorm]   = { color0,	0 }, /* normal tags section */
+	[BorderNorm]   = { color0,	0           }, /* normal tags section */
 	[BorderSel]    = { color2,	borderalpha }, /* selected tag */
 	[BorderUrg]    = { fg_wal,	borderalpha }, /* selected tag */
 };
