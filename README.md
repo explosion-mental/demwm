@@ -25,19 +25,22 @@ My build of dwm
 - Please look at the [docs](doc.md)
 
 # Features
-- Vanitygaps (some of the specific increase/decrease on horizontal or vertical
-  functions are commented out since I use only the general one.)
+- Gaps (vanitygaps)
 - [pywal](https://github.com/dylanaraps/pywal) color syncronization by default
-- More layouts
+  (xresources reading)
+- Changing the schemes (colors) at run time
+- More [layouts](https://github.com/explosion-mental/Dwm/blob/main/layouts.c)
 - Custom bar height
+- Separated border color scheme from general color scheme (which improves
+  readability, in a way)
 - Different color schemes for Title, Status and Layout (added 4 more shemes on
   top of the other mentioned: Urgent - Notify - Indicator on/of)
 - Transparency on the bar
 - A beautiful looking config.h file (at least for my taste :)
-- Toggleable 'hide-vacant' patch
+- Toggleable 'hide-vacant' patch which activates alternative tags that makes
+  tag movements easy
+- Dynamic and static scratchpads
 
-
-see: [layouts.c](https://github.com/explosion-mental/Dwm/blob/main/layouts.c)
 
 # Toggleable Features
 Here are the "too bloated" features which doesn't affect the workflow, but
@@ -62,22 +65,29 @@ edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
 uncomment the line with `#SYSTRAY`
 
 ## Tag Previews
-Hover your mouse over a tag (you have had it viewed first) and look the contents of it.
+Hover your mouse over a tag (you need to have it viewed first) and look the
+contents of it.
 
 edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
 uncomment the line with `#TAG_PREVIEW`
 
 # dwm_random_wall
 This is a little script that changes the wallpaper to a random one and uses
-(and requires) **pywal**. It also has the `-o` option that runs a `postrun`
+(requires) **pywal**. It uses the `-o` flag for pywal that runs a `postrun`
 script (you can safely delete it), which syncs zathura and dunst to the pywal
 coloscheme. By default my dwm build syncs all colors to pywal colors, this only
 seems "_useful_" if you wish to change wallpapers (and colorscheme) at runtime.
 You should **edit** the variable `img_path` to your actual path of wallpapers
-(if you use pywal then you have wallpapers, else it would be rather pointless).
+(makes sense to use `pywal` if you also use wallpapers, it would be pointless
+otherwise).
+
 
 Remember, the script is copied and removed by the makefile (`make install` and
 `make unistall`).
+
+
+_I'm working on making this a function on C so no external script would be
+needed_
 
 # Patches
 My little collection of patches, which aren't necessarily applied to this. You
@@ -98,8 +108,8 @@ Currently I don't wish more 'features' but here are some ideas:
 
 ## Some little TODOS:
 - toggle border
-- Make _systray_ background the same color as the bar
 - depatch cfacts(?)
+- Make _systray_ background the same color as the bar
 - <s>Make _tag previews_ more solid</s> and prevent from being shown in the preview of the preview...
 - <s>systray toggleable with _#ifdef_ and _#endif_</s>
 - <s>make [hide vacant patch](https://dwm.suckless.org/patches/hide_vacant_tags/)
@@ -107,9 +117,9 @@ Currently I don't wish more 'features' but here are some ideas:
 - <s>a better way of handling layouts at startup</s>
 
 ## Some wishing pains:
-- change `dwm_random_wall` script to an actual function
+- change `dwm_random_wall` script to an actual function on C.
 - pertag cursor position. Save the state of the cursor position between tags.
-- integrate dwmblocks into dwm (prob not worth it)
+- integrate dwmblocks into dwm (prob not worth it).
 - Make gaps an option(?)
 - Can `tcc` (tiny C Compiler) be used along side with the **alpha** patch?
 - <s>getenv("TERMINAL")</s>
@@ -123,6 +133,8 @@ Currently I don't wish more 'features' but here are some ideas:
 - Better way of handling Pywal colors (Jun 21 2021)
 - Window icons (Jul 22 2021)
 	* Icons on swallowed - unswallowed windows (Jul 23 2021)
-- toggleable hide vacants tags (Jul 28 2021)
+- Toggleable hide vacants tags (Jul 28 2021)
+	* Now hidevacants activates alternative tags (Oct 15 2021)
 - System Tray (Aug 06 2021)
 - Tag previews (Aug 10 2021)
+- Borders colors and general colors has different schemes (Oct 16 2021)
