@@ -10,10 +10,10 @@ static unsigned int gappiv    = 20;       /* vert inner gap between windows */
 static unsigned int gappoh    = 15;       /* horiz outer gap between windows and screen edge */
 static unsigned int gappov    = 20;       /* vert outer gap between windows and screen edge */
 static int hidevacant         = 0;        /* 1 means hide vacant tags */
-static int swallowfloating    = 0;        /* 1 means swallow floating windows by default */
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
-static int showbar            = 1;        /* 0 means no bar */
-static int topbar             = 1;        /* 0 means bottom bar */
+static int swallowfloating    = 0;        /* 1 means swallow floating windows by default */
+static const int showbar      = 1;        /* 0 means no bar */
+static const int topbar       = 1;        /* 0 means bottom bar */
 static const int barh         = 4;        /* 1 or more means bar height */
 static const int dwmblocks    = 1;        /* 1 means use and start dwmblocks */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
@@ -72,6 +72,7 @@ static const unsigned int alphas[][2]   = {
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
 static const int taglayouts[] = {    0,   1,    0,   0,    0,    0,    0,    0,    0 };
 
+enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, SpLast };
 static const Rule rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
@@ -112,14 +113,14 @@ static const Rule rules[] = {
 	RULE(.title = "mpvfloat",	.isfloating = 1)
 	RULE(.instance = "mpvfloat",	.isfloating = 1)
 
-	RULE(.instance = "notes",	.tags = SPTAG(0), .isfloating = 1)
-	RULE(.instance = "calc" ,	.tags = SPTAG(1), .isfloating = 1)
-	RULE(.instance = "pre"  ,	.tags = SPTAG(2), .isfloating = 1)
-	RULE(.instance = "term",	.tags = SPTAG(3), .isfloating = 1)
-	RULE(.instance = "music",	.tags = SPTAG(4), .isfloating = 1)
-	RULE(.instance = "pulsemixer",	.tags = SPTAG(5), .isfloating = 1)
-	RULE(.instance = "term",	.tags = SPTAG(6), .isfloating = 1)
-	RULE(.instance = "normal",	.tags = SPTAG(7))
+	RULE(.instance = "term",	.tags = SPTAG(Sp1), .isfloating = 1)
+	RULE(.instance = "notes",	.tags = SPTAG(Sp2), .isfloating = 1)
+	RULE(.instance = "calc" ,	.tags = SPTAG(Sp3), .isfloating = 1)
+	RULE(.instance = "pre"  ,	.tags = SPTAG(Sp4), .isfloating = 1)
+	RULE(.instance = "music",	.tags = SPTAG(Sp5), .isfloating = 1)
+	RULE(.instance = "pulsemixer",	.tags = SPTAG(Sp6), .isfloating = 1)
+	RULE(.instance = "term",	.tags = SPTAG(Sp7), .isfloating = 1)
+	//RULE(.instance = "normal",	.tags = SPTAG(7))
 	//RULE(.instance = "emacsfloat",	.tags = SPTAG(8), .isfloating = 1)
 };
 
@@ -178,7 +179,7 @@ static const Layout layouts[] = {
 	{ MODKEY|ControlMask,           KEY,	toggleview,     { .ui = 1 << TAG } }, \
 	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,      { .ui = 1 << TAG } }, \
 	{ MODKEY|Mod1Mask,		KEY,	swaptags,	{ .ui = 1 << TAG } },
-#define SCRATCHKEYS(MOD,KEY,NUM) \
+#define SPKEYS(MOD,KEY,NUM) \
 	{ MOD,			KEY,	togglescratch,	{ .ui = NUM } },
 /* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd? */
 #define SHCMD(cmd)	spawn, { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
@@ -201,18 +202,18 @@ static const char *vifm[]      = { "st", "-e", "vifmrun", NULL };
 static const char *samevifm[]  = { "samedirvifm", NULL };
 //EXEC(samedmenu, "samedirmenu"
 
-/* scratchpads */
+/* macro for nvim to start on insertmode on the last line */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
-const char *spname[] = { "notes", "calc", "pre", "term", "music", "pulsemixer", "term" };
-static Sp scratchpads[9];
-const char *spcmd0[] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL };
-const char *spcmd1[] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL };
-const char *spcmd2[] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL };
-const char *spcmd3[] = { "st", "-n", "term", "-g", "115x30" , NULL };
-const char *spcmd4[] = { "st", "-n", "music", "-g", "105x27",  "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", "-e", "ncmpcpp", "-q", NULL };
-const char *spcmd5[] = { "st", "-n", "pulsemixer", "-g", "100x25", "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "pulsemixer", NULL };
-const char *spcmd6[] = { "samedir", "-n", "term", "-g", "115x30", NULL };
-//const char *spcmd7[] = { "st", "-n", "normal", NULL };
+/* scratchpads */
+static const char *scratchpads[SpLast][256] = {
+	[Sp1] = { "st", "-n", "term", "-g", "115x30" , NULL }, /* terminal */
+	[Sp2] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
+	[Sp3] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL }, /* calculator */
+	[Sp4] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL }, /* uni */
+	[Sp5] = { "st", "-n", "music", "-g", "105x27",  "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", "-e", "ncmpcpp", "-q", NULL }, /* music */
+	[Sp6] = { "st", "-n", "pulsemixer", "-g", "100x25", "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "pulsemixer", NULL }, /* pulsemixer */
+	[Sp7] = { "samedir", "-n", "term", "-g", "115x30", NULL }, /* samedir */
+};
 
 static Key keys[] = {
 	/* modifier(s)			key	function	argument */
@@ -229,19 +230,19 @@ static Key keys[] = {
 //	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn,		{ .v = passmenu }	},
 	{ MODKEY|ShiftMask,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
 	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
-	SCRATCHKEYS(MODKEY,		XK_e,	/* notes	*/	0)
-	SCRATCHKEYS(MODKEY,		XK_x,	/* calculator	*/	1)
-	SCRATCHKEYS(MODKEY|ControlMask,	XK_s,	/* uni		*/	2)
-	SCRATCHKEYS(MODKEY,		XK_s,	/* terminal	*/	3)
-	SCRATCHKEYS(MODKEY,		XK_n,	/* music	*/	4)
-	SCRATCHKEYS(MODKEY|ShiftMask,	XK_p,	/* pulsemixer	*/	5)
-	SCRATCHKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	6)
+	SPKEYS(MODKEY,			XK_s,	/* terminal	*/	Sp1)
+	SPKEYS(MODKEY,			XK_e,	/* notes	*/	Sp2)
+	SPKEYS(MODKEY,			XK_x,	/* calculator	*/	Sp3)
+	SPKEYS(MODKEY|ControlMask,	XK_s,	/* uni		*/	Sp4)
+	SPKEYS(MODKEY,			XK_n,	/* music	*/	Sp5)
+	SPKEYS(MODKEY|ShiftMask,	XK_p,	/* pulsemixer	*/	Sp6)
+	SPKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	Sp7)
 	//SCRATCHKEYS(MODKEY|ControlMask,	XK_e,	/* stnormal	*/	7)
 	{ MODKEY|ControlMask,		XK_v,	scratchpad_remove,	{0} },
 	{ MODKEY,                       XK_v,	scratchpad_show,	{0} },
 	{ MODKEY|ShiftMask,             XK_v,	scratchpad_hide,	{0} },
 	//{ MODKEY|ControlMask,          	XK_v,	scratchpad_remove,	{0} },
-//	{ MODKEY,		   XK_Num_Lock,	togglescratch,	{.ui = 1 } },/* bc */
+	//{ MODKEY,			XK_s,	togglescratch,	{.ui = Sp1 } },/* bc */
 
 				/* Navigation */
 	{ MODKEY,			XK_j,	focusstack,	{ .i = -1 }		},

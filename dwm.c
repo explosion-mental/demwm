@@ -240,17 +240,10 @@ struct Systray {
 };
 #endif /* SYSTRAY */
 
-/* scratchpads */
 typedef struct {
-//	const char *name;
-	const void *cmd;
-} Sp;
-
-typedef struct {
-	char *color;
+	const char *color;
 	const unsigned int alpha;
 } Bordercolor;
-
 
 /* function declarations */
 static void applyrules(Client *c);
@@ -285,6 +278,7 @@ static void focusstack(const Arg *arg);
 static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 #ifdef ICONS
+static uint32_t prealpha(uint32_t p);
 static Picture geticonprop(Window w, unsigned int *icw, unsigned int *ich);
 static void freeicon(Client *c);
 static void updateicon(Client *c);
@@ -504,20 +498,8 @@ static const int scrollargs[][2] = {
 	{ 0, 			+scrollsensetivity },
 };
 
-
+/* dynamic scratchpads (this selects an unused tag?) */
 #define SCRATCHPAD_MASK (1u << sizeof tags / sizeof * tags)
-
-/* scratchpads */
-static Sp scratchpads[] = { {spcmd0}, {spcmd1}, {spcmd2}, {spcmd3}, {spcmd4}, {spcmd5}, {spcmd6} };
-//static Sp scratchpads[] = {
-//	/* name		cmd   */
-//	{"notes",	spcmd0},
-//	{"calc",	spcmd1},
-//	{"pre",		spcmd2},
-//	{"diary",	spcmd3},
-//	{"music",	spcmd4},
-//	{"pulsemixer",	spcmd5},
-//};
 
 /* Pertag */
 struct Pertag {
@@ -1820,7 +1802,7 @@ void
 updatesystray(void)
 {
 	XSetWindowAttributes wa;
-	XWindowChanges wc;
+	//XWindowChanges wc;
 	Client *i;
 	Monitor *m = systraytomon(NULL);
 	unsigned int x = m->mx + m->mw;
@@ -1973,13 +1955,14 @@ wintosystrayicon(Window w) {
 
 /* Window Icons functions */
 #ifdef ICONS
-static uint32_t prealpha(uint32_t p) {
+uint32_t
+prealpha(uint32_t p)
+{
 	uint8_t a = p >> 24u;
 	uint32_t rb = (a * (p & 0xFF00FFu)) >> 8u;
 	uint32_t g = (a * (p & 0x00FF00u)) >> 8u;
 	return (rb & 0xFF00FFu) | (g & 0x00FF00u) | (a << 24u);
 }
-
 Picture
 geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 {
@@ -2245,7 +2228,7 @@ loadxrdb(void)
 		XRDB_LOAD_COLOR("color6", color6);
 		XRDB_LOAD_COLOR("color7", color7);
 		XRDB_LOAD_COLOR("color8", color8);
- 		XrmDestroyDatabase(xrdb);	/* Fix memory leaks */
+ 		XrmDestroyDatabase(xrdb);	/* fix memory leaks */
 	} else
 		loadcolors(1);
 	XCloseDisplay(display);
@@ -3471,6 +3454,7 @@ spawn(const Arg *arg)
 	}
 }
 
+/* wrapper for exec which appends NULL to the variable */
 void
 spawncmd(const Arg *arg)
 {
@@ -3598,7 +3582,8 @@ togglescratch(const Arg *arg)
 	Client *c;
 	unsigned int found = 0;
 	unsigned int scratchtag = SPTAG(arg->ui);
-	Arg sparg = {.v = scratchpads[arg->ui].cmd};
+	Arg sparg = {.v = scratchpads[arg->ui]};
+	//Arg sparg = {.v = scratchpads[arg->ui].cmd};
 
 	for (c = selmon->clients; c && !(found = c->tags & scratchtag); c = c->next);
 	if (found) {
