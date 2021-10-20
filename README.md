@@ -8,8 +8,7 @@ My build of dwm
 - Xcb header files for the `swallow patch`.
 ## Optional
 - [pywal](https://github.com/dylanaraps/pywal)
-	* If not you will have to define (instead of declaring) the colors
-	  variable
+	* if not installed it will set colors to (hopefully) default dwm colors
 - [libxft-bgra](https://github.com/uditkarode/libxft-bgra)
 	* The `tags[]` array has emojis, replacing the unicode characters to
 	  non-unicode will make independant of libxft-bgra.
@@ -110,6 +109,9 @@ Currently I don't wish more 'features' but here are some ideas:
 - toggle border
 - depatch cfacts(?)
 - Make _systray_ background the same color as the bar
+- toggleable pertag. This features a workflow
+  in which you can have the such 'dynamic' window management of dwm and also have a pertag
+  workflow. Can this be implememnted just like the hidevacant patch? meaning, with a simple flag variable. Maybe intead of a lot of if / else we just re-arrange (re-start / re-setup) the pertag variables to default one and somehow maintain them the same while pertag is active.
 - <s>Make _tag previews_ more solid</s> and prevent from being shown in the preview of the preview...
 - <s>systray toggleable with _#ifdef_ and _#endif_</s>
 - <s>make [hide vacant patch](https://dwm.suckless.org/patches/hide_vacant_tags/)
