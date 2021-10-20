@@ -33,7 +33,7 @@ static char *fonts[] = {
 //	"Noto Color Emoji:pixelsize=16:antialias=true:autohint=true: style=Regular", /* Emojis */
 	"JoyPixels:pixelsize=14:antialias=true:autohint=true"
 };
-/* Pywal */
+/* pywal */
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8], color6[8], color7[8], color8[8];
 static char bg_wal[8], fg_wal[8], cursor_wal[8];
 
@@ -72,15 +72,17 @@ static const unsigned int alphas[][2]   = {
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
 static const int taglayouts[] = {    0,   1,    0,   0,    0,    0,    0,    0,    0 };
 
-enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, SpLast };
 static const Rule rules[] = {
-	/* xprop(1):
+	/* flags: class, instance, title, wintype, role, tags, isfloating,
+	 * isterminal, noswallow, isfakefullscreen, monitor
+	 *
+	 * order is actually important here (e.g. if .noswallow is before
+	 * .isterminal then it would not take effect)
+	 *
+	 * xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 *	_NET_WM_WINDOW_TYPE(ATOM) = wintype
-	 * tags, isfloating, isterminal, noswallow, isfakefullscreen
-	 * Order is actually important here (e.g. if .noswallow is before
-	 * .isterminal then it would not take effect)
 	 */
 	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "DIALOG",	.isfloating = 1)
 	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "UTILITY",.isfloating = 1)

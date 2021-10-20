@@ -109,6 +109,7 @@ enum { BorderNorm, BorderSel, BorderUrg }; /* border schemes */
 enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
        SchemeStatus, SchemeIndOff, SchemeIndOn,
        SchemeNotify, SchemeSys }; /* color schemes */
+enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, SpLast }; /* scratchpads */
 enum { NetSupported, NetWMName,
 #ifdef ICONS
        NetWMIcon,
@@ -477,7 +478,6 @@ static int depth;
 static Colormap cmap;
 static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 static Client *scratchpad_last_showed = NULL;
-static Client *prevzoom = NULL;
 
 /* Undefined in X11/X.h buttons that actualy exist and correspond to horizontal
  * scroll (two-finger gestures) */
@@ -767,7 +767,7 @@ buttonpress(XEvent *e)
 #endif /* TAG_PREVIEW */
 		i = x = 0;
 		for (c = m->clients; c; c = c->next)
-			occ |= c->tags == 255 ? 0 : c->tags;
+			occ |= c->tags == 255 && hidevacant ? 0 : c->tags;
 		do {
 			/* do not reserve space for vacant tags */
 			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i) && hidevacant)
@@ -1282,14 +1282,18 @@ drawbar(Monitor *m)
 		x += w;
 	}
 	/* monocle, count clients if there are more than one */
-	if (m->lt[m->sellt]->arrange == monocle) {
+	if (m->lt[m->sellt]->arrange == monocle || m->lt[m->sellt]->arrange == alphamonocle) {
 		for (a = 0, s = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), a++)
 			if (c == m->stack)
 				s = a;
 		if (!s && a)
 			s = a;
-		if (a > 1)
-			snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d/%d]", s, a);
+		if (a > 1) {
+			if (m->lt[m->sellt]->arrange == monocle)
+				snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d/%d]", s, a);
+			else
+				snprintf(m->ltsymbol, sizeof m->ltsymbol, "{%d/%d}", s, a);
+		}
 	}
 	w = blw = (int)TEXTW(m->ltsymbol);
 	drw_setscheme(drw, scheme[SchemeLt]); //scheme[SchemeNorm]);
@@ -3125,9 +3129,9 @@ setup(void)
 	/* clean up any zombies immediately */
 	sigchld(0);
 
-	/* exit or restart signal (kill -TERM/-HUP) */
-	signal(SIGHUP, sighup);
-	signal(SIGTERM, sigterm);
+	/* init signals handlers */
+	signal(SIGHUP, sighup); /* restart */
+	signal(SIGTERM, sigterm); /* exit */
 
 	/* init screen */
 	screen = DefaultScreen(dpy);
@@ -3415,8 +3419,8 @@ sighup(int unused)
 void
 sigterm(int unused)
 {
-	Arg a = {.i = 0};
-	quit(&a);
+	//Arg a = {.i = 0};
+	quit(0);
 }
 
 #ifndef __OpenBSD__
@@ -4299,31 +4303,41 @@ zoom(const Arg *arg)
 void
 zoomswap(const Arg *arg)
 {
- 	Client *c = selmon->sel;
-	Client *at = NULL, *cold, *cprevious = NULL;
+	Client *c = selmon->sel;
+	if (arg && arg->v)
+		c = (Client*)arg->v;
+	if (!c)
+		return;
+	Client *at = NULL, *cold, *cprevious = NULL,
+	       *p = c->mon->pertag->prevzooms[c->mon->pertag->curtag];
 
- 	if (!selmon->lt[selmon->sellt]->arrange
- 	|| (selmon->sel && selmon->sel->isfloating))
- 		return;
-	if (c == nexttiled(selmon->clients)) {
-		at = findbefore(prevzoom);
+	/* if it's floating, make the floating window the new master (which
+	 * means making it not floating) */
+	if (c && c->isfloating)
+		togglefloating(&((Arg) { .v = c }));
+
+	if (!c->mon->lt[c->mon->sellt]->arrange
+	|| (c && c->isfloating) || !c)
+		return;
+	if (c == nexttiled(c->mon->clients)) {
+		at = findbefore(p);
 		if (at)
 			cprevious = nexttiled(at->next);
-		if (!cprevious || cprevious != prevzoom) {
-			prevzoom = NULL;
+		if (!cprevious || cprevious != p) {
+			p = NULL;
 			if (!c || !(c = nexttiled(c->next)))
 				return;
 		} else
 			c = cprevious;
 	}
-	cold = nexttiled(selmon->clients);
+	cold = nexttiled(c->mon->clients);
 	if (c != cold && !at)
 		at = findbefore(c);
 	detach(c);
 	attach(c);
 	/* swap windows instead of pushing the previous one down */
 	if (c != cold && at) {
-		prevzoom = cold;
+		p = cold;
 		if (cold && at != cold) {
 			detach(cold);
 			cold->next = at->next;
