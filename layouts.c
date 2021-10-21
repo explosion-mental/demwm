@@ -72,8 +72,7 @@ incrivgaps(const Arg *arg)
  ***********/
 
 /* Tile layout + gaps */
-#ifdef TILE
-static void
+void
 tile(Monitor *m)
 {
 	unsigned int i, n;
@@ -118,12 +117,10 @@ tile(Monitor *m)
 			sy += HEIGHT(c) + ih;
 		}
 }
-#endif	/* TILE */
 
 /* Monocle */
-#ifdef MONOCLE
 //static void monocle(Monitor *m);
-static void
+void
 monocle(Monitor *m)
 {
 	unsigned int n;
@@ -139,15 +136,13 @@ monocle(Monitor *m)
 //		resize(c, m->wx + ov, m->wy + oh, m->ww - 2 * ov, m->wh - 2 * oh, 0);
 		resize(c, m->wx + ov, m->wy + oh, m->ww - 2 * c->bw - 2 * ov, m->wh - 2 * c->bw - 2 * oh, 0);
 }
-#endif	/* MONOCLE */
 
 /* ALPHA Monocle
  * only show the currently focused window,
  * rather than all windows stacked on top of each other.
 */
-#ifdef ALPHAMONOCLE
 //static void monocle(Monitor *m);
-static void
+void
 alphamonocle(Monitor *m)
 {
 	unsigned int n;
@@ -168,15 +163,13 @@ alphamonocle(Monitor *m)
 		if (!c->isfloating && ISVISIBLE(c))
 			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 }
-#endif	/* ALPHAMONOCLE */
 
 /*
  * Center floating master
  * same as master on center but is floating
  */
-#ifdef CENTEREDFLOATMASTER
 //static void centeredfloatmaster(Monitor *m);
-static void
+void
 centeredfloatmaster(Monitor *m)
 {
 	unsigned int i, n;
@@ -231,15 +224,13 @@ centeredfloatmaster(Monitor *m)
 			sx += WIDTH(c) + iv;
 		}
 }
-#endif /* CENTEREDFLOATMASTER */
 
 /*
  * Deck layout + gaps
  * https://dwm.suckless.org/patches/deck/
  */
-#ifdef DECK
 //static void deck(Monitor *m);
-static void
+void
 deck(Monitor *m)
 {
 	unsigned int i, n;
@@ -278,13 +269,12 @@ deck(Monitor *m)
 		} else
 			resize(c, sx, sy, sw - (2*c->bw), sh - (2*c->bw), 0);
 }
-#endif /* DECK */
 
 /*
  * Fibonacci layout + gaps
  * https://dwm.suckless.org/patches/fibonacci/
  */
-static void
+void
 fibonacci(Monitor *m, int s)
 {
 	unsigned int i, n;
@@ -376,23 +366,19 @@ fibonacci(Monitor *m, int s)
  * dwindle
  * Decreasing in size right and leftward
  */
-#ifdef DWINDLE
 //static void dwindle(Monitor *m);
-static void
+void
 dwindle(Monitor *m)
 {
 	fibonacci(m, 1);
 }
-#endif /* DWINDLE */
 
-#ifdef SPIRAL
 //static void spiral(Monitor *m);
-static void
+void
 spiral(Monitor *m)
 {
 	fibonacci(m, 0);
 }
-#endif /* SPIRAL */
 
 
 
@@ -401,9 +387,8 @@ spiral(Monitor *m)
  * Gappless grid layout + gaps (ironically)
  * https://dwm.suckless.org/patches/gaplessgrid/
  */
-#ifdef GAPLESSGRID
 //static void gaplessgrid(Monitor *m);
-static void
+void
 gaplessgrid(Monitor *m)
 {
 	unsigned int i, n;
@@ -451,15 +436,13 @@ gaplessgrid(Monitor *m)
 		}
 	}
 }
-#endif /* GAPLESSGRID */
 
 /*
  * Gridmode layout + gaps
  * https://dwm.suckless.org/patches/gridmode/
  */
-#ifdef GRID
 //static void grid(Monitor *m);
-static void
+void
 grid(Monitor *m)
 {
 	unsigned int i, n;
@@ -488,15 +471,13 @@ grid(Monitor *m)
 		resize(c, cx, cy, cw + (cc < cwrest ? 1 : 0) - 2*c->bw, ch + (cr < chrest ? 1 : 0) - 2*c->bw, False);
 	}
 }
-#endif /* GRID */
 
 /*
  * Horizontal grid layout + gaps
  * https://dwm.suckless.org/patches/horizgrid/
  */
-#ifdef HORIZGRID
 //static void horizgrid(Monitor *m);
-static void
+void
 horizgrid(Monitor *m)
 {
 	Client *c;
@@ -557,15 +538,13 @@ horizgrid(Monitor *m)
 			sx += WIDTH(c) + iv;
 		}
 }
-#endif /* HORIZGRID */
 
 /*
  * nrowgrid layout + gaps
  * https://dwm.suckless.org/patches/nrowgrid/
  */
-#ifdef NROWGRID
 //static void nrowgrid(Monitor *m);
-static void
+void
 nrowgrid(Monitor *m)
 {
 	unsigned int n;
@@ -584,7 +563,7 @@ nrowgrid(Monitor *m)
 		return;
 
 	/* force 2 clients to always split vertically */
-	if (FORCE_VSPLIT && n == 2)
+	if (forcevsplit && n == 2)
 		rows = 1;
 
 	/* never allow empty rows */
@@ -618,15 +597,13 @@ nrowgrid(Monitor *m)
 		resize(c, cx, cy, cw - (2*c->bw), ch - (2*c->bw), 0);
 	}
 }
-#endif /* NROWGRID */
 
 /*
  * Bottomstack layout + gaps
  * https://dwm.suckless.org/patches/bottomstack/
  */
-#ifdef BSTACK
 //static void bstack(Monitor *m);
-static void
+void
 bstack(Monitor *m)
 {
 	unsigned int i, n;
@@ -666,11 +643,9 @@ bstack(Monitor *m)
 		}
 	}
 }
-#endif /* BSTACK */
 
-#ifdef BSTACKHORIZ
 //static void bstackhoriz(Monitor *m);
-static void
+void
 bstackhoriz(Monitor *m)
 {
 	unsigned int i, n;
@@ -711,15 +686,13 @@ bstackhoriz(Monitor *m)
 		}
 	}
 }
-#endif /* BSTACKHORIZ */
 
 /*
  * Centred master layout + gaps
  * https://dwm.suckless.org/patches/centeredmaster/
  */
-#ifdef CENTEREDMASTER
 //static void centeredmaster(Monitor *m);
-static void
+void
 centeredmaster(Monitor *m)
 {
 	unsigned int i, n;
@@ -803,7 +776,6 @@ centeredmaster(Monitor *m)
 		}
 	}
 }
-#endif /* CENTEREDMASTER */
 
 /* "EGO"
  *  https://github.com/sineemore/dotfiles/blob/bc316ca97ad339302b647acafeb9fdc8c02efdf3/patches/dwm-ego.patch

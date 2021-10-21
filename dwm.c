@@ -73,10 +73,10 @@
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
 /* scratchpad */
 #define NUMTAGS			(LENGTH(tags) + LENGTH(scratchpads))
+//#define TAGMASK		((1 << LENGTH(tags)) - 1)
 #define TAGMASK     		((1 << NUMTAGS) - 1)
 #define SPTAG(i) 		((1 << LENGTH(tags)) << (i))
 #define SPTAGMASK   		(((1 << LENGTH(scratchpads))-1) << LENGTH(tags))
-//#define TAGMASK		((1 << LENGTH(tags)) - 1)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 #define RULE(...)		{ .monitor = -1, ##__VA_ARGS__ },
 #define XRDB_LOAD_COLOR(R,V) \
@@ -94,6 +94,8 @@
                         } \
                 } \
         }
+#define Button6			6
+#define Button7			7
 #ifdef SYSTRAY
 /* XEMBED messages */
 #define VERSION_MAJOR               0
@@ -109,7 +111,7 @@ enum { BorderNorm, BorderSel, BorderUrg }; /* border schemes */
 enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
        SchemeStatus, SchemeIndOff, SchemeIndOn,
        SchemeNotify, SchemeSys }; /* color schemes */
-enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, SpLast }; /* scratchpads */
+enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7 }; /* scratchpads */
 enum { NetSupported, NetWMName,
 #ifdef ICONS
        NetWMIcon,
@@ -336,6 +338,7 @@ static void setlayout(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
+static void shift(void (*func)(const Arg *arg));
 static void shifttag(const Arg *arg);
 static void shifttagclients(const Arg *arg);
 static void shiftview(const Arg *arg);
@@ -350,7 +353,7 @@ static void updatepreview(void);
 #endif /* TAG_PREVIEW */
 static void sigchld(int unused);
 #ifndef __OpenBSD__
-static int getdwmblockspid();
+static int getdwmblockspid(void);
 static void sigdwmblocks(const Arg *arg);
 #endif
 static void sighup(int unused);
@@ -422,6 +425,23 @@ static void reorganizetags(void);
 static void nostatus(const Arg *arg);
 static void spawncmd(const Arg *arg);
 
+/* layouts */
+static void tile(Monitor *m);
+static void monocle(Monitor *m);
+static void alphamonocle(Monitor *m);
+static void centeredfloatmaster(Monitor *m);
+static void deck(Monitor *m);
+static void fibonacci(Monitor *m, int s);
+static void dwindle(Monitor *m);
+static void spiral(Monitor *m);
+static void gaplessgrid(Monitor *m);
+static void grid(Monitor *m);
+static void horizgrid(Monitor *m);
+static void nrowgrid(Monitor *m);
+static void bstack(Monitor *m);
+static void bstackhoriz(Monitor *m);
+static void centeredmaster(Monitor *m);
+
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
 static Client *swallowingclient(Window w);
@@ -479,15 +499,11 @@ static Colormap cmap;
 static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 static Client *scratchpad_last_showed = NULL;
 
-/* Undefined in X11/X.h buttons that actualy exist and correspond to horizontal
- * scroll (two-finger gestures) */
-#define Button6		6
-#define Button7		7
-
 static const int scrollargs[4][2];
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
+#include "layouts.c"
 
 /* resizemousescroll direction argument list */
 static const int scrollargs[][2] = {
@@ -545,7 +561,6 @@ applyrules(Client *c)
 		if ((!r->title || strstr(c->name, r->title))
 		&& (!r->class || strstr(class, r->class))
 		&& (!r->role || strstr(role, r->role))
-		//&& (!r->instance || strstr(instance, r->instance)))
 		&& (!r->instance || strstr(instance, r->instance))
 		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False)))
 		{
@@ -554,10 +569,6 @@ applyrules(Client *c)
 			c->isfloating = r->isfloating;
 			c->tags |= r->tags;
 			c->fakefullscreen = r->isfakefullscreen;
-			if ((r->tags & SPTAGMASK) && r->isfloating) {
-				c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
-				c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
-			}
 
 			for (m = mons; m && m->num != r->monitor; m = m->next);
 			if (m)
@@ -1113,10 +1124,8 @@ createmon(void)
 	m->gappoh = gappoh;
 	m->gappov = gappov;
 
-	//m->lt[0] = &layouts[0];
 	m->lt[0] = taglayouts[0] && taglayouts[0] < LENGTH(layouts) ? &layouts[taglayouts[0]] : &layouts[0];
 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
-	//strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
 	strncpy(m->ltsymbol, taglayouts[1] && taglayouts[1] < LENGTH(layouts) ? layouts[taglayouts[1]].symbol : layouts[0].symbol, sizeof m->ltsymbol);
 
 	if (pertag) {
@@ -1245,7 +1254,7 @@ drawbar(Monitor *m)
 
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) { /* status is only drawn on selected monitor */
-		drw_setscheme(drw, scheme[SchemeStatus]);//[SchemeNorm]);
+		drw_setscheme(drw, scheme[SchemeStatus]);
 		tw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
 		drw_text(drw, bw - tw, 0, tw, bh, 0, stext, 0);
 	}
@@ -1296,15 +1305,15 @@ drawbar(Monitor *m)
 		}
 	}
 	w = blw = (int)TEXTW(m->ltsymbol);
-	drw_setscheme(drw, scheme[SchemeLt]); //scheme[SchemeNorm]);
+	drw_setscheme(drw, scheme[SchemeLt]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
 	if ((w = bw - tw - x) > bh) {
 		if (m->sel) {
-			drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]); //[m == selmon ? SchemeSel : SchemeNorm]);
+			drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]);
 		#ifdef ICONS
 			//drw_text(drw, x, 0, w, bh, m->sel->icon ? m->sel->icw + 2 : lrpad / 2, m->sel->name, 0);
-			if (TEXTW(m->sel->name) > w) { /* if the title is bigger than the width of the title rectangle, don't center */
+			if (TEXTW(m->sel->name) + m->sel->icw > w) { /* if the title is bigger than the width of the title rectangle, don't center */
 				drw_text(drw, x, 0, w, bh, m->sel->icon ? m->sel->icw + 2 : lrpad / 2, m->sel->name, 0);
 				if (m->sel->icon)
 					drw_pic(drw, x, (bh - m->sel->ich) / 2, m->sel->icw, m->sel->ich, m->sel->icon);
@@ -1319,7 +1328,6 @@ drawbar(Monitor *m)
 		#endif /* ICONS */
 			if (m->sel->isfloating)
 				drw_rect(drw, bw - tw - boxw - 1, boxs, boxw, boxw, m->sel->isfixed, 0);
-				//drw_polygon(drw, x + boxs, m->sel->isfloating ? boxs * 2 + boxw : boxs, stickyiconbb.x, stickyiconbb.y, boxw, boxw * stickyiconbb.y / stickyiconbb.x, stickyicon, LENGTH(stickyicon), Nonconvex, m->sel->tags & m->tagset[m->seltags]);
 		} else {
 			drw_setscheme(drw, scheme[SchemeNorm]);
 			drw_rect(drw, x, 0, w, bh, 1, 1);
@@ -1332,18 +1340,8 @@ void
 drawbars(void)
 {
 	Monitor *m;
-//#ifdef SYSTRAY
-	/* Clear status bar to avoid artifacts beneath systray icons */
-	/* FIXME this makes switching tags too flashy... should I be worried? */
-//	drw_setscheme(drw, scheme[SchemeNorm]);
-//	drw_rect(drw, 0, 0, selmon->ww, bh, 1, 1);
-//	drw_map(drw, selmon->barwin, 0, 0, selmon->ww, bh);
-//#endif /* SYSTRAY */
 	for (m = mons; m; m = m->next)
 		drawbar(m);
-//#ifdef SYSTRAY
-//	updatesystray();
-//#endif /* SYSTRAY */
 }
 
 void
@@ -1379,7 +1377,7 @@ focus(Client *c)
 	if (!c || !ISVISIBLE(c))
 		for (c = selmon->stack; c && !ISVISIBLE(c); c = c->snext);
 	if (selmon->sel && selmon->sel != c) {
-		//if we don't losefullscreen we can stack fullscren clients
+		/* if we don't losefullscreen, we can stack fullscren clients */
 		//losefullscreen(c);
 		unfocus(selmon->sel, 0);
 	}
@@ -1391,7 +1389,6 @@ focus(Client *c)
 		detachstack(c);
 		attachstack(c);
 		grabbuttons(c, 1);
-		//XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
 		XSetWindowBorder(dpy, c->win, borderscheme[BorderSel][0].pixel);
 		setfocus(c);
 		if (c->mon->lt[c->mon->sellt]->arrange) {
@@ -1407,7 +1404,6 @@ focus(Client *c)
 			wc.stack_mode = Above;
 			wc.sibling = c->mon->barwin;
 			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
-			//c->alwaysontop = 1;
 
 			/* Move all visible floating windows that are not marked as on top, below the bar window */
 			wc.stack_mode = Below;
@@ -1495,60 +1491,8 @@ focusstack(const Arg *arg)
 	}
 	if (c) {
 		focus(c);
-		//if (selmon->sel->alwaysontop) //if (!focusedontop)
-		//	restack(selmon);
 	}
 }
-
-
-//void
-//pushstack(const Arg *arg) {
-//	Client *c = NULL, *p = NULL, *pc = NULL, *i;
-//
-//	if(arg->i > 0) {
-//		/* find the client after selmon->sel */
-//		for(c = selmon->sel->next; c && (!ISVISIBLE(c) || c->isfloating); c = c->next);
-//		if(!c)
-//			for(c = selmon->clients; c && (!ISVISIBLE(c) || c->isfloating); c = c->next);
-//
-//	}
-//	else {
-//		/* find the client before selmon->sel */
-//		for(i = selmon->clients; i != selmon->sel; i = i->next)
-//			if(ISVISIBLE(i) && !i->isfloating)
-//				c = i;
-//		if(!c)
-//			for(; i; i = i->next)
-//				if(ISVISIBLE(i) && !i->isfloating)
-//					c = i;
-//	}
-//	/* find the client before selmon->sel and c */
-//	for(i = selmon->clients; i && (!p || !pc); i = i->next) {
-//		if(i->next == selmon->sel)
-//			p = i;
-//		if(i->next == c)
-//			pc = i;
-//	}
-//
-//	/* swap c and selmon->sel selmon->clients in the selmon->clients list */
-//	if(c && c != selmon->sel) {
-//		Client *temp = selmon->sel->next==c?selmon->sel:selmon->sel->next;
-//		selmon->sel->next = c->next==selmon->sel?c:c->next;
-//		c->next = temp;
-//
-//		if(p && p != c)
-//			p->next = c;
-//		if(pc && pc != selmon->sel)
-//			pc->next = selmon->sel;
-//
-//		if(selmon->sel == selmon->clients)
-//			selmon->clients = c;
-//		else if(c == selmon->clients)
-//			selmon->clients = selmon->sel;
-//
-//		arrange(selmon);
-//	}
-//}
 
 void
 pushstack(const Arg *arg)
@@ -1564,30 +1508,14 @@ pushstack(const Arg *arg)
 			sel->next = c->next;
 			c->next = sel;
 		}
-		//else {
-		//	detach(sel);
-		//	attach(sel);
-		//}
 	} else { /* pushup */
 		if (!sel || sel->isfloating)
 			return;
-		//if ((c = prevtiled(sel))) {
 		if ((c = prevtiled(sel)) && c != nexttiled(selmon->clients)) {
 			detach(sel);
 			sel->next = c;
 			for (c = selmon->clients; c->next != sel->next; c = c->next);
 			c->next = sel;
-//			if (selmon->clients == c)
-//				selmon->clients = sel;
-//			else {
-//			for(c = selmon->clients; c->next != sel->next; c = c->next);
-//			c->next = sel;
-//			}
-//		} else {
-//			for(c = sel; c->next; c = c->next);
-//			detach(sel);
-//			sel->next = NULL;
-//			c->next = sel;
 		}
 	}
 	focus(sel);
@@ -1622,7 +1550,7 @@ getatomprop(Client *c, Atom prop)
 
 #ifndef __OpenBSD__
 int
-getdwmblockspid()
+getdwmblockspid(void)
 {
 	char buf[16];
 	FILE *fp = popen("pidof -s dwmblocks", "r");
@@ -1684,9 +1612,6 @@ updatepreview(void)
 		XDefineCursor(dpy, m->tagwin, cursor[CurNormal]->cursor);
 		XMapRaised(dpy, m->tagwin);
 		XUnmapWindow(dpy, m->tagwin);
-	//	XSelectInput(dpy, m->tagwin, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
-	//	XClassHint ch = {"dwmpreview", "dwmpreview"};
-	//	XSetClassHint(dpy, m->tagwin, &ch);
 	}
 }
 void
@@ -2220,7 +2145,7 @@ loadxrdb(void)
 	char *resm, *type;
 	XrmValue value;
 	XrmDatabase xrdb;
-	int i; //for the macro
+	int i;
 
 	display = XOpenDisplay(NULL);
 	resm = XResourceManagerString(display);
@@ -2330,7 +2255,6 @@ manage(Window w, XWindowAttributes *wa)
 	if (term)
 		swallow(term, c);
 	focus(NULL);
-	//while (XCheckMaskEvent(dpy, EnterWindowMask, &xev));
 }
 
 void
@@ -2357,7 +2281,8 @@ maprequest(XEvent *e)
 #endif /* SYSTRAY */
 	if (!XGetWindowAttributes(dpy, ev->window, &wa))
 		return;
-	if (!wa.depth) //https://github.com/bakkeby/patches/commit/67c8bcefafbed8d0f122bb91b6d253919727b60e
+/* https://github.com/bakkeby/patches/commit/67c8bcefafbed8d0f122bb91b6d253919727b60e */
+	if (!wa.depth)
 		return;
 	if (wa.override_redirect)
 		return;
@@ -3118,7 +3043,6 @@ setmfact(const Arg *arg)
 	if (!arg || !selmon->lt[selmon->sellt]->arrange)
 		return;
 	f = arg->f < 1.0 ? arg->f + selmon->mfact : arg->f - 1.0;
-//	if (f < 0.1 || f > 0.9)
 	if (f < 0.05 || f > 0.95)
 		return;
 	if (pertag)
@@ -3151,9 +3075,7 @@ setup(void)
 	if (!drw_fontset_create(drw, fonts, LENGTH(fonts)))
 		die("no fonts could be loaded.");
 	lrpad = drw->fonts->h;
-	//bh = drw->fonts->h + 2;
-	/* prevent barh being < than font size */
-	bh = drw->fonts->h + barh;
+	bh = drw->fonts->h + barh; /* prevent barh being < than font size */
 	updategeom();
 	/* init atoms */
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
@@ -3258,25 +3180,13 @@ void
 shifttag(const Arg *arg)
 {
 	Arg shifted;
-	Client *c;
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
-	c = selmon->clients;
-
-	/* if no client do nothing */
-	if (!c)
+	if (!selmon->clients)
 		return;
-	/* if it is a scratchpad do nothing */
-	if ((c->tags & SPTAGMASK) && c->isfloating)
-		return;
-	//c = c->next;
-
-	if (arg->i > 0) {/* left circular shift */
+	if (arg->i > 0)	/* left circular shift */
 		shifted.ui = ((shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i))) & ~SPTAGMASK;
-	} else {	/* right circular shift */
-		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i));
-      		shifted.ui &= ~SPTAGMASK;
-	}
-
+	else	/* right circular shift */
+		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i)) & ~SPTAGMASK;
 	tag(&shifted);
 }
 
@@ -3289,28 +3199,35 @@ shifttagclients(const Arg *arg)
 	unsigned int tagmask = 0;
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
-//	c = selmon->clients;
-//	if ((c->tags & SPTAGMASK) && c->isfloating)
-//		return;
-
 	for (c = selmon->clients; c; c = c->next)
 		if (!(c->tags & SPTAGMASK))
 			tagmask = tagmask | c->tags;
 
-
 	if (arg->i > 0)	/* left circular shift */
-		do {
-			shifted.ui = (shifted.ui << arg->i)
-			   | (shifted.ui >> (LENGTH(tags) - arg->i));
-			shifted.ui &= ~SPTAGMASK;
-		} while (tagmask && !(shifted.ui & tagmask));
+		do
+			shifted.ui = ((shifted.ui << arg->i)
+			   | (shifted.ui >> (LENGTH(tags) - arg->i))) & ~SPTAGMASK;
+		while (tagmask && !(shifted.ui & tagmask));
 	else		/* right circular shift */
-		do {
+		do
 			shifted.ui = (shifted.ui >> (- arg->i)
-			   | shifted.ui << (LENGTH(tags) + arg->i));
-			shifted.ui &= ~SPTAGMASK;
-		} while (tagmask && !(shifted.ui & tagmask));
+			   | shifted.ui << (LENGTH(tags) + arg->i)) & ~SPTAGMASK;
+		while (tagmask && !(shifted.ui & tagmask));
 	tag(&shifted);
+}
+
+
+void
+shift(void (*func)(const Arg *arg))
+{
+//	Arg shifted;
+//	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+//
+//	if ((*func)(arg->i) > 0)	/* left circular shift */
+//		shifted.ui = ((shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i))) & ~SPTAGMASK;
+//	else	/* right circular shift */
+//		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i)) & ~SPTAGMASK;
+//	func(&shifted);
 }
 
 void
@@ -3319,29 +3236,29 @@ shiftview(const Arg *arg)
 	Arg shifted;
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
-	if (arg->i > 0) {/* left circular shift */
-		shifted.ui = (shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i));
-		shifted.ui &= ~SPTAGMASK;
-	} else {	/* right circular shift */
-		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i));
-		shifted.ui &= ~SPTAGMASK;
-	}
+	if (arg->i > 0)	/* left circular shift */
+		shifted.ui = ((shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i))) & ~SPTAGMASK;
+	else	/* right circular shift */
+		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i)) & ~SPTAGMASK;
 	view(&shifted);
 }
-
 
 void
 shiftviewclients(const Arg *arg)
 {
 	Arg shifted;
 	Client *c;
-	unsigned int tagmask = 0;
+	unsigned int tagmask = 0, filter = 0;
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
 	for (c = selmon->clients; c; c = c->next)
 		if (!(c->tags & SPTAGMASK))
-			tagmask = tagmask | c->tags;
+			filter = filter | c->tags;
 
+	/* FIXME at least two tags are going to be with a client in order to
+	 * shiftviewclient, else shiftview normally */
+	//if (filter > LENGTH(tags))
+	tagmask = filter;
 
 	if (arg->i > 0)	/* left circular shift */
 		do {
@@ -3361,18 +3278,8 @@ shiftviewclients(const Arg *arg)
 void
 shiftboth(const Arg *arg)
 {
-//	shifttag(arg);
-//	shiftview(arg);
-
 	Arg shifted;
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
-	Client *c;
-	c = selmon->clients;
-
-	/* if it is a scratchpad do nothing */
-	//if (!c) return;
-	if (!c && ((c->tags & SPTAGMASK) && c->isfloating))
-		return;
 
 	if (arg->i > 0)	/* left circular shift */
 		shifted.ui = ((shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i))) & ~SPTAGMASK;
@@ -3389,14 +3296,6 @@ showhide(Client *c)
 	if (!c)
 		return;
 	if (ISVISIBLE(c)) {
-		/* if scratchpad center */
-		//With these commented out scratchpad can be tiled and the float position is saved
-		//if (((c->tags == SCRATCHPAD_MASK) || (c->tags & SPTAGMASK)) && c->isfloating) {
-		//	//if (scratchpads[0].cmd) {
-		//	c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
-		//	c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
-		//	//}
-		//}
 		/* show clients top down */
 		XMoveWindow(dpy, c->win, c->x, c->y);
 		if ((!c->mon->lt[c->mon->sellt]->arrange || c->isfloating) && !c->isfullscreen)
@@ -3420,15 +3319,13 @@ sigchld(int unused)
 void
 sighup(int unused)
 {
-	Arg a = {.i = 1};
-	quit(&a);
+	quit(&((Arg){.i = 1}));
 }
 
 void
 sigterm(int unused)
 {
-	//Arg a = {.i = 0};
-	quit(0);
+	quit(&((Arg){.i = 0}));
 }
 
 #ifndef __OpenBSD__
@@ -3441,12 +3338,10 @@ sigdwmblocks(const Arg *arg)
 		if (getdwmblockspid() == -1)
 			return;
 
-	if (sigqueue(dwmblockspid, SIGUSR1, sv) == -1) {
-		if (errno == ESRCH) {
+	if (sigqueue(dwmblockspid, SIGUSR1, sv) == -1)
+		if (errno == ESRCH)
 			if (!getdwmblockspid())
 				sigqueue(dwmblockspid, SIGUSR1, sv);
-		}
-	}
 }
 #endif
 
@@ -3592,10 +3487,8 @@ void
 togglescratch(const Arg *arg)
 {
 	Client *c;
-	unsigned int found = 0;
-	unsigned int scratchtag = SPTAG(arg->ui);
-	Arg sparg = {.v = scratchpads[arg->ui]};
-	//Arg sparg = {.v = scratchpads[arg->ui].cmd};
+	unsigned int found = 0, scratchtag = SPTAG(arg->ui);
+	Arg sparg = {.v = scratchpads[arg->ui] };
 
 	for (c = selmon->clients; c && !(found = c->tags & scratchtag); c = c->next);
 	if (found) {
@@ -3674,13 +3567,8 @@ unfocus(Client *c, int setfocus)
 {
 	if (!c)
 		return;
-	//quit fullscreen while changing the focus
-	//if (c->isfullscreen && ISVISIBLE(c) && c->mon == selmon && nextfocus && !nextfocus->isfloating)
-		//if (c->fakefullscreen != 1)
-		//	setfullscreen(c, 0);
 	grabbuttons(c, 0);
 	//c->alwaysontop = 0;
-	//XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
 	XSetWindowBorder(dpy, c->win, borderscheme[BorderNorm][0].pixel);
 	if (setfocus) {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
@@ -3993,9 +3881,7 @@ updatewmhints(Client *c)
 			XSetWMHints(dpy, c->win, wmh);
 		} else {
 			c->isurgent = (wmh->flags & XUrgencyHint) ? 1 : 0;
-			/* Set border to urgent */
-			if (c->isurgent)
-				//XSetWindowBorder(dpy, c->win, scheme[SchemeUrgent][ColBorder].pixel);
+			if (c->isurgent) /* set border to urgent */
 				XSetWindowBorder(dpy, c->win, borderscheme[BorderUrg][0].pixel);
 		}
 		if (wmh->flags & InputHint)
@@ -4048,7 +3934,6 @@ view(const Arg *arg)
 	unsigned int tmptag;
 
 	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
-		//view(&((Arg) { .ui = 0 })); /* toggletag patch */
  		return;
 #ifdef TAG_PREVIEW
          switchtag();
@@ -4443,8 +4328,6 @@ togglevacant(const Arg *arg)
 {
 	hidevacant = !hidevacant;
 	drawbar(selmon);
-//	focus(NULL);
-//	arrange(NULL);
 }
 void
 reorganizetags(void)

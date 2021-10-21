@@ -34,8 +34,8 @@ static char *fonts[] = {
 	"JoyPixels:pixelsize=14:antialias=true:autohint=true"
 };
 /* pywal */
-static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8], color6[8], color7[8], color8[8];
-static char bg_wal[8], fg_wal[8], cursor_wal[8];
+static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8];
+static char color6[8], color7[8], color8[8], bg_wal[8], fg_wal[8], cursor_wal[8];
 
 static const Bordercolor bordercolors[]	= {
 			/* border	alpha                description         */
@@ -64,8 +64,6 @@ static const unsigned int alphas[][2]   = {
 	[SchemeTitle]  = { OPAQUE,	OPAQUE,	 },
 	[SchemeStatus] = { OPAQUE,	baralpha },
 	[SchemeSys]    = { baralpha,	baralpha },
-	//[BorderNorm]    = { baralpha,	baralpha,	OPAQUE },
-	//[BorderSel]     = { baralpha,	baralpha,	OPAQUE },
 };
 
 /* tags */
@@ -115,6 +113,7 @@ static const Rule rules[] = {
 	RULE(.title = "mpvfloat",	.isfloating = 1)
 	RULE(.instance = "mpvfloat",	.isfloating = 1)
 
+	/* scratchpads */
 	RULE(.instance = "term",	.tags = SPTAG(Sp1), .isfloating = 1)
 	RULE(.instance = "notes",	.tags = SPTAG(Sp2), .isfloating = 1)
 	RULE(.instance = "calc" ,	.tags = SPTAG(Sp3), .isfloating = 1)
@@ -130,44 +129,25 @@ static const Rule rules[] = {
 static float mfact     = 0.55;	/* factor of master area size [0.05..0.95] */
 static int nmaster     = 1;	/* number of clients in master area */
 static int resizehints = 0;	/* 1 means respect size hints in tiled resizals */
-
-/* Uncomment layouts you want */
-#define TILE
-#define MONOCLE
-#define ALPHAMONOCLE
-#define CENTEREDFLOATMASTER
-//#define BSTACK
-#define SPIRAL
-//#define DWINDLE
-#define DECK
-//#define CENTEREDMASTER
-//#define BSTACKHORIZ
-#define GRID
-#define NROWGRID
-#define FORCE_VSPLIT 1	/* nrowgrid: force two clients to always split vertically */
-//#define HORIZGRID
-//#define GAPLESSGRID
-//#define PIDGIN
-//#define EGO
-#include "layouts.c"
+static int forcevsplit = 1;	/* nrowgrid: force two clients to always split vertically */
 
 static const Layout layouts[] = {
-	/* symbol	arrange function			Description			*/
- 	{ "[]=",	tile },			/* Master on left, slaves on right */
- 	{ "🧐",		monocle },		/* All windows on top of eachother */
+	/* symbol	arrange function			description			*/
+ 	{ "[]=",	tile },			/* master on left, slaves on right */
+ 	{ "🧐",		monocle },		/* all windows on top of eachother */
  	{ "{}",		alphamonocle },		/* monocle but windows aren't stacked */
-	//{ "TTT",	bstack },		/* Master on top, slaves on bottom */
-	{ "🐚",		spiral },		/* Fibonacci spiral */
-	//{ "[\\]",	dwindle },		/* Decreasing in size right and leftward */
-	{ "[D]",	deck },			/* Master on left, slaves in monocle mode on right */
-	{ ">M>",	centeredfloatmaster},	/* Centermaster but master floats */
-	//{ "|M|",	centeredmaster },	/* Master in middle, slaves on sides */
-	//{ "===",      bstackhoriz },		/* Bstack but slaves stacked "monocle"-like */
+	//{ "TTT",	bstack },		/* master on top, slaves on bottom */
+	{ "🐚",		spiral },		/* fibonacci spiral */
+	//{ "[\\]",	dwindle },		/* decreasing in size right and leftward */
+	{ "[D]",	deck },			/* master on left, slaves in monocle mode on right */
+	{ ">M>",	centeredfloatmaster},	/* centermaster but master floats */
+	//{ "|M|",	centeredmaster },	/* master in middle, slaves on sides */
+	//{ "===",      bstackhoriz },		/* bstack but slaves stacked "monocle"-like */
 	//{ "HHH",      grid },			/* windows in a grid */
-	{ "###",      nrowgrid },		/* Gaplessgrid with no gaps, but not equal size */
-	//{ "---",      horizgrid },		/* Gaplessgrid but with horizontal order */
+	{ "###",      nrowgrid },		/* gaplessgrid with no gaps, but not equal size */
+	//{ "---",      horizgrid },		/* gaplessgrid but with horizontal order */
 	//{ ":::",      gaplessgrid },		/* grid ajusted in such that there are no gaps */
-	//{ "🐷", 	pidgin },		/* Basically grid? */
+	//{ "🐷", 	pidgin },		/* basically grid? */
 	//{ ")M(",	ego },
 	//{ "🥏",	NULL },			/* no layout function means floating behavior */
 	{ NULL,		NULL },
@@ -207,7 +187,7 @@ static const char *samevifm[]  = { "samedirvifm", NULL };
 /* macro for nvim to start on insertmode on the last line */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
 /* scratchpads */
-static const char *scratchpads[SpLast][256] = {
+static const char *scratchpads[][256] = {
 	[Sp1] = { "st", "-n", "term", "-g", "115x30" , NULL }, /* terminal */
 	[Sp2] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
 	[Sp3] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL }, /* calculator */
@@ -406,8 +386,8 @@ static Button buttons[] = {
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
-	{ ClkTagBar,            0,              Button4,	shiftview,	{ .i = +1 } },
-	{ ClkTagBar,            0,              Button5,	shiftview,	{ .i = -1 } },
+	{ ClkTagBar,            0,              Button4,	shiftview,	{.i = +1 } },
+	{ ClkTagBar,            0,              Button5,	shiftview,	{.i = -1 } },
 
 	{ ClkLtSymbol,          0,              Button1,        togglegaps,     {0} },
 	{ ClkLtSymbol,          0,              Button3,        togglevacant,   {0} },
@@ -422,8 +402,8 @@ static Button buttons[] = {
 	{ ClkWinTitle,          0,              Button2,	zoomswap,       {0} },
 	{ ClkWinTitle,          0,              Button2,	killclient,	{0} },
 	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -us -e 'mv $f ~/Downloads'") },
-	{ ClkWinTitle,          0,              Button4,        focusstack,	{.i = 1} },
-	{ ClkWinTitle,          0,              Button5,        focusstack,	{.i = -1} },
+	{ ClkWinTitle,          0,              Button4,        focusstack,	{.i = +1 } },
+	{ ClkWinTitle,          0,              Button5,        focusstack,	{.i = -1 } },
 
 	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1 } },
 	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2 } },
