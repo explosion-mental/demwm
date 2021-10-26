@@ -112,6 +112,7 @@ Currently I don't wish more 'features' but here are some ideas:
 - toggleable pertag. This features a workflow
   in which you can have the such 'dynamic' window management of dwm and also have a pertag
   workflow. Can this be implememnted just like the hidevacant patch? meaning, with a simple flag variable. Maybe intead of a lot of if / else we just re-arrange (re-start / re-setup) the pertag variables to default one and somehow maintain them the same while pertag is active.
+	* another idea. maybe just doing all the above but only for the layout..
 - <s>Make _tag previews_ more solid</s> and prevent from being shown in the preview of the preview...
 - <s>systray toggleable with _#ifdef_ and _#endif_</s>
 - <s>make [hide vacant patch](https://dwm.suckless.org/patches/hide_vacant_tags/)
