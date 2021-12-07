@@ -69,6 +69,7 @@ static const unsigned int alphas[][2]   = {
 /* tags */
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
 static const int taglayouts[] = {    0,   1,    0,   0,    0,    0,    0,    0,    0 };
+static const char *tagsalt[]  = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
 static const Rule rules[] = {
 	/* flags: class, instance, title, wintype, role, tags, isfloating,
@@ -121,6 +122,7 @@ static const Rule rules[] = {
 	RULE(.instance = "music",	.tags = SPTAG(Sp5), .isfloating = 1)
 	RULE(.instance = "pulsemixer",	.tags = SPTAG(Sp6), .isfloating = 1)
 	RULE(.instance = "term",	.tags = SPTAG(Sp7), .isfloating = 1)
+	RULE(.instance = "testi",	.tags = SPTAG(Sp8), .isfloating = 1)
 	//RULE(.instance = "normal",	.tags = SPTAG(7))
 	//RULE(.instance = "emacsfloat",	.tags = SPTAG(8), .isfloating = 1)
 };
@@ -183,18 +185,23 @@ static const char *web[]       = { "surf", "start.duckduckgo.com", NULL };
 static const char *vifm[]      = { "st", "-e", "vifmrun", NULL };
 static const char *samevifm[]  = { "samedirvifm", NULL };
 //EXEC(samedmenu, "samedirmenu"
+static const char pulsepad[] = "st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer; kill -42 $(pidof dwmblocks)";
 
 /* macro for nvim to start on insertmode on the last line */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
+#define FURSIZE		"90x25"
 /* scratchpads */
 static const char *scratchpads[][256] = {
 	[Sp1] = { "st", "-n", "term", "-g", "115x30" , NULL }, /* terminal */
-	[Sp2] = { "st", "-n", "notes", "-g", "100x25", NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
+	[Sp2] = { "st", "-n", "notes", "-g", FURSIZE, "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", NOTES, "/home/faber/Docs/testi/notes", NULL }, /* notes */
 	[Sp3] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL }, /* calculator */
-	[Sp4] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL }, /* uni */
-	[Sp5] = { "st", "-n", "music", "-g", "105x27",  "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", "-e", "ncmpcpp", "-q", NULL }, /* music */
-	[Sp6] = { "st", "-n", "pulsemixer", "-g", "100x25", "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "pulsemixer", NULL }, /* pulsemixer */
+	//[Sp4] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL }, /* uni */
+	[Sp4] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/testi-is", NULL }, /* uni */
+	[Sp5] = { "st", "-n", "music", "-g", "105x27", "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", "-e", "ncmpcpp", "-q", NULL }, /* music */
+	//[Sp6] = { "st", "-n", "pulsemixer", "-g", "100x25", "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "pulsemixer", NULL }, /* pulsemixer */
+	[Sp6] = { "/bin/sh", "-c", pulsepad, NULL },
 	[Sp7] = { "samedir", "-n", "term", "-g", "115x30", NULL }, /* samedir */
+	[Sp8] = { "st", "-n", "testi", "-g", FURSIZE, "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
 };
 
 static Key keys[] = {
@@ -219,6 +226,7 @@ static Key keys[] = {
 	SPKEYS(MODKEY,			XK_n,	/* music	*/	Sp5)
 	SPKEYS(MODKEY|ShiftMask,	XK_p,	/* pulsemixer	*/	Sp6)
 	SPKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	Sp7)
+	SPKEYS(MODKEY|ControlMask,	XK_e,	/* notes - is	*/	Sp8)
 	//SCRATCHKEYS(MODKEY|ControlMask,	XK_e,	/* stnormal	*/	7)
 	{ MODKEY|ControlMask,		XK_v,	scratchpad_remove,	{0} },
 	{ MODKEY,                       XK_v,	scratchpad_show,	{0} },
@@ -311,12 +319,12 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,		XK_equal,		SHCMD("mpc volume +3")	},
 	{ MODKEY|ShiftMask,		XK_bracketleft,		SHCMD("mpc seek -10")	},
 	{ MODKEY|ShiftMask,		XK_bracketright,	SHCMD("mpc seek +10")	},
-{ MODKEY,	XK_minus,	SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
-{ MODKEY,	XK_equal,	SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
-{ MODKEY,	 XK_BackSpace,	SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 2; kill -44 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2; kill -44 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioMute,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
+{ MODKEY,	XK_minus,	SHCMD("pamixer --allow-boost -d 3; kill -42 $(pidof dwmblocks)") },
+{ MODKEY,	XK_equal,	SHCMD("pamixer --allow-boost -i 3; kill -42 $(pidof dwmblocks)") },
+{ MODKEY,	 XK_BackSpace,	SHCMD("pamixer -t; kill -42 $(pidof dwmblocks)") },
+{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 2; kill -42 $(pidof dwmblocks)") },
+{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2; kill -42 $(pidof dwmblocks)") },
+{ 0, XF86XK_AudioMute,		SHCMD("pamixer -t; kill -42 $(pidof dwmblocks)") },
 //{ 0,	XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 //{ 0, XF86XK_ScreenSaver,		SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
 //	{ 0,	XF86XK_AudioStop,		SHCMD("mpc toggle)		},
@@ -337,7 +345,7 @@ static Key keys[] = {
 	{ MODKEY,			XK_b,	CMDCMD("Books001")		},
 	{ MODKEY|ShiftMask,		XK_u,	SHCMD("bookmenu")		},
 	{ MODKEY|ShiftMask,		XK_b,	SHCMD("Boletin001")		},
-	{ MODKEY,		        XK_c,	SHCMD("st -e calcurse")		},
+	{ MODKEY,		        XK_c,	SHCMD("st -f 'Monofur Nerd Font:pixelsize=22:antialias=true:autohint=true' -e calcurse")},
 	{ MODKEY,	         	XK_z,	SHCMD("redyt -r")		},
 	{ MODKEY|ShiftMask,	      	XK_z,	SHCMD("walldown")		},
 	{ MODKEY,		    XK_grave,	SHCMD("dmenuunicode")		},
@@ -372,10 +380,10 @@ static Key keys[] = {
 	{ MODKEY,                       XK_F11,	random_wall,		{0}	},
 	{ MODKEY,                       XK_F12,	xrdb,			{0}	},
 	//remove black bar on the screenshot %90 percent accuracy
-	{ 0, XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
+	{ ShiftMask, XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
 		magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
 	{ MODKEY,		    XK_Print,	SHCMD("dmenurecord")		},
-	{ ShiftMask,		    XK_Print,	SHCMD("scrot")			},
+	{ 0,		    XK_Print,	SHCMD("scrot")			},
 };
 
 /* button definitions
@@ -390,7 +398,8 @@ static Button buttons[] = {
 	{ ClkTagBar,            0,              Button5,	shiftview,	{.i = -1 } },
 
 	{ ClkLtSymbol,          0,              Button1,        togglegaps,     {0} },
-	{ ClkLtSymbol,          0,              Button3,        togglevacant,   {0} },
+	{ ClkLtSymbol,          0,              Button2,        togglevacant,   {0} },
+	//{ ClkLtSymbol,          0,              Button3,        togglevacant,   {0} },
 //	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
 //	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
 	{ ClkLtSymbol,          0,              Button4,        cyclelayout,    {.i = +1 } },
