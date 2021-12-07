@@ -782,8 +782,8 @@ buttonpress(XEvent *e)
 			/* do not reserve space for vacant tags */
 			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i) && hidevacant)
 				continue;
-			x += TEXTW(tags[i]);
-		} while (ev->x >= x && ++i < LENGTH(tags));
+			x += TEXTW(hidevacant ? tagsalt[i] : tags[i]);
+		} while (ev->x >= x && ++i < (hidevacant ? LENGTH(tagsalt) : LENGTH(tags)));
 		if (i < LENGTH(tags)) {
 			click = ClkTagBar;
 			arg.ui = 1 << i;
@@ -1262,7 +1262,7 @@ drawbar(Monitor *m)
 	#endif /* SYSTRAY */
 
 	for (c = m->clients; c; c = c->next) {
-		occ |= c->tags == 255 && hidevacant ? 0 : c->tags;
+		occ |= c->tags == 255 ? 0 : c->tags;
 		if (c->isurgent)
 			urg |= c->tags;
 	}
