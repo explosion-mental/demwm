@@ -36,8 +36,7 @@ My build of dwm
   top of the other mentioned: Urgent - Notify - Indicator on/of)
 - Transparency on the bar
 - A beautiful looking config.h file (at least for my taste :)
-- Toggleable 'hide-vacant' patch which activates alternative tags that makes
-  tag movements easy
+- Toggleable 'hide-vacant' patch, which enables alternative tags on toggle
 - Dynamic and static scratchpads
 
 
