@@ -20,7 +20,6 @@
  *
  * To understand everything else, start reading main().
  */
-
 #include <errno.h>
 #include <locale.h>
 #include <signal.h>
@@ -111,7 +110,7 @@ enum { BorderNorm, BorderSel, BorderUrg }; /* border schemes */
 enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
        SchemeStatus, SchemeIndOff, SchemeIndOn,
        SchemeNotify, SchemeSys }; /* color schemes */
-enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7 }; /* scratchpads */
+enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8 }; /* scratchpads */
 enum { NetSupported, NetWMName,
 #ifdef ICONS
        NetWMIcon,
@@ -515,7 +514,7 @@ static const int scrollargs[][2] = {
 };
 
 /* dynamic scratchpads (this selects an unused tag?) */
-#define SCRATCHPAD_MASK (1u << sizeof tags / sizeof * tags)
+#define SCRATCHPAD_MASK (1u << (NUMTAGS - 3))
 
 /* Pertag */
 struct Pertag {
@@ -1244,8 +1243,7 @@ drawbar(Monitor *m)
 	unsigned int i, occ = 0, urg = 0;
 	unsigned int a = 0, s = 0;
 	Client *c;
-	char *tagsalt[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-	int bw = m->ww - tw; /* bar width */
+	int bw = m->ww; /* bar width */
 
 
 	#ifdef SYSTRAY
