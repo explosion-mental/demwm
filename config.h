@@ -29,9 +29,9 @@ static const char *fonts[] = {
 //	"JetBrains Mono Medium:pixelsize=12:antialias=true:autohint=true", /* Mono */
 //	"Hack Nerd Font:pixelsize=12:antialias=true:autohint=true", /* Powerline */
 //	"Hack Nerd Font:style=bold:pixelsize=12:antialias=true:autohint=true", /* Powerline */
-//	"SauceCodePro Nerd Font:pixelsize=14:antialias=true:autohint=true",
+//	"SauceCodePro Nerd Font:pixelsize=14:antialias=true:autohint=true", /* Code */
 //	"Noto Color Emoji:pixelsize=16:antialias=true:autohint=true: style=Regular", /* Emojis */
-	"JoyPixels:pixelsize=14:antialias=true:autohint=true"
+	"JoyPixels:pixelsize=14:antialias=true:autohint=true" /* Emojis */
 };
 /* pywal */
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8];
@@ -46,13 +46,12 @@ static const char *colors[][2]	        = {
 	[SchemeTitle]  = { color0,	color2 }, /* window title */
 	[SchemeStatus] = { fg_wal,	color0 }, /* status bar */
 	[SchemeSys]    = { color0,	color0 }, /* system tray */
-	[SchemeNotify] = { fg_wal,	color0 }, /* little red bar on urgent tag */
+	[SchemeNotify] = { fg_wal,	color0 }, /* bar on urgent tag */
 	[SchemeIndOn]  = { color4,	color0 }, /* rectangle on sel tag */
 	[SchemeIndOff] = { color2,	color0 }, /* rectangle on norm tag */
-	/* border colors */
-	[BorderNorm]   = { color0 }, /* normal tags section */
-	[BorderSel]    = { color2 }, /* selected tag */
-	[BorderUrg]    = { fg_wal }, /* selected tag */
+	[BorderNorm]   = { color0 },	/* normal window border */
+	[BorderSel]    = { color2 },	/* selected window border */
+	[BorderUrg]    = { fg_wal },	/* urgent window border */
 };
 static const unsigned int alphas[][2]   = {
 			/* fg		bg	 */
@@ -66,7 +65,6 @@ static const unsigned int alphas[][2]   = {
 	[SchemeNotify] = { OPAQUE,	baralpha },
 	[SchemeIndOn]  = { OPAQUE,	baralpha },
 	[SchemeIndOff] = { OPAQUE,	baralpha },
-	/* border colors */
 	[BorderNorm]   = { 0 },
 	[BorderSel]    = { borderalpha },
 	[BorderUrg]    = { borderalpha },
