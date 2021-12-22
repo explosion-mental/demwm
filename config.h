@@ -24,7 +24,7 @@ static const int scrollsensetivity    = 30;	/* 1 means resize window by 1 pixel 
 static const unsigned int baralpha    = 120;	/* bar opacity from 0 to 255, default is 185*/
 static const unsigned int borderalpha = OPAQUE;	/* borders, default is 0xffU (OPAQUE) */
 
-static char *fonts[] = {
+static const char *fonts[] = {
 	"Monofur Nerd Font:pixelsize=14:antialias=true:autohint=true", /* Mono */
 //	"JetBrains Mono Medium:pixelsize=12:antialias=true:autohint=true", /* Mono */
 //	"Hack Nerd Font:pixelsize=12:antialias=true:autohint=true", /* Powerline */
