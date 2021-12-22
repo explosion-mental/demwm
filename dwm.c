@@ -193,8 +193,8 @@ typedef struct {
 
 typedef struct {
 	const char *symbol;
-	//int addgaps;
 	void (*arrange)(Monitor *);
+	const int gaps;
 } Layout;
 
 typedef struct Pertag Pertag;
@@ -2799,6 +2799,11 @@ getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 	if (smartgaps && n == 1) {
 		oe = 0;     /* outer gaps disabled when only one client */
 	}
+
+	/* disable gaps if they are disabled */
+	if (selmon->lt[selmon->sellt]->gaps)
+		oe = 0;
+
 	*oh = m->gappoh*oe; /* outer horizontal gap */
 	*ov = m->gappov*oe; /* outer vertical gap   */
 	*ih = m->gappih*ie; /* inner horizontal gap */
