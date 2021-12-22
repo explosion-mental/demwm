@@ -389,6 +389,7 @@ static Key keys[] = {
 		magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
 	{ MODKEY,		    XK_Print,	SHCMD("dmenurecord")		},
 	{ 0,		    XK_Print,	SHCMD("scrot")			},
+/* panic key */ { MODKEY, XK_Delete, SHCMD("mpv '/home/faber/Media/Videos/Fight the Power!.mkv' --loop-file=inf --fs") },
 };
 
 /* button definitions
