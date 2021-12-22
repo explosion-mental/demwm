@@ -37,12 +37,6 @@ static const char *fonts[] = {
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8];
 static char color6[8], color7[8], color8[8], bg_wal[8], fg_wal[8], cursor_wal[8];
 
-static const Bordercolor bordercolors[]	= {
-			/* border	alpha                description         */
-	[BorderNorm]   = { color0,	0           }, /* normal tags section */
-	[BorderSel]    = { color2,	borderalpha }, /* selected tag */
-	[BorderUrg]    = { fg_wal,	borderalpha }, /* selected tag */
-};
 static const char *colors[][2]	        = {
 			/* fg		bg           description         */
 	[SchemeNorm]   = { fg_wal,	color0 }, /* normal tags section */
@@ -55,15 +49,27 @@ static const char *colors[][2]	        = {
 	[SchemeNotify] = { fg_wal,	color0 }, /* little red bar on urgent tag */
 	[SchemeIndOn]  = { color4,	color0 }, /* rectangle on sel tag */
 	[SchemeIndOff] = { color2,	color0 }, /* rectangle on norm tag */
+	/* border colors */
+	[BorderNorm]   = { color0 }, /* normal tags section */
+	[BorderSel]    = { color2 }, /* selected tag */
+	[BorderUrg]    = { fg_wal }, /* selected tag */
 };
 static const unsigned int alphas[][2]   = {
 			/* fg		bg	 */
 	[SchemeNorm]   = { OPAQUE,	baralpha },
 	[SchemeSel]    = { OPAQUE,	baralpha },
+	[SchemeUrgent] = { OPAQUE,	baralpha },
 	[SchemeLt]     = { OPAQUE,	baralpha },
 	[SchemeTitle]  = { OPAQUE,	OPAQUE,	 },
 	[SchemeStatus] = { OPAQUE,	baralpha },
-	[SchemeSys]    = { baralpha,	baralpha },
+	[SchemeSys]    = { OPAQUE,	baralpha },
+	[SchemeNotify] = { OPAQUE,	baralpha },
+	[SchemeIndOn]  = { OPAQUE,	baralpha },
+	[SchemeIndOff] = { OPAQUE,	baralpha },
+	/* border colors */
+	[BorderNorm]   = { 0 },
+	[BorderSel]    = { borderalpha },
+	[BorderUrg]    = { borderalpha },
 };
 
 /* tags */

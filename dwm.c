@@ -106,10 +106,20 @@ enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { BorderNorm, BorderSel, BorderUrg }; /* border schemes */
-enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
-       SchemeStatus, SchemeIndOff, SchemeIndOn,
-       SchemeNotify, SchemeSys }; /* color schemes */
+enum { SchemeNorm,
+	SchemeSel,
+	SchemeUrgent,
+	SchemeLt,
+	SchemeTitle,
+	SchemeStatus,
+	SchemeSys,
+	SchemeNotify,
+	SchemeIndOff,
+	SchemeIndOn,
+	BorderNorm,
+	BorderSel,
+	BorderUrg /* border schemes */
+}; /* color schemes */
 enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8 }; /* scratchpads */
 enum { NetSupported, NetWMName,
 #ifdef ICONS
@@ -241,11 +251,6 @@ struct Systray {
 	Client *icons;
 };
 #endif /* SYSTRAY */
-
-typedef struct {
-	const char *color;
-	const unsigned int alpha;
-} Bordercolor;
 
 /* function declarations */
 static void applyrules(Client *c);
@@ -485,7 +490,7 @@ static unsigned long systrayorientation = 0; /* _NET_SYSTEM_TRAY_ORIENTATION_HOR
 static Atom wmatom[WMLast], netatom[NetLast];
 static int running = 1, restart = 0;
 static Cur *cursor[CurLast];
-static Clr **scheme, **borderscheme;
+static Clr **scheme;
 static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
@@ -870,10 +875,7 @@ cleanup(void)
 		drw_cur_free(drw, cursor[i]);
 	for (i = 0; i < LENGTH(colors); i++)
 		free(scheme[i]);
-	for (i = 0; i < LENGTH(bordercolors); i++)
-		free(borderscheme[i]);
  	free(scheme);
- 	free(borderscheme);
 	XDestroyWindow(dpy, wmcheckwin);
 	drw_free(drw);
 	XSync(dpy, False);
@@ -1387,7 +1389,7 @@ focus(Client *c)
 		detachstack(c);
 		attachstack(c);
 		grabbuttons(c, 1);
-		XSetWindowBorder(dpy, c->win, borderscheme[BorderSel][0].pixel);
+		XSetWindowBorder(dpy, c->win, scheme[BorderSel][ColFg].pixel);
 		setfocus(c);
 		if (c->mon->lt[c->mon->sellt]->arrange) {
 			/* Move all visible tiled clients that are not marked as on top below the bar window */
@@ -2106,9 +2108,6 @@ losefullscreen(Client *next)
 void
 loadcolors(int fallback)
 {
-	int i;
-	size_t j;
-
 	if (fallback) { /* fallback colors */
 		strcpy(bg_wal, "#222222");
 		strcpy(fg_wal, "#222222");
@@ -2122,18 +2121,9 @@ loadcolors(int fallback)
 		strcpy(color7, "#222222");
 		strcpy(color8, "#222222");
 		strcpy(cursor_wal, "#222222");
-	} else { /* allocate colors */
-		Clr *ret = ecalloc(LENGTH(bordercolors), sizeof(XftColor));
-
-		/* colors and alpha values */
-		for (i = 0; i < LENGTH(colors); i++)
+	} else  /* init colors */
+		for (int i = 0; i < LENGTH(colors); i++)
 			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
-		/* bordercolors and alpha values */
-		for (j = 0; j < LENGTH(bordercolors); j++) {
-			drw_clr_create(drw, &ret[j], bordercolors[j].color, bordercolors[j].alpha);
-			borderscheme[j] = &ret[j];
-		}
-	}
 }
 
 void
@@ -2217,8 +2207,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
-	//XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
-	XSetWindowBorder(dpy, w, borderscheme[BorderNorm][0].pixel);
+	XSetWindowBorder(dpy, w, scheme[BorderNorm][ColFg].pixel);
 	configure(c); /* propagates border_width, if size doesn't change */
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMStateAbove])
 		c->alwaysontop = 1;
@@ -3114,7 +3103,6 @@ setup(void)
 
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
-	borderscheme = ecalloc(LENGTH(bordercolors), sizeof(Clr *));
 
 	/* FIXME if restarting keep the wallpaper the same, else refresh */
 	if (restart)
@@ -3567,7 +3555,7 @@ unfocus(Client *c, int setfocus)
 		return;
 	grabbuttons(c, 0);
 	//c->alwaysontop = 0;
-	XSetWindowBorder(dpy, c->win, borderscheme[BorderNorm][0].pixel);
+	XSetWindowBorder(dpy, c->win, scheme[BorderNorm][ColFg].pixel);
 	if (setfocus) {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
@@ -3880,7 +3868,7 @@ updatewmhints(Client *c)
 		} else {
 			c->isurgent = (wmh->flags & XUrgencyHint) ? 1 : 0;
 			if (c->isurgent) /* set border to urgent */
-				XSetWindowBorder(dpy, c->win, borderscheme[BorderUrg][0].pixel);
+				XSetWindowBorder(dpy, c->win, scheme[BorderUrg][ColFg].pixel);
 		}
 		if (wmh->flags & InputHint)
 			c->neverfocus = !wmh->input;
@@ -4170,7 +4158,6 @@ xrdb(const Arg *arg)
 {
 	loadxrdb();
 	loadcolors(0);
-
 	drawbar(selmon);
 	focus(NULL);
 	arrange(NULL);
