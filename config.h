@@ -140,25 +140,24 @@ static int resizehints = 0;	/* 1 means respect size hints in tiled resizals */
 static int forcevsplit = 1;	/* nrowgrid: force two clients to always split vertically */
 
 static const Layout layouts[] = {
-	/* symbol	arrange function			description			*/
+	/* symbol	arrange function   gaps (enabled if omitted)			*/
  	{ "[]=",	tile },			/* master on left, slaves on right */
  	{ "🧐",		monocle },		/* all windows on top of eachother */
- 	{ "{}",		alphamonocle },		/* monocle but windows aren't stacked */
+ 	{ "{}",		alphamonocle, 1 },	/* monocle but windows aren't stacked */
 	//{ "TTT",	bstack },		/* master on top, slaves on bottom */
-	{ "🐚",		spiral },		/* fibonacci spiral */
+	//{ "🐚",		spiral },		/* fibonacci spiral */
 	//{ "[\\]",	dwindle },		/* decreasing in size right and leftward */
 	{ "[D]",	deck },			/* master on left, slaves in monocle mode on right */
-	{ ">M>",	centeredfloatmaster},	/* centermaster but master floats */
+	//{ ">M>",	centeredfloatmaster},	/* centermaster but master floats */
 	//{ "|M|",	centeredmaster },	/* master in middle, slaves on sides */
 	//{ "===",      bstackhoriz },		/* bstack but slaves stacked "monocle"-like */
 	//{ "HHH",      grid },			/* windows in a grid */
-	{ "###",      nrowgrid },		/* gaplessgrid with no gaps, but not equal size */
+	{ "###",	nrowgrid },		/* gaplessgrid with no gaps, but not equal size */
 	//{ "---",      horizgrid },		/* gaplessgrid but with horizontal order */
 	//{ ":::",      gaplessgrid },		/* grid ajusted in such that there are no gaps */
 	//{ "🐷", 	pidgin },		/* basically grid? */
 	//{ ")M(",	ego },
 	//{ "🥏",	NULL },			/* no layout function means floating behavior */
-	{ NULL,		NULL },
 };
 
 /* key definitions */
