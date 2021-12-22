@@ -10,9 +10,8 @@ My build of dwm
 - [pywal](https://github.com/dylanaraps/pywal)
 	* if not installed it will set colors to (hopefully) default dwm colors
 - [libxft-bgra](https://github.com/uditkarode/libxft-bgra)
-	* The `tags[]` array has emojis, replacing the unicode characters to
+	* There are emojis on config.h, replacing the unicode characters to
 	  non-unicode will make independant of libxft-bgra.
-	  [line](https://github.com/explosion-mental/Dwm/blob/410c01096547f3400d9afad7a091e3cb8c11397e/config.h#L63)
 - xwallpaper
 	* You can use other program to set the wallpaper,
 	  [see](https://github.com/explosion-mental/Dwm/blob/main/dwm_random_wall)
@@ -30,10 +29,9 @@ My build of dwm
 - Changing the schemes (colors) at run time
 - More [layouts](https://github.com/explosion-mental/Dwm/blob/main/layouts.c)
 - Custom bar height
-- Separated border color scheme from general color scheme (which improves
-  readability, in a way)
 - Different color schemes for Title, Status and Layout (added 4 more shemes on
-  top of the other mentioned: Urgent - Notify - Indicator on/of)
+  top of the other mentioned: Urgent - Notify - Indicator on/off)
+- Different scheme for border instances
 - Transparency on the bar
 - A beautiful looking config.h file (at least for my taste :)
 - Toggleable 'hide-vacant' patch, which enables alternative tags on toggle
