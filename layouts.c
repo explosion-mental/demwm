@@ -1,78 +1,5 @@
-/* All of what i consider "core" of vanitygaps are on dwm.c since I don't plan
- * to don't use gaps, here I the 'too much customization' functions. */
-/*************************
- * Key binding functions *
- *************************/
-/*
-void
-incrigaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh,
-		selmon->gappov,
-		selmon->gappih + arg->i,
-		selmon->gappiv + arg->i
-	);
-}
-void
-incrogaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh + arg->i,
-		selmon->gappov + arg->i,
-		selmon->gappih,
-		selmon->gappiv
-	);
-}
-void
-incrohgaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh + arg->i,
-		selmon->gappov,
-		selmon->gappih,
-		selmon->gappiv
-	);
-}
-void
-incrovgaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh,
-		selmon->gappov + arg->i,
-		selmon->gappih,
-		selmon->gappiv
-	);
-}
-void
-incrihgaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh,
-		selmon->gappov,
-		selmon->gappih + arg->i,
-		selmon->gappiv
-	);
-}
-void
-incrivgaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh,
-		selmon->gappov,
-		selmon->gappih,
-		selmon->gappiv + arg->i
-	);
-}
-*/
-
-
-/***********
- * Layouts *
- ***********/
-
-/* Tile layout + gaps */
-void
+/* Tile */
+static void
 tile(Monitor *m)
 {
 	unsigned int i, n;
@@ -119,8 +46,7 @@ tile(Monitor *m)
 }
 
 /* Monocle */
-//static void monocle(Monitor *m);
-void
+static void
 monocle(Monitor *m)
 {
 	unsigned int n;
@@ -141,8 +67,7 @@ monocle(Monitor *m)
  * only show the currently focused window,
  * rather than all windows stacked on top of each other.
 */
-//static void monocle(Monitor *m);
-void
+static void
 alphamonocle(Monitor *m)
 {
 	unsigned int n;
@@ -168,8 +93,7 @@ alphamonocle(Monitor *m)
  * Center floating master
  * same as master on center but is floating
  */
-//static void centeredfloatmaster(Monitor *m);
-void
+static void
 centeredfloatmaster(Monitor *m)
 {
 	unsigned int i, n;
@@ -229,8 +153,7 @@ centeredfloatmaster(Monitor *m)
  * Deck layout + gaps
  * https://dwm.suckless.org/patches/deck/
  */
-//static void deck(Monitor *m);
-void
+static void
 deck(Monitor *m)
 {
 	unsigned int i, n;
@@ -274,7 +197,7 @@ deck(Monitor *m)
  * Fibonacci layout + gaps
  * https://dwm.suckless.org/patches/fibonacci/
  */
-void
+static void
 fibonacci(Monitor *m, int s)
 {
 	unsigned int i, n;
@@ -366,29 +289,23 @@ fibonacci(Monitor *m, int s)
  * dwindle
  * Decreasing in size right and leftward
  */
-//static void dwindle(Monitor *m);
-void
+static void
 dwindle(Monitor *m)
 {
 	fibonacci(m, 1);
 }
 
-//static void spiral(Monitor *m);
-void
+static void
 spiral(Monitor *m)
 {
 	fibonacci(m, 0);
 }
 
-
-
-
 /*
  * Gappless grid layout + gaps (ironically)
  * https://dwm.suckless.org/patches/gaplessgrid/
  */
-//static void gaplessgrid(Monitor *m);
-void
+static void
 gaplessgrid(Monitor *m)
 {
 	unsigned int i, n;
@@ -441,8 +358,7 @@ gaplessgrid(Monitor *m)
  * Gridmode layout + gaps
  * https://dwm.suckless.org/patches/gridmode/
  */
-//static void grid(Monitor *m);
-void
+static void
 grid(Monitor *m)
 {
 	unsigned int i, n;
@@ -476,8 +392,7 @@ grid(Monitor *m)
  * Horizontal grid layout + gaps
  * https://dwm.suckless.org/patches/horizgrid/
  */
-//static void horizgrid(Monitor *m);
-void
+static void
 horizgrid(Monitor *m)
 {
 	Client *c;
@@ -491,6 +406,7 @@ horizgrid(Monitor *m)
 
 	/* Count windows */
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
+
 	if (n == 0)
 		return;
 
@@ -500,6 +416,7 @@ horizgrid(Monitor *m)
 		ntop = n / 2;
 		nbottom = n - ntop;
 	}
+
 	sx = mx = m->wx + ov;
 	sy = my = m->wy + oh;
 	sh = mh = m->wh - 2*oh;
@@ -543,9 +460,8 @@ horizgrid(Monitor *m)
  * nrowgrid layout + gaps
  * https://dwm.suckless.org/patches/nrowgrid/
  */
-//static void nrowgrid(Monitor *m);
 void
-nrowgrid(Monitor *m)
+layoutnrowgrid(Monitor *m, int forcevsplit)
 {
 	unsigned int n;
 	int ri = 0, ci = 0;  /* counters */
@@ -555,7 +471,6 @@ nrowgrid(Monitor *m)
 	unsigned int cols, rows = m->nmaster + 1;
 	Client *c;
 
-	/* count clients */
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
 
 	/* nothing to do here */
@@ -597,13 +512,24 @@ nrowgrid(Monitor *m)
 		resize(c, cx, cy, cw - (2*c->bw), ch - (2*c->bw), 0);
 	}
 }
+static void
+nrowgrid(Monitor *m)
+{
+	layoutnrowgrid(m, 0);
+}
+
+static void
+vsplitnrowgrid(Monitor *m)
+{
+	layoutnrowgrid(m, 1);
+}
+
 
 /*
  * Bottomstack layout + gaps
  * https://dwm.suckless.org/patches/bottomstack/
  */
-//static void bstack(Monitor *m);
-void
+static void
 bstack(Monitor *m)
 {
 	unsigned int i, n;
@@ -615,6 +541,7 @@ bstack(Monitor *m)
 	Client *c;
 
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
+
 	if (n == 0)
 		return;
 
@@ -644,8 +571,7 @@ bstack(Monitor *m)
 	}
 }
 
-//static void bstackhoriz(Monitor *m);
-void
+static void
 bstackhoriz(Monitor *m)
 {
 	unsigned int i, n;
@@ -657,6 +583,7 @@ bstackhoriz(Monitor *m)
 	Client *c;
 
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
+
 	if (n == 0)
 		return;
 
@@ -691,8 +618,7 @@ bstackhoriz(Monitor *m)
  * Centred master layout + gaps
  * https://dwm.suckless.org/patches/centeredmaster/
  */
-//static void centeredmaster(Monitor *m);
-void
+static void
 centeredmaster(Monitor *m)
 {
 	unsigned int i, n;
@@ -706,6 +632,7 @@ centeredmaster(Monitor *m)
 	Client *c;
 
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
+
 	if (n == 0)
 		return;
 
@@ -906,3 +833,69 @@ centeredmaster(Monitor *m)
 //			sy += HEIGHT(c) + ih;
 //		}
 //}
+
+/* All of what i consider "core" of vanitygaps are on dwm.c since I don't plan
+ * to don't use gaps, here I the 'too much customization' functions. */
+
+/*
+void
+incrigaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh,
+		selmon->gappov,
+		selmon->gappih + arg->i,
+		selmon->gappiv + arg->i
+	);
+}
+void
+incrogaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh + arg->i,
+		selmon->gappov + arg->i,
+		selmon->gappih,
+		selmon->gappiv
+	);
+}
+void
+incrohgaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh + arg->i,
+		selmon->gappov,
+		selmon->gappih,
+		selmon->gappiv
+	);
+}
+void
+incrovgaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh,
+		selmon->gappov + arg->i,
+		selmon->gappih,
+		selmon->gappiv
+	);
+}
+void
+incrihgaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh,
+		selmon->gappov,
+		selmon->gappih + arg->i,
+		selmon->gappiv
+	);
+}
+void
+incrivgaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh,
+		selmon->gappov,
+		selmon->gappih,
+		selmon->gappiv + arg->i
+	);
+}
+*/

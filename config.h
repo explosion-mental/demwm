@@ -135,7 +135,6 @@ static const Rule rules[] = {
 static float mfact     = 0.55;	/* factor of master area size [0.05..0.95] */
 static int nmaster     = 1;	/* number of clients in master area */
 static int resizehints = 0;	/* 1 means respect size hints in tiled resizals */
-static int forcevsplit = 1;	/* nrowgrid: force two clients to always split vertically */
 
 static const Layout layouts[] = {
 	/* symbol	arrange function   gaps (enabled if omitted)			*/
@@ -151,6 +150,7 @@ static const Layout layouts[] = {
 	//{ "===",      bstackhoriz },		/* bstack but slaves stacked "monocle"-like */
 	//{ "HHH",      grid },			/* windows in a grid */
 	{ "###",	nrowgrid },		/* gaplessgrid with no gaps, but not equal size */
+	//{ "#v#",	vsplitnrowgrid },	/* nrowgrid: force two clients to always split vertically */
 	//{ "---",      horizgrid },		/* gaplessgrid but with horizontal order */
 	//{ ":::",      gaplessgrid },		/* grid ajusted in such that there are no gaps */
 	//{ "🐷", 	pidgin },		/* basically grid? */

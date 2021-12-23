@@ -429,23 +429,6 @@ static void reorganizetags(void);
 static void nostatus(const Arg *arg);
 static void spawncmd(const Arg *arg);
 
-/* layouts */
-static void tile(Monitor *m);
-static void monocle(Monitor *m);
-static void alphamonocle(Monitor *m);
-static void centeredfloatmaster(Monitor *m);
-static void deck(Monitor *m);
-static void fibonacci(Monitor *m, int s);
-static void dwindle(Monitor *m);
-static void spiral(Monitor *m);
-static void gaplessgrid(Monitor *m);
-static void grid(Monitor *m);
-static void horizgrid(Monitor *m);
-static void nrowgrid(Monitor *m);
-static void bstack(Monitor *m);
-static void bstackhoriz(Monitor *m);
-static void centeredmaster(Monitor *m);
-
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
 static Client *swallowingclient(Window w);
@@ -506,8 +489,8 @@ static Client *scratchpad_last_showed = NULL;
 static const int scrollargs[4][2];
 
 /* configuration, allows nested code to access above variables */
-#include "config.h"
 #include "layouts.c"
+#include "config.h"
 
 /* resizemousescroll direction argument list */
 static const int scrollargs[][2] = {
