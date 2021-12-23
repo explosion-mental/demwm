@@ -200,27 +200,27 @@ deck(Monitor *m)
 static void
 fibonacci(Monitor *m, int s)
 {
-	unsigned int i, n;
-	int nx, ny, nw, nh;
-	int oh, ov, ih, iv;
-	int nv, hrest = 0, wrest = 0, r = 1;
 	Client *c;
+	int oh, ov, ih, iv;
+	int nx, ny, nw, nh;
+	int nv, hrest = 0, wrest = 0, r = 1;
+	unsigned int i, n;
 
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
+
 	if (n == 0)
 		return;
 
 	nx = m->wx + ov;
 	ny = m->wy + oh;
-	nw = m->ww - 2*ov;
-	nh = m->wh - 2*oh;
+	nw = m->ww - 2 * ov;
+	nh = m->wh - 2 * oh;
 
 	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next)) {
 		if (r) {
 			if ((i % 2 && (nh - ih) / 2 <= (bh + 2*c->bw))
-			   || (!(i % 2) && (nw - iv) / 2 <= (bh + 2*c->bw))) {
+			|| (!(i % 2) && (nw - iv) / 2 <= (bh + 2*c->bw)))
 				r = 0;
-			}
 			if (r && i < n - 1) {
 				if (i % 2) {
 					nv = (nh - ih) / 2;
@@ -242,23 +242,19 @@ fibonacci(Monitor *m, int s)
 				if (s) {
 					ny += nh + ih;
 					nh += hrest;
-				}
-				else {
+				} else {
 					nh -= hrest;
 					ny -= nh + ih;
 				}
-			}
-			else if ((i % 4) == 1) {
+			} else if ((i % 4) == 1) {
 				nx += nw + iv;
 				nw += wrest;
-			}
-			else if ((i % 4) == 2) {
+			} else if ((i % 4) == 2) {
 				ny += nh + ih;
 				nh += hrest;
 				if (i < n - 1)
 					nw += wrest;
-			}
-			else if ((i % 4) == 3) {
+			} else if ((i % 4) == 3) {
 				if (s) {
 					nx += nw + iv;
 					nw -= wrest;
@@ -268,14 +264,14 @@ fibonacci(Monitor *m, int s)
 					nh += hrest;
 				}
 			}
-			if (i == 0)	{
+
+			if (i == 0) {
 				if (n != 1) {
 					nw = (m->ww - iv - 2*ov) - (m->ww - iv - 2*ov) * (1 - m->mfact);
 					wrest = 0;
 				}
 				ny = m->wy + oh;
-			}
-			else if (i == 1)
+			} else if (i == 1)
 				nw = m->ww - nw - iv - 2*ov;
 			i++;
 		}
@@ -308,28 +304,29 @@ spiral(Monitor *m)
 static void
 gaplessgrid(Monitor *m)
 {
-	unsigned int i, n;
-	int x, y, cols, rows, ch, cw, cn, rn, rrest, crest; // counters
-	int oh, ov, ih, iv;
 	Client *c;
+	int oh, ov, ih, iv;
+	int x, y, cols, rows, ch, cw, cn, rn, rrest, crest; /* counters */
+	unsigned int i, n;
 
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
+
 	if (n == 0)
 		return;
 
 	/* grid dimensions */
-	for (cols = 0; cols <= n/2; cols++)
-		if (cols*cols >= n)
+	for (cols = 0; cols <= n / 2; cols++)
+		if (cols * cols >= n)
 			break;
 	if (n == 5) /* set layout against the general calculation: not 1:2:2, but 2:3 */
 		cols = 2;
 	rows = n/cols;
-	cn = rn = 0; // reset column no, row no, client count
+	cn = rn = 0; /* reset column no, row no, client count */
 
-	ch = (m->wh - 2*oh - ih * (rows - 1)) / rows;
-	cw = (m->ww - 2*ov - iv * (cols - 1)) / cols;
-	rrest = (m->wh - 2*oh - ih * (rows - 1)) - ch * rows;
-	crest = (m->ww - 2*ov - iv * (cols - 1)) - cw * cols;
+	ch = (m->wh - 2 * oh - ih * (rows - 1)) / rows;
+	cw = (m->ww - 2 * ov - iv * (cols - 1)) / cols;
+	rrest = (m->wh - 2 * oh - ih * (rows - 1)) - ch * rows;
+	crest = (m->ww - 2 * ov - iv * (cols - 1)) - cw * cols;
 	x = m->wx + ov;
 	y = m->wy + oh;
 
@@ -361,10 +358,10 @@ gaplessgrid(Monitor *m)
 static void
 grid(Monitor *m)
 {
-	unsigned int i, n;
-	int cx, cy, cw, ch, cc, cr, chrest, cwrest, cols, rows;
-	int oh, ov, ih, iv;
 	Client *c;
+	int oh, ov, ih, iv;
+	int cx, cy, cw, ch, cc, cr, chrest, cwrest, cols, rows;
+	unsigned int i, n;
 
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
 
@@ -404,7 +401,6 @@ horizgrid(Monitor *m)
 	float mfacts = 0, sfacts = 0;
 	int mrest, srest, mtotal = 0, stotal = 0;
 
-	/* Count windows */
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
 
 	if (n == 0)
@@ -463,17 +459,16 @@ horizgrid(Monitor *m)
 void
 layoutnrowgrid(Monitor *m, int forcevsplit)
 {
-	unsigned int n;
+	int oh, ov, ih, iv;
 	int ri = 0, ci = 0;  /* counters */
-	int oh, ov, ih, iv;                         /* vanitygap settings */
-	unsigned int cx, cy, cw, ch;                /* client geometry */
-	unsigned int uw = 0, uh = 0, uc = 0;        /* utilization trackers */
+	unsigned int n;
+	unsigned int cx, cy, cw, ch;		/* client geometry */
+	unsigned int uw = 0, uh = 0, uc = 0;	/* utilization trackers */
 	unsigned int cols, rows = m->nmaster + 1;
 	Client *c;
 
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
 
-	/* nothing to do here */
 	if (n == 0)
 		return;
 
@@ -615,7 +610,7 @@ bstackhoriz(Monitor *m)
 }
 
 /*
- * Centred master layout + gaps
+ * Centered master layout + gaps
  * https://dwm.suckless.org/patches/centeredmaster/
  */
 static void
@@ -669,9 +664,9 @@ centeredmaster(Monitor *m)
 		if (!m->nmaster || n < m->nmaster)
 			mfacts += c->cfact;
 		else if ((n - m->nmaster) % 2)
-			lfacts += c->cfact; // total factor of left hand stack area
+			lfacts += c->cfact; /* total factor of left hand stack area */
 		else
-			rfacts += c->cfact; // total factor of right hand stack area
+			rfacts += c->cfact; /* total factor of right hand stack area */
 	}
 
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++)
@@ -794,51 +789,11 @@ centeredmaster(Monitor *m)
 //	}
 //}
 
-/* old tile */
-//static void
-//tile(Monitor *m)
-//{
-//	unsigned int i, n;
-//	int oh, ov, ih, iv;
-//	int mx = 0, my = 0, mh = 0, mw = 0;
-//	int sx = 0, sy = 0, sh = 0, sw = 0;
-//	float mfacts, sfacts;
-//	int mrest, srest;
-//	Client *c;
-//
-//	getgaps(m, &oh, &ov, &ih, &iv, &n);
-//	if (n == 0)
-//		return;
-//
-//	sx = mx = m->wx + ov;
-//	sy = my = m->wy + oh;
-//	mh = m->wh - 2*oh - ih * (MIN(n, m->nmaster) - 1);
-//	sh = m->wh - 2*oh - ih * (n - m->nmaster - 1);
-//	sw = mw = m->ww - 2*ov;
-//
-//	if (m->nmaster && n > m->nmaster) {
-//		sw = (mw - iv) * (1 - m->mfact);
-//		mw = mw - iv - sw;
-//		sx = mx + mw + iv;
-//	}
-//
-//	getfacts(m, mh, sh, &mfacts, &sfacts, &mrest, &srest);
-//
-//	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
-//		if (i < m->nmaster) {
-//			resize(c, mx, my, mw - (2*c->bw), mh * (c->cfact / mfacts) + (i < mrest ? 1 : 0) - (2*c->bw), 0);
-//			my += HEIGHT(c) + ih;
-//		} else {
-//			resize(c, sx, sy, sw - (2*c->bw), sh * (c->cfact / sfacts) + ((i - m->nmaster) < srest ? 1 : 0) - (2*c->bw), 0);
-//			sy += HEIGHT(c) + ih;
-//		}
-//}
-
 /* All of what i consider "core" of vanitygaps are on dwm.c since I don't plan
  * to don't use gaps, here I the 'too much customization' functions. */
 
 /*
-void
+static void
 incrigaps(const Arg *arg)
 {
 	setgaps(
@@ -848,7 +803,7 @@ incrigaps(const Arg *arg)
 		selmon->gappiv + arg->i
 	);
 }
-void
+static void
 incrogaps(const Arg *arg)
 {
 	setgaps(
@@ -858,7 +813,7 @@ incrogaps(const Arg *arg)
 		selmon->gappiv
 	);
 }
-void
+static void
 incrohgaps(const Arg *arg)
 {
 	setgaps(
@@ -868,7 +823,7 @@ incrohgaps(const Arg *arg)
 		selmon->gappiv
 	);
 }
-void
+static void
 incrovgaps(const Arg *arg)
 {
 	setgaps(
@@ -878,7 +833,7 @@ incrovgaps(const Arg *arg)
 		selmon->gappiv
 	);
 }
-void
+static void
 incrihgaps(const Arg *arg)
 {
 	setgaps(
@@ -888,7 +843,7 @@ incrihgaps(const Arg *arg)
 		selmon->gappiv
 	);
 }
-void
+static void
 incrivgaps(const Arg *arg)
 {
 	setgaps(

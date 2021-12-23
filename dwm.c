@@ -245,11 +245,10 @@ typedef struct {
 } Rule;
 
 #ifdef SYSTRAY
-typedef struct Systray Systray;
-struct Systray {
+typedef struct {
 	Window win;
 	Client *icons;
-};
+} Systray;
 #endif /* SYSTRAY */
 
 /* function declarations */
@@ -411,12 +410,6 @@ static void incrgaps(const Arg *arg);
 static void getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc);
 static void getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *sr);
 static void setgaps(int oh, int ov, int ih, int iv);
-/*static void incrigaps(const Arg *arg);
-static void incrogaps(const Arg *arg);
-static void incrohgaps(const Arg *arg);
-static void incrovgaps(const Arg *arg);
-static void incrihgaps(const Arg *arg);
-static void incrivgaps(const Arg *arg);*/
 
 /* Customs */
 static void swaptags(const Arg *arg);
@@ -437,10 +430,9 @@ static pid_t winpid(Window w);
 
 /* variables */
 static const char broken[] = "broken";
-static char stext[256];
-static char rawstext[256];
+static char stext[256], rawstext[256];
 static int dwmblockssig;
-pid_t dwmblockspid = 0;
+static pid_t dwmblockspid = 0;
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh, blw = 0;      /* bar geometry */
@@ -483,8 +475,9 @@ static int useargb = 0;
 static Visual *visual;
 static int depth;
 static Colormap cmap;
-static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 static Client *scratchpad_last_showed = NULL;
+
+static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 
 static const int scrollargs[4][2];
 
@@ -493,7 +486,7 @@ static const int scrollargs[4][2];
 #include "config.h"
 
 /* resizemousescroll direction argument list */
-static const int scrollargs[][2] = {
+static const int scrollargs[4][2] = {
 	/* width change         height change */
 	{ -scrollsensetivity,	0 },
 	{ +scrollsensetivity,	0 },
@@ -501,20 +494,18 @@ static const int scrollargs[][2] = {
 	{ 0, 			+scrollsensetivity },
 };
 
-/* dynamic scratchpads (this selects an unused tag?) */
-#define SCRATCHPAD_MASK (1u << (NUMTAGS - 3))
+/* dynamic scratchpads (this selects an unused tag) */
+#define SCRATCHPAD_MASK (1 << (NUMTAGS + 1))
 
-/* Pertag */
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
 	int nmasters[LENGTH(tags) + 1];		/* number of windows in master area */
 	float mfacts[LENGTH(tags) + 1];		/* mfacts per tag */
 	unsigned int sellts[LENGTH(tags) + 1];	/* selected layouts */
-	const Layout*ltidxs[LENGTH(tags)+1][2];	/* matrix of tags and layouts indexes */
-	Bool showbars[LENGTH(tags) + 1];	/* display bar for the current tag */
+	const Layout *ltidxs[LENGTH(tags)+1][2];/* matrix of tags and layouts indexes */
+	int showbars[LENGTH(tags) + 1];		/* display bar for the current tag */
 	Client *prevzooms[LENGTH(tags) + 1];	/* store zoom information */
-//	int enablegaps[LENGTH(tags) + 1];	/* added with vanitygaps */
-	int enablegaps[NUMTAGS + 1];		/* added with vanitygaps */
+	int enablegaps[LENGTH(tags) + 1];	/* added with vanitygaps */
 	unsigned int gaps[NUMTAGS + 1];		/* gaps per tag */
 };
 
