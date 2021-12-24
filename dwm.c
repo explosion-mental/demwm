@@ -3081,10 +3081,11 @@ setup(void)
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 
-	/* FIXME if restarting keep the wallpaper the same, else refresh */
-	if (restart)
+	/* if restarting keep the wallpaper the same, else refresh */
+	if (restart) {
 		loadcolors(0);
-	else {
+		restart = 0;
+	} else {
 		if (system("dwm_random_wall") != 0)
 			loadcolors(1);
 		xrdb(NULL);
@@ -4441,9 +4442,12 @@ toggletopbar(const Arg *arg)
 int
 main(int argc, char *argv[])
 {
-	if (argc == 2 && !strcmp("-v", argv[1]))
-		die("dwm-"VERSION);
-	else if (argc != 1)
+	if (argc == 2) {
+		if (!strcmp("-v", argv[1]))
+			die("dwm-"VERSION);
+		else if (!strcmp("--restart", argv[1]))
+			restart = 1;
+	} else if (argc != 1)
 		die("usage: dwm [-v]");
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
@@ -4461,7 +4465,7 @@ main(int argc, char *argv[])
 	scan();
 	reorganizetags();	/* if more than 2 clients reorganize clients on restart */
 	run();
-	if (restart) execvp(argv[0], argv);
+	if (restart) execvp(argv[0], (char*[]){ "dwm", "--restart", NULL });
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
