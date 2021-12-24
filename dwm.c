@@ -91,34 +91,21 @@ enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm,
-	SchemeSel,
-	SchemeUrgent,
-	SchemeLt,
-	SchemeTitle,
-	SchemeStatus,
-	SchemeSys,
-	SchemeNotify,
-	SchemeIndOff,
-	SchemeIndOn,
-	BorderNorm,
-	BorderSel,
-	BorderUrg /* border schemes */
-}; /* color schemes */
+enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
+       SchemeStatus, SchemeSys, SchemeNotify, SchemeIndOff, SchemeIndOn,
+       BorderNorm, BorderSel, BorderUrg }; /* color schemes */
 enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8 }; /* scratchpads */
 enum { NetSupported, NetWMName,
 #ifdef ICONS
        NetWMIcon,
 #endif /* ICONS */
-       NetWMState, NetWMCheck,
-       NetWMFullscreen, NetActiveWindow, NetWMWindowType,
-       NetWMStateAbove,
+       NetWMState, NetWMCheck, NetWMFullscreen, NetActiveWindow,
+       NetWMWindowType, NetWMStateAbove,
        //NetWMWindowTypeDialog,
        NetClientList,
 #ifdef SYSTRAY
-       NetSystemTray, NetSystemTrayOP,
-       NetSystemTrayOrientation, NetSystemTrayVisual,
-       NetWMWindowTypeDock, NetSystemTrayOrientationHorz,
+       NetSystemTray, NetSystemTrayOP, NetSystemTrayOrientation,
+       NetSystemTrayVisual, NetWMWindowTypeDock, NetSystemTrayOrientationHorz,
 #endif /* SYSTRAY */
        NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMWindowRole, WMLast }; /* default atoms */
@@ -130,7 +117,6 @@ typedef union {
 	unsigned int ui;
 	float f;
 	const void *v;
-	//const char?
 } Arg;
 
 typedef struct {
@@ -155,8 +141,7 @@ struct Client {
 	int isfixed, isurgent, neverfocus, oldstate;
 	/* rules */
 	int isfloating, isfullscreen, isterminal, noswallow;
-	int fakefullscreen;
-	int alwaysontop;
+	int fakefullscreen, alwaysontop;
 	pid_t pid;
 	#ifdef ICONS
 	unsigned int icw, ich;
@@ -294,6 +279,7 @@ static Client *prevtiled(Client *c);
 static void propertynotify(XEvent *e);
 static void pushstack(const Arg *arg);
 static void quit(const Arg *arg);
+static void refresh(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
 static void resize(Client *c, int x, int y, int w, int h, int interact);
 static void resizeclient(Client *c, int x, int y, int w, int h);
@@ -305,7 +291,7 @@ static void scan(void);
 #ifdef SYSTRAY
 static void resizebarwin(Monitor *m);
 static Atom getatomprop(Client *c, Atom prop);
-static unsigned int getsystraywidth();
+static unsigned int getsystraywidth(void);
 static void removesystrayicon(Client *i);
 static void resizerequest(XEvent *e);
 static Monitor *systraytomon(Monitor *m);
@@ -466,8 +452,10 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 
 static const int scrollargs[4][2];
 
-/* configuration, allows nested code to access above variables */
+/* various layouts to use on the config */
 #include "layouts.c"
+
+/* configuration, allows nested code to access above variables */
 #include "config.h"
 
 /* resizemousescroll direction argument list */
@@ -879,9 +867,8 @@ clientmessage(XEvent *e)
 
 	if (systray && cme->window == systray->win && cme->message_type == netatom[NetSystemTrayOP]) {
 		/* add systray icons */
-		if (cme->data.l[1] == 0 /* SYSTEM_TRAY_REQUEST_DOCK */ ) {
-			if (!(c = (Client *)calloc(1, sizeof(Client))))
-				die("fatal: could not malloc() %u bytes\n", sizeof(Client));
+		if (cme->data.l[1] == 0 /* SYSTEM_TRAY_REQUEST_DOCK */) {
+			c = ecalloc(1, sizeof(Client));
 			if (!(c->win = cme->data.l[2])) {
 				free(c);
 				return;
@@ -916,7 +903,7 @@ clientmessage(XEvent *e)
 			sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
 					0 /* XEMBED_EMBEDDED_NOTIFY */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
 
-			/* FIXME not sure if I have to send these events, too */
+			/* FIXME are these events needed? */
 			sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
 					0 /* XEMBED_FOCUS_IN */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
 			sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
@@ -931,7 +918,6 @@ clientmessage(XEvent *e)
 		return;
 	}
 #endif /* SYSTRAY */
-
 	if (!c)
 		return;
 	if (cme->message_type == netatom[NetWMState]) {
@@ -1652,7 +1638,7 @@ getsystraywidth()
 	unsigned int w = 0;
 	Client *i;
 	if (!systray)
-		return 1;
+		return 0;
 	for (i = systray->icons; i; w += i->w + lrpad / 2, i = i->next);
 	return w ? w - lrpad / 2 : 0;
 }
@@ -1709,8 +1695,7 @@ updatesystray(void)
 
 	if (!systray) {
 		/* init systray */
-		if (!(systray = (Systray *)calloc(1, sizeof(Systray))))
-			die("fatal: could not malloc() %u bytes\n", sizeof(Systray));
+		systray = ecalloc(1, sizeof(Systray));
 
 		wa.override_redirect = True; //ignore the window
 		wa.event_mask = ButtonPressMask|ExposureMask;
@@ -1841,7 +1826,6 @@ wintosystrayicon(Window w) {
 
 	if (!systray)
 		return NULL;
-
 	if (!w)
 		return i;
 	for (i = systray->icons; i && i->win != w; i = i->next);
@@ -2243,13 +2227,15 @@ maprequest(XEvent *e)
 #ifdef SYSTRAY
 	Client *i;
 	if ((i = wintosystrayicon(ev->window))) {
-		sendevent(i->win, netatom[Xembed], StructureNotifyMask, CurrentTime, 1 /* XEMBED_WINDOW_ACTIVATE */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+		sendevent(i->win, netatom[Xembed], StructureNotifyMask,
+			CurrentTime, 1 /* XEMBED_WINDOW_ACTIVATE */, 0,
+			systray->win, XEMBED_EMBEDDED_VERSION);
 		updatesystray();
 	}
 #endif /* SYSTRAY */
 	if (!XGetWindowAttributes(dpy, ev->window, &wa))
 		return;
-/* https://github.com/bakkeby/patches/commit/67c8bcefafbed8d0f122bb91b6d253919727b60e */
+/* github.com/bakkeby/patches/commit/67c8bcefafbed8d0f122bb91b6d253919727b60e */
 	if (!wa.depth)
 		return;
 	if (wa.override_redirect)
@@ -2446,8 +2432,13 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
-	if (arg->i)
-		restart = 1;
+	running = 0;
+}
+
+void
+refresh(const Arg *arg)
+{
+	restart = 1;
 	running = 0;
 }
 
@@ -3291,13 +3282,13 @@ sigchld(int unused)
 void
 sighup(int unused)
 {
-	quit(&((Arg){.i = 1}));
+	refresh(0);
 }
 
 void
 sigterm(int unused)
 {
-	quit(&((Arg){.i = 0}));
+	quit(0);
 }
 
 #ifndef __OpenBSD__
@@ -3608,8 +3599,8 @@ unmapnotify(XEvent *e)
 			unmanage(c, 0);
 #ifdef SYSTRAY
 	} else if ((c = wintosystrayicon(ev->window))) {
-		/* KLUDGE! sometimes icons occasionally unmap their windows,
-		 * but do _not_ destroy them. We map those windows back */
+		/* KLUDGE sometimes icons occasionally unmap their windows,
+		 * but do _not_ destroy them, we map those windows back */
 		XMapRaised(dpy, c->win);
 		removesystrayicon(c);
 		updatesystray();
@@ -3867,16 +3858,10 @@ updatewmhints(Client *c)
 void
 xinitvisual(void)
 {
-	XVisualInfo *infos;
-	XRenderPictFormat *fmt;
 	int nitems, i;
 	long masks = VisualScreenMask | VisualDepthMask | VisualClassMask;
-
-	XVisualInfo tpl = {
-		.screen = screen,
-		.depth = 32,
-		.class = TrueColor
-	};
+	XRenderPictFormat *fmt;
+	XVisualInfo *infos, tpl = { .screen = screen, .depth = 32, .class = TrueColor };
 
 	infos = XGetVisualInfo(dpy, masks, &tpl, &nitems);
 	visual = NULL;
@@ -4474,7 +4459,7 @@ main(int argc, char *argv[])
 	if (pledge("stdio rpath proc exec ps", NULL) == -1) die("pledge");
 #endif /* __OpenBSD__ */
 	scan();
-	reorganizetags();	/* if more than 2 clients reorganize clients on restart*/
+	reorganizetags();	/* if more than 2 clients reorganize clients on restart */
 	run();
 	if (restart) execvp(argv[0], argv);
 	cleanup();
