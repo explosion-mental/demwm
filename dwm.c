@@ -78,21 +78,6 @@
 #define SPTAGMASK   		(((1 << LENGTH(scratchpads))-1) << LENGTH(tags))
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 #define RULE(...)		{ .monitor = -1, ##__VA_ARGS__ },
-#define XRDB_LOAD_COLOR(R,V) \
-	if (XrmGetResource(xrdb, R, NULL, &type, &value) == True) { \
-		if (strnlen(value.addr, 8) == 7 && value.addr[0] == '#') { \
-			for (i = 1; i <= 6; i++) { \
-                                if (value.addr[i] < 48) break; \
-                                if (value.addr[i] > 57 && value.addr[i] < 65) break; \
-                                if (value.addr[i] > 70 && value.addr[i] < 97) break; \
-                        	if (value.addr[i] > 102) break; \
-                        } \
-                        if (i == 7) { \
-                        	strncpy(V, value.addr, 7); \
-                        	V[7] = '\0'; \
-                        } \
-                } \
-        }
 #define Button6			6
 #define Button7			7
 #ifdef SYSTRAY
@@ -2101,13 +2086,35 @@ loadcolors(int fallback)
 }
 
 void
+xrdbloadcolor(XrmDatabase xrdb, const char *name, char *var)
+{
+	XrmValue value;
+	char *type;
+	int i;
+
+	if (XrmGetResource(xrdb, name, NULL, &type, &value) == True) { /* exist */
+		if (strnlen(value.addr, 8) == 7 && value.addr[0] == '#') { /* is a hex color */
+			for (i = 1; i < 7; i++)
+				if ((value.addr[i] < 48)
+				|| (value.addr[i] > 57 && value.addr[i] < 65)
+				|| (value.addr[i] > 70 && value.addr[i] < 97)
+				|| (value.addr[i] > 102))
+					break;
+			if (i == 7) {
+				strncpy(var, value.addr, 7);
+				var[7] = '\0';
+			}
+		}
+        }
+}
+
+
+void
 loadxrdb(void)
 {
 	Display *display;
-	char *resm, *type;
-	XrmValue value;
+	char *resm;
 	XrmDatabase xrdb;
-	int i;
 
 	display = XOpenDisplay(NULL);
 	resm = XResourceManagerString(display);
@@ -2115,19 +2122,19 @@ loadxrdb(void)
 		return;
 	xrdb = XrmGetStringDatabase(resm);
 	if (xrdb != NULL) {
-		XRDB_LOAD_COLOR("background", bg_wal);
-		XRDB_LOAD_COLOR("foreground", fg_wal);
-		XRDB_LOAD_COLOR("cursor", cursor_wal);
-		XRDB_LOAD_COLOR("color0", color0);
-		XRDB_LOAD_COLOR("color1", color1);
-		XRDB_LOAD_COLOR("color2", color2);
-		XRDB_LOAD_COLOR("color3", color3);
-		XRDB_LOAD_COLOR("color4", color4);
-		XRDB_LOAD_COLOR("color5", color5);
-		XRDB_LOAD_COLOR("color6", color6);
-		XRDB_LOAD_COLOR("color7", color7);
-		XRDB_LOAD_COLOR("color8", color8);
- 		XrmDestroyDatabase(xrdb);	/* fix memory leaks */
+		xrdbloadcolor(xrdb, "background", bg_wal);
+		xrdbloadcolor(xrdb, "foreground", fg_wal);
+		xrdbloadcolor(xrdb, "cursor", cursor_wal);
+		xrdbloadcolor(xrdb, "color0", color0);
+		xrdbloadcolor(xrdb, "color1", color1);
+		xrdbloadcolor(xrdb, "color2", color2);
+		xrdbloadcolor(xrdb, "color3", color3);
+		xrdbloadcolor(xrdb, "color4", color4);
+		xrdbloadcolor(xrdb, "color5", color5);
+		xrdbloadcolor(xrdb, "color6", color6);
+		xrdbloadcolor(xrdb, "color7", color7);
+		xrdbloadcolor(xrdb, "color8", color8);
+ 		XrmDestroyDatabase(xrdb);	/* close the database */
 	} else
 		loadcolors(1);
 	XCloseDisplay(display);
@@ -4141,7 +4148,6 @@ xrdb(const Arg *arg)
 	focus(NULL);
 	arrange(NULL);
 }
-
 
 void
 zoom(const Arg *arg)
