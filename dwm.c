@@ -1192,6 +1192,8 @@ drawbar(Monitor *m)
 	Client *c;
 	int bw = m->ww; /* bar width */
 
+	if (!m->showbar)
+		return;
 
 	#ifdef SYSTRAY
 	bw -= m == systraytomon(m) ? getsystraywidth() : 0;
