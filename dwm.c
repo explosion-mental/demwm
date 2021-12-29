@@ -3297,15 +3297,16 @@ void
 sigdwmblocks(const Arg *arg)
 {
 	union sigval sv;
+
+	if (!dwmblockspid)
+		if (getdwmblockspid() == -1)
+			return;
+
 	if (dwmblocksasync) {
 		sv.sival_int = arg->i;
 		sigqueue(dwmblockspid, SIGRTMIN+dwmblockssig, sv);
 	} else { /* normal dwmblocks */
 		sv.sival_int = 0 | (dwmblockssig << 8) | arg->i;
-		if (!dwmblockspid)
-			if (getdwmblockspid() == -1)
-				return;
-
 		if (sigqueue(dwmblockspid, SIGUSR1, sv) == -1)
 			if (errno == ESRCH)
 				if (!getdwmblockspid())
