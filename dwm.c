@@ -1500,7 +1500,7 @@ int
 getdwmblockspid(void)
 {
 	char buf[16];
-	FILE *fp = popen("pidof -s dwmblocks", "r");
+	FILE *fp = popen("pidof -o dwmblocks", "r");
 	fgets(buf, sizeof(buf), fp);
 	pid_t pid = strtoul(buf, NULL, 10);
 	pclose(fp);
@@ -2228,7 +2228,7 @@ maprequest(XEvent *e)
 
 #ifdef SYSTRAY
 	Client *i;
-	if ((i = wintosystrayicon(ev->window))) {
+	if (systray && (i = wintosystrayicon(ev->window))) {
 		sendevent(i->win, netatom[Xembed], StructureNotifyMask,
 			CurrentTime, 1 /* XEMBED_WINDOW_ACTIVATE */, 0,
 			systray->win, XEMBED_EMBEDDED_VERSION);
@@ -2478,11 +2478,11 @@ resizeclient(Client *c, int x, int y, int w, int h)
 
 	/* don't draw borders if monocle/alphamonocle/only 1 client */
 	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next))
-	    || (&monocle == c->mon->lt[c->mon->sellt]->arrange
-	    || &alphamonocle == c->mon->lt[c->mon->sellt]->arrange))
+	    || (c->mon->lt[c->mon->sellt]->arrange == &monocle
+	    ||  c->mon->lt[c->mon->sellt]->arrange == &alphamonocle))
 	    && (c->fakefullscreen == 1 || !c->isfullscreen)
 	    && !c->isfloating
-	    && NULL != c->mon->lt[c->mon->sellt]->arrange) {
+	    && c->mon->lt[c->mon->sellt]->arrange != NULL) {
 		c->w = wc.width += c->bw * 2;
 		c->h = wc.height += c->bw * 2;
 		wc.border_width = 0;
@@ -2844,7 +2844,7 @@ sendevent(Client *c, Atom proto)
 #ifdef SYSTRAY
 		ev.xclient.window = w;
 		ev.xclient.message_type = mt;
- 		ev.xclient.format = 32;
+		ev.xclient.format = 32;
 		ev.xclient.data.l[0] = d0;
 		ev.xclient.data.l[1] = d1;
 		ev.xclient.data.l[2] = d2;
@@ -3082,12 +3082,10 @@ setup(void)
 
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
-
-	/* if restarting keep the wallpaper the same, else refresh */
-	if (restart) {
+	if (restart) {	/* keep the wallpaper the same */
 		loadcolors(0);
 		restart = 0;
-	} else {
+	} else {	/* refresh wallpaper and colors */
 		if (system("dwm_random_wall") != 0)
 			loadcolors(1);
 		xrdb(NULL);
@@ -4461,13 +4459,13 @@ main(int argc, char *argv[])
 	XrmInitialize();
         loadxrdb();
 	setup();
-#ifdef __OpenBSD__
+	#ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1) die("pledge");
-#endif /* __OpenBSD__ */
+	#endif /* __OpenBSD__ */
 	scan();
 	reorganizetags();	/* if more than 2 clients reorganize clients on restart */
 	run();
-	if (restart) execvp(argv[0], (char*[]){ "dwm", "--restart", NULL });
+	if (restart) execlp(argv[0], argv[0], "--restart", NULL);
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
