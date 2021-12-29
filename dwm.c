@@ -390,7 +390,7 @@ static void random_wall(const Arg *arg);
 //static void toggleborder(const Arg *arg);
 static void togglevacant(const Arg *arg);
 static void reorganizetags(void);
-static void nostatus(const Arg *arg);
+static void togglestatus(const Arg *arg);
 static void spawncmd(const Arg *arg);
 
 static pid_t getparentprocess(pid_t p);
@@ -3817,8 +3817,10 @@ updatestatus(void)
 {
 	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
 		strcpy(stext, " Welcome! :) ");
-	else
+	else if (status)
 		copyvalidchars(stext, rawstext);
+	else
+		strcpy(stext, "");
 	drawbar(selmon);
 #ifdef SYSTRAY
 	updatesystray();
@@ -4338,22 +4340,15 @@ toggleborder(const Arg *arg)
 	//}
 	arrange(NULL);
 }
-//TODO
+
 void
-nostatus(const Arg *arg)
+togglestatus(const Arg *arg)
 {
-	//if (arg->i > 0)
-	//char *hello = "\0";
-	//if (gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
-	//else
-	//if (gettextprop(root, XA_WM_NAME, hello , sizeof(hello)))
-	//	copyvalidchars(stext, rawstext);
-	//else
-	//	strcpy(stext, hello);
-	if (arg->i > 0)
-		strcpy(stext, "");
-	else
+	status = !status;
+	if (status)
 		copyvalidchars(stext, rawstext);
+	else
+		strcpy(stext, "");
 	drawbar(selmon);
 }
 void

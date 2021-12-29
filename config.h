@@ -12,6 +12,7 @@ static unsigned int gappov    = 20;       /* vert outer gap between windows and 
 static int hidevacant         = 1;        /* 1 means hide vacant tags */
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int swallowfloating    = 0;        /* 1 means swallow floating windows by default */
+static int status             = 1;        /* 1 means display status text */
 static const int showbar      = 1;        /* 0 means no bar */
 static const int topbar       = 1;        /* 0 means bottom bar */
 static const int barh         = 4;        /* 1 or more means bar height */
@@ -293,8 +294,7 @@ static Key keys[] = {
 	  TAGKEYS(			XK_7,				6)
 	  TAGKEYS(			XK_8,				7)
 	  TAGKEYS(			XK_9,				8)
-	{ MODKEY|ControlMask,		XK_b,	nostatus,	{ .i = 1  }		},
-	{ MODKEY|ControlMask,		XK_n,	nostatus,	{ .i = -1 }		},
+	{ MODKEY|ControlMask,		XK_b,	togglestatus,		{0}		},
 
 				/* LAYOUTS */
 	{ MODKEY,		XK_backslash,   cyclelayout,	{.i = +1 }		},
