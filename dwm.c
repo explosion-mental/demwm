@@ -4351,11 +4351,7 @@ void
 togglestatus(const Arg *arg)
 {
 	status = !status;
-	if (status)
-		copyvalidchars(stext, rawstext);
-	else
-		strcpy(stext, "");
-	drawbar(selmon);
+	updatestatus();
 }
 void
 shiftswaptags(const Arg *arg)
