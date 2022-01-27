@@ -3098,8 +3098,7 @@ setup(void)
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 	if (restart) {	/* keep the colors the same */
-		for (i = 0; i < LENGTH(colors); i++)
-			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
+		xrdb(0);
 		restart = 0;
 	} else {	/* refresh colors */
 		if (system("dwm_random_wall") != 0)
