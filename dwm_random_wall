@@ -1,19 +1,22 @@
 #!/bin/sh
-img_path="$HOME/Media/Pictures/Wallpapers"
-bgloc="${XDG_DATA_HOME:-$HOME/.local/share/}/bg"
 
-# colorz - schemer2 - wal - haishoku - colorthief
-backend=colorz
+img_dir="${HOME}/Media/Pictures/Wallpapers"
+bgloc="${XDG_DATA_HOME:-$HOME/.local/share}/bg"
+backend=colorz		# colorz - schemer2 - wal - haishoku - colorthief
 
-findcmd="$(fd . "$img_path" -e jpg -e jpeg -e png --type f | shuf -n 1)"
+# postrun hooks
+postrun() {
+	xwallpaper --zoom "$bgloc"
+	ln -sf	"${HOME}/.cache/wal/dunstrc"	"${HOME}/.config/dunst/dunstrc"
+	pkill dunst; dunst
+	ln -sf	"${HOME}/.cache/wal/zathurarc"	"${HOME}/.config/zathura/zathurarc"
+}
+
+findcmd="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
 #findcmd="$(fd . "$img_path" "*.(jpg|jpeg|png)" -t f | shuf -n 1)"
 #findcmd="$(find "$img_path" -iregex '.*.\(jpg\|jpeg\|png\)' -type f | shuf -n 1)"
 
-wal -i "$findcmd" --backend $backend -qn >/dev/null 2>&1
+wal -i "$findcmd" --backend $backend -qn >/dev/null
 ln -sf "$findcmd" "$bgloc"
 
-# postrun hooks
-xwallpaper --zoom "$bgloc"
-ln -sf	"${HOME}/.cache/wal/dunstrc"	"${HOME}/.config/dunst/dunstrc"
-pkill dunst; dunst &
-ln -sf	"${HOME}/.cache/wal/zathurarc"	"${HOME}/.config/zathura/zathurarc" &
+postrun &

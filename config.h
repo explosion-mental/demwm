@@ -15,13 +15,13 @@ static int swallowfloating    = 0;        /* 1 means swallow floating windows by
 static int status             = 1;        /* 1 means display status text */
 static const int showbar      = 1;        /* 0 means no bar */
 static const int topbar       = 1;        /* 0 means bottom bar */
-static const int barh         = 4;        /* 1 or more means bar height */
+static const int barh         = 8;        /* 1 or more means bar height */
 static const int dwmblocks    = 1;        /* 1 means use and start dwmblocks */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
 static const int scalepreview = 4;        /* tag previews scaling */
-static const int dwmblocksasync       = 1;      /* 1 means do not support user signals (SIGUSR) */
+static const int dwmblocksasync       = 0;      /* 1 means do not support user signals (SIGUSR) */
 static const int scrollsensetivity    = 30;	/* 1 means resize window by 1 pixel for each scroll event */
 static const unsigned int baralpha    = 120;	/* bar opacity from 0 to 255, default is 185*/
 static const unsigned int borderalpha = OPAQUE;	/* borders, default is 0xffU (OPAQUE) */
@@ -340,9 +340,9 @@ static Key keys[] = {
 	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev")			},
 	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next")			},
 	//{ 0,	XF86XK_RFKill,			random_wall, {0}		},
-	{ MODKEY,		XK_p,		SHCMD("mpc toggle")			},
-	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev")			},
-	{ MODKEY,	XK_bracketright,	SHCMD("mpc next")			},
+	{ MODKEY,		XK_p,		SHCMD("mpc toggle; kill -45 $(pidof dwmblocks)")			},
+	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev; kill -45 $(pidof dwmblocks)")			},
+	{ MODKEY,	XK_bracketright,	SHCMD("mpc next; kill -45 $(pidof dwmblocks")			},
 	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")			},
 
 			/* Custom bindings (may be better using shkd) */
