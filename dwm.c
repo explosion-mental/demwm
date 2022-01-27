@@ -2058,13 +2058,13 @@ fallbackcolors(void)
 {
 	int i;
 
-	strcpy(bg_wal, "#222222");
-	strcpy(fg_wal, "#222222");
+	strcpy(bg_wal, "#444444");
+	strcpy(fg_wal, "#bbbbbb");
 	strcpy(color0, "#222222");
-	strcpy(color1, "#222222");
-	strcpy(color2, "#222222");
+	strcpy(color1, "#eeeeee");
+	strcpy(color2, "#005577");
 	strcpy(color3, "#222222");
-	strcpy(color4, "#222222");
+	strcpy(color4, "#eeeeee");
 	strcpy(color5, "#222222");
 	strcpy(color6, "#222222");
 	strcpy(color7, "#222222");
