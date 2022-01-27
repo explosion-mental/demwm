@@ -25,8 +25,6 @@ static const int dwmblocksasync       = 0;      /* 1 means do not support user s
 static const int scrollsensetivity    = 30;	/* 1 means resize window by 1 pixel for each scroll event */
 static const unsigned int baralpha    = 120;	/* bar opacity from 0 to 255, default is 185*/
 static const unsigned int borderalpha = OPAQUE;	/* borders, default is 0xffU (OPAQUE) */
-static const int log = 1;
-static const char logfile[] = "/home/faber/.cache/dwm.log";
 
 static const char *fonts[] = {
 	"Monofur Nerd Font:pixelsize=14:antialias=true:autohint=true", /* Mono */

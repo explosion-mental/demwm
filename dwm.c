@@ -400,7 +400,6 @@ static Client *termforwin(const Client *c);
 static pid_t winpid(Window w);
 
 /* variables */
-FILE *flog;
 static const char broken[] = "broken";
 static char stext[256], rawstext[256];
 static int dwmblockssig;
@@ -800,8 +799,6 @@ cleanup(void)
 	Monitor *m;
 	size_t i;
 
-	if (log)
-		fclose(flog);
 	view(&a);
 	selmon->lt[selmon->sellt] = &foo;
 	for (m = mons; m; m = m->next)
@@ -1727,7 +1724,7 @@ updatesystray(void)
 			sendevent(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->win, 0, 0);
 			XSync(dpy, False);
 		} else {
-			fprintf(flog, "dwm: unable to obtain system tray.\n");
+			fprintf(stderr, "dwm: unable to obtain system tray.\n");
 			free(systray);
 			systray = NULL;
 			return;
@@ -2072,7 +2069,7 @@ fallbackcolors(void)
 	strcpy(cursor_wal, "#222222");
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
-	fprintf(flog, "dwm: could not get Xresources colors, switching to fallback colors.\n");
+	fprintf(stderr, "dwm: could not get Xresources colors, switching to fallback colors.\n");
 }
 
 void
@@ -3038,14 +3035,6 @@ setup(void)
 	signal(SIGHUP, sighup); /* restart */
 	signal(SIGTERM, sigterm); /* exit */
 
-	/* init debug */
-	if (log) {
-		flog = fopen(logfile, "w");
-		if (flog == NULL)
-			die("dwm: the log file doesn't exist.\n");
-	} else
-		flog = stderr;
-
 	/* init screen */
 	screen = DefaultScreen(dpy);
 	sw = DisplayWidth(dpy, screen);
@@ -3113,8 +3102,8 @@ setup(void)
 	#endif /* SYSTRAY */
 
 	/* init bars */
-	updatebars();
 	if (dwmblocks) system("killall -q dwmblocks; dwmblocks &");
+	updatebars();
 	updatestatus();
 	#ifdef TAG_PREVIEW
 	updatepreview(); //Is this for the current tag?
@@ -3341,7 +3330,7 @@ spawn(const Arg *arg)
 			close(ConnectionNumber(dpy));
 		setsid();
 		execvp(((char **)arg->v)[0], (char **)arg->v);
-		fprintf(flog, "dwm: execvp %s", ((char **)arg->v)[0]);
+		fprintf(stderr, "dwm: execvp %s", ((char **)arg->v)[0]);
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
@@ -3359,7 +3348,7 @@ spawncmd(const Arg *arg)
 		strcpy(shcmd, arg->v);
 		char *command[] = { "/bin/sh", "-c", shcmd, NULL };
 		execvp(command[0], command);
-		fprintf(flog, "dwm: execvp %s", *command);
+		fprintf(stderr, "dwm: execvp %s", *command);
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
@@ -4129,7 +4118,7 @@ xerror(Display *dpy, XErrorEvent *ee)
 	|| (ee->request_code == X_GrabKey && ee->error_code == BadAccess)
 	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
 		return 0;
-	fprintf(flog, "dwm: fatal error: request code=%d, error code=%d\n",
+	fprintf(stderr, "dwm: fatal error: request code=%d, error code=%d\n",
 		ee->request_code, ee->error_code);
 	return xerrorxlib(dpy, ee); /* may call exit */
 }
@@ -4453,7 +4442,7 @@ main(int argc, char *argv[])
 	} else if (argc != 1)
 		die("usage: dwm [-v]");
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
-		fputs("warning: no locale support\n", flog);
+		fputs("warning: no locale support\n", stderr);
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("dwm: cannot open display");
 	if (!(xcon = XGetXCBConnection(dpy)))
