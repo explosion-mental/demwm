@@ -3041,8 +3041,10 @@ setup(void)
 	root = RootWindow(dpy, screen);
 	xinitvisual();
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
-	if (!drw_fontset_create(drw, fonts, LENGTH(fonts)))
-		die("no fonts could be loaded.");
+	if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
+		fprintf(stderr, "dwm: no fonts could be loaded, status bar hidden.\n");
+		showbar = 0;
+	}
 	lrpad = drw->fonts->h;
 	bh = drw->fonts->h + barh; /* prevent barh being < than font size */
 	updategeom();
