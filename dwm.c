@@ -3024,7 +3024,6 @@ setmfact(const Arg *arg)
 void
 setup(void)
 {
-	int i;
 	XSetWindowAttributes wa;
 	Atom utf8string;
 
@@ -3102,7 +3101,15 @@ setup(void)
 	#endif /* SYSTRAY */
 
 	/* init bars */
-	if (dwmblocks) system("killall -q dwmblocks; dwmblocks &");
+	if (dwmblocks) {
+		if (!dwmblockspid) { /* start dwmblocks */
+			if (getdwmblockspid() == -1)
+				system("dwmblocks &");
+		} else { /* restart dwmblocks */
+			kill(dwmblockspid, SIGTERM);
+			system("dwmblocks &");
+		}
+	}
 	updatebars();
 	updatestatus();
 	#ifdef TAG_PREVIEW
@@ -4449,6 +4456,7 @@ main(int argc, char *argv[])
 		die("dwm: cannot get xcb connection\n");
 	checkotherwm();
 	XrmInitialize();
+	getdwmblockspid();
 	setup();
 	#ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1) die("pledge");
