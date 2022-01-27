@@ -13,7 +13,6 @@ postrun() {
 }
 
 findcmd="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
-#findcmd="$(fd . "$img_path" "*.(jpg|jpeg|png)" -t f | shuf -n 1)"
 #findcmd="$(find "$img_path" -iregex '.*.\(jpg\|jpeg\|png\)' -type f | shuf -n 1)"
 
 wal -i "$findcmd" --backend $backend -qn || exit 1

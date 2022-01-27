@@ -69,22 +69,12 @@ edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
 uncomment the line with `#TAG_PREVIEW`
 
 # dwm_random_wall
-This is a little script that changes the wallpaper to a random one and uses
-(requires) **pywal**. It uses the `-o` flag for pywal that runs a `postrun`
-script (you can safely delete it), which syncs zathura and dunst to the pywal
-coloscheme. By default my dwm build syncs all colors to pywal colors, this only
-seems "_useful_" if you wish to change wallpapers (and colorscheme) at runtime.
-You should **edit** the variable `img_path` to your actual path of wallpapers
-(makes sense to use `pywal` if you also use wallpapers, it would be pointless
-otherwise).
+This is a little script that changes the wallpaper to a random one in `img_dir`
+variable and uses (requires) **pywal**. `fd` is much more faster than `find`
+but you might not have it installed, in that case uncomment the next line.
 
-
-Remember, the script is copied and removed by the makefile (`make install` and
-`make unistall`).
-
-
-_I'm working on making this a function on C so no external script would be
-needed_
+The script is copied/deleted to `/usr/local/bin` by default, `PREFIX` path can
+be changed in config.mk.
 
 # Patches
 My little collection of patches, which aren't necessarily applied to this. You
@@ -104,6 +94,7 @@ Here are some that I converted into a patch:
 Currently I don't wish more 'features' but here are some ideas:
 
 ## Some little TODOS:
+- tapresize **corners**
 - toggle border
 - depatch cfacts(?)
 - Make _systray_ background the same color as the bar
@@ -120,14 +111,15 @@ Currently I don't wish more 'features' but here are some ideas:
 ## Some wishing pains:
 - change `dwm_random_wall` script to an actual function on C.
 - pertag cursor position. Save the state of the cursor position between tags.
-- integrate dwmblocks into dwm (prob not worth it).
-- Make gaps an option(?)
+- integrate dwmblocks into dwm with statuscmd patch.
 - Can `tcc` (tiny C Compiler) be used along side with the **alpha** patch?
+- <s>Make gaps an option(?)</s>
 - <s>getenv("TERMINAL")</s>
 
 # Mayor improvements:
 - xrdb patch finally working with pywal without restarting or recompiling (Mar
   01 2021)
+	* Implemented fallback colors in case any errors (Jan 27 2022)
 - Layouts at startup (Apr 04 2021)
 	* A better way of handling this (per monitor) (Aug 08 2021)
 - Gaps per tag instead of per monitor (Apr 04 2021)
@@ -138,4 +130,4 @@ Currently I don't wish more 'features' but here are some ideas:
 	* Now hidevacants activates alternative tags (Oct 15 2021)
 - System Tray (Aug 06 2021)
 - Tag previews (Aug 10 2021)
-- Borders colors and general colors has different schemes (Oct 16 2021)
+- Borders colors and general colors now have different schemes (Oct 16 2021)
