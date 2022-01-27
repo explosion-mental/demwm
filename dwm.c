@@ -2084,12 +2084,13 @@ xrdbloadcolor(XrmDatabase xrdb, const char *name, char *var)
 
 	if (XrmGetResource(xrdb, name, NULL, &type, &value) == True) { /* exist */
 		if (strnlen(value.addr, 8) == 7 && value.addr[0] == '#') { /* is a hex color */
-			for (i = 1; i < 7; i++)
+			for (i = 1; i < 7; i++) {
 				if ((value.addr[i] < 48)
 				|| (value.addr[i] > 57 && value.addr[i] < 65)
 				|| (value.addr[i] > 70 && value.addr[i] < 97)
 				|| (value.addr[i] > 102))
 					break;
+			}
 			if (i == 7) {
 				strncpy(var, value.addr, 7);
 				var[7] = '\0';
@@ -3104,7 +3105,7 @@ setup(void)
 		if (system("dwm_random_wall") != 0)
 			fallbackcolors();
 		else
-			xrdb(NULL);
+			xrdb(0);
 	}
 
 	/* init system tray */
@@ -4152,11 +4153,10 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
 void
 xrdb(const Arg *arg)
 {
-	int i;
+	unsigned int i;
 	readxresources();
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
-	drawbar(selmon);
 	focus(NULL);
 	arrange(NULL);
 }
@@ -4430,11 +4430,8 @@ swaptags(const Arg *arg)
 void
 random_wall(const Arg *arg)
 {
-	/* "Daemonize" */
-	if (fork() == 0) {
-		system("dwm_random_wall");
-		xrdb(NULL);
-	}
+	system("dwm_random_wall");
+	xrdb(0);
 }
 /*void
 toggletopbar(const Arg *arg)
@@ -4464,7 +4461,6 @@ main(int argc, char *argv[])
 		die("dwm: cannot get xcb connection\n");
 	checkotherwm();
 	XrmInitialize();
-        readxresources();
 	setup();
 	#ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1) die("pledge");

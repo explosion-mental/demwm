@@ -2,7 +2,7 @@
 
 img_dir="${HOME}/Media/Pictures/Wallpapers"
 bgloc="${XDG_DATA_HOME:-$HOME/.local/share}/bg"
-backend=colorz		# colorz - schemer2 - wal - haishoku - colorthief
+backend=wal		# colorz - schemer2 - wal - haishoku - colorthief
 
 # postrun hooks
 postrun() {
@@ -16,7 +16,7 @@ findcmd="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
 #findcmd="$(fd . "$img_path" "*.(jpg|jpeg|png)" -t f | shuf -n 1)"
 #findcmd="$(find "$img_path" -iregex '.*.\(jpg\|jpeg\|png\)' -type f | shuf -n 1)"
 
-wal -i "$findcmd" --backend $backend -qn >/dev/null 2>&1
+wal -i "$findcmd" --backend $backend -qn || exit 1
 ln -sf "$findcmd" "$bgloc"
 
 postrun &
