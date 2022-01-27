@@ -18,9 +18,10 @@ My build of dwm
 - dwmblocks
 	* You can disable/enable autostarting dwmblocks on `config.h`
 
-# Recommendations
+# Suggestions
 - Before updating (`git pull`), change your configs (config.h) to config.def.h
-- Please look at the [docs](doc.md)
+- An incomplete [documentation](doc.md) about dwm functions.
+- To redirect error mesagges to a file `exec dwm 2> "$HOME"/.cache/dwm.log`
 
 # Features
 - Gaps (vanitygaps)
