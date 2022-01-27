@@ -266,8 +266,8 @@ static void incnmaster(const Arg *arg);
 static void keypress(XEvent *e);
 static void killclient(const Arg *arg);
 static void losefullscreen(Client *next);
-static void loadcolors(int fallback);
-static void loadxrdb(void);
+static void fallbackcolors();
+static void readxresources(void);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
@@ -400,6 +400,7 @@ static Client *termforwin(const Client *c);
 static pid_t winpid(Window w);
 
 /* variables */
+FILE *flog;
 static const char broken[] = "broken";
 static char stext[256], rawstext[256];
 static int dwmblockssig;
@@ -799,6 +800,8 @@ cleanup(void)
 	Monitor *m;
 	size_t i;
 
+	if (log)
+		fclose(flog);
 	view(&a);
 	selmon->lt[selmon->sellt] = &foo;
 	for (m = mons; m; m = m->next)
@@ -1724,7 +1727,7 @@ updatesystray(void)
 			sendevent(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->win, 0, 0);
 			XSync(dpy, False);
 		} else {
-			fprintf(stderr, "dwm: unable to obtain system tray.\n");
+			fprintf(flog, "dwm: unable to obtain system tray.\n");
 			free(systray);
 			systray = NULL;
 			return;
@@ -2051,24 +2054,25 @@ losefullscreen(Client *next)
  * logic is: if 'fallback' value is 0, load the colors normally (pywal); but if
  * it does has a value, then use fallback colors */
 void
-loadcolors(int fallback)
+fallbackcolors(void)
 {
-	if (fallback) { /* fallback colors */
-		strcpy(bg_wal, "#222222");
-		strcpy(fg_wal, "#222222");
-		strcpy(color0, "#222222");
-		strcpy(color1, "#222222");
-		strcpy(color2, "#222222");
-		strcpy(color3, "#222222");
-		strcpy(color4, "#222222");
-		strcpy(color5, "#222222");
-		strcpy(color6, "#222222");
-		strcpy(color7, "#222222");
-		strcpy(color8, "#222222");
-		strcpy(cursor_wal, "#222222");
-	} else  /* init colors */
-		for (int i = 0; i < LENGTH(colors); i++)
-			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
+	int i;
+
+	strcpy(bg_wal, "#222222");
+	strcpy(fg_wal, "#222222");
+	strcpy(color0, "#222222");
+	strcpy(color1, "#222222");
+	strcpy(color2, "#222222");
+	strcpy(color3, "#222222");
+	strcpy(color4, "#222222");
+	strcpy(color5, "#222222");
+	strcpy(color6, "#222222");
+	strcpy(color7, "#222222");
+	strcpy(color8, "#222222");
+	strcpy(cursor_wal, "#222222");
+	for (i = 0; i < LENGTH(colors); i++)
+		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
+	fprintf(flog, "dwm: could not get Xresources colors, switching to fallback colors.\n");
 }
 
 void
@@ -2096,7 +2100,7 @@ xrdbloadcolor(XrmDatabase xrdb, const char *name, char *var)
 
 
 void
-loadxrdb(void)
+readxresources(void)
 {
 	Display *display;
 	char *resm;
@@ -2122,7 +2126,8 @@ loadxrdb(void)
 		xrdbloadcolor(xrdb, "color8", color8);
  		XrmDestroyDatabase(xrdb);	/* close the database */
 	} else
-		loadcolors(1);
+		fallbackcolors();
+
 	XCloseDisplay(display);
 }
 
@@ -3021,6 +3026,7 @@ setmfact(const Arg *arg)
 void
 setup(void)
 {
+	int i;
 	XSetWindowAttributes wa;
 	Atom utf8string;
 
@@ -3030,6 +3036,14 @@ setup(void)
 	/* init signals handlers */
 	signal(SIGHUP, sighup); /* restart */
 	signal(SIGTERM, sigterm); /* exit */
+
+	/* init debug */
+	if (log) {
+		flog = fopen(logfile, "w");
+		if (flog == NULL)
+			die("dwm: the log file doesn't exist.\n");
+	} else
+		flog = stderr;
 
 	/* init screen */
 	screen = DefaultScreen(dpy);
@@ -3082,13 +3096,15 @@ setup(void)
 
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
-	if (restart) {	/* keep the wallpaper the same */
-		loadcolors(0);
+	if (restart) {	/* keep the colors the same */
+		for (i = 0; i < LENGTH(colors); i++)
+			scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
 		restart = 0;
-	} else {	/* refresh wallpaper and colors */
+	} else {	/* refresh colors */
 		if (system("dwm_random_wall") != 0)
-			loadcolors(1);
-		xrdb(NULL);
+			fallbackcolors();
+		else
+			xrdb(NULL);
 	}
 
 	/* init system tray */
@@ -3325,7 +3341,7 @@ spawn(const Arg *arg)
 			close(ConnectionNumber(dpy));
 		setsid();
 		execvp(((char **)arg->v)[0], (char **)arg->v);
-		fprintf(stderr, "dwm: execvp %s", ((char **)arg->v)[0]);
+		fprintf(flog, "dwm: execvp %s", ((char **)arg->v)[0]);
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
@@ -3343,7 +3359,7 @@ spawncmd(const Arg *arg)
 		strcpy(shcmd, arg->v);
 		char *command[] = { "/bin/sh", "-c", shcmd, NULL };
 		execvp(command[0], command);
-		fprintf(stderr, "dwm: execvp %s", *command);
+		fprintf(flog, "dwm: execvp %s", *command);
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
@@ -4113,7 +4129,7 @@ xerror(Display *dpy, XErrorEvent *ee)
 	|| (ee->request_code == X_GrabKey && ee->error_code == BadAccess)
 	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
 		return 0;
-	fprintf(stderr, "dwm: fatal error: request code=%d, error code=%d\n",
+	fprintf(flog, "dwm: fatal error: request code=%d, error code=%d\n",
 		ee->request_code, ee->error_code);
 	return xerrorxlib(dpy, ee); /* may call exit */
 }
@@ -4136,8 +4152,10 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
 void
 xrdb(const Arg *arg)
 {
-	loadxrdb();
-	loadcolors(0);
+	int i;
+	readxresources();
+	for (i = 0; i < LENGTH(colors); i++)
+		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
 	drawbar(selmon);
 	focus(NULL);
 	arrange(NULL);
@@ -4414,15 +4432,7 @@ random_wall(const Arg *arg)
 {
 	/* "Daemonize" */
 	if (fork() == 0) {
-		if (dpy)
-			close(ConnectionNumber(dpy));
-		setsid();
-		execlp("dwm_random_wall", "dwm_random_wall", NULL);
-		exit(EXIT_SUCCESS);
-	} else {
-	/* Parent */
-		//we wait so when the bar is updated at the exact same time when the wallpaper is set
-		wait(NULL);
+		system("dwm_random_wall");
 		xrdb(NULL);
 	}
 }
@@ -4447,14 +4457,14 @@ main(int argc, char *argv[])
 	} else if (argc != 1)
 		die("usage: dwm [-v]");
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
-		fputs("warning: no locale support\n", stderr);
+		fputs("warning: no locale support\n", flog);
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("dwm: cannot open display");
 	if (!(xcon = XGetXCBConnection(dpy)))
 		die("dwm: cannot get xcb connection\n");
 	checkotherwm();
 	XrmInitialize();
-        loadxrdb();
+        readxresources();
 	setup();
 	#ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1) die("pledge");
