@@ -15,7 +15,7 @@ postrun() {
 findcmd="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
 #findcmd="$(find "$img_path" -iregex '.*.\(jpg\|jpeg\|png\)' -type f | shuf -n 1)"
 
-wal -i "$findcmd" --backend $backend -qn || exit 1
+wal -i "$findcmd" --backend $backend -qnt || exit 1
 ln -sf "$findcmd" "$bgloc"
 
 postrun &
