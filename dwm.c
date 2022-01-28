@@ -236,6 +236,8 @@ static void clientmessage(XEvent *e);
 static void configure(Client *c);
 static void configurenotify(XEvent *e);
 static void configurerequest(XEvent *e);
+static void combotag(const Arg *arg);
+static void comboview(const Arg *arg);
 static void copyvalidchars(char *text, char *rawtext);
 static Monitor *createmon(void);
 static void cyclelayout(const Arg *arg);
@@ -264,6 +266,7 @@ static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
 static void incnmaster(const Arg *arg);
 static void keypress(XEvent *e);
+static void keyrelease(XEvent *e);
 static void killclient(const Arg *arg);
 static void losefullscreen(Client *next);
 static void fallbackcolors();
@@ -403,7 +406,7 @@ static pid_t winpid(Window w);
 static const char broken[] = "broken";
 static char stext[256], rawstext[256];
 static int dwmblockssig;
-static pid_t dwmblockspid = 0;
+static pid_t dwmblockspid = -1;
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh, blw = 0;      /* bar geometry */
@@ -418,6 +421,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[DestroyNotify] = destroynotify,
 	[Expose] = expose,
 	[FocusIn] = focusin,
+	[KeyRelease] = keyrelease,
 	[KeyPress] = keypress,
 	[MappingNotify] = mappingnotify,
 	[MapRequest] = maprequest,
@@ -447,25 +451,15 @@ static Visual *visual;
 static int depth;
 static Colormap cmap;
 static Client *scratchpad_last_showed = NULL;
+static int combo = 0;
 
 static char dmenumon[2] = "0"; /* dmenu default selected monitor */
-
-static const int scrollargs[4][2];
 
 /* various layouts to use on the config */
 #include "layouts.c"
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
-
-/* resizemousescroll direction argument list */
-static const int scrollargs[4][2] = {
-	/* width change         height change */
-	{ -scrollsensetivity,	0 },
-	{ +scrollsensetivity,	0 },
-	{ 0, 			-scrollsensetivity },
-	{ 0, 			+scrollsensetivity },
-};
 
 /* dynamic scratchpads (this selects an unused tag) */
 #define SCRATCHPAD_MASK (1 << (NUMTAGS + 1))
@@ -1040,6 +1034,42 @@ configurerequest(XEvent *e)
 }
 
 void
+combotag(const Arg *arg)
+{
+	if (!selmon->sel)
+		return;
+
+	unsigned int newtags = selmon->sel->tags ^ (arg->ui & TAGMASK);
+
+	if (newtags) {
+		if (combo) {
+			selmon->sel->tags |= newtags;
+		} else {
+			combo = 1;
+			selmon->sel->tags = newtags;
+		}
+	}
+	focus(NULL);
+	arrange(selmon);
+}
+
+void
+comboview(const Arg *arg)
+{
+	unsigned int newtags = arg->ui & TAGMASK;
+	//unsigned int newtags = selmon->tagset[selmon->seltags] ^ (arg->ui & TAGMASK);
+	if (combo) {
+		selmon->tagset[selmon->seltags] |= newtags;
+	} else {
+		combo = 1;
+		if (newtags)
+			view(&((Arg) { .ui = newtags }));
+	}
+	focus(NULL);
+	arrange(selmon);
+}
+
+void
 copyvalidchars(char *text, char *rawtext)
 {
 	int i = -1, j = 0;
@@ -1500,12 +1530,13 @@ int
 getdwmblockspid(void)
 {
 	char buf[16];
-	FILE *fp = popen("pgrep -o dwmblocks", "r");
+	FILE *fp = NULL;
+	if (!(fp = popen("pgrep -o dwmblocks", "r")))
+		return -1;
 	fgets(buf, sizeof(buf), fp);
-	pid_t pid = strtoul(buf, NULL, 10);
 	pclose(fp);
-	dwmblockspid = pid;
-	return pid != 0 ? 0 : -1;
+	dwmblockspid = strtoul(buf, NULL, 10);
+	return dwmblockspid != 0 ? 0 : -1;
 }
 #endif
 
@@ -2015,6 +2046,12 @@ keypress(XEvent *e)
 		&& CLEANMASK(keys[i].mod) == CLEANMASK(ev->state)
 		&& keys[i].func)
 			keys[i].func(&(keys[i].arg));
+}
+
+void
+keyrelease(XEvent *e)
+{
+	combo = 0;
 }
 
 void
@@ -4466,7 +4503,7 @@ main(int argc, char *argv[])
 	scan();
 	reorganizetags();	/* if more than 2 clients reorganize clients on restart */
 	run();
-	if (restart) execlp(argv[0], argv[0], "--restart", NULL);
+	if (restart) execlp(argv[0], argv[0], "--restart", (char *) NULL);
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;

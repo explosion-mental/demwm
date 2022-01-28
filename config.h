@@ -134,6 +134,15 @@ static const Rule rules[] = {
 	//RULE(.instance = "emacsfloat",	.tags = SPTAG(8), .isfloating = 1)
 };
 
+/* resizemousescroll direction argument list */
+static const int scrollargs[4][2] = {
+	/* width change         height change */
+	{ -scrollsensetivity,	0 },
+	{ +scrollsensetivity,	0 },
+	{ 0, 			-scrollsensetivity },
+	{ 0, 			+scrollsensetivity },
+};
+
 /* layout(s) */
 static float mfact     = 0.55;	/* factor of master area size [0.05..0.95] */
 static int nmaster     = 1;	/* number of clients in master area */
@@ -164,11 +173,12 @@ static const Layout layouts[] = {
 /* key definitions */
 #define MODKEY Mod4Mask
 #define TAGKEYS(KEY,TAG) \
-	{ MODKEY,                       KEY,	view,           { .ui = 1 << TAG } }, \
-	{ MODKEY|ShiftMask,             KEY,	tag,            { .ui = 1 << TAG } }, \
-	{ MODKEY|ControlMask,           KEY,	toggleview,     { .ui = 1 << TAG } }, \
+	{ MODKEY,                       KEY,	comboview,      { .ui = 1 << TAG } }, \
+	{ MODKEY|ShiftMask,             KEY,	combotag,       { .ui = 1 << TAG } }, \
+	/*{ MODKEY|ControlMask,           KEY,	toggleview,     { .ui = 1 << TAG } },*/\
 	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,      { .ui = 1 << TAG } }, \
-	{ MODKEY|Mod1Mask,		KEY,	swaptags,	{ .ui = 1 << TAG } },
+	{ MODKEY|ControlMask,		KEY,	swaptags,	{ .ui = 1 << TAG } },
+
 #define SPKEYS(MOD,KEY,NUM) \
 	{ MOD,			KEY,	togglescratch,	{ .ui = NUM } },
 /* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd? */
@@ -191,7 +201,7 @@ static const char *web[]       = { "surf", "start.duckduckgo.com", NULL };
 static const char *vifm[]      = { "st", "-e", "vifmrun", NULL };
 static const char *samevifm[]  = { "samedirvifm", NULL };
 //EXEC(samedmenu, "samedirmenu"
-static const char pulsepad[] = "st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer; kill -42 $(pidof dwmblocks)";
+static const char pulsepad[] = "kill -42 $(pidof dwmblocks); st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer";
 
 /* macro for nvim to start on insertmode on the last line */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
@@ -343,7 +353,7 @@ static Key keys[] = {
 	//{ 0,	XF86XK_RFKill,			random_wall, {0}		},
 	{ MODKEY,		XK_p,		SHCMD("mpc toggle; kill -45 $(pidof dwmblocks)")			},
 	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev; kill -45 $(pidof dwmblocks)")			},
-	{ MODKEY,	XK_bracketright,	SHCMD("mpc next; kill -45 $(pidof dwmblocks")			},
+	{ MODKEY,	XK_bracketright,	SHCMD("mpc next; kill -45 $(pidof dwmblocks)")			},
 	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")			},
 
 			/* Custom bindings (may be better using shkd) */
