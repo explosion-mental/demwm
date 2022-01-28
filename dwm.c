@@ -755,7 +755,8 @@ buttonpress(XEvent *e)
 					text[i] = ch;
 					text += i + 1;
 					i = -1;
-					if (x >= ev->x) break;
+					if (x >= ev->x)
+						break;
 					dwmblockssig = ch;
 				}
 			}
