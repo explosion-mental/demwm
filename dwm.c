@@ -1488,6 +1488,9 @@ pushstack(const Arg *arg)
 			detach(sel);
 			sel->next = c->next;
 			c->next = sel;
+		} else { /* move to the front */
+			detach(sel);
+			attach(sel);
 		}
 	} else { /* pushup */
 		if ((c = prevtiled(sel)) && c != nexttiled(selmon->clients)) {
@@ -1495,6 +1498,13 @@ pushstack(const Arg *arg)
 			sel->next = c;
 			for (c = selmon->clients; c->next != sel->next; c = c->next);
 			c->next = sel;
+		} else { /* move to the end */
+			for (c = sel; c->next; c = c->next);
+			if (sel != c) {
+				detach(sel);
+				sel->next = NULL;
+				c->next = sel;
+			}
 		}
 	}
 	focus(sel);
