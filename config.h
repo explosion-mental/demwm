@@ -192,7 +192,7 @@ static const Layout layouts[] = {
 /* commands */
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
 static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
-static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
+static const char *clip[]      = { "clipmenu", "-i", "-l", "25", NULL };
 //static const char *passmenu[]  = { "passmenu", "-i", "-l", "25", "-p", "Passmenu:", DMENUARGS, NULL };
 //static const char *termcmd[]   = { terminalcmd, NULL };
 EXEC(termcmd, "st")
@@ -362,7 +362,7 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,		XK_b,	SHCMD("Boletin001")		},
 	{ MODKEY,		        XK_c,	SHCMD("st -f 'Monofur Nerd Font:pixelsize=22:antialias=true:autohint=true' -e calcurse")},
 	{ MODKEY,	         	XK_z,	SHCMD("redyt -r")		},
-	{ MODKEY|ShiftMask,	      	XK_z,	SHCMD("walldown")		},
+	{ MODKEY|ShiftMask,	      	XK_z,	SHCMD("waldl")		},
 	{ MODKEY,		    XK_grave,	SHCMD("dmenuunicode")		},
 	{ MODKEY|ShiftMask,	   XK_Return,	SHCMD("samedir &")		},
 //	{ MODKEY,	        XK_semicolon,	SHCMD("dmenu_mpc")		},
