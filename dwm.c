@@ -1037,19 +1037,20 @@ configurerequest(XEvent *e)
 void
 combotag(const Arg *arg)
 {
-	if (!selmon->sel)
+	unsigned int newtags = arg->ui & TAGMASK;
+
+	//unsigned int newtags = selmon->sel->tags ^ (arg->ui & TAGMASK);
+
+	if (!selmon->sel || !newtags)
 		return;
 
-	unsigned int newtags = selmon->sel->tags ^ (arg->ui & TAGMASK);
-
-	if (newtags) {
-		if (combo) {
-			selmon->sel->tags |= newtags;
-		} else {
-			combo = 1;
-			selmon->sel->tags = newtags;
-		}
+	if (combo)
+		selmon->sel->tags |= newtags;
+	else {
+		combo = 1;
+		selmon->sel->tags = newtags;
 	}
+
 	focus(NULL);
 	arrange(selmon);
 }
@@ -1058,14 +1059,17 @@ void
 comboview(const Arg *arg)
 {
 	unsigned int newtags = arg->ui & TAGMASK;
+
 	//unsigned int newtags = selmon->tagset[selmon->seltags] ^ (arg->ui & TAGMASK);
-	if (combo) {
+
+	if (combo)
 		selmon->tagset[selmon->seltags] |= newtags;
-	} else {
+	else {
 		combo = 1;
 		if (newtags)
 			view(&((Arg) { .ui = newtags }));
 	}
+
 	focus(NULL);
 	arrange(selmon);
 }
@@ -1106,8 +1110,7 @@ createmon(void)
 	strncpy(m->ltsymbol, taglayouts[1] && taglayouts[1] < LENGTH(layouts) ? layouts[taglayouts[1]].symbol : layouts[0].symbol, sizeof m->ltsymbol);
 
 	if (pertag) {
-		if (!(m->pertag = (Pertag *)calloc(1, sizeof(Pertag))))
-			die("fatal: could not malloc() %u bytes\n", sizeof(Pertag));
+		m->pertag = ecalloc(1, sizeof(Pertag));
 		m->pertag->curtag = m->pertag->prevtag = 1;
 
 		for (i = 0; i <= LENGTH(tags); i++) {
@@ -1122,15 +1125,16 @@ createmon(void)
 			m->pertag->ltidxs[i][0] = taglayouts[i - 1] && taglayouts[i - 1] < LENGTH(layouts) ? &layouts[taglayouts[i - 1]] : &layouts[0];
 			m->pertag->ltidxs[i][1] = m->lt[0];
 
-			if (pertagbar) {
-				/* init showbar */
+			/* init showbar */
+			if (pertagbar)
 				m->pertag->showbars[i] = m->showbar;
 
-				/* swap focus and zoomswap*/
-				m->pertag->prevzooms[i] = NULL;
-			}
+			/* swap focus and zoomswap*/
+			m->pertag->prevzooms[i] = NULL;
+
 			/* compatibility with pertag and togglegaps line in createmon */
 			m->pertag->enablegaps[i] = 1;
+
 			if (gapspertag)
 				m->pertag->gaps[i] = ((gappoh & 0xFF) << 0) | ((gappov & 0xFF) << 8) | ((gappih & 0xFF) << 16) | ((gappiv & 0xFF) << 24);
 		}
@@ -1246,6 +1250,7 @@ drawbar(Monitor *m)
 		if (c->isurgent)
 			urg |= c->tags;
 	}
+
 	for (i = 0; i < LENGTH(tags); i++) {
 		/* apply 'hidevacant' only to the selected monitor */
 		if (hidevacant && (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i)))
@@ -1282,7 +1287,7 @@ drawbar(Monitor *m)
 				snprintf(m->ltsymbol, sizeof m->ltsymbol, "{%d/%d}", s, a);
 		}
 	}
-	w = blw = (int)TEXTW(m->ltsymbol);
+	w = blw = TEXTW(m->ltsymbol);
 	drw_setscheme(drw, scheme[SchemeLt]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
@@ -1290,14 +1295,12 @@ drawbar(Monitor *m)
 		if (m->sel) {
 			drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]);
 		#ifdef ICONS
-			//drw_text(drw, x, 0, w, bh, m->sel->icon ? m->sel->icw + 2 : lrpad / 2, m->sel->name, 0);
-			if (TEXTW(m->sel->name) + m->sel->icw > w) { /* if the title is bigger than the width of the title rectangle, don't center */
+			if (TEXTW(m->sel->name) + m->sel->icw > w) { /* don't center if the title + icon don't fit */
 				drw_text(drw, x, 0, w, bh, m->sel->icon ? m->sel->icw + 2 : lrpad / 2, m->sel->name, 0);
 				if (m->sel->icon)
 					drw_pic(drw, x, (bh - m->sel->ich) / 2, m->sel->icw, m->sel->ich, m->sel->icon);
 			} else { /* center window title and icon */
 				drw_text(drw, x, 0, w, bh, (w - TEXTW(m->sel->name) + (m->sel->icon ? m->sel->icw + 2 : 0)) / 2, m->sel->name, 0);
-			//drw_text(drw, x, 0, w, bh, (w - TEXTW(m->sel->name) - (m->sel->icon ? m->sel->icw + 2 : 0)) / 2, m->sel->name, 0);
 				if (m->sel->icon)
 					drw_pic(drw, x + (w - TEXTW(m->sel->name) - m->sel->icw) / 2, (bh - m->sel->ich) / 2, m->sel->icw, m->sel->ich, m->sel->icon);
 			}
@@ -1475,20 +1478,18 @@ focusstack(const Arg *arg)
 void
 pushstack(const Arg *arg)
 {
-	Client *sel = selmon->sel, *c;
+	Client *c, *sel = selmon->sel;
+
+	if (!sel || sel->isfloating)
+		return;
 
 	if (arg->i > 0) { /* pushdown */
-		//if (!sel || sel->isfloating)
-		if (!sel || sel->isfloating || sel == nexttiled(selmon->clients))
-			return;
 		if ((c = nexttiled(sel->next))) {
 			detach(sel);
 			sel->next = c->next;
 			c->next = sel;
 		}
 	} else { /* pushup */
-		if (!sel || sel->isfloating)
-			return;
 		if ((c = prevtiled(sel)) && c != nexttiled(selmon->clients)) {
 			detach(sel);
 			sel->next = c;
@@ -2144,8 +2145,10 @@ readxresources(void)
 
 	display = XOpenDisplay(NULL);
 	resm = XResourceManagerString(display);
+
 	if (!resm)
 		return;
+
 	xrdb = XrmGetStringDatabase(resm);
 	if (xrdb != NULL) {
 		xrdbloadcolor(xrdb, "background", bg_wal);
@@ -3335,13 +3338,13 @@ sigchld(int unused)
 void
 sighup(int unused)
 {
-	refresh(0);
+	refresh(NULL);
 }
 
 void
 sigterm(int unused)
 {
-	quit(0);
+	running = 0;
 }
 
 #ifndef __OpenBSD__
@@ -4493,7 +4496,7 @@ main(int argc, char *argv[])
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("dwm: cannot open display");
 	if (!(xcon = XGetXCBConnection(dpy)))
-		die("dwm: cannot get xcb connection\n");
+		die("dwm: cannot get xcb connection");
 	checkotherwm();
 	XrmInitialize();
 	getdwmblockspid();

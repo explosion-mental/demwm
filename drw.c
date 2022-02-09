@@ -460,29 +460,6 @@ drw_picture_create_resized(Drw *drw, char *src, unsigned int srcw, unsigned int 
 
 	return pic;
 }
-
-//inline static uint8_t div255(uint32_t x) {return (x*0x8081u) >> 23u; }
-//inline static uint32_t blend(uint32_t p1rb, uint32_t p1g, uint8_t p1a, uint32_t p2) {
-//	uint8_t a = p2 >> 24u;
-//	uint32_t rb = (p2 & 0xFF00FFu) + ( (a * p1rb) >> 8u );
-//	uint32_t g = (p2 & 0x00FF00u) + ( (a * p1g) >> 8u );
-//	return (rb & 0xFF00FFu) | (g & 0x00FF00u) | div255(~a * 255u + a * p1a) << 24u;
-//}
-//void
-//drw_img(Drw *drw, int x, int y, XImage *img, uint32_t *tmp)
-//{
-//	if (!drw || !drw->scheme)
-//		return;
-//	uint32_t *data = (uint32_t *)img->data, p = drw->scheme[ColBg].pixel,
-//			 prb = p & 0xFF00FFu, pg = p & 0x00FF00u;
-//	uint8_t pa = p >> 24u;
-//	int icsz = img->width * img->height, i;
-//	for (i = 0; i < icsz; ++i) tmp[i] = blend(prb, pg, pa, data[i]);
-//
-//	img->data = (char *) tmp;
-//	XPutImage(drw->dpy, drw->drawable, drw->gc, img, 0, 0, x, y, img->width, img->height);
-//	img->data = (char *) data;
-//}
 #endif /* ICONS */
 
 void
