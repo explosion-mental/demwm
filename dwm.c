@@ -1893,28 +1893,33 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 {
 	int format;
 	unsigned long n, extra, *p = NULL;
+	unsigned int iconsize;
 	Atom real;
 
 	if (XGetWindowProperty(dpy, win, netatom[NetWMIcon], 0L, LONG_MAX, False, AnyPropertyType,
 						   &real, &format, &n, &extra, (unsigned char **)&p) != Success)
 		return None;
+
 	if (n == 0 || format != 32) { XFree(p); return None; }
+
+	iconsize = drw->fonts->h;
 
 	unsigned long *bstp = NULL;
 	uint32_t w, h, sz;
 	{
-		unsigned long *i; const unsigned long *end = p + n;
+		unsigned long *i;
+		const unsigned long *end = p + n;
 		uint32_t bstd = UINT32_MAX, d, m;
 		for (i = p; i < end - 1; i += sz) {
 			if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) { XFree(p); return None; }
 			if ((sz = w * h) > end - i) break;
-			if ((m = w > h ? w : h) >= bh && (d = m - bh) < bstd) { bstd = d; bstp = i; }
+			if ((m = w > h ? w : h) >= iconsize && (d = m - iconsize) < bstd) { bstd = d; bstp = i; }
 		}
 		if (!bstp) {
 			for (i = p; i < end - 1; i += sz) {
 				if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) { XFree(p); return None; }
 				if ((sz = w * h) > end - i) break;
-				if ((d = bh - (w > h ? w : h)) < bstd) { bstd = d; bstp = i; }
+				if ((d = iconsize - (w > h ? w : h)) < bstd) { bstd = d; bstp = i; }
 			}
 		}
 		if (!bstp) { XFree(p); return None; }
@@ -1924,10 +1929,12 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 
 	uint32_t icw, ich;
 	if (w <= h) {
-		ich = bh; icw = w * bh / h;
+		ich = iconsize;
+		icw = w * drw->fonts->h / h;
 		if (icw == 0) icw = 1;
 	} else {
-		icw = bh; ich = h * bh / w;
+		icw = iconsize;
+		ich = h * drw->fonts->h / w;
 		if (ich == 0) ich = 1;
 	}
 	*picw = icw; *pich = ich;
