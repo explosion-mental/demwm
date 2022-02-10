@@ -1079,10 +1079,10 @@ copyvalidchars(char *text, char *rawtext)
 {
 	int i = -1, j = 0;
 
-	while(rawtext[++i]) {
+	while (rawtext[++i])
 		if ((unsigned char)rawtext[i] >= ' ')
 			text[j++] = rawtext[i];
-	}
+
 	text[j] = '\0';
 }
 
@@ -2495,6 +2495,7 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
+	kill(dwmblockspid, SIGTERM);
 	running = 0;
 }
 
@@ -3148,12 +3149,8 @@ setup(void)
 	if (restart) {	/* keep the colors the same */
 		xrdb(0);
 		restart = 0;
-	} else {	/* refresh colors */
-		if (system("dwm_random_wall") != 0)
-			fallbackcolors();
-		else
-			xrdb(0);
-	}
+	} else	/* refresh colors */
+		random_wall(NULL);
 
 	/* init system tray */
 	#ifdef SYSTRAY
@@ -3162,10 +3159,9 @@ setup(void)
 
 	/* init bars */
 	if (dwmblocks) {
-		if (!dwmblockspid) { /* start dwmblocks */
-			if (getdwmblockspid() == -1)
-				system("dwmblocks &");
-		} else { /* restart dwmblocks */
+		if (!dwmblockspid && getdwmblockspid() == -1) /* start dwmblocks */
+			system("dwmblocks &");
+		else { /* restart dwmblocks */
 			kill(dwmblockspid, SIGTERM);
 			system("dwmblocks &");
 		}
@@ -3361,6 +3357,7 @@ sighup(int unused)
 void
 sigterm(int unused)
 {
+	kill(dwmblockspid, SIGTERM);
 	running = 0;
 }
 
@@ -4485,8 +4482,10 @@ swaptags(const Arg *arg)
 void
 random_wall(const Arg *arg)
 {
-	system("dwm_random_wall");
-	xrdb(0);
+	if (system("dwm_random_wall") != 0)
+		fallbackcolors();
+	else
+		xrdb(NULL);
 }
 /*void
 toggletopbar(const Arg *arg)

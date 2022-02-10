@@ -8,7 +8,7 @@ backend=wal		# colorz - schemer2 - wal - haishoku - colorthief
 postrun() {
 	xwallpaper --zoom "$bgloc"
 	ln -sf	"${HOME}/.cache/wal/dunstrc"	"${HOME}/.config/dunst/dunstrc"
-	pkill dunst; dunst
+	#killall -9 dunst; dunst &
 	ln -sf	"${HOME}/.cache/wal/zathurarc"	"${HOME}/.config/zathura/zathurarc"
 }
 
@@ -18,4 +18,4 @@ findcmd="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
 wal -i "$findcmd" --backend $backend -qnt || exit 1
 ln -sf "$findcmd" "$bgloc"
 
-postrun &
+postrun & disown
