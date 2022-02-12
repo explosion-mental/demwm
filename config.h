@@ -241,7 +241,7 @@ static const char *web[]       = { "surf", "start.duckduckgo.com", NULL };
 static const char *vifm[]      = { "st", "-e", "vifmrun", NULL };
 static const char *samevifm[]  = { "samedirvifm", NULL };
 //EXEC(samedmenu, "samedirmenu"
-static const char pulsepad[] = "kill -42 $(pidof dwmblocks); st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer";
+static const char pulsepad[] = "kill -42 $STATUSBAR; st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer";
 
 /* macro for nvim to start on insertmode on the last line */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
@@ -374,12 +374,12 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,		XK_equal,		SHCMD("mpc volume +3")	},
 	{ MODKEY|ShiftMask,		XK_bracketleft,		SHCMD("mpc seek -10")	},
 	{ MODKEY|ShiftMask,		XK_bracketright,	SHCMD("mpc seek +10")	},
-{ MODKEY,	XK_minus,	SHCMD("pamixer --allow-boost -d 3; kill -42 $(pidof dwmblocks)") },
-{ MODKEY,	XK_equal,	SHCMD("pamixer --allow-boost -i 3; kill -42 $(pidof dwmblocks)") },
-{ MODKEY,	 XK_BackSpace,	SHCMD("pamixer -t; kill -42 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 2; kill -42 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2; kill -42 $(pidof dwmblocks)") },
-{ 0, XF86XK_AudioMute,		SHCMD("pamixer -t; kill -42 $(pidof dwmblocks)") },
+{ MODKEY,	XK_minus,	SHCMD("pamixer --allow-boost -d 3; kill -42 $STATUSBAR")},
+{ MODKEY,	XK_equal,	SHCMD("pamixer --allow-boost -i 3; kill -42 $STATUSBAR")},
+{ MODKEY,	 XK_BackSpace,	SHCMD("pamixer -t; kill -42 $STATUSBAR")		},
+{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 2; kill -42 $STATUSBAR")},
+{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2; kill -42 $STATUSBAR")},
+{ 0, XF86XK_AudioMute,		SHCMD("pamixer -t; kill -42 $STATUSBAR") },
 //{ 0,	XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 //{ 0, XF86XK_ScreenSaver,		SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
 //	{ 0,	XF86XK_AudioStop,		SHCMD("mpc toggle)		},
@@ -391,9 +391,9 @@ static Key keys[] = {
 	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev")			},
 	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next")			},
 	//{ 0,	XF86XK_RFKill,			random_wall, {0}		},
-	{ MODKEY,		XK_p,		SHCMD("mpc toggle; kill -45 $(pidof dwmblocks)")			},
-	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev; kill -45 $(pidof dwmblocks)")			},
-	{ MODKEY,	XK_bracketright,	SHCMD("mpc next; kill -45 $(pidof dwmblocks)")			},
+	{ MODKEY,		XK_p,		SHCMD("mpc toggle; kill -45 $STATUSBAR")},
+	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev; kill -45 $STATUSBAR")	},
+	{ MODKEY,	XK_bracketright,	SHCMD("mpc next; kill -45 $STATUSBAR")	},
 	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")			},
 
 			/* Custom bindings (may be better using shkd) */

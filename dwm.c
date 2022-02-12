@@ -1968,6 +1968,8 @@ updateicon(Client *c)
 }
 #endif /* ICONS */
 
+//FIXME if a command exits out, without even echo '' (nothing, NULL, '\0') the
+//text that was before remains
 void
 getcmd(const Block *block, char *output)
 {
