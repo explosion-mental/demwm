@@ -131,3 +131,4 @@ Currently I don't wish more 'features' but here are some ideas:
 - System Tray (Aug 06 2021)
 - Tag previews (Aug 10 2021)
 - Borders colors and general colors now have different schemes (Oct 16 2021)
+- status text (blocks) handled by dwm itself (Feb 12 2022)
