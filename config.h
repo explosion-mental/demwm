@@ -70,6 +70,49 @@ static const unsigned int alphas[][2]   = {
 	[BorderUrg]    = { borderalpha },
 };
 
+/* status bar */
+static const Block blocks[] = {
+	/* Command			Update Interval	Update Signal*/
+	{ "sb-clock",				30,		1},
+	{ "sb-disk",				9000,		2},
+	{ "sb-battery",				10,		3},
+	{ "sb-internet",			10,		4},
+	{ "sb-mailbox",				0,		5},
+	{ "sb-moonphase",			18000,		6},
+	{ "sb-forecast",			18000,		7},
+	{ "sb-volume",				0,		8},
+//	{ "sb-price btc Bitcoin 💰",		9000,		21},
+//	{ "sb-price eth Ethereum 🍸",		9000,		23},
+//	{ "sb-price xmr \"Monero\" 🔒",		9000,		24},
+//	{ "sb-price link \"Chainlink\" 🔗",	300,		25},
+//	{ "sb-price bat \"Basic Attention Token\" 🦁",9000,		20},
+//	{ "sb-price lbc \"LBRY Token\" 📚",	9000,		22},
+//	{ "sb-cpu",				10,		18},
+//	{ "sb-kbselect",			0,		30},
+//	{ "sb-memory",				10,		14},
+//	{ "sb-torrent",				20,		7},
+//	{ "sb-crypto",				0,		13},
+//	{ "sb-help-icon",			0,		15},
+//	{ "sb-nettraf",				1,		16},
+//	{ "sb-news",				0,		6},
+//	{ "sb-xbpsup",				18000,		8},
+	{ "sb-pacpackages",			0,		9},
+	{ "sb-sync",				0,		10},
+//	{ "sb-mpc",				0,		26},
+	{ "sb-music",				0,		11},
+//	{ "sb-tasks",				10,		12},
+	{ "sb-notes",				0,		13},
+	{ "cat /tmp/recordingicon 2>/dev/null",	0,		14},
+//	{ "sb-count",				0,		21},
+};
+
+/* if inversed, inverse the order of the blocks */
+#define INVERSED
+/* delimeter between blocks commands. NULL character ('\0') means no delimeter. */
+static char delim[] = " ";
+/* max number of character that one block command can output */
+#define CMDLENGTH		(50)
+
 /* tags */
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
 static const int taglayouts[] = {    0,   1,    0,   0,    0,    0,    0,    0,    0 };
@@ -427,12 +470,12 @@ static Button buttons[] = {
 	{ ClkWinTitle,          0,              Button4,        focusstack,	{.i = +1 } },
 	{ ClkWinTitle,          0,              Button5,        focusstack,	{.i = -1 } },
 
-//	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1 } },
-//	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2 } },
-//	{ ClkStatusText,        0,              Button3,        sigdwmblocks,   {.i = 3 } },
-//	{ ClkStatusText,        0,              Button4,        sigdwmblocks,   {.i = 4 } },
-//	{ ClkStatusText,        0,              Button5,        sigdwmblocks,   {.i = 5 } },
-//	{ ClkStatusText,        ShiftMask,      Button1,        sigdwmblocks,   {.i = 6 } },
+	{ ClkStatusText,        0,              Button1,        sendstatusbar,   {.i = 1 } },
+	{ ClkStatusText,        0,              Button2,        sendstatusbar,   {.i = 2 } },
+	{ ClkStatusText,        0,              Button3,        sendstatusbar,   {.i = 3 } },
+	{ ClkStatusText,        0,              Button4,        sendstatusbar,   {.i = 4 } },
+	{ ClkStatusText,        0,              Button5,        sendstatusbar,   {.i = 5 } },
+	{ ClkStatusText,        ShiftMask,      Button1,        sendstatusbar,   {.i = 6 } },
 
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },

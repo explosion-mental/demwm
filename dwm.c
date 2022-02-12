@@ -80,12 +80,21 @@
 #define RULE(...)		{ .monitor = -1, ##__VA_ARGS__ },
 #define Button6			6
 #define Button7			7
+/* status bar signals */
+#ifdef __OpenBSD__
+#define SIGPLUS			SIGUSR1+1
+#define SIGMINUS		SIGUSR1-1
+#else
+#define SIGPLUS			SIGRTMIN
+#define SIGMINUS		SIGRTMIN
+#endif
 #ifdef SYSTRAY
 /* XEMBED messages */
 #define VERSION_MAJOR               0
 #define VERSION_MINOR               0
 #define XEMBED_MAPPED              (1 << 0)
 #define XEMBED_EMBEDDED_VERSION (VERSION_MAJOR << 16) | VERSION_MINOR
+
 enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 #endif /* SYSTRAY */
 
@@ -221,6 +230,12 @@ typedef struct {
 } Systray;
 #endif /* SYSTRAY */
 
+typedef struct {
+	const char *command;
+	const unsigned int interval;
+	const unsigned int signal;
+} Block;
+
 /* function declarations */
 static void applyrules(Client *c);
 static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
@@ -260,6 +275,11 @@ static Picture geticonprop(Window w, unsigned int *icw, unsigned int *ich);
 static void freeicon(Client *c);
 static void updateicon(Client *c);
 #endif /* ICONS */
+static void getcmd(const Block *block, char *output);
+static void getcmds(int time);
+static void getsigcmds(unsigned int signal);
+static int gcd(int a, int b);
+static int getstatus(char *str, char *last);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
@@ -306,6 +326,7 @@ static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, lon
 static int sendevent(Client *c, Atom proto);
 #endif /* SYSTRAY */
 static void sendmon(Client *c, Monitor *m);
+static void sendstatusbar(const Arg *arg);
 static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
@@ -328,11 +349,13 @@ static void switchtag(void);
 static void updatepreview(void);
 #endif /* TAG_PREVIEW */
 static void sigchld(int unused);
+static void sighandler(int signum);
 static void sighup(int unused);
 static void sigterm(int unused);
 static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
+static void timerloop(void);
 static void togglebar(const Arg *arg);
 static void fakefullscreen(const Arg *arg);
 static void togglefloating(const Arg *arg);
@@ -399,7 +422,9 @@ static pid_t winpid(Window w);
 
 /* variables */
 static const char broken[] = "broken";
-static char stext[256];
+static int blocknum;
+static pid_t statuspid = -1;
+static unsigned int delimlen;
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh, blw = 0;      /* bar geometry */
@@ -430,7 +455,7 @@ static Atom xatom[XLast];
 static Systray *systray = NULL;
 static unsigned long systrayorientation = 0; /* _NET_SYSTEM_TRAY_ORIENTATION_HORZ */
 #endif /* SYSTRAY */
-static Atom wmatom[WMLast], netatom[NetLast];
+static Atom wmatom[WMLast], netatom[NetLast], dwmstatus;
 static int running = 1, restart = 0;
 static Cur *cursor[CurLast];
 static Clr **scheme;
@@ -455,7 +480,11 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 #include "config.h"
 
 /* dynamic scratchpads (this selects an unused tag) */
-#define SCRATCHPAD_MASK (1 << (NUMTAGS + 1))
+#define SCRATCHPAD_MASK		(1 << (NUMTAGS + 1))
+#define STATUSLENGTH		(LENGTH(blocks) * CMDLENGTH + 1)
+
+static char blockoutput[LENGTH(blocks)][CMDLENGTH] = {0};
+static char status[STATUSLENGTH], statusstr[STATUSLENGTH];
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
@@ -728,13 +757,31 @@ buttonpress(XEvent *e)
 			arg.ui = 1 << i;
 		} else if (ev->x < x + blw)
 			click = ClkLtSymbol;
-
-		else if (ev->x > (x = selmon->ww - (int)TEXTW(stext) + lrpad
-		#ifdef SYSTRAY
-		-getsystraywidth()
-		#endif /* SYSTRAY */
+		else if (ev->x > (x = selmon->ww - TEXTW(status) - lrpad
+			#ifdef SYSTRAY
+			- getsystraywidth()
+			#endif /* SYSTRAY */
 			)) {
 			click = ClkStatusText;
+			int len, i;
+			//int last = LENGTH(blocks) - 1;
+		#ifdef INVERSED
+			for (i = LENGTH(blocks) - 1; i >= 0; i--)
+		#else
+			for (i = 0; i < LENGTH(blocks); i++)
+		#endif /* INVERSED */
+			{
+				if (*(blockoutput[i]) == '\0') //ignore command that output NULL or '\0'
+					continue;
+				len = TEXTW(blockoutput[i]) - lrpad + TEXTW(delim) - lrpad;
+				//if (i == last)
+				//	len -= TEXTW(delim);
+				x += len;
+				if (ev->x <= x && ev->x >= x - len) { /* if the mouse is between the block area */
+					blocknum = i; /* store what block the mouse is clicking */
+					break;
+				}
+			}
 		} else
 			click = ClkWinTitle;
 	} else if ((c = wintoclient(ev->window))) {
@@ -1200,8 +1247,8 @@ drawbar(Monitor *m)
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) { /* status is only drawn on selected monitor */
 		drw_setscheme(drw, scheme[SchemeStatus]);
-		tw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
-		drw_text(drw, bw - tw, 0, tw, bh, 0, stext, 0);
+		tw = TEXTW(status) - lrpad + 2; /* 2px right padding */
+		drw_text(drw, bw - tw, 0, tw, bh, 0, status, 0);
 	}
 
 	#ifdef SYSTRAY
@@ -1279,6 +1326,14 @@ drawbar(Monitor *m)
 	}
 	drw_map(drw, m->barwin, 0, 0, bw, bh);
 }
+
+#ifndef __OpenBSD__
+void
+dummysighandler(int signum)
+{
+    return;/* this signal handler should do nothing */
+}
+#endif
 
 void
 drawbars(void)
@@ -1552,6 +1607,7 @@ updatepreview(void)
 		XUnmapWindow(dpy, m->tagwin);
 	}
 }
+
 void
 switchtag(void)
 {
@@ -1912,6 +1968,96 @@ updateicon(Client *c)
 }
 #endif /* ICONS */
 
+void
+getcmd(const Block *block, char *output)
+{
+	FILE *cmdf = popen(block->command, "r");
+	if (!cmdf)
+		return;
+	fgets(output, CMDLENGTH-delimlen, cmdf);
+	int i = strlen(output);
+
+	/* only chop off newline if one is present at the end */
+	i = output[i - 1] == '\n' ? i - 1 : i;
+
+	/* block is empty (or atleast the first line) */
+	if (i == 0 || i == '\0') {
+		output[i++] = '\0';
+		pclose(cmdf);
+		return;
+	}
+
+	if (delim[0] != '\0') {
+		strncpy(output+i, delim, delimlen);
+	} else
+		output[i++] = '\0';
+	pclose(cmdf);
+}
+
+void
+getcmds(int time)
+{
+	const Block *current;
+	int i;
+#ifdef INVERSED
+	for (i = LENGTH(blocks) - 1; i >= 0; i--)
+#else
+	for (i = 0; i < LENGTH(blocks); i++)
+#endif /* INVERSED */
+	{
+		current = blocks + i;
+		if ((current->interval != 0 && time % current->interval == 0) || time == -1)
+			getcmd(current, blockoutput[i]);
+	}
+}
+
+void
+getsigcmds(unsigned int signal)
+{
+	const Block *current;
+	int i;
+#ifdef INVERSED
+	for (i = LENGTH(blocks) - 1; i >= 0; i--)
+#else
+	for (i = 0; i < LENGTH(blocks); i++)
+#endif /* INVERSED */
+	{
+		current = blocks + i;
+		if (current->signal == signal)
+			getcmd(current, blockoutput[i]);
+	}
+}
+
+int
+getstatus(char *str, char *last)
+{
+	strcpy(last, str);
+	str[0] = '\0';
+	int i;
+#ifdef INVERSED
+	for (i = LENGTH(blocks) - 1; i >= 0; i--)
+#else
+	for (i = 0; i < LENGTH(blocks); i++)
+#endif /* INVERSED */
+		strcat(str, blockoutput[i]);
+	str[strlen(str)-strlen(delim)] = '\0';
+	return 0;
+	//strcmp(str, last);//0 if they are the same
+}
+
+int
+gcd(int a, int b)
+{
+	int temp;
+
+	while (b > 0) {
+		temp = a % b;
+		a = b;
+		b = temp;
+	}
+
+	return a;
+}
 
 int
 gettextprop(Window w, Atom atom, char *text, unsigned int size)
@@ -2405,7 +2551,7 @@ propertynotify(XEvent *e)
 	}
 #endif /* SYSTRAY */
 
-	if ((ev->window == root) && (ev->atom == XA_WM_NAME))
+	if ((ev->window == root) && (ev->atom == dwmstatus))
 		updatestatus();
 	else if (ev->state == PropertyDelete)
 		return; /* ignore */
@@ -2443,12 +2589,14 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
+	kill(statuspid, SIGKILL);
 	running = 0;
 }
 
 void
 refresh(const Arg *arg)
 {
+	kill(statuspid, SIGKILL);
 	restart = 1;
 	running = 0;
 }
@@ -2873,6 +3021,20 @@ sendevent(Client *c, Atom proto)
 }
 
 void
+sendstatusbar(const Arg *arg)
+{
+	if (fork() == 0) {
+		const Block *current = blocks + blocknum;
+		char button[2] = { '0' + arg->i & 0xff, '\0' };
+		char shcmd[CMDLENGTH + 20];
+		snprintf(shcmd, LENGTH(shcmd), "%s && kill -%d %d", current->command, current->signal+34, getppid());
+		setenv("BLOCK_BUTTON", button, 1);
+		execl("/bin/sh", "sh", "-c", shcmd, (char*)NULL);
+		exit(EXIT_SUCCESS);
+	}
+}
+
+void
 setfocus(Client *c)
 {
 	if (!c->neverfocus) {
@@ -3039,6 +3201,37 @@ setup(void)
 	/* init signals handlers */
 	signal(SIGHUP, sighup); /* restart */
 	signal(SIGTERM, sigterm); /* exit */
+	#ifndef __OpenBSD__
+	for (int i = SIGRTMIN; i <= SIGRTMAX; i++) /* init real time signals with dummy handler */
+		signal(i, dummysighandler);
+	#endif
+
+	int i;
+#ifdef INVERSED
+	for (i = LENGTH(blocks) - 1; i >= 0; i--)
+#else
+	for (i = 0; i < LENGTH(blocks); i++)
+#endif /* INVERSED */
+		if (blocks[i].signal > 0)
+			signal(SIGMINUS+blocks[i].signal, sighandler);
+
+	/* init status text */
+	delimlen = strlen(delim);
+	delim[delimlen++] = '\0';
+	getcmds(-1);
+	statuspid = fork();
+
+	/* pid as an enviromental variable */
+	char envpid[16];
+	snprintf(envpid, LENGTH(envpid), "%d", getpid());
+	setenv("STATUSBAR", envpid, 1);
+
+	if (statuspid == 0) { /* timerloop as the child */
+		if (dpy)
+			close(ConnectionNumber(dpy));
+		sleep(2); /* wait for dwm to setup */
+		timerloop();
+	}
 
 	/* init screen */
 	screen = DefaultScreen(dpy);
@@ -3056,6 +3249,7 @@ setup(void)
 	updategeom();
 	/* init atoms */
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
+	dwmstatus                      = XInternAtom(dpy, "UPDATE_DWM_STATUSBAR", False);
 	wmatom[WMProtocols]            = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	wmatom[WMDelete]               = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wmatom[WMState]                = XInternAtom(dpy, "WM_STATE", False);
@@ -3288,14 +3482,35 @@ sigchld(int unused)
 }
 
 void
+sighandler(int signum)
+{
+	XEvent event;
+
+	getsigcmds(signum-SIGPLUS);
+
+	/* send a custom Atom in PropertyNotify event to the root window */
+	event.type = PropertyNotify;
+	//event.window = root;
+	//event.send_event = True;
+	//event.xclient.message_type = customatom;
+	event.xproperty.atom = dwmstatus;
+	event.xproperty.window = root;
+	XSendEvent(dpy, root, False, PropertyNotify, &event);
+	XFlush(dpy);
+}
+
+void
 sighup(int unused)
 {
-	refresh(NULL);
+	kill(statuspid, SIGKILL);
+	restart = 1;
+	running = 0;
 }
 
 void
 sigterm(int unused)
 {
+	kill(statuspid, SIGKILL);
 	running = 0;
 }
 
@@ -3359,6 +3574,52 @@ tagmon(const Arg *arg)
 		}
 	} else
 		sendmon(c, dirtomon(arg->i));
+}
+
+void
+timerloop(void)
+{
+
+	int i;
+	unsigned int interval = 0, maxinterval = 0;
+
+#ifdef INVERSED
+	for (i = LENGTH(blocks) - 1; i > 1; i--)
+#else
+	for (i = (inversedblocks ? LENGTH(blocks) - 1 : 0); i < (inversedblocks ? 1 : LENGTH(blocks)); inversedblocks ? i-- : i++)
+#endif /* INVERSED */
+	//for (i = (inversedblocks ? LENGTH(blocks) - 1 : 0); i < (inversedblocks ? 1 : LENGTH(blocks)); inversedblocks ? i-- : i++)
+		if (blocks[i].interval) {
+			maxinterval = MAX(blocks[i].interval, maxinterval);
+			interval = gcd(blocks[i].interval, interval);
+		}
+
+	unsigned int count = 0;
+	struct timespec sleeptime = {interval, 0};
+	struct timespec tosleep = sleeptime;
+	const Block *current;
+	pid_t parentpid = getppid();
+
+	while (1) {
+		/* check if any block needs to update */
+	#ifdef INVERSED
+		for (i = LENGTH(blocks) - 1; i >= 0; i--)
+	#else
+		for (i = 0; i < LENGTH(blocks); i++)
+	#endif /* INVERSED */
+		{
+			current = blocks + i;
+			if ((current->interval != 0 && count % current->interval == 0) || count == -1 || count == 0)
+				kill(parentpid, SIGMINUS+current->signal); /* notify parent to update blocks X */
+		}
+
+		/* update count to [1, maxinterval] */
+		count = (count + interval - 1) % maxinterval + 1;
+
+		/* sleep for sleeptime even while being interrupted */
+		while (nanosleep(&tosleep, &tosleep) == -1);
+		tosleep = sleeptime;
+	}
 }
 
 void
@@ -3805,8 +4066,11 @@ updatesizehints(Client *c)
 void
 updatestatus(void)
 {
-	if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
-		strcpy(stext, " Welcome! :) ");
+	/* only update if text has changed */
+	//if (!getstatus(status, statusstr))
+	//XXX comparing if the status has changed or not doesn't change much
+	//since the text will get drawn anyway (in drawbar())
+	getstatus(status, statusstr);
 	drawbar(selmon);
 #ifdef SYSTRAY
 	updatesystray();
