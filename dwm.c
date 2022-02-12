@@ -424,7 +424,6 @@ static pid_t winpid(Window w);
 static const char broken[] = "broken";
 static int blocknum;
 static pid_t statuspid = -1;
-static unsigned int delimlen;
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh, blw = 0;      /* bar geometry */
@@ -484,7 +483,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 #define STATUSLENGTH		(LENGTH(blocks) * CMDLENGTH + 1)
 
 static char blockoutput[LENGTH(blocks)][CMDLENGTH] = {0};
-static char status[STATUSLENGTH], statusstr[STATUSLENGTH];
+static char status[STATUSLENGTH] = {0}, statusstr[STATUSLENGTH] = {0};
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
@@ -1968,32 +1967,45 @@ updateicon(Client *c)
 }
 #endif /* ICONS */
 
-//FIXME if a command exits out, without even echo '' (nothing, NULL, '\0') the
-//text that was before remains
+static void
+remove_all(char *str, char to_remove)
+{
+	char *read = str, *write = str;
+	do {
+		while (*read == to_remove) read++;
+		*write++ = *read;
+		read++;
+	} while (*(read-1));
+}
+
 void
 getcmd(const Block *block, char *output)
 {
 	FILE *cmdf = popen(block->command, "r");
 	if (!cmdf)
 		return;
-	fgets(output, CMDLENGTH-delimlen, cmdf);
+
+	/* keep trying while (even if) the interrupt error */
+	char tmpstr[CMDLENGTH] = "", *s;
+	int e;
+	do {
+		errno = 0;
+		s = fgets(tmpstr, CMDLENGTH-(strlen(delim)+1), cmdf);
+		e = errno;
+	} while (!s && e == EINTR);
+
+	pclose(cmdf);
+
+	strcpy(output, tmpstr);
+	remove_all(output, '\n');	/* chop off newline */
 	int i = strlen(output);
 
-	/* only chop off newline if one is present at the end */
-	i = output[i - 1] == '\n' ? i - 1 : i;
-
-	/* block is empty (or atleast the first line) */
-	if (i == 0 || i == '\0') {
-		output[i++] = '\0';
-		pclose(cmdf);
-		return;
+	if (delim != '\0') { /* if the delimiter is not NULL */
+		if (i > 0) /* if there output is not NULL */
+			strcat(output, delim);
+		i += strlen(delim);
 	}
-
-	if (delim[0] != '\0') {
-		strncpy(output+i, delim, delimlen);
-	} else
-		output[i++] = '\0';
-	pclose(cmdf);
+	output[i++] = '\0';
 }
 
 void
@@ -2042,6 +2054,7 @@ getstatus(char *str, char *last)
 	for (i = 0; i < LENGTH(blocks); i++)
 #endif /* INVERSED */
 		strcat(str, blockoutput[i]);
+	/* chop off the last delimeter */
 	str[strlen(str)-strlen(delim)] = '\0';
 	return 0;
 	//strcmp(str, last);//0 if they are the same
@@ -3218,8 +3231,7 @@ setup(void)
 			signal(SIGMINUS+blocks[i].signal, sighandler);
 
 	/* init status text */
-	delimlen = strlen(delim);
-	delim[delimlen++] = '\0';
+	delim[strlen(delim)+1] = '\0';
 	getcmds(-1);
 	statuspid = fork();
 
