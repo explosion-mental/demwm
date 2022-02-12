@@ -12,16 +12,13 @@ static unsigned int gappov    = 20;       /* vert outer gap between windows and 
 static int hidevacant         = 1;        /* 1 means hide vacant tags */
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int swallowfloating    = 0;        /* 1 means swallow floating windows by default */
-static int status             = 1;        /* 1 means display status text */
 static int showbar            = 1;        /* 0 means no bar */
 static const int topbar       = 1;        /* 0 means bottom bar */
 static const int barh         = 8;        /* 1 or more means bar height */
-static const int dwmblocks    = 1;        /* 1 means use and start dwmblocks */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
 static const int scalepreview = 4;        /* tag previews scaling */
-static const int dwmblocksasync       = 0;      /* 1 means do not support user signals (SIGUSR) */
 static const int scrollsensetivity    = 30;	/* 1 means resize window by 1 pixel for each scroll event */
 static const unsigned int baralpha    = 120;	/* bar opacity from 0 to 255, default is 185*/
 static const unsigned int borderalpha = OPAQUE;	/* borders, default is 0xffU (OPAQUE) */
@@ -306,7 +303,7 @@ static Key keys[] = {
 	  TAGKEYS(			XK_7,				6)
 	  TAGKEYS(			XK_8,				7)
 	  TAGKEYS(			XK_9,				8)
-	{ MODKEY|ControlMask,		XK_b,	togglestatus,		{0}		},
+//	{ MODKEY|ControlMask,		XK_b,	togglestatus,		{0}		},
 
 				/* LAYOUTS */
 	{ MODKEY,		XK_backslash,   cyclelayout,	{.i = +1 }		},
@@ -430,12 +427,12 @@ static Button buttons[] = {
 	{ ClkWinTitle,          0,              Button4,        focusstack,	{.i = +1 } },
 	{ ClkWinTitle,          0,              Button5,        focusstack,	{.i = -1 } },
 
-	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1 } },
-	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2 } },
-	{ ClkStatusText,        0,              Button3,        sigdwmblocks,   {.i = 3 } },
-	{ ClkStatusText,        0,              Button4,        sigdwmblocks,   {.i = 4 } },
-	{ ClkStatusText,        0,              Button5,        sigdwmblocks,   {.i = 5 } },
-	{ ClkStatusText,        ShiftMask,      Button1,        sigdwmblocks,   {.i = 6 } },
+//	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1 } },
+//	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2 } },
+//	{ ClkStatusText,        0,              Button3,        sigdwmblocks,   {.i = 3 } },
+//	{ ClkStatusText,        0,              Button4,        sigdwmblocks,   {.i = 4 } },
+//	{ ClkStatusText,        0,              Button5,        sigdwmblocks,   {.i = 5 } },
+//	{ ClkStatusText,        ShiftMask,      Button1,        sigdwmblocks,   {.i = 6 } },
 
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },

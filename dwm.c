@@ -238,7 +238,6 @@ static void configurenotify(XEvent *e);
 static void configurerequest(XEvent *e);
 static void combotag(const Arg *arg);
 static void comboview(const Arg *arg);
-static void copyvalidchars(char *text, char *rawtext);
 static Monitor *createmon(void);
 static void cyclelayout(const Arg *arg);
 static void destroynotify(XEvent *e);
@@ -329,10 +328,6 @@ static void switchtag(void);
 static void updatepreview(void);
 #endif /* TAG_PREVIEW */
 static void sigchld(int unused);
-#ifndef __OpenBSD__
-static int getdwmblockspid(void);
-static void sigdwmblocks(const Arg *arg);
-#endif
 static void sighup(int unused);
 static void sigterm(int unused);
 static void spawn(const Arg *arg);
@@ -404,9 +399,7 @@ static pid_t winpid(Window w);
 
 /* variables */
 static const char broken[] = "broken";
-static char stext[256], rawstext[256];
-static int dwmblockssig;
-static pid_t dwmblockspid = -1;
+static char stext[256];
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh, blw = 0;      /* bar geometry */
@@ -742,24 +735,6 @@ buttonpress(XEvent *e)
 		#endif /* SYSTRAY */
 			)) {
 			click = ClkStatusText;
-
-			char *text = rawstext;
-			int i = -1;
-			char ch;
-			dwmblockssig = 0;
-			while (text[++i]) {
-				if ((unsigned char)text[i] < ' ') {
-					ch = text[i];
-					text[i] = '\0';
-					x += TEXTW(text) - lrpad;
-					text[i] = ch;
-					text += i + 1;
-					i = -1;
-					if (x >= ev->x)
-						break;
-					dwmblockssig = ch;
-				}
-			}
 		} else
 			click = ClkWinTitle;
 	} else if ((c = wintoclient(ev->window))) {
@@ -1072,18 +1047,6 @@ comboview(const Arg *arg)
 
 	focus(NULL);
 	arrange(selmon);
-}
-
-void
-copyvalidchars(char *text, char *rawtext)
-{
-	int i = -1, j = 0;
-
-	while (rawtext[++i])
-		if ((unsigned char)rawtext[i] >= ' ')
-			text[j++] = rawtext[i];
-
-	text[j] = '\0';
 }
 
 Monitor *
@@ -1536,21 +1499,6 @@ getatomprop(Client *c, Atom prop)
 	}
 	return atom;
 }
-
-#ifndef __OpenBSD__
-int
-getdwmblockspid(void)
-{
-	char buf[16];
-	FILE *fp = NULL;
-	if (!(fp = popen("pgrep -o dwmblocks", "r")))
-		return -1;
-	fgets(buf, sizeof(buf), fp);
-	pclose(fp);
-	dwmblockspid = strtoul(buf, NULL, 10);
-	return dwmblockspid != 0 ? 0 : -1;
-}
-#endif
 
 int
 getrootptr(int *x, int *y)
@@ -2495,7 +2443,6 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
-	kill(dwmblockspid, SIGTERM);
 	running = 0;
 }
 
@@ -3158,14 +3105,6 @@ setup(void)
 	#endif /* SYSTRAY */
 
 	/* init bars */
-	if (dwmblocks) {
-		if (!dwmblockspid && getdwmblockspid() == -1) /* start dwmblocks */
-			system("dwmblocks &");
-		else { /* restart dwmblocks */
-			kill(dwmblockspid, SIGTERM);
-			system("dwmblocks &");
-		}
-	}
 	updatebars();
 	updatestatus();
 	#ifdef TAG_PREVIEW
@@ -3357,32 +3296,8 @@ sighup(int unused)
 void
 sigterm(int unused)
 {
-	kill(dwmblockspid, SIGTERM);
 	running = 0;
 }
-
-#ifndef __OpenBSD__
-void
-sigdwmblocks(const Arg *arg)
-{
-	union sigval sv;
-
-	if (!dwmblockspid)
-		if (getdwmblockspid() == -1)
-			return;
-
-	if (dwmblocksasync) {
-		sv.sival_int = arg->i;
-		sigqueue(dwmblockspid, SIGRTMIN+dwmblockssig, sv);
-	} else { /* normal dwmblocks */
-		sv.sival_int = 0 | (dwmblockssig << 8) | arg->i;
-		if (sigqueue(dwmblockspid, SIGUSR1, sv) == -1)
-			if (errno == ESRCH)
-				if (!getdwmblockspid())
-					sigqueue(dwmblockspid, SIGUSR1, sv);
-	}
-}
-#endif
 
 void
 spawn(const Arg *arg)
@@ -3890,12 +3805,8 @@ updatesizehints(Client *c)
 void
 updatestatus(void)
 {
-	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
+	if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
 		strcpy(stext, " Welcome! :) ");
-	else if (status)
-		copyvalidchars(stext, rawstext);
-	else
-		strcpy(stext, "");
 	drawbar(selmon);
 #ifdef SYSTRAY
 	updatesystray();
@@ -4420,7 +4331,7 @@ toggleborder(const Arg *arg)
 void
 togglestatus(const Arg *arg)
 {
-	status = !status;
+	//status = !status;
 	updatestatus();
 }
 void
@@ -4515,7 +4426,6 @@ main(int argc, char *argv[])
 		die("dwm: cannot get xcb connection");
 	checkotherwm();
 	XrmInitialize();
-	getdwmblockspid();
 	setup();
 	#ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1) die("pledge");
