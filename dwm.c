@@ -421,6 +421,7 @@ static Client *termforwin(const Client *c);
 static pid_t winpid(Window w);
 
 /* variables */
+static int stsw = 0;
 static const char broken[] = "broken";
 static int blocknum;
 static pid_t statuspid = -1;
@@ -756,7 +757,7 @@ buttonpress(XEvent *e)
 			arg.ui = 1 << i;
 		} else if (ev->x < x + blw)
 			click = ClkLtSymbol;
-		else if (ev->x > (x = selmon->ww - TEXTW(status) - lrpad
+		else if (ev->x > (x = selmon->ww - stsw
 			#ifdef SYSTRAY
 			- getsystraywidth()
 			#endif /* SYSTRAY */
@@ -772,7 +773,7 @@ buttonpress(XEvent *e)
 			{
 				if (*(blockoutput[i]) == '\0') //ignore command that output NULL or '\0'
 					continue;
-				len = TEXTW(blockoutput[i]) - lrpad + TEXTW(delim) - lrpad;
+				len = TEXTW(blockoutput[i]) - lrpad;
 				//if (i == last)
 				//	len -= TEXTW(delim);
 				x += len;
@@ -1228,7 +1229,7 @@ dirtomon(int dir)
 void
 drawbar(Monitor *m)
 {
-	int x = 0, w, tw = 0;
+	int x = 0, w, tw = stsw;
 	int boxs = drw->fonts->h / 9;
 	int boxw = drw->fonts->h / 6 + 2;
 	unsigned int i, occ = 0, urg = 0;
@@ -1246,7 +1247,6 @@ drawbar(Monitor *m)
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) { /* status is only drawn on selected monitor */
 		drw_setscheme(drw, scheme[SchemeStatus]);
-		tw = TEXTW(status) - lrpad + 2; /* 2px right padding */
 		drw_text(drw, bw - tw, 0, tw, bh, 0, status, 0);
 	}
 
@@ -3260,6 +3260,7 @@ setup(void)
 	}
 	lrpad = drw->fonts->h;
 	bh = drw->fonts->h + barh; /* prevent barh being < than font size */
+	stsw = TEXTW(status) - lrpad;
 	updategeom();
 	/* init atoms */
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
@@ -4085,6 +4086,7 @@ updatestatus(void)
 	//XXX comparing if the status has changed or not doesn't change much
 	//since the text will get drawn anyway (in drawbar())
 	getstatus(status, statusstr);
+	stsw = TEXTW(status) - lrpad;
 	drawbar(selmon);
 #ifdef SYSTRAY
 	updatesystray();
