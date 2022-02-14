@@ -232,7 +232,7 @@ static const Layout layouts[] = {
 /* commands */
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
 static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
-static const char *clip[]      = { "clipmenu", "-i", "-l", "25", NULL };
+static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
 //static const char *passmenu[]  = { "passmenu", "-i", "-l", "25", "-p", "Passmenu:", DMENUARGS, NULL };
 //static const char *termcmd[]   = { terminalcmd, NULL };
 EXEC(termcmd, "st")

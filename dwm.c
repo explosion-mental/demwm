@@ -3524,8 +3524,11 @@ sigterm(int unused)
 void
 spawn(const Arg *arg)
 {
-	if (arg->v == dmenucmd || arg->v == clip)
+	if (arg->v == dmenucmd)
 		dmenumon[0] = '0' + selmon->num;
+	if (arg->v == clip) /* fix for rofi */
+		dmenumon[0] = '\0';
+
 	if (fork() == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
