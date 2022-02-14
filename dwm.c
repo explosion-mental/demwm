@@ -423,7 +423,7 @@ static pid_t winpid(Window w);
 /* variables */
 static const char broken[] = "broken";
 static unsigned int stsw = 0, blocknum;
-static pid_t statuspid = -1;
+static pid_t timerpid = -1;
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh, blw = 0;      /* bar geometry */
@@ -823,7 +823,7 @@ cleanup(void)
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 	while (mons)
 		cleanupmon(mons);
-	kill(statuspid, SIGKILL);
+	kill(timerpid, SIGKILL);
 #ifdef SYSTRAY
 	if (systray) {
 		while (systray->icons)
@@ -2606,7 +2606,7 @@ quit(const Arg *arg)
 void
 refresh(const Arg *arg)
 {
-	kill(statuspid, SIGKILL);
+	kill(timerpid, SIGKILL);
 	restart = 1;
 	running = 0;
 }
@@ -3227,14 +3227,14 @@ setup(void)
 	/* init status text */
 	getcmds(-1);
 	stsw = drw_fontset_getwidth(drw, status);
-	statuspid = fork();
+	timerpid = fork();
 
 	/* pid as an enviromental variable */
 	char envpid[16];
 	snprintf(envpid, LENGTH(envpid), "%d", getpid());
 	setenv("STATUSBAR", envpid, 1);
 
-	if (statuspid == 0) { /* timerloop as the child */
+	if (timerpid == 0) { /* timerloop as the child */
 		if (dpy)
 			close(ConnectionNumber(dpy));
 		sleep(2); /* wait for dwm to setup */
@@ -3510,7 +3510,7 @@ sighandler(int signum)
 void
 sighup(int unused)
 {
-	kill(statuspid, SIGKILL);
+	kill(timerpid, SIGKILL);
 	restart = 1;
 	running = 0;
 }
