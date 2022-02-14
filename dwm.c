@@ -275,7 +275,7 @@ static Picture geticonprop(Window w, unsigned int *icw, unsigned int *ich);
 static void freeicon(Client *c);
 static void updateicon(Client *c);
 #endif /* ICONS */
-static void getcmd(const Block *block, char *output);
+static void getcmd(int i, char *output);
 static void getcmds(int time);
 static void getsigcmds(unsigned int signal);
 static int gcd(int a, int b);
@@ -421,9 +421,8 @@ static Client *termforwin(const Client *c);
 static pid_t winpid(Window w);
 
 /* variables */
-static int stsw = 0;
 static const char broken[] = "broken";
-static int blocknum;
+static unsigned int stsw = 0, blocknum;
 static pid_t statuspid = -1;
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
@@ -824,6 +823,7 @@ cleanup(void)
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 	while (mons)
 		cleanupmon(mons);
+	kill(statuspid, SIGKILL);
 #ifdef SYSTRAY
 	if (systray) {
 		while (systray->icons)
@@ -1979,9 +1979,9 @@ remove_all(char *str, char to_remove)
 }
 
 void
-getcmd(const Block *block, char *output)
+getcmd(int i, char *output)
 {
-	FILE *cmdf = popen(block->command, "r");
+	FILE *cmdf = popen(blocks[i].command, "r");
 	if (!cmdf)
 		return;
 
@@ -1998,20 +1998,19 @@ getcmd(const Block *block, char *output)
 
 	strcpy(output, tmpstr);
 	remove_all(output, '\n');	/* chop off newline */
-	int i = strlen(output);
+	int len = strlen(output);
 
 	if (delim != '\0') { /* if the delimiter is not NULL */
-		if (i > 0) /* if there output is not NULL */
+		if (len > 0) /* if there output is not NULL */
 			strcat(output, delim);
-		i += strlen(delim);
+		len += strlen(delim);
 	}
-	output[i++] = '\0';
+	output[len++] = '\0';
 }
 
 void
 getcmds(int time)
 {
-	const Block *current;
 	int i;
 #ifdef INVERSED
 	for (i = LENGTH(blocks) - 1; i >= 0; i--)
@@ -2019,16 +2018,14 @@ getcmds(int time)
 	for (i = 0; i < LENGTH(blocks); i++)
 #endif /* INVERSED */
 	{
-		current = blocks + i;
-		if ((current->interval != 0 && time % current->interval == 0) || time == -1)
-			getcmd(current, blockoutput[i]);
+		if ((blocks[i].interval != 0 && time % blocks[i].interval == 0) || time == -1)
+			getcmd(i, blockoutput[i]);
 	}
 }
 
 void
 getsigcmds(unsigned int signal)
 {
-	const Block *current;
 	int i;
 #ifdef INVERSED
 	for (i = LENGTH(blocks) - 1; i >= 0; i--)
@@ -2036,9 +2033,8 @@ getsigcmds(unsigned int signal)
 	for (i = 0; i < LENGTH(blocks); i++)
 #endif /* INVERSED */
 	{
-		current = blocks + i;
-		if (current->signal == signal)
-			getcmd(current, blockoutput[i]);
+		if (blocks[i].signal == signal)
+			getcmd(i, blockoutput[i]);
 	}
 }
 
@@ -2604,7 +2600,6 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
-	kill(statuspid, SIGKILL);
 	running = 0;
 }
 
@@ -3039,10 +3034,9 @@ void
 sendstatusbar(const Arg *arg)
 {
 	if (fork() == 0) {
-		const Block *current = blocks + blocknum;
 		char button[2] = { '0' + arg->i & 0xff, '\0' };
 		char shcmd[CMDLENGTH + 20];
-		snprintf(shcmd, LENGTH(shcmd), "%s && kill -%d %d", current->command, current->signal+34, getppid());
+		snprintf(shcmd, LENGTH(shcmd), "%s && kill -%d %d", blocks[blocknum].command, blocks[blocknum].signal + 34, getppid());
 		setenv("BLOCK_BUTTON", button, 1);
 		execl("/bin/sh", "sh", "-c", shcmd, (char*)NULL);
 		exit(EXIT_SUCCESS);
@@ -3227,12 +3221,12 @@ setup(void)
 #else
 	for (i = 0; i < LENGTH(blocks); i++)
 #endif /* INVERSED */
-		if (blocks[i].signal > 0)
+		if (blocks[i].signal)
 			signal(SIGMINUS+blocks[i].signal, sighandler);
 
 	/* init status text */
-	delim[strlen(delim)+1] = '\0';
 	getcmds(-1);
+	stsw = drw_fontset_getwidth(drw, status);
 	statuspid = fork();
 
 	/* pid as an enviromental variable */
@@ -3260,7 +3254,6 @@ setup(void)
 	}
 	lrpad = drw->fonts->h;
 	bh = drw->fonts->h + barh; /* prevent barh being < than font size */
-	stsw = TEXTW(status) - lrpad;
 	updategeom();
 	/* init atoms */
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
@@ -3525,7 +3518,6 @@ sighup(int unused)
 void
 sigterm(int unused)
 {
-	kill(statuspid, SIGKILL);
 	running = 0;
 }
 
@@ -3612,7 +3604,6 @@ timerloop(void)
 	unsigned int count = 0;
 	struct timespec sleeptime = {interval, 0};
 	struct timespec tosleep = sleeptime;
-	const Block *current;
 	pid_t parentpid = getppid();
 
 	while (1) {
@@ -3623,9 +3614,8 @@ timerloop(void)
 		for (i = 0; i < LENGTH(blocks); i++)
 	#endif /* INVERSED */
 		{
-			current = blocks + i;
-			if ((current->interval != 0 && count % current->interval == 0) || count == -1 || count == 0)
-				kill(parentpid, SIGMINUS+current->signal); /* notify parent to update blocks X */
+			if ((blocks[i].interval != 0 && count % blocks[i].interval == 0) || count == -1 || count == 0)
+				kill(parentpid, SIGMINUS+blocks[i].signal); /* notify parent to update blocks X */
 		}
 
 		/* update count to [1, maxinterval] */
