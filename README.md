@@ -15,8 +15,6 @@ My build of dwm
 - xwallpaper
 	* You can use other program to set the wallpaper,
 	  [see](https://github.com/explosion-mental/Dwm/blob/main/dwm_random_wall)
-- dwmblocks
-	* You can disable/enable autostarting dwmblocks on `config.h`
 
 # Suggestions
 - Before updating (`git pull`), change your configs (config.h) to config.def.h
@@ -37,7 +35,40 @@ My build of dwm
 - A beautiful looking config.h file (at least for my taste :)
 - Toggleable 'hide-vacant' patch, which enables alternative tags on toggle
 - Dynamic and static scratchpads
+- Handles the status text just like dwmblocks, but without it. (see below)
 
+# Status text
+I've decided to integrate dwmblocks into dwm itself.
+Why? Some reasons:
+- One config file
+- Remove the 'extra' program (which was a bit annoying for me)
+- Dwm handles the **displaying** of the text and the **clicking** interatcion,
+  no more signals for the buttons.
+- This way we could expand and play around with 'blocks' (different colors for
+  different blocks, for example)
+
+You may notice two intances of `dwm` running (with `pidof dwm`, for example).
+This is because dwm creates a child process that acts as a timer for the
+blocks, since `dwm` cannot sleep or wait. This could be setted up as another
+program in the future but, for now I will leave this as is.
+
+## How to interact with blocks
+Blocks is only a group that consist of 3 things: command, interval and signal.
+
+The block text is actually just the output of any program. For example you
+could define the command as `echo "This is a block"`.
+
+The interval is how many X seconds you want to pass before re-**run**ning the
+command and update the output. Can be 0, which means never.
+
+The signal is a number where you can re-**run** the command.
+Say a signal number `Y` which, for example, I will define as `11`. Then `Y +
+34` -> `11 + 34` -> `45`, and you will need this result in order to actually
+use the signal with `kill`, In this case: `kill -45 $(pgrep -o dwm)`. `pgrep -o
+dwm` gets the parent process which names matches dwm. That is not the
+reccomended way of doing it. This build of `dwm` sets an _enviromental
+variable_ called `STATUSBAR` which value is the _pid_ of the dwm parent.
+In short do: `kill -45 $STATUSBAR`.
 
 # Toggleable Features
 Here are the "too bloated" features which doesn't affect the workflow, but
@@ -111,8 +142,8 @@ Currently I don't wish more 'features' but here are some ideas:
 ## Some wishing pains:
 - change `dwm_random_wall` script to an actual function on C.
 - pertag cursor position. Save the state of the cursor position between tags.
-- integrate dwmblocks into dwm with statuscmd patch.
-- Can `tcc` (tiny C Compiler) be used along side with the **alpha** patch?
+- Can `tcc` (tiny C Compiler) be used along side with the **alpha** patch? (yes, with macros for `baralpha` and `boderalpha`)
+- <s>integrate dwmblocks into dwm with statuscmd patch.<s>
 - <s>Make gaps an option(?)</s>
 - <s>getenv("TERMINAL")</s>
 
