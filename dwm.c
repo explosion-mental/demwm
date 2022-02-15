@@ -770,11 +770,9 @@ buttonpress(XEvent *e)
 			for (i = 0; i < LENGTH(blocks); i++)
 		#endif /* INVERSED */
 			{
-				if (*(blockoutput[i]) == '\0') //ignore command that output NULL or '\0'
+				if (*blockoutput[i] == '\0') //ignore command that output NULL or '\0'
 					continue;
 				len = TEXTW(blockoutput[i]) - lrpad;
-				//if (i == last)
-				//	len -= TEXTW(delim);
 				x += len;
 				if (ev->x <= x && ev->x >= x - len) { /* if the mouse is between the block area */
 					blocknum = i; /* store what block the mouse is clicking */
@@ -1989,7 +1987,7 @@ getcmd(int i, char *output)
 	int e;
 	do {
 		errno = 0;
-		s = fgets(tmpstr, CMDLENGTH-(strlen(delim)+1), cmdf);
+		s = fgets(tmpstr, CMDLENGTH - (strlen(delimiter) + 1), cmdf);
 		e = errno;
 	} while (!s && e == EINTR);
 
@@ -2032,8 +2030,7 @@ getsigcmds(unsigned int signal)
 int
 getstatus(int width)
 {
-	int i, len, all = width;
-	int delimlen = TEXTW(delim) - lrpad;
+	int i, len, all = width, delimlen = TEXTW(delimiter) - lrpad;
 	char fgcol[8];
 				/* fg		bg */
 	const char *cols[8] = 	{ fgcol, colors[SchemeStatus][ColBg] };
@@ -2054,10 +2051,10 @@ getstatus(int width)
 		all -= len;
 		drw_text(drw, all, 0, len, bh, 0, blockoutput[i], 0);
 		/* delimiter */
-		if (delim == '\0') /* ignore no delimiter */
+		if (delimiter == '\0') /* ignore no delimiter */
 			continue;
 		all -= delimlen;
-		drw_text(drw, all, 0, delimlen, bh, 0, delim, 0);
+		drw_text(drw, all, 0, delimlen, bh, 0, delimiter, 0);
 	}
 
 	stsw = width - all;
@@ -4085,12 +4082,6 @@ updatesizehints(Client *c)
 void
 updatestatus(void)
 {
-	/* only update if text has changed */
-	//if (!getstatus(status, statusstr))
-	//XXX comparing if the status has changed or not doesn't change much
-	//since the text will get drawn anyway (in drawbar())
-	//getstatus(status, statusstr);
-	//stsw = TEXTW(status) - lrpad;
 	drawbar(selmon);
 #ifdef SYSTRAY
 	updatesystray();
