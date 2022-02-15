@@ -231,6 +231,7 @@ typedef struct {
 #endif /* SYSTRAY */
 
 typedef struct {
+	const char *color;
 	const char *command;
 	const unsigned int interval;
 	const unsigned int signal;
@@ -279,7 +280,7 @@ static void getcmd(int i, char *output);
 static void getcmds(int time);
 static void getsigcmds(unsigned int signal);
 static int gcd(int a, int b);
-static int getstatus(char *str, char *last);
+static int getstatus(char *str, char *last, int width);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
@@ -1229,7 +1230,7 @@ dirtomon(int dir)
 void
 drawbar(Monitor *m)
 {
-	int x = 0, w, tw = stsw;
+	int x = 0, w, tw = 0;
 	int boxs = drw->fonts->h / 9;
 	int boxw = drw->fonts->h / 6 + 2;
 	unsigned int i, occ = 0, urg = 0;
@@ -1246,8 +1247,7 @@ drawbar(Monitor *m)
 
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) { /* status is only drawn on selected monitor */
-		drw_setscheme(drw, scheme[SchemeStatus]);
-		drw_text(drw, bw - tw, 0, tw, bh, 0, status, 0);
+		tw = getstatus(status, statusstr, selmon->ww);
 	}
 
 	#ifdef SYSTRAY
@@ -2039,21 +2039,36 @@ getsigcmds(unsigned int signal)
 }
 
 int
-getstatus(char *str, char *last)
+getstatus(char *str, char *last, int width)
 {
 	strcpy(last, str);
 	str[0] = '\0';
-	int i;
+
+	int i, len, all = width;
+	char fgcol[8];
+				/* fg		bg */
+	const char *cols[8] = 	{ fgcol, colors[SchemeStatus][ColBg] };
+
 #ifdef INVERSED
-	for (i = LENGTH(blocks) - 1; i >= 0; i--)
-#else
 	for (i = 0; i < LENGTH(blocks); i++)
+#else
+	for (i = LENGTH(blocks) - 1; i >= 0; i--)
 #endif /* INVERSED */
-		strcat(str, blockoutput[i]);
-	/* chop off the last delimeter */
-	str[strlen(str)-strlen(delim)] = '\0';
-	return 0;
-	//strcmp(str, last);//0 if they are the same
+	{
+		if (*blockoutput[i] == '\0') /* ignore command that output NULL or '\0' */
+			continue;
+		strcpy(fgcol, blocks[i].color);
+		/* re-load the scheme with the new colors */
+		scheme[SchemeStatus] = drw_scm_create(drw, cols, alphas[SchemeStatus], 2);
+		drw_setscheme(drw, scheme[SchemeStatus]); /* 're-set' the scheme */
+		len = TEXTW(blockoutput[i]) - lrpad;
+		all -= len;
+		drw_text(drw, all, 0, len, bh, 0, blockoutput[i], 0);
+	}
+
+	stsw = width - all;
+
+	return stsw;
 }
 
 int
@@ -4078,8 +4093,8 @@ updatestatus(void)
 	//if (!getstatus(status, statusstr))
 	//XXX comparing if the status has changed or not doesn't change much
 	//since the text will get drawn anyway (in drawbar())
-	getstatus(status, statusstr);
-	stsw = TEXTW(status) - lrpad;
+	//getstatus(status, statusstr);
+	//stsw = TEXTW(status) - lrpad;
 	drawbar(selmon);
 #ifdef SYSTRAY
 	updatesystray();
@@ -4391,6 +4406,7 @@ xrdb(const Arg *arg)
 {
 	unsigned int i;
 	readxresources();
+
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
 	focus(NULL);
