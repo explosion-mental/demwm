@@ -159,7 +159,7 @@ Currently I don't wish more 'features' but here are some ideas:
 - change `dwm_random_wall` script to an actual function on C.
 - pertag cursor position. Save the state of the cursor position between tags.
 - Can `tcc` (tiny C Compiler) be used along side with the **alpha** patch? (yes, with macros for `baralpha` and `boderalpha`)
-- <s>integrate dwmblocks into dwm with statuscmd patch.<s>
+- <s>integrate dwmblocks into dwm with statuscmd patch.</s>
 - <s>Make gaps an option(?)</s>
 - <s>getenv("TERMINAL")</s>
 
