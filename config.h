@@ -327,7 +327,7 @@ static Key keys[] = {
 	{ MODKEY,	            XK_space,	view,			{0}		},
 	{ MODKEY|ControlMask,	    XK_grave,	togglebar,		{0}		},
 //	{ MODKEY|ShiftMask,	    XK_grave,	toggletopbar,		{0}		},
-//	{ MODKEY|ShiftMask,             XK_c,	quit,           	{0}		},
+	{ MODKEY|ShiftMask,             XK_F5,	quit,           	{0}		},
 	{ MODKEY,			XK_F5,	refresh,		{0}		},
 	{ MODKEY,                   XK_comma,	focusmon,	{ .i = -1 }		},
 	{ MODKEY|ShiftMask,         XK_comma,	tagmon,		{ .i = -1 }		},
