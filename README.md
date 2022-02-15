@@ -53,9 +53,9 @@ blocks, since `dwm` cannot sleep or wait. This could be setted up as another
 program in the future but, for now I will leave this as is.
 
 ## How to interact with blocks
-Blocks is only a group that consist of 3 things: command, interval and signal.
+A block is only a group that consist of 3 things: command, interval and signal.
 
-The block text is actually just the output of any program. For example you
+The command is the block text, just the output of any program. For example you
 could define the command as `echo "This is a block"`.
 
 The interval is how many X seconds you want to pass before re-**run**ning the
@@ -69,6 +69,22 @@ dwm` gets the parent process which names matches dwm. That is not the
 reccomended way of doing it. This build of `dwm` sets an _enviromental
 variable_ called `STATUSBAR` which value is the _pid_ of the dwm parent.
 In short do: `kill -45 $STATUSBAR`.
+
+For clicking to do anything you have to make a dedicated script which handles
+the `BLOCK_BUTTON` _enviromental variable_, here an example:
+```
+case $BLOCK_BUTTON in
+	1) notify-send "You've clicked mouse button $BLOCK_BUTTON" ;;
+	2) notify-send "Right click" ;;
+	3) notify-send "Middle click" ;;
+	4) pamixer --allow-boost -i 1 ;; # volume up
+	5) pamixer --allow-boost -d 1 ;; # volume down
+	6) "$TERMINAL" -e "$EDITOR" "$0" ;; # edit the block
+esac
+```
+
+To define the value of `BLOCK_BUTTON`, you have to edit _config.h_ mouse
+buttons bindings `sendstatusbar`.
 
 # Toggleable Features
 Here are the "too bloated" features which doesn't affect the workflow, but
