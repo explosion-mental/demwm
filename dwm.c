@@ -3214,6 +3214,7 @@ setup(void)
 {
 	XSetWindowAttributes wa;
 	Atom utf8string;
+	int i;
 
 	/* clean up any zombies immediately */
 	sigchld(0);
@@ -3222,29 +3223,30 @@ setup(void)
 	signal(SIGHUP, sighup); /* restart */
 	signal(SIGTERM, sigterm); /* exit */
 	#ifndef __OpenBSD__
-	for (int i = SIGRTMIN; i <= SIGRTMAX; i++) /* init real time signals with dummy handler */
+	for (i = SIGRTMIN; i <= SIGRTMAX; i++) /* init real time signals with dummy handler */
 		signal(i, dummysighandler);
 	#endif
 
-	int i;
+	/* init blocks */
 #ifdef INVERSED
 	for (i = LENGTH(blocks) - 1; i >= 0; i--)
 #else
 	for (i = 0; i < LENGTH(blocks); i++)
 #endif /* INVERSED */
+	{
 		if (blocks[i].signal)
 			signal(SIGMINUS+blocks[i].signal, sighandler);
-
-	/* init status text */
-	getcmds(-1);
-	timerpid = fork();
+		getcmd(i, blockoutput[i]);
+	}
 
 	/* pid as an enviromental variable */
 	char envpid[16];
 	snprintf(envpid, LENGTH(envpid), "%d", getpid());
 	setenv("STATUSBAR", envpid, 1);
 
-	if (timerpid == 0) { /* timerloop as the child */
+	/* timerloop as the child */
+	timerpid = fork();
+	if (timerpid == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
 		sleep(2); /* wait for dwm to setup */
@@ -3265,6 +3267,7 @@ setup(void)
 	lrpad = drw->fonts->h;
 	bh = drw->fonts->h + barh; /* prevent barh being < than font size */
 	updategeom();
+
 	/* init atoms */
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
 	dwmstatus                      = XInternAtom(dpy, "UPDATE_DWM_STATUSBAR", False);
@@ -3306,15 +3309,10 @@ setup(void)
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 	if (restart) {	/* keep the colors the same */
-		xrdb(0);
+		xrdb(NULL);
 		restart = 0;
 	} else	/* refresh colors */
 		random_wall(NULL);
-
-	/* init system tray */
-	#ifdef SYSTRAY
-	updatesystray();
-	#endif /* SYSTRAY */
 
 	/* init bars */
 	updatebars();
