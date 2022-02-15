@@ -3603,7 +3603,7 @@ timerloop(void)
 #ifdef INVERSED
 	for (i = LENGTH(blocks) - 1; i > 1; i--)
 #else
-	for (i = (inversedblocks ? LENGTH(blocks) - 1 : 0); i < (inversedblocks ? 1 : LENGTH(blocks)); inversedblocks ? i-- : i++)
+	for (i = 0; i < LENGTH(blocks); i++)
 #endif /* INVERSED */
 	//for (i = (inversedblocks ? LENGTH(blocks) - 1 : 0); i < (inversedblocks ? 1 : LENGTH(blocks)); inversedblocks ? i-- : i++)
 		if (blocks[i].interval) {
