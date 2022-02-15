@@ -3312,6 +3312,11 @@ setup(void)
 	} else	/* refresh colors */
 		random_wall(NULL);
 
+	/* init system tray */
+	#ifdef SYSTRAY
+	updatesystray();
+	#endif /* SYSTRAY */
+
 	/* init bars */
 	updatebars();
 	updatestatus();
