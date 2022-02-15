@@ -1243,9 +1243,8 @@ drawbar(Monitor *m)
 	#endif /* SYSTRAY */
 
 	/* draw status first so it can be overdrawn by tags later */
-	if (m == selmon) { /* status is only drawn on selected monitor */
-		tw = getstatus(selmon->ww);
-	}
+	if (m == selmon) /* status is only drawn on selected monitor */
+		tw = getstatus(m->ww);
 
 	#ifdef SYSTRAY
 	resizebarwin(m);
@@ -1327,7 +1326,7 @@ drawbar(Monitor *m)
 void
 dummysighandler(int signum)
 {
-    return;/* this signal handler should do nothing */
+    return; /* this signal handler should do nothing */
 }
 #endif
 
