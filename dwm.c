@@ -1997,14 +1997,6 @@ getcmd(int i, char *output)
 
 	strcpy(output, tmpstr);
 	remove_all(output, '\n');	/* chop off newline */
-	int len = strlen(output);
-
-	if (delim != '\0') { /* if the delimiter is not NULL */
-		if (len > 0) /* if there output is not NULL */
-			strcat(output, delim);
-		len += strlen(delim);
-	}
-	output[len++] = '\0';
 }
 
 void
@@ -2041,6 +2033,7 @@ int
 getstatus(int width)
 {
 	int i, len, all = width;
+	int delimlen = TEXTW(delim) - lrpad;
 	char fgcol[8];
 				/* fg		bg */
 	const char *cols[8] = 	{ fgcol, colors[SchemeStatus][ColBg] };
@@ -2060,6 +2053,11 @@ getstatus(int width)
 		len = TEXTW(blockoutput[i]) - lrpad;
 		all -= len;
 		drw_text(drw, all, 0, len, bh, 0, blockoutput[i], 0);
+		/* delimiter */
+		if (delim == '\0') /* ignore no delimiter */
+			continue;
+		all -= delimlen;
+		drw_text(drw, all, 0, delimlen, bh, 0, delim, 0);
 	}
 
 	stsw = width - all;
