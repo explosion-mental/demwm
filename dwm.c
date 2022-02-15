@@ -280,7 +280,7 @@ static void getcmd(int i, char *output);
 static void getcmds(int time);
 static void getsigcmds(unsigned int signal);
 static int gcd(int a, int b);
-static int getstatus(char *str, char *last, int width);
+static int getstatus(int width);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
@@ -484,7 +484,6 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 #define STATUSLENGTH		(LENGTH(blocks) * CMDLENGTH + 1)
 
 static char blockoutput[LENGTH(blocks)][CMDLENGTH] = {0};
-static char status[STATUSLENGTH] = {0}, statusstr[STATUSLENGTH] = {0};
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
@@ -1247,7 +1246,7 @@ drawbar(Monitor *m)
 
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) { /* status is only drawn on selected monitor */
-		tw = getstatus(status, statusstr, selmon->ww);
+		tw = getstatus(selmon->ww);
 	}
 
 	#ifdef SYSTRAY
@@ -2039,11 +2038,8 @@ getsigcmds(unsigned int signal)
 }
 
 int
-getstatus(char *str, char *last, int width)
+getstatus(int width)
 {
-	strcpy(last, str);
-	str[0] = '\0';
-
 	int i, len, all = width;
 	char fgcol[8];
 				/* fg		bg */
@@ -3241,7 +3237,6 @@ setup(void)
 
 	/* init status text */
 	getcmds(-1);
-	stsw = drw_fontset_getwidth(drw, status);
 	timerpid = fork();
 
 	/* pid as an enviromental variable */
