@@ -772,7 +772,7 @@ buttonpress(XEvent *e)
 			{
 				if (*blockoutput[i] == '\0') //ignore command that output NULL or '\0'
 					continue;
-				len = TEXTW(blockoutput[i]) - lrpad;
+				len = TEXTW(blockoutput[i]) - lrpad + TEXTW(delimiter) - lrpad;
 				x += len;
 				if (ev->x <= x && ev->x >= x - len) { /* if the mouse is between the block area */
 					blocknum = i; /* store what block the mouse is clicking */
