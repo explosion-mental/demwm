@@ -101,8 +101,8 @@ enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
-       SchemeStatus, SchemeSys, SchemeNotify, SchemeIndOff, SchemeIndOn,
-       BorderNorm, BorderSel, BorderUrg }; /* color schemes */
+	SchemeStatus, SchemeDelim, SchemeSys, SchemeNotify, SchemeIndOff,
+	SchemeIndOn, BorderNorm, BorderSel, BorderUrg }; /* color schemes */
 enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8 }; /* scratchpads */
 enum { NetSupported, NetWMName,
 #ifdef ICONS
@@ -2052,6 +2052,7 @@ getstatus(int width)
 		/* delimiter */
 		if (delimiter == '\0') /* ignore no delimiter */
 			continue;
+		drw_setscheme(drw, scheme[SchemeDelim]);
 		all -= delimlen;
 		drw_text(drw, all, 0, delimlen, bh, 0, delimiter, 0);
 	}

@@ -45,6 +45,7 @@ static const char *colors[][2]	        = {
 	[SchemeLt]     = { fg_wal,	color0 }, /* layout */
 	[SchemeTitle]  = { color0,	color2 }, /* window title */
 	[SchemeStatus] = { fg_wal,	color0 }, /* status bar */
+	[SchemeDelim]  = { fg_wal,	color0 }, /* delimiter */
 	[SchemeSys]    = { color0,	color0 }, /* system tray */
 	[SchemeNotify] = { fg_wal,	color0 }, /* bar on urgent tag */
 	[SchemeIndOn]  = { color4,	color0 }, /* rectangle on sel tag */
@@ -61,6 +62,7 @@ static const unsigned int alphas[][2]   = {
 	[SchemeLt]     = { OPAQUE,	baralpha },
 	[SchemeTitle]  = { OPAQUE,	OPAQUE,	 },
 	[SchemeStatus] = { OPAQUE,	baralpha },
+	[SchemeDelim]  = { OPAQUE,	baralpha },
 	[SchemeSys]    = { OPAQUE,	baralpha },
 	[SchemeNotify] = { OPAQUE,	baralpha },
 	[SchemeIndOn]  = { OPAQUE,	baralpha },
@@ -107,7 +109,7 @@ static const Block blocks[] = {
 };
 
 /* if inversed, inverse the order of the blocks */
-//#define INVERSED
+#define INVERSED
 /* delimeter between blocks commands. NULL character ('\0') means no delimeter. */
 static char delimiter[] = " ";
 /* max number of character that one block command can output */
