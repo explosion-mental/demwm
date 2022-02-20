@@ -13,6 +13,7 @@ static int hidevacant         = 1;        /* 1 means hide vacant tags */
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int swallowfloating    = 0;        /* 1 means swallow floating windows by default */
 static int showbar            = 1;        /* 0 means no bar */
+static int showstatus         = 1;        /* 0 means no status text */
 static const int topbar       = 1;        /* 0 means bottom bar */
 static const int barh         = 8;        /* 1 or more means bar height */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
@@ -262,7 +263,7 @@ static const char *scratchpads[][256] = {
 	[Sp8] = { "st", "-n", "testi", "-g", FURSIZE, "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
 };
 
-static Key keys[] = {
+static const Key keys[] = {
 	/* modifier(s)			key	function	argument */
 
 				/* Commands */
@@ -348,7 +349,7 @@ static Key keys[] = {
 	  TAGKEYS(			XK_7,				6)
 	  TAGKEYS(			XK_8,				7)
 	  TAGKEYS(			XK_9,				8)
-//	{ MODKEY|ControlMask,		XK_b,	togglestatus,		{0}		},
+	{ MODKEY|ControlMask,		XK_b,	togglestatus,		{0}		},
 
 				/* LAYOUTS */
 	{ MODKEY,		XK_backslash,   cyclelayout,	{.i = +1 }		},
@@ -446,7 +447,7 @@ static Key keys[] = {
 
 /* button definitions
  * click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
-static Button buttons[] = {
+static const Button buttons[] = {
 	/* click                event mask      button          function        argument */
 	{ ClkTagBar,            0,              Button1,        view,           {0} },
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },

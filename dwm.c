@@ -1710,7 +1710,8 @@ resizerequest(XEvent *e)
 	}
 }
 Monitor *
-systraytomon(Monitor *m) {
+systraytomon(Monitor *m)
+{
 	Monitor *t;
 	int i, n;
 	if (!systraypinning) {
@@ -2034,6 +2035,9 @@ getstatus(int width)
 				/* fg		bg */
 	const char *cols[8] = 	{ fgcol, colors[SchemeStatus][ColBg] };
 
+	if (!showstatus)
+		return stsw = 0;
+
 #ifdef INVERSED
 	for (i = 0; i < LENGTH(blocks); i++)
 #else
@@ -2049,7 +2053,7 @@ getstatus(int width)
 		len = TEXTW(blockoutput[i]) - lrpad;
 		all -= len;
 		drw_text(drw, all, 0, len, bh, 0, blockoutput[i], 0);
-		/* delimiter */
+		/* draw delimiter */
 		if (delimiter == '\0') /* ignore no delimiter */
 			continue;
 		drw_setscheme(drw, scheme[SchemeDelim]);
@@ -2057,9 +2061,7 @@ getstatus(int width)
 		drw_text(drw, all, 0, delimlen, bh, 0, delimiter, 0);
 	}
 
-	stsw = width - all;
-
-	return stsw;
+	return stsw = width - all;
 }
 
 int
@@ -3231,7 +3233,6 @@ setup(void)
 	{
 		if (blocks[i].signal)
 			signal(SIGMINUS+blocks[i].signal, sighandler);
-		getcmd(i, blockoutput[i]);
 	}
 
 	/* pid as an enviromental variable */
@@ -3602,11 +3603,10 @@ timerloop(void)
 	unsigned int interval = 0, maxinterval = 0;
 
 #ifdef INVERSED
-	for (i = LENGTH(blocks) - 1; i > 1; i--)
+	for (i = LENGTH(blocks) - 1; i >= 0; i--)
 #else
 	for (i = 0; i < LENGTH(blocks); i++)
 #endif /* INVERSED */
-	//for (i = (inversedblocks ? LENGTH(blocks) - 1 : 0); i < (inversedblocks ? 1 : LENGTH(blocks)); inversedblocks ? i-- : i++)
 		if (blocks[i].interval) {
 			maxinterval = MAX(blocks[i].interval, maxinterval);
 			interval = gcd(blocks[i].interval, interval);
@@ -4607,7 +4607,7 @@ toggleborder(const Arg *arg)
 void
 togglestatus(const Arg *arg)
 {
-	//status = !status;
+	showstatus = !showstatus;
 	updatestatus();
 }
 void
