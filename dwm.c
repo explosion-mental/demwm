@@ -2570,8 +2570,63 @@ propertynotify(XEvent *e)
 	}
 #endif /* SYSTRAY */
 
-	if ((ev->window == root) && (ev->atom == dwmstatus))
-		updatestatus();
+	if ((ev->window == root)) { /* root events */
+		if (ev->atom == dwmstatus) /* update bar */
+			updatestatus();
+		if (ev->atom == XA_WM_NAME) { /* 'fake' signal */
+			char n[32], *buf;
+			int arg;
+			if (gettextprop(root, XA_WM_NAME, n, sizeof(n))) {
+				/* divide into 2 args separated by the first space */
+				for (int i = 0; i <= strlen(n); i++) {
+					if (n[i] == ' ') {
+						buf = n;
+						buf += i + 1; /* chop the first 'word' */
+						arg = atoi(buf); /* store as an int */
+
+						n[i] = '\0'; /* chop every after the space */
+						break;
+					}
+				}
+
+				/* parsing commands */
+				if (!strcmp(n, "togglebar"))
+					togglebar(NULL);
+				else if (!strcmp(n, "cyclelayout"))
+					cyclelayout(&((Arg) { .i = arg }));
+				else if (!strcmp(n, "setlayout"))
+					setlayout(&((Arg) { .v = &layouts[arg] }));
+				else if (!strcmp(n, "view"))
+					view(&((Arg) { .ui = 1 << arg }));
+				else if (!strcmp(n, "tag"))
+					tag(&((Arg) { .ui = 1 << arg }));
+				else if (!strcmp(n, "togglefloating"))
+					togglefloating(NULL);
+				else if (!strcmp(n, "togglegaps"))
+					togglegaps(NULL);
+				else if (!strcmp(n, "togglesmartgaps"))
+					togglesmartgaps(NULL);
+				else if (!strcmp(n, "fullscreen"))
+					fullscreen(NULL);
+				else if (!strcmp(n, "togglevacant"))
+					togglevacant(NULL);
+				else if (!strcmp(n, "togglestatus"))
+					togglestatus(NULL);
+				else if (!strcmp(n, "killclient"))
+					killclient(NULL);
+				else if (!strcmp(n, "xrdb"))
+					xrdb(NULL);
+				else if (!strcmp(n, "random_wall"))
+					random_wall(NULL);
+				else if (!strcmp(n, "refresh"))
+					refresh(NULL);
+				else if (atoi(n) > 0) { /* if atoi returns non 0 and the number is more than 0 it is a signal */
+					getsigcmds(atoi(n));
+					updatestatus();
+				}
+			}
+		}
+	}
 	else if (ev->state == PropertyDelete)
 		return; /* ignore */
 	else if ((c = wintoclient(ev->window))) {
