@@ -69,6 +69,10 @@ dwm` gets the parent process which names matches dwm. That is not the
 reccomended way of doing it. This build of `dwm` sets an _enviromental
 variable_ called `STATUSBAR` which value is the _pid_ of the dwm parent.
 In short do: `kill -45 $STATUSBAR`.
+Another option to update a block with a signal is to use `xsetroot -name 1`, to
+update a block with signal 1, for example.
+**You must assign signal for a block, this value cannot be 0.**
+
 
 For clicking to do anything you have to make a dedicated script which handles
 the `BLOCK_BUTTON` _enviromental variable_, here an example:
@@ -85,6 +89,15 @@ esac
 
 To define the value of `BLOCK_BUTTON`, you have to edit _config.h_ mouse
 buttons bindings `sendstatusbar`.
+
+# Manage dwm with `xsetroot`
+
+Since dwm handles the text itself, we can use the 'name' of the root window for
+other purposes, like managing dwm (similar to the `fakesignal` patch).
+
+- Give it a function, for example `xsetroot -name togglebar`, will toggle the bar
+- or a standalone `signal number` of one of the blocks, e.g `xsetroot -name 1` will update block 1
+- It can accept functions that require an argument, e.g `xsetroot -name 'cyclelayout -1'` but remember to use `'` or `"` around it.
 
 # Toggleable Features
 Here are the "too bloated" features which doesn't affect the workflow, but
