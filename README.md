@@ -154,6 +154,7 @@ Here are some that I converted into a patch:
 Currently I don't wish more 'features' but here are some ideas:
 
 ## Some little TODOS:
+- use fork/exec/dup2 instead of popen in `getcmd` funcs (to remove delay).
 - tapresize **corners**
 - toggle border
 - depatch cfacts(?)
@@ -171,7 +172,7 @@ Currently I don't wish more 'features' but here are some ideas:
 ## Some wishing pains:
 - change `dwm_random_wall` script to an actual function on C.
 - pertag cursor position. Save the state of the cursor position between tags.
-- Can `tcc` (tiny C Compiler) be used along side with the **alpha** patch? (yes, with macros for `baralpha` and `boderalpha`)
+- Can `tcc` (tiny C Compiler) be used along side with the **alpha** patch? yes, with macros for `baralpha` and `boderalpha` compiles but if `tcc` is being used it crashes.
 - <s>integrate dwmblocks into dwm with statuscmd patch.</s>
 - <s>Make gaps an option(?)</s>
 - <s>getenv("TERMINAL")</s>
