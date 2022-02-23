@@ -129,12 +129,18 @@ edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
 uncomment the line with `#TAG_PREVIEW`
 
 # dwm_random_wall
-This is a little script that changes the wallpaper to a random one in `img_dir`
-variable and uses (requires) **pywal**. `fd` is much more faster than `find`
-but you might not have it installed, in that case uncomment the next line.
+This is a little script chooses a random file from the `img_dir` directory
+variable, runs **pywal** with the chosen image and symlinks to `bgloc` to make
+it accesible to other programs.
 
-The script is copied/deleted to `/usr/local/bin` by default, `PREFIX` path can
+Currently it uses `fd`, but you might not have it installed, in that case
+uncomment the next line to use `find`.
+
+The script is copied/deleted to `${PREFIX}/bin` by default, `PREFIX` path can
 be changed in config.mk.
+
+**NOTE**: I run some custom 'hooks' in `postrun` function which forks to the
+background, you can delete everything and change at your liking the function.
 
 # Patches
 My little collection of patches, which aren't necessarily applied to this. You
