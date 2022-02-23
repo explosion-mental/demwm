@@ -77,7 +77,7 @@
 #define SPTAG(i) 		((1 << LENGTH(tags)) << (i))
 #define SPTAGMASK   		(((1 << LENGTH(scratchpads))-1) << LENGTH(tags))
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
-#define RULE(...)		{ .monitor = -1, ##__VA_ARGS__ },
+#define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
 #define Button6			6
 #define Button7			7
 /* status bar signals */
