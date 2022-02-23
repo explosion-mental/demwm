@@ -210,7 +210,7 @@ static const Layout layouts[] = {
 	//{ ":::",      gaplessgrid },		/* grid ajusted in such that there are no gaps */
 	//{ "🐷", 	pidgin },		/* basically grid? */
 	//{ ")M(",	ego },
-	//{ "🥏",	NULL },			/* no layout function means floating behavior */
+	{ "🥏",	NULL },			/* no layout function means floating behavior */
 };
 
 /* key definitions */
