@@ -109,7 +109,7 @@ enum { NetSupported, NetWMName,
        NetWMIcon,
 #endif /* ICONS */
        NetWMState, NetWMCheck, NetWMFullscreen, NetActiveWindow,
-       NetWMWindowType, NetWMStateAbove,
+       NetWMWindowTypeDesktop, NetWMWindowType, NetWMStateAbove,
        //NetWMWindowTypeDialog,
        NetClientList,
 #ifdef SYSTRAY
@@ -2311,6 +2311,16 @@ manage(Window w, XWindowAttributes *wa)
 	c = ecalloc(1, sizeof(Client));
 	c->win = w;
 	c->pid = winpid(w);
+
+	/* do not manage (lower and skip) NET_WINDOW_TYPE_DESKTOP
+	 * (desktop implementation) windows (glava, xlivebg, etc) */
+	if (getatomprop(c, netatom[NetWMWindowType]) == netatom[NetWMWindowTypeDesktop]) {
+		XMapWindow(dpy, c->win);
+		XLowerWindow(dpy, c->win);
+		free(c);
+		return;
+	}
+
 	/* geometry */
 	c->x = c->oldx = wa->x;
 	c->y = c->oldy = wa->y;
@@ -3337,6 +3347,7 @@ setup(void)
 	netatom[NetWMState]            = XInternAtom(dpy, "_NET_WM_STATE", False);
 	netatom[NetWMCheck]            = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	netatom[NetWMFullscreen]       = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	netatom[NetWMWindowTypeDesktop] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
 	netatom[NetWMWindowType]       = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
 	//netatom[NetWMWindowTypeDialog] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
 	netatom[NetClientList]         = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
