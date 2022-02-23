@@ -4,7 +4,7 @@ img_dir="${HOME}/Media/Pictures/Wallpapers"
 bgloc="${XDG_DATA_HOME:-$HOME/.local/share}/bg"
 backend=wal		# colorz - schemer2 - wal - haishoku - colorthief
 
-# postrun hooks
+# post run hooks
 postrun() {
 	xwallpaper --zoom "$bgloc"
 	ln -sf	"${HOME}/.cache/wal/dunstrc"	"${HOME}/.config/dunst/dunstrc"
@@ -12,10 +12,12 @@ postrun() {
 	ln -sf	"${HOME}/.cache/wal/zathurarc"	"${HOME}/.config/zathura/zathurarc"
 }
 
-findcmd="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
-#findcmd="$(find "$img_path" -iregex '.*.\(jpg\|jpeg\|png\)' -type f | shuf -n 1)"
+randomimg="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
+#randomimg="$(find "$img_path" -iregex '.*.\(jpg\|jpeg\|png\)' -type f | shuf -n 1)"
 
-wal -i "$findcmd" --backend $backend -qnt || exit 1
-ln -sf "$findcmd" "$bgloc"
+# if not installed, exit with 1 so dwm uses fallback colors
+wal -i "$randomimg" --backend $backend -qnt || exit 1
+
+ln -sf "$randomimg" "$bgloc"
 
 postrun & disown
