@@ -3107,11 +3107,15 @@ void
 sendstatusbar(const Arg *arg)
 {
 	if (fork() == 0) {
+		if (dpy)
+			close(ConnectionNumber(dpy));
 		char button[2] = { '0' + arg->i & 0xff, '\0' };
-		char shcmd[CMDLENGTH + 20];
-		snprintf(shcmd, LENGTH(shcmd), "%s && kill -%d %d", blocks[blocknum].command, blocks[blocknum].signal + 34, getppid());
+		char shcmd[CMDLENGTH + 32];
+		snprintf(shcmd, LENGTH(shcmd), "%s && xsetroot -name %d", blocks[blocknum].command, blocks[blocknum].signal);
 		setenv("BLOCK_BUTTON", button, 1);
-		execl("/bin/sh", "sh", "-c", shcmd, (char*)NULL);
+		execlp("/bin/sh", "sh", "-c", shcmd, (char*)NULL);
+		fprintf(stderr, "dwm: execlp %s", shcmd);
+		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
 }
