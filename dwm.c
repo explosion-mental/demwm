@@ -485,6 +485,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 
 static char blockoutput[LENGTH(blocks)][CMDLENGTH] = {0};
 static int pipes[LENGTH(blocks)][2];
+static int execlock = 0; /* ensure only one child process exists per block at an instance */
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
@@ -1988,6 +1989,12 @@ remove_all(char *str, char to_remove)
 void
 getcmd(int i, char *button)
 {
+	if (execlock & 1 << i) /* block is already running */
+		return;
+
+	/* lock execution of block until current instance finishes execution */
+	execlock |= 1 << i;
+
 	if (fork() == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
@@ -2956,9 +2963,6 @@ run(void)
 			#endif /* INVERSED */
 			{
 				if (fds[i].revents & POLLIN) {
-					//TODO currently if the blocks are updated 'too fast' the text duplicates
-					memset((void *) blockoutput[i], 0, CMDLENGTH); //empty the string
-					//strcpy(blockoutput[i], "");
 					char *output = blockoutput[i];
 					char buffer[CMDLENGTH];
 					int bt = read(pipes[i][0], buffer, LENGTH(buffer));
@@ -2967,6 +2971,8 @@ run(void)
 						char ch;
 						while (read(pipes[i][0], &ch, 1) == 1 && ch != '\n');
 					}
+
+					//FIXME binary literal, gcc dependant..
 
 					// Trim UTF-8 characters properly
 					int j = bt - 1;
@@ -2978,8 +2984,13 @@ run(void)
 					while (buffer[j] == ' ')
 						j--;
 					buffer[j + 1] = '\0';
+
 					//remove_all(output, '\n');
 					strcpy(output, buffer);
+
+					/* remove lock for the current block */
+					execlock &= ~(1 << i);
+
 					drawbar(selmon);
 				} else if (fds[i].revents & POLLHUP) {
 					fprintf(stderr, "dwm ERROR POLL\n");
