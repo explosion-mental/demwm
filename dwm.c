@@ -2932,7 +2932,6 @@ run(void)
 	for (i = 0; i < LENGTH(blocks); i++)
 	#endif /* INVERSED */
 	{
-		pipe(pipes[i]);
 		fds[i].fd = pipes[i][0];
 		fds[i].events |= POLLIN;
 	}
@@ -3395,8 +3394,10 @@ setup(void)
 	for (i = 0; i < LENGTH(blocks); i++)
 #endif /* INVERSED */
 	{
+		pipe(pipes[i]);
 		if (blocks[i].signal)
 			signal(SIGMINUS+blocks[i].signal, sighandler);
+		getcmd(i, NULL);
 	}
 
 	/* pid as an enviromental variable */
@@ -3409,7 +3410,7 @@ setup(void)
 	if (timerpid == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
-		sleep(2); /* wait for dwm to setup */
+		sleep(1); /* wait for dwm to setup */
 		timerloop();
 	}
 
