@@ -276,7 +276,7 @@ static Picture geticonprop(Window w, unsigned int *icw, unsigned int *ich);
 static void freeicon(Client *c);
 static void updateicon(Client *c);
 #endif /* ICONS */
-static void getcmd(int i, char *output);
+static void getcmd(int i, char *button);
 static void getcmds(int time);
 static void getsigcmds(unsigned int signal);
 static int gcd(int a, int b);
@@ -484,6 +484,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 #define STATUSLENGTH		(LENGTH(blocks) * CMDLENGTH + 1)
 
 static char blockoutput[LENGTH(blocks)][CMDLENGTH] = {0};
+static int pipes[LENGTH(blocks)][2];
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
@@ -822,6 +823,15 @@ cleanup(void)
 	while (mons)
 		cleanupmon(mons);
 	kill(timerpid, SIGKILL);
+	#ifdef INVERSED
+	for (i = LENGTH(blocks) - 1; i >= 0; i--)
+	#else
+	for (i = 0; i < LENGTH(blocks); i++)
+	#endif /* INVERSED */
+	{
+		close(pipes[i][0]);
+		close(pipes[i][1]);
+	}
 #ifdef SYSTRAY
 	if (systray) {
 		while (systray->icons)
@@ -1976,25 +1986,39 @@ remove_all(char *str, char to_remove)
 }
 
 void
-getcmd(int i, char *output)
+getcmd(int i, char *button)
 {
-	FILE *cmdf = popen(blocks[i].command, "r");
-	if (!cmdf)
-		return;
+	if (fork() == 0) {
+		if (dpy)
+			close(ConnectionNumber(dpy));
+		dup2(pipes[i][1], STDOUT_FILENO);
+		close(pipes[i][0]);
+		close(pipes[i][1]);
 
-	/* keep trying while (even if) the interrupt error */
-	char tmpstr[CMDLENGTH] = "", *s;
-	int e;
-	do {
-		errno = 0;
-		s = fgets(tmpstr, CMDLENGTH - (strlen(delimiter) + 1), cmdf);
-		e = errno;
-	} while (!s && e == EINTR);
-
-	pclose(cmdf);
-
-	strcpy(output, tmpstr);
-	remove_all(output, '\n');	/* chop off newline */
+		if (button)
+			setenv("BLOCK_BUTTON", button, 1);
+		execlp("/bin/sh", "sh", "-c", blocks[i].command, (char *)NULL);
+		fprintf(stderr, "GETCMD Failed to execute '%s', '%d'\n", blocks[i].command, i);
+		perror(" failed");
+		exit(EXIT_SUCCESS);
+	}
+//	FILE *cmdf = popen(blocks[i].command, "r");
+//	if (!cmdf)
+//		return;
+//
+//	/* keep trying while (even if) the interrupt error */
+//	char tmpstr[CMDLENGTH] = "", *s;
+//	int e;
+//	do {
+//		errno = 0;
+//		s = fgets(tmpstr, CMDLENGTH - (strlen(delimiter) + 1), cmdf);
+//		e = errno;
+//	} while (!s && e == EINTR);
+//
+//	pclose(cmdf);
+//
+//	strcpy(output, tmpstr);
+//	remove_all(output, '\n');	/* chop off newline */
 }
 
 void
@@ -2008,7 +2032,7 @@ getcmds(int time)
 #endif /* INVERSED */
 	{
 		if ((blocks[i].interval != 0 && time % blocks[i].interval == 0) || time == -1)
-			getcmd(i, blockoutput[i]);
+			getcmd(i, NULL);
 	}
 }
 
@@ -2023,7 +2047,7 @@ getsigcmds(unsigned int signal)
 #endif /* INVERSED */
 	{
 		if (blocks[i].signal == signal)
-			getcmd(i, blockoutput[i]);
+			getcmd(i, NULL);
 	}
 }
 
@@ -2888,16 +2912,86 @@ restack(Monitor *m)
 	XSync(dpy, False);
 	//while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 }
-
+#include <sys/poll.h>
 void
 run(void)
 {
 	XEvent ev;
+	int i, ret;
+	struct pollfd fds[LENGTH(blocks)];
+	#ifdef INVERSED
+	for (i = LENGTH(blocks) - 1; i >= 0; i--)
+	#else
+	for (i = 0; i < LENGTH(blocks); i++)
+	#endif /* INVERSED */
+	{
+		pipe(pipes[i]);
+		fds[i].fd = pipes[i][0];
+		fds[i].events |= POLLIN;
+	}
+	//fds[LENGTH(blocks) + 1].fd = ConnectionNumber(dpy);
+	//fds[LENGTH(blocks) + 1].events |= POLLIN;
+
 	/* main event loop */
 	XSync(dpy, False);
-	while (running && !XNextEvent(dpy, &ev))
+	while (running) {
+		ret = poll(fds, LENGTH(blocks), 0);
+		if (ret > 0) {
+			//if (fds[LENGTH(blocks) + 1].revents & POLLIN) { /* handle display fd */
+			//	XEvent ev;
+			//	while (running && XPending(dpy)) {
+			//		XNextEvent(dpy, &ev);
+			//		if (handler[ev.type]) {
+			//			handler[ev.type](&ev); /* call handler */
+			//		}
+			//	}
+			//} else if (fds[LENGTH(blocks) + 1].revents & POLLHUP) {
+			//	fprintf(stderr, "dwm ERROR POLL\n");
+			//	exit(1);
+			//}
+			#ifdef INVERSED
+			for (i = LENGTH(blocks) - 1; i >= 0; i--)
+			#else
+			for (i = 0; i < LENGTH(blocks); i++)
+			#endif /* INVERSED */
+			{
+				if (fds[i].revents & POLLIN) {
+					//TODO currently if the blocks are updated 'too fast' the text duplicates
+					memset((void *) blockoutput[i], 0, CMDLENGTH); //empty the string
+					//strcpy(blockoutput[i], "");
+					char *output = blockoutput[i];
+					char buffer[CMDLENGTH];
+					int bt = read(pipes[i][0], buffer, LENGTH(buffer));
+					//int bt = read(pipes[i][0], blockoutput[i], CMDLENGTH);
+					if (bt == LENGTH(buffer)) { // Clear the pipe
+						char ch;
+						while (read(pipes[i][0], &ch, 1) == 1 && ch != '\n');
+					}
+
+					// Trim UTF-8 characters properly
+					int j = bt - 1;
+					while ((buffer[j] & 0b11000000) == 0x80)
+						j--;
+					buffer[j] = ' ';
+
+					// Trim trailing spaces
+					while (buffer[j] == ' ')
+						j--;
+					buffer[j + 1] = '\0';
+					//remove_all(output, '\n');
+					strcpy(output, buffer);
+					drawbar(selmon);
+				} else if (fds[i].revents & POLLHUP) {
+					fprintf(stderr, "dwm ERROR POLL\n");
+					exit(1);
+				}
+			}
+		}
+
+		XNextEvent(dpy, &ev);
 		if (handler[ev.type])
 			handler[ev.type](&ev); /* call handler */
+	}
 }
 
 void
@@ -3106,18 +3200,8 @@ sendevent(Client *c, Atom proto)
 void
 sendstatusbar(const Arg *arg)
 {
-	if (fork() == 0) {
-		if (dpy)
-			close(ConnectionNumber(dpy));
-		char button[2] = { '0' + arg->i & 0xff, '\0' };
-		char shcmd[CMDLENGTH + 32];
-		snprintf(shcmd, LENGTH(shcmd), "%s && xsetroot -name %d", blocks[blocknum].command, blocks[blocknum].signal);
-		setenv("BLOCK_BUTTON", button, 1);
-		execlp("/bin/sh", "sh", "-c", shcmd, (char*)NULL);
-		fprintf(stderr, "dwm: execlp %s", shcmd);
-		perror(" failed");
-		exit(EXIT_SUCCESS);
-	}
+	char button[2] = { '0' + arg->i & 0xff, '\0' };
+	getcmd(blocknum, button);
 }
 
 void
