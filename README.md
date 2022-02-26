@@ -35,7 +35,8 @@ My build of dwm
 - A beautiful looking config.h file (at least for my taste :)
 - Toggleable 'hide-vacant' patch, which enables alternative tags on toggle
 - Dynamic and static scratchpads
-- Handles the status text just like dwmblocks, but without it. (see below)
+- Centered title only if there is space left
+- Status text handling, like dwmblocks, but asynchronous. (see below)
 
 # Status text
 I've decided to integrate dwmblocks into dwm itself.
@@ -74,6 +75,8 @@ update a block with signal 1, for example.
 **You must assign signal for a block, this value cannot be 0.**
 
 
+## Scripts
+
 For clicking to do anything you have to make a dedicated script which handles
 the `BLOCK_BUTTON` _enviromental variable_, here an example:
 ```
@@ -85,10 +88,17 @@ case $BLOCK_BUTTON in
 	5) pamixer --allow-boost -d 1 ;; # volume down
 	6) "$TERMINAL" -e "$EDITOR" "$0" ;; # edit the block
 esac
+
+[ "$(mpc status '%state%')" = 'paused' ] && echo '' && exit
 ```
 
 To define the value of `BLOCK_BUTTON`, you have to edit _config.h_ mouse
 buttons bindings `sendstatusbar`.
+
+
+Take a look at the last line. **Before exiting it does `echo ''`**. It is
+important to echo something (even `''`) to 'notify dwm' that the block has
+changed.
 
 # Manage dwm with `xsetroot`
 
@@ -98,6 +108,27 @@ other purposes, like managing dwm (similar to the `fakesignal` patch).
 - Give it a function, for example `xsetroot -name togglebar`, will toggle the bar
 - or a standalone `signal number` of one of the blocks, e.g `xsetroot -name 1` will update block 1
 - It can accept functions that require an argument, e.g `xsetroot -name 'cyclelayout -1'` but remember to use `'` or `"` around it.
+
+
+* Commands:
+```
+xsetroot -name togglebar
+xsetroot -name 'cyclelayout N'	# N can be -1 or +1
+xsetroot -name 'setlayout N'	# N is an index of an existing layout (0 to the last)
+xsetroot -name 'view N'		# N is a tag
+xsetroot -name 'tag N'		# N is a tag
+xsetroot -name togglefloating
+xsetroot -name togglegaps
+xsetroot -name togglesmartgaps
+xsetroot -name fullscreen
+xsetroot -name togglevacant
+xsetroot -name togglestatus
+xsetroot -name killclient
+xsetroot -name xrdb
+xsetroot -name random_wall
+xsetroot -name refresh
+xsetroot -name N		# N is an existing signal of a block
+```
 
 # Toggleable Features
 Here are the "too bloated" features which doesn't affect the workflow, but
@@ -109,6 +140,8 @@ Icons for the different programs that offers them.
 
 edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk),
 uncomment the line with `#ICONS`
+
+**requires imlib2**
 
 ## Systray
 System Tray. Blueman, screenkeys, obs, etc on your bar. You should use this if
@@ -127,6 +160,8 @@ contents of it.
 
 edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
 uncomment the line with `#TAG_PREVIEW`
+
+**requires imlib2**
 
 # dwm_random_wall
 This is a little script chooses a random file from the `img_dir` directory
@@ -160,7 +195,6 @@ Here are some that I converted into a patch:
 Currently I don't wish more 'features' but here are some ideas:
 
 ## Some little TODOS:
-- use fork/exec/dup2 instead of popen in `getcmd` funcs (to remove delay).
 - tapresize **corners**
 - toggle border
 - depatch cfacts(?)
@@ -169,6 +203,7 @@ Currently I don't wish more 'features' but here are some ideas:
   in which you can have the such 'dynamic' window management of dwm and also have a pertag
   workflow. Can this be implememnted just like the hidevacant patch? meaning, with a simple flag variable. Maybe intead of a lot of if / else we just re-arrange (re-start / re-setup) the pertag variables to default one and somehow maintain them the same while pertag is active.
 	* another idea. maybe just doing all the above but only for the layout..
+- <s>use fork/exec/dup2 instead of popen in `getcmd` funcs (to remove delay).</s>
 - <s>Make _tag previews_ more solid</s> and prevent from being shown in the preview of the preview...
 - <s>systray toggleable with _#ifdef_ and _#endif_</s>
 - <s>make [hide vacant patch](https://dwm.suckless.org/patches/hide_vacant_tags/)
@@ -199,3 +234,4 @@ Currently I don't wish more 'features' but here are some ideas:
 - Tag previews (Aug 10 2021)
 - Borders colors and general colors now have different schemes (Oct 16 2021)
 - status text (blocks) handled by dwm itself (Feb 12 2022)
+	* Asynchronous block handling (Feb 25 2022)
