@@ -485,7 +485,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 
 static char blockoutput[LENGTH(blocks)][CMDLENGTH] = {0};
 static int pipes[LENGTH(blocks)][2];
-static int execlock = 0; /* ensure only one child process exists per block at an instance */
+static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
@@ -1989,8 +1989,10 @@ remove_all(char *str, char to_remove)
 void
 getcmd(int i, char *button)
 {
-	if (execlock & 1 << i) /* block is already running */
+	if (execlock & 1 << i) { /* block is already running */
+		fprintf(stderr, "dwm: ignoring block %d, command %s\n", i, blocks[i].command);
 		return;
+	}
 
 	/* lock execution of block until current instance finishes execution */
 	execlock |= 1 << i;
@@ -2005,27 +2007,10 @@ getcmd(int i, char *button)
 		if (button)
 			setenv("BLOCK_BUTTON", button, 1);
 		execlp("/bin/sh", "sh", "-c", blocks[i].command, (char *)NULL);
-		fprintf(stderr, "GETCMD Failed to execute '%s', '%d'\n", blocks[i].command, i);
+		fprintf(stderr, "dwm: block %d, execlp %s", i, blocks[i].command);
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
-//	FILE *cmdf = popen(blocks[i].command, "r");
-//	if (!cmdf)
-//		return;
-//
-//	/* keep trying while (even if) the interrupt error */
-//	char tmpstr[CMDLENGTH] = "", *s;
-//	int e;
-//	do {
-//		errno = 0;
-//		s = fgets(tmpstr, CMDLENGTH - (strlen(delimiter) + 1), cmdf);
-//		e = errno;
-//	} while (!s && e == EINTR);
-//
-//	pclose(cmdf);
-//
-//	strcpy(output, tmpstr);
-//	remove_all(output, '\n');	/* chop off newline */
 }
 
 void
