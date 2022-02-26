@@ -244,7 +244,7 @@ static const char *web[]       = { "surf", "start.duckduckgo.com", NULL };
 static const char *vifm[]      = { "st", "-e", "vifmrun", NULL };
 static const char *samevifm[]  = { "samedirvifm", NULL };
 //EXEC(samedmenu, "samedirmenu"
-static const char pulsepad[] = "kill -42 $STATUSBAR; st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer";
+static const char pulsepad[] = "st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer";
 
 /* macro for nvim to start on insertmode on the last line */
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
@@ -284,6 +284,7 @@ static const Key keys[] = {
 	SPKEYS(MODKEY|ControlMask,	XK_s,	/* uni		*/	Sp4)
 	SPKEYS(MODKEY,			XK_n,	/* music	*/	Sp5)
 	SPKEYS(MODKEY|ShiftMask,	XK_p,	/* pulsemixer	*/	Sp6)
+	{ MODKEY|ShiftMask,		XK_p,	updateblock,		{ .ui = 8 }	},
 	SPKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	Sp7)
 	SPKEYS(MODKEY|ControlMask,	XK_e,	/* notes - is	*/	Sp8)
 	//SCRATCHKEYS(MODKEY|ControlMask,	XK_e,	/* stnormal	*/	7)
@@ -377,12 +378,18 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,		XK_equal,		SHCMD("mpc volume +3")	},
 	{ MODKEY|ShiftMask,		XK_bracketleft,		SHCMD("mpc seek -10")	},
 	{ MODKEY|ShiftMask,		XK_bracketright,	SHCMD("mpc seek +10")	},
-{ MODKEY,	XK_minus,	SHCMD("pamixer --allow-boost -d 3; kill -42 $STATUSBAR")},
-{ MODKEY,	XK_equal,	SHCMD("pamixer --allow-boost -i 3; kill -42 $STATUSBAR")},
-{ MODKEY,	 XK_BackSpace,	SHCMD("pamixer -t; kill -42 $STATUSBAR")		},
-{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 2; kill -42 $STATUSBAR")},
-{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2; kill -42 $STATUSBAR")},
-{ 0, XF86XK_AudioMute,		SHCMD("pamixer -t; kill -42 $STATUSBAR") },
+	{ MODKEY,			XK_minus,	SHCMD("pamixer --allow-boost -d 3")},
+	{ MODKEY,			XK_minus, updateblock,		{ .ui = 8 }	},
+	{ MODKEY,			XK_equal,	SHCMD("pamixer --allow-boost -i 3")},
+	{ MODKEY,			XK_equal, updateblock,		{ .ui = 8 }	},
+	{ MODKEY,			XK_BackSpace,	SHCMD("pamixer -t")		},
+	{ MODKEY,			XK_BackSpace,	updateblock,	{ .ui = 8 }	},
+	{ 0,	XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 2")	},
+	{ 0,	XF86XK_AudioLowerVolume,	updateblock,		{ .ui = 8 } 	},
+	{ 0,	XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2")	},
+	{ 0,	XF86XK_AudioRaiseVolume,	updateblock,		{ .ui = 8 }	},
+	{ 0,	XF86XK_AudioMute,		SHCMD("pamixer -t")			},
+	{ 0,	XF86XK_AudioRaiseVolume,	updateblock,		{ .ui = 8 }	},
 //{ 0,	XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 //{ 0, XF86XK_ScreenSaver,		SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
 //	{ 0,	XF86XK_AudioStop,		SHCMD("mpc toggle)		},
@@ -394,9 +401,12 @@ static const Key keys[] = {
 	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev")			},
 	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next")			},
 	//{ 0,	XF86XK_RFKill,			random_wall, {0}		},
-	{ MODKEY,		XK_p,		SHCMD("mpc toggle; kill -45 $STATUSBAR")},
-	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev; kill -45 $STATUSBAR")	},
-	{ MODKEY,	XK_bracketright,	SHCMD("mpc next; kill -45 $STATUSBAR")	},
+	{ MODKEY,		XK_p,		SHCMD("mpc toggle")},
+	{ MODKEY,		XK_p,		updateblock,		{ .ui = 11 }	},
+	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev")	},
+	{ MODKEY,	XK_bracketleft,		updateblock,		{ .ui = 11 }	},
+	{ MODKEY,	XK_bracketright,	SHCMD("mpc next")	},
+	{ MODKEY,	XK_bracketright,	updateblock,		{ .ui = 11 }	},
 	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")			},
 
 			/* Custom bindings (may be better using shkd) */
