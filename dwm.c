@@ -487,6 +487,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 static char blockoutput[LENGTH(blocks)][CMDLENGTH] = {0};
 static int pipes[LENGTH(blocks)][2];
 static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
+static int iglock = 0;            /* ignore the lock above if it's a signal */
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
@@ -1990,13 +1991,16 @@ remove_all(char *str, char to_remove)
 void
 getcmd(int i, char *button)
 {
-	if (execlock & 1 << i) { /* block is already running */
-		fprintf(stderr, "dwm: ignoring block %d, command %s\n", i, blocks[i].command);
-		return;
-	}
+	/* if iglock it's on, then it's a signal */
+	if (!iglock) {
+		if (execlock & 1 << i) { /* block is already running */
+			fprintf(stderr, "dwm: ignoring block %d, command %s\n", i, blocks[i].command);
+			return;
+		}
 
-	/* lock execution of block until current instance finishes execution */
-	execlock |= 1 << i;
+		/* lock execution of block until current instance finishes execution */
+		execlock |= 1 << i;
+	}
 
 	if (fork() == 0) {
 		if (dpy)
@@ -2007,7 +2011,7 @@ getcmd(int i, char *button)
 
 		if (button)
 			setenv("BLOCK_BUTTON", button, 1);
-		execlp("/bin/sh", "sh", "-c", blocks[i].command, (char *)NULL);
+		execlp("/bin/sh", "sh", "-c", blocks[i].command, (char *) NULL);
 		fprintf(stderr, "dwm: block %d, execlp %s", i, blocks[i].command);
 		perror(" failed");
 		exit(EXIT_SUCCESS);
@@ -2039,8 +2043,10 @@ getsigcmds(unsigned int signal)
 	for (i = 0; i < LENGTH(blocks); i++)
 #endif /* INVERSED */
 	{
-		if (blocks[i].signal == signal)
+		if (blocks[i].signal == signal) {
+			iglock = 1;
 			getcmd(i, NULL);
+		}
 	}
 }
 
@@ -2912,6 +2918,7 @@ run(void)
 	XEvent ev;
 	int i, ret;
 	struct pollfd fds[LENGTH(blocks)];
+
 	#ifdef INVERSED
 	for (i = LENGTH(blocks) - 1; i >= 0; i--)
 	#else
@@ -2974,8 +2981,8 @@ run(void)
 					strcpy(output, buffer);
 
 					/* remove lock for the current block */
-					execlock &= ~(1 << i);
-
+					if (!iglock)
+						execlock &= ~(1 << i);
 					drawbar(selmon);
 				} else if (fds[i].revents & POLLHUP) {
 					fprintf(stderr, "dwm ERROR POLL\n");
@@ -3396,7 +3403,6 @@ setup(void)
 	if (timerpid == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
-		sleep(1); /* wait for dwm to setup */
 		timerloop();
 	}
 
@@ -3770,6 +3776,13 @@ timerloop(void)
 	pid_t parentpid = getppid();
 
 	while (1) {
+		/* update count to [1, maxinterval] */
+		count = (count + interval - 1) % maxinterval + 1;
+
+		/* sleep for sleeptime even while being interrupted */
+		while (nanosleep(&tosleep, &tosleep) == -1);
+		tosleep = sleeptime;
+
 		/* check if any block needs to update */
 	#ifdef INVERSED
 		for (i = LENGTH(blocks) - 1; i >= 0; i--)
@@ -3780,13 +3793,6 @@ timerloop(void)
 			if ((blocks[i].interval != 0 && count % blocks[i].interval == 0) || count == -1 || count == 0)
 				kill(parentpid, SIGMINUS+blocks[i].signal); /* notify parent to update blocks X */
 		}
-
-		/* update count to [1, maxinterval] */
-		count = (count + interval - 1) % maxinterval + 1;
-
-		/* sleep for sleeptime even while being interrupted */
-		while (nanosleep(&tosleep, &tosleep) == -1);
-		tosleep = sleeptime;
 	}
 }
 
