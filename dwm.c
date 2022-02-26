@@ -369,6 +369,7 @@ static void unmanage(Client *c, int destroyed);
 static void unmapnotify(XEvent *e);
 static void updatebarpos(Monitor *m);
 static void updatebars(void);
+static void updateblock(const Arg *arg);
 static void updateclientlist(void);
 static int updategeom(void);
 static void updatenumlockmask(void);
@@ -4077,6 +4078,13 @@ updatebarpos(Monitor *m)
 		m->wy = m->topbar ? m->wy + bh : m->wy;
 	} else
 		m->by = -bh;
+}
+
+void
+updateblock(const Arg *arg)
+{
+	getsigcmds(arg->ui);
+	updatestatus();
 }
 
 void
