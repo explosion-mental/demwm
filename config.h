@@ -389,7 +389,7 @@ static const Key keys[] = {
 	{ 0,	XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2")	},
 	{ 0,	XF86XK_AudioRaiseVolume,	updateblock,		{ .ui = 8 }	},
 	{ 0,	XF86XK_AudioMute,		SHCMD("pamixer -t")			},
-	{ 0,	XF86XK_AudioRaiseVolume,	updateblock,		{ .ui = 8 }	},
+	{ 0,	XF86XK_AudioMute,		updateblock,		{ .ui = 8 }	},
 //{ 0,	XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 //{ 0, XF86XK_ScreenSaver,		SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
 //	{ 0,	XF86XK_AudioStop,		SHCMD("mpc toggle)		},

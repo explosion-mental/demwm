@@ -486,7 +486,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 
 static char blockoutput[LENGTH(blocks)][CMDLENGTH] = {0};
 static int pipes[LENGTH(blocks)][2];
-static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
+static int execlock = 0; /* ensure only one child process exists per block at an instance */
 static int iglock = 0;            /* ignore the lock above if it's a signal */
 
 struct Pertag {
@@ -2043,10 +2043,8 @@ getsigcmds(unsigned int signal)
 	for (i = 0; i < LENGTH(blocks); i++)
 #endif /* INVERSED */
 	{
-		if (blocks[i].signal == signal) {
-			iglock = 1;
+		if (blocks[i].signal == signal)
 			getcmd(i, NULL);
-		}
 	}
 }
 
@@ -2654,6 +2652,7 @@ propertynotify(XEvent *e)
 				else if (!strcmp(n, "refresh"))
 					refresh(NULL);
 				else if (atoi(n) > 0) { /* if atoi returns non 0 and the number is more than 0 it is a signal */
+					iglock = 1;
 					getsigcmds(atoi(n));
 					updatestatus();
 				}
@@ -2959,10 +2958,6 @@ run(void)
 					char buffer[CMDLENGTH];
 					int bt = read(pipes[i][0], buffer, LENGTH(buffer));
 					//int bt = read(pipes[i][0], blockoutput[i], CMDLENGTH);
-					if (bt == LENGTH(buffer)) { // Clear the pipe
-						char ch;
-						while (read(pipes[i][0], &ch, 1) == 1 && ch != '\n');
-					}
 
 					//FIXME binary literal, gcc dependant..
 
@@ -2970,6 +2965,10 @@ run(void)
 					int j = bt - 1;
 					while ((buffer[j] & 0b11000000) == 0x80)
 						j--;
+
+					// Cache last character and replace it with a trailing space
+					char ch = buffer[j];
+
 					buffer[j] = ' ';
 
 					// Trim trailing spaces
@@ -2977,11 +2976,15 @@ run(void)
 						j--;
 					buffer[j + 1] = '\0';
 
+					if (bt == LENGTH(buffer)) // Clear the pipe
+						while (ch != '\n' && read(pipes[i][0], &ch, 1) == 1);
+
 					//remove_all(output, '\n');
 					strcpy(output, buffer);
 
-					/* remove lock for the current block */
-					if (!iglock)
+					if (iglock) /* restore iglock */
+						iglock = 0;
+					else /* remove lock for the current block */
 						execlock &= ~(1 << i);
 					drawbar(selmon);
 				} else if (fds[i].revents & POLLHUP) {
@@ -3661,6 +3664,7 @@ sighandler(int signum)
 {
 	XEvent event;
 
+	iglock = 1;
 	getsigcmds(signum-SIGPLUS);
 
 	/* send a custom Atom in PropertyNotify event to the root window */
