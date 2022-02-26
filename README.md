@@ -79,7 +79,7 @@ update a block with signal 1, for example.
 
 For clicking to do anything you have to make a dedicated script which handles
 the `BLOCK_BUTTON` _enviromental variable_, here an example:
-```
+```sh
 case $BLOCK_BUTTON in
 	1) notify-send "You've clicked mouse button $BLOCK_BUTTON" ;;
 	2) notify-send "Right click" ;;
@@ -111,7 +111,7 @@ other purposes, like managing dwm (similar to the `fakesignal` patch).
 
 
 * Commands:
-```
+```sh
 xsetroot -name togglebar
 xsetroot -name 'cyclelayout N'	# N can be -1 or +1
 xsetroot -name 'setlayout N'	# N is an index of an existing layout (0 to the last)
