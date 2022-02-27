@@ -2924,36 +2924,36 @@ run(void)
 	for (i = 0; i < LENGTH(blocks); i++)
 	#endif /* INVERSED */
 	{
-		fds[i].fd = pipes[i][0];
-		fds[i].events |= POLLIN;
+		fds[i + 1].fd = pipes[i][0];
+		fds[i + 1].events |= POLLIN;
 	}
-	//fds[LENGTH(blocks) + 1].fd = ConnectionNumber(dpy);
-	//fds[LENGTH(blocks) + 1].events |= POLLIN;
+
+	fds[0].fd = ConnectionNumber(dpy);
+	fds[0].events |= POLLIN;
 
 	/* main event loop */
 	XSync(dpy, False);
 	while (running) {
 		ret = poll(fds, LENGTH(blocks), 0);
 		if (ret > 0) {
-			//if (fds[LENGTH(blocks) + 1].revents & POLLIN) { /* handle display fd */
-			//	XEvent ev;
-			//	while (running && XPending(dpy)) {
-			//		XNextEvent(dpy, &ev);
-			//		if (handler[ev.type]) {
-			//			handler[ev.type](&ev); /* call handler */
-			//		}
-			//	}
-			//} else if (fds[LENGTH(blocks) + 1].revents & POLLHUP) {
-			//	fprintf(stderr, "dwm ERROR POLL\n");
-			//	exit(1);
-			//}
+			if (fds[0].revents & POLLIN) { /* handle display fd */
+				while (running && XPending(dpy)) {
+					XNextEvent(dpy, &ev);
+					if (handler[ev.type])
+						handler[ev.type](&ev); /* call handler */
+				}
+			} else if (fds[0].revents & POLLHUP) {
+				fprintf(stderr, "dwm ERROR POLL\n");
+				exit(1);
+			}
+
 			#ifdef INVERSED
 			for (i = LENGTH(blocks) - 1; i >= 0; i--)
 			#else
 			for (i = 0; i < LENGTH(blocks); i++)
 			#endif /* INVERSED */
 			{
-				if (fds[i].revents & POLLIN) {
+				if (fds[i + 1].revents & POLLIN) {
 					char *output = blockoutput[i];
 					char buffer[CMDLENGTH];
 					int bt = read(pipes[i][0], buffer, LENGTH(buffer));
@@ -2987,16 +2987,12 @@ run(void)
 					else /* remove lock for the current block */
 						execlock &= ~(1 << i);
 					drawbar(selmon);
-				} else if (fds[i].revents & POLLHUP) {
+				} else if (fds[i + 1].revents & POLLHUP) {
 					fprintf(stderr, "dwm ERROR POLL\n");
 					exit(1);
 				}
 			}
 		}
-
-		XNextEvent(dpy, &ev);
-		if (handler[ev.type])
-			handler[ev.type](&ev); /* call handler */
 	}
 }
 
