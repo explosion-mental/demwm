@@ -114,7 +114,7 @@ static const Block blocks[] = {
 /* delimeter between blocks commands. NULL character ('\0') means no delimeter. */
 static char delimiter[] = " ";
 /* max number of character that one block command can output */
-#define CMDLENGTH		(50)
+#define CMDLENGTH		50
 
 /* tags */
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
