@@ -2932,10 +2932,14 @@ run(void)
 	fds[0].fd = ConnectionNumber(dpy);
 	fds[0].events |= POLLIN;
 
+	const struct timespec fivems = {0, 5000000};
+
 	/* main event loop */
 	XSync(dpy, False);
 	while (running) {
-		ret = poll(fds, LENGTH(blocks), 0);
+		nanosleep(&fivems, NULL); /* workaround for high cpu usage */
+
+		ret = poll(fds, LENGTH(blocks), -1);
 		if (ret > 0) {
 			if (fds[0].revents & POLLIN) { /* handle display fd */
 				while (running && XPending(dpy)) {
