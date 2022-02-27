@@ -488,7 +488,6 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 static char blockoutput[LENGTH(blocks)][CMDLENGTH] = {0};
 static int pipes[LENGTH(blocks)][2];
 static int execlock = 0; /* ensure only one child process exists per block at an instance */
-static int iglock = 0;            /* ignore the lock above if it's a signal */
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
@@ -1992,16 +1991,13 @@ remove_all(char *str, char to_remove)
 void
 getcmd(int i, char *button)
 {
-	/* if iglock it's on, then it's a signal */
-	if (!iglock) {
-		if (execlock & 1 << i) { /* block is already running */
-			fprintf(stderr, "dwm: ignoring block %d, command %s\n", i, blocks[i].command);
-			return;
-		}
-
-		/* lock execution of block until current instance finishes execution */
-		execlock |= 1 << i;
+	if (execlock & 1 << i) { /* block is already running */
+		fprintf(stderr, "dwm: ignoring block %d, command %s\n", i, blocks[i].command);
+		return;
 	}
+
+	/* lock execution of block until current instance finishes execution */
+	execlock |= 1 << i;
 
 	if (fork() == 0) {
 		if (dpy)
@@ -2653,7 +2649,6 @@ propertynotify(XEvent *e)
 				else if (!strcmp(n, "refresh"))
 					refresh(NULL);
 				else if (atoi(n) > 0) { /* if atoi returns non 0 and the number is more than 0 it is a signal */
-					iglock = 1;
 					getsigcmds(atoi(n));
 					updatestatus();
 				}
@@ -2987,10 +2982,9 @@ run(void)
 					//remove_all(output, '\n');
 					strcpy(output, buffer);
 
-					if (iglock) /* restore iglock */
-						iglock = 0;
-					else /* remove lock for the current block */
-						execlock &= ~(1 << i);
+					/* remove lock for the current block */
+					execlock &= ~(1 << i);
+
 					drawbar(selmon);
 				} else if (fds[i + 1].revents & POLLHUP) {
 					fprintf(stderr, "dwm: blocks hangup\n");
@@ -3666,7 +3660,6 @@ sighandler(int signum)
 {
 	XEvent event;
 
-	iglock = 1;
 	getsigcmds(signum-SIGPLUS);
 
 	/* send a custom Atom in PropertyNotify event to the root window */
