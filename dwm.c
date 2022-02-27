@@ -29,6 +29,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/poll.h>
 #include <sys/wait.h>	/* dwm doesn't use wait? */
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
@@ -2910,7 +2911,7 @@ restack(Monitor *m)
 	XSync(dpy, False);
 	//while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 }
-#include <sys/poll.h>
+
 void
 run(void)
 {
@@ -2943,10 +2944,10 @@ run(void)
 						handler[ev.type](&ev); /* call handler */
 				}
 			} else if (fds[0].revents & POLLHUP) {
-				fprintf(stderr, "dwm ERROR POLL\n");
+				fprintf(stderr, "dwm: main event loop, hang up\n");
+				perror(" failed");
 				exit(1);
 			}
-
 			#ifdef INVERSED
 			for (i = LENGTH(blocks) - 1; i >= 0; i--)
 			#else
@@ -2988,7 +2989,8 @@ run(void)
 						execlock &= ~(1 << i);
 					drawbar(selmon);
 				} else if (fds[i + 1].revents & POLLHUP) {
-					fprintf(stderr, "dwm ERROR POLL\n");
+					fprintf(stderr, "dwm: blocks hangup\n");
+					perror(" failed");
 					exit(1);
 				}
 			}
