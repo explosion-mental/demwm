@@ -699,6 +699,16 @@ centeredmaster(Monitor *m)
 	}
 }
 
+static void
+clear(Monitor *m)
+{
+	Client *c;
+	for (c = m->stack; c; c = c->snext) {
+		if (ISVISIBLE(c))
+			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+	}
+}
+
 /* "EGO"
  *  https://github.com/sineemore/dotfiles/blob/bc316ca97ad339302b647acafeb9fdc8c02efdf3/patches/dwm-ego.patch
  * Weird monocle
