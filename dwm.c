@@ -1310,6 +1310,13 @@ drawbar(Monitor *m)
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
 	if ((w = bw - tw - x) > bh) {
+		if (m->lt[m->sellt]->arrange == clear) { /* hide title in clear layout */
+			drw_setscheme(drw, scheme[SchemeNorm]);
+			drw_rect(drw, x, 0, w, bh, 1, 1);
+			drw_map(drw, m->barwin, 0, 0, bw, bh);
+			return;
+		}
+
 		if (m->sel) {
 			drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]);
 		#ifdef ICONS
