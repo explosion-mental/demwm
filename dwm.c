@@ -337,6 +337,7 @@ static void setlayout(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
+static void settagsatom(Window w, unsigned int tags);
 static void shift(void (*func)(const Arg *arg));
 static void shifttag(const Arg *arg);
 static void shifttagclients(const Arg *arg);
@@ -457,7 +458,7 @@ static Atom xatom[XLast];
 static Systray *systray = NULL;
 static unsigned long systrayorientation = 0; /* _NET_SYSTEM_TRAY_ORIENTATION_HORZ */
 #endif /* SYSTRAY */
-static Atom wmatom[WMLast], netatom[NetLast], dwmstatus;
+static Atom wmatom[WMLast], netatom[NetLast], dwmstatus, dwmtags;
 static int running = 1, restart = 0;
 static Cur *cursor[CurLast];
 static Clr **scheme;
@@ -1067,6 +1068,7 @@ configurerequest(XEvent *e)
 	XSync(dpy, False);
 }
 
+
 void
 combotag(const Arg *arg)
 {
@@ -1084,6 +1086,7 @@ combotag(const Arg *arg)
 		selmon->sel->tags = newtags;
 	}
 
+	settagsatom(selmon->sel->win, selmon->sel->tags);
 	focus(NULL);
 	arrange(selmon);
 }
@@ -2331,6 +2334,10 @@ manage(Window w, XWindowAttributes *wa)
 	Client *c, *t = NULL, *term = NULL;
 	Window trans = None;
 	XWindowChanges wc;
+	int format;
+	unsigned int *ptags;
+	unsigned long n, extra;
+	Atom atom;
 	//XEvent xev;
 
 	c = ecalloc(1, sizeof(Client));
@@ -2368,7 +2375,13 @@ manage(Window w, XWindowAttributes *wa)
 		c->mon = selmon;
 		applyrules(c);
 		term = termforwin(c);
+		if (XGetWindowProperty(dpy, c->win, dwmtags, 0L, 1L, False, XA_CARDINAL,
+		&atom, &format, &n, &extra, (unsigned char **)&ptags) == Success && n == 1 && *ptags != 0) {
+			c->tags = *ptags;
+			XFree(ptags);
+		}
 	}
+	settagsatom(c->win, c->tags);
 
 	if (c->x + WIDTH(c) > c->mon->mx + c->mon->mw)
 		c->x = c->mon->mx + c->mon->mw - WIDTH(c);
@@ -3430,6 +3443,7 @@ setup(void)
 	/* init atoms */
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
 	dwmstatus                      = XInternAtom(dpy, "UPDATE_DWM_STATUSBAR", False);
+	dwmtags                        = XInternAtom(dpy, "_DWM_TAGS", False);
 	wmatom[WMProtocols]            = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	wmatom[WMDelete]               = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wmatom[WMState]                = XInternAtom(dpy, "WM_STATE", False);
@@ -3520,6 +3534,13 @@ seturgent(Client *c, int urg)
 	wmh->flags = urg ? (wmh->flags | XUrgencyHint) : (wmh->flags & ~XUrgencyHint);
 	XSetWMHints(dpy, c->win, wmh);
 	XFree(wmh);
+}
+
+void
+settagsatom(Window w, unsigned int tags)
+{
+	XChangeProperty(dpy, w, dwmtags, XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char*)&tags, 1);
 }
 
 void
@@ -3736,6 +3757,7 @@ tag(const Arg *arg)
 {
 	if (selmon->sel && arg->ui & TAGMASK) {
 		selmon->sel->tags = arg->ui & TAGMASK;
+		settagsatom(selmon->sel->win, selmon->sel->tags);
 		focus(NULL);
 		arrange(selmon);
 	}
@@ -3913,6 +3935,7 @@ toggletag(const Arg *arg)
 	newtags = selmon->sel->tags ^ (arg->ui & TAGMASK);
 	if (newtags) {
 		selmon->sel->tags = newtags;
+		settagsatom(selmon->sel->win, selmon->sel->tags);
 		focus(NULL);
 		arrange(selmon);
 	}
@@ -4878,7 +4901,7 @@ main(int argc, char *argv[])
 	if (pledge("stdio rpath proc exec ps", NULL) == -1) die("pledge");
 	#endif /* __OpenBSD__ */
 	scan();
-	reorganizetags();	/* if more than 2 clients reorganize clients on restart */
+	//reorganizetags();	/* if more than 2 clients reorganize clients on restart */
 	run();
 	if (restart) execlp(argv[0], argv[0], "--restart", (char *) NULL);
 	cleanup();
