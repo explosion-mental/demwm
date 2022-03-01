@@ -2930,7 +2930,7 @@ void
 run(void)
 {
 	XEvent ev;
-	int i, ret;
+	int i;
 	struct pollfd fds[LENGTH(blocks)];
 
 	#ifdef INVERSED
@@ -2953,63 +2953,66 @@ run(void)
 	while (running) {
 		nanosleep(&fivems, NULL); /* workaround for high cpu usage */
 
-		ret = poll(fds, LENGTH(blocks), -1);
-		if (ret > 0) {
-			if (fds[0].revents & POLLIN) { /* handle display fd */
-				while (running && XPending(dpy)) {
-					XNextEvent(dpy, &ev);
-					if (handler[ev.type])
-						handler[ev.type](&ev); /* call handler */
-				}
-			} else if (fds[0].revents & POLLHUP) {
-				fprintf(stderr, "dwm: main event loop, hang up\n");
+		if ((poll(fds, LENGTH(blocks), -1)) == -1) {
+			fprintf(stderr, "dwm: poll ");
+			perror("failed");
+			exit(EXIT_FAILURE);
+		}
+
+		if (fds[0].revents & POLLIN) { /* handle display fd */
+			while (running && XPending(dpy)) {
+				XNextEvent(dpy, &ev);
+				if (handler[ev.type])
+					handler[ev.type](&ev); /* call handler */
+			}
+		} else if (fds[0].revents & POLLHUP) {
+			fprintf(stderr, "dwm: main event loop, hang up\n");
+			perror(" failed");
+			exit(1);
+		}
+		#ifdef INVERSED
+		for (i = LENGTH(blocks) - 1; i >= 0; i--)
+		#else
+		for (i = 0; i < LENGTH(blocks); i++)
+		#endif /* INVERSED */
+		{
+			if (fds[i + 1].revents & POLLIN) {
+				char *output = blockoutput[i];
+				char buffer[CMDLENGTH];
+				int bt = read(pipes[i][0], buffer, LENGTH(buffer));
+				//int bt = read(pipes[i][0], blockoutput[i], CMDLENGTH);
+
+				//FIXME binary literal, gcc dependant..
+
+				// Trim UTF-8 characters properly
+				int j = bt - 1;
+				while ((buffer[j] & 0b11000000) == 0x80)
+					j--;
+
+				// Cache last character and replace it with a trailing space
+				char ch = buffer[j];
+
+				buffer[j] = ' ';
+
+				// Trim trailing spaces
+				while (buffer[j] == ' ')
+					j--;
+				buffer[j + 1] = '\0';
+
+				if (bt == LENGTH(buffer)) // Clear the pipe
+					while (ch != '\n' && read(pipes[i][0], &ch, 1) == 1);
+
+				//remove_all(output, '\n');
+				strcpy(output, buffer);
+
+				/* remove lock for the current block */
+				execlock &= ~(1 << i);
+
+				drawbar(selmon);
+			} else if (fds[i + 1].revents & POLLHUP) {
+				fprintf(stderr, "dwm: blocks hangup\n");
 				perror(" failed");
 				exit(1);
-			}
-			#ifdef INVERSED
-			for (i = LENGTH(blocks) - 1; i >= 0; i--)
-			#else
-			for (i = 0; i < LENGTH(blocks); i++)
-			#endif /* INVERSED */
-			{
-				if (fds[i + 1].revents & POLLIN) {
-					char *output = blockoutput[i];
-					char buffer[CMDLENGTH];
-					int bt = read(pipes[i][0], buffer, LENGTH(buffer));
-					//int bt = read(pipes[i][0], blockoutput[i], CMDLENGTH);
-
-					//FIXME binary literal, gcc dependant..
-
-					// Trim UTF-8 characters properly
-					int j = bt - 1;
-					while ((buffer[j] & 0b11000000) == 0x80)
-						j--;
-
-					// Cache last character and replace it with a trailing space
-					char ch = buffer[j];
-
-					buffer[j] = ' ';
-
-					// Trim trailing spaces
-					while (buffer[j] == ' ')
-						j--;
-					buffer[j + 1] = '\0';
-
-					if (bt == LENGTH(buffer)) // Clear the pipe
-						while (ch != '\n' && read(pipes[i][0], &ch, 1) == 1);
-
-					//remove_all(output, '\n');
-					strcpy(output, buffer);
-
-					/* remove lock for the current block */
-					execlock &= ~(1 << i);
-
-					drawbar(selmon);
-				} else if (fds[i + 1].revents & POLLHUP) {
-					fprintf(stderr, "dwm: blocks hangup\n");
-					perror(" failed");
-					exit(1);
-				}
 			}
 		}
 	}
