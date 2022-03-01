@@ -1068,7 +1068,6 @@ configurerequest(XEvent *e)
 	XSync(dpy, False);
 }
 
-
 void
 combotag(const Arg *arg)
 {
@@ -4744,24 +4743,6 @@ togglevacant(const Arg *arg)
 	hidevacant = !hidevacant;
 	drawbar(selmon);
 }
-void
-reorganizetags(void)
-{
-	Client *c;
-	unsigned int ui = 1;
-        int n, i = 0;
-	for (n = 0, c = selmon->clients; c; c = c->next, n++);
-	for (c = selmon->clients; c; c = c->next) {
-		if (n > 2 && !((c->tags & SPTAGMASK) && c->isfloating)) {
-                	//c->tags = (ui << i) & TAGMASK & ~SPTAGMASK;
-                	c->tags = (ui << i) & TAGMASK;
-                	i = (i + 1) % LENGTH(tags);
-		} else
-			return;
-        }
-        focus(NULL);
-        arrange(selmon);
-}
 
 static int oldborder;
 //TODO
@@ -4901,7 +4882,6 @@ main(int argc, char *argv[])
 	if (pledge("stdio rpath proc exec ps", NULL) == -1) die("pledge");
 	#endif /* __OpenBSD__ */
 	scan();
-	//reorganizetags();	/* if more than 2 clients reorganize clients on restart */
 	run();
 	if (restart) execlp(argv[0], argv[0], "--restart", (char *) NULL);
 	cleanup();
