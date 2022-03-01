@@ -36,7 +36,8 @@ My build of dwm
 - Toggleable 'hide-vacant' patch, which enables alternative tags on toggle
 - Dynamic and static scratchpads
 - Centered title only if there is space left
-- Status text handling, like dwmblocks, but asynchronous. (see below)
+- Status text handling, like dwmblocks, but asynchronous (see below)
+- Windows remember their tags, they don't go into the first tag when restarting
 
 # Status text
 I've decided to integrate dwmblocks into dwm itself.
@@ -235,3 +236,4 @@ Currently I don't wish more 'features' but here are some ideas:
 - Borders colors and general colors now have different schemes (Oct 16 2021)
 - status text (blocks) handled by dwm itself (Feb 12 2022)
 	* Asynchronous block handling (Feb 25 2022)
+- Windows remember their tags, useful when restarting (Feb 28 2022)
