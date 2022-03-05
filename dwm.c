@@ -2716,7 +2716,7 @@ quit(const Arg *arg)
 void
 refresh(const Arg *arg)
 {
-	kill(timerpid, SIGKILL);
+	//kill(timerpid, SIGKILL);
 	restart = 1;
 	running = 0;
 }
@@ -2931,7 +2931,10 @@ run(void)
 {
 	XEvent ev;
 	int i;
-	struct pollfd fds[LENGTH(blocks)];
+	struct pollfd fds[LENGTH(blocks) + 1] = {0};
+
+	fds[0].fd = ConnectionNumber(dpy);
+	fds[0].events = POLLIN;
 
 	#ifdef INVERSED
 	for (i = LENGTH(blocks) - 1; i >= 0; i--)
@@ -2939,21 +2942,17 @@ run(void)
 	for (i = 0; i < LENGTH(blocks); i++)
 	#endif /* INVERSED */
 	{
+		pipe(pipes[i]);
 		fds[i + 1].fd = pipes[i][0];
-		fds[i + 1].events |= POLLIN;
+		fds[i + 1].events = POLLIN;
+		getcmd(i, NULL);
 	}
-
-	fds[0].fd = ConnectionNumber(dpy);
-	fds[0].events |= POLLIN;
-
-	const struct timespec fivems = {0, 5000000};
 
 	/* main event loop */
 	XSync(dpy, False);
 	while (running) {
-		nanosleep(&fivems, NULL); /* workaround for high cpu usage */
 
-		if ((poll(fds, LENGTH(blocks), -1)) == -1) {
+		if ((poll(fds, LENGTH(blocks) + 1, -1)) == -1) {
 			fprintf(stderr, "dwm: poll ");
 			perror("failed");
 			exit(EXIT_FAILURE);
@@ -2977,37 +2976,13 @@ run(void)
 		#endif /* INVERSED */
 		{
 			if (fds[i + 1].revents & POLLIN) {
-				char *output = blockoutput[i];
-				char buffer[CMDLENGTH];
-				int bt = read(pipes[i][0], buffer, LENGTH(buffer));
-				//int bt = read(pipes[i][0], blockoutput[i], CMDLENGTH);
-
-				//FIXME binary literal, gcc dependant..
-
-				// Trim UTF-8 characters properly
-				int j = bt - 1;
-				while ((buffer[j] & 0b11000000) == 0x80)
-					j--;
-
-				// Cache last character and replace it with a trailing space
-				char ch = buffer[j];
-
-				buffer[j] = ' ';
-
-				// Trim trailing spaces
-				while (buffer[j] == ' ')
-					j--;
-				buffer[j + 1] = '\0';
-
-				if (bt == LENGTH(buffer)) // Clear the pipe
-					while (ch != '\n' && read(pipes[i][0], &ch, 1) == 1);
-
-				//remove_all(output, '\n');
-				strcpy(output, buffer);
-
+				char buffer[CMDLENGTH] = {0};
+				int bt = read(fds[i + 1].fd, buffer, LENGTH(buffer));
+				if (buffer[bt - 1] == '\n') /* chop off ending new line, if one is present */
+					buffer[bt - 1] = '\0';
+				strcpy(blockoutput[i], buffer);
 				/* remove lock for the current block */
 				execlock &= ~(1 << i);
-
 				drawbar(selmon);
 			} else if (fds[i + 1].revents & POLLHUP) {
 				fprintf(stderr, "dwm: blocks hangup\n");
@@ -3391,28 +3366,32 @@ setup(void)
 	int i;
 
 	/* clean up any zombies immediately */
-	sigchld(0);
+	//FIXME original sigchld 'killed' poll, sigaction sigchld doesn't let `dwm_random_wall` script run
+	//sigchld(0);
 
 	/* init signals handlers */
 	signal(SIGHUP, sighup); /* restart */
 	signal(SIGTERM, sigterm); /* exit */
-	#ifndef __OpenBSD__
-	for (i = SIGRTMIN; i <= SIGRTMAX; i++) /* init real time signals with dummy handler */
-		signal(i, dummysighandler);
-	#endif
 
-	/* init blocks */
-#ifdef INVERSED
-	for (i = LENGTH(blocks) - 1; i >= 0; i--)
-#else
-	for (i = 0; i < LENGTH(blocks); i++)
-#endif /* INVERSED */
-	{
-		pipe(pipes[i]);
-		if (blocks[i].signal)
-			signal(SIGMINUS+blocks[i].signal, sighandler);
-		getcmd(i, NULL);
-	}
+	//FIXME SA_RESTART shoud not 'kill' poll
+//	/* ignore all real time signals */
+//	struct sigaction ig;
+//	ig.sa_handler = SIG_IGN;
+//	for (i = SIGRTMIN; i <= SIGRTMAX; i++)
+//		sigaction(i, &ig, NULL);
+//
+//	/* handle defined real time signals */
+//	struct sigaction sa;
+//	sa.sa_handler = sighandler;
+//	sa.sa_flags = SA_RESTART;
+//#ifdef INVERSED
+//	for (i = LENGTH(blocks) - 1; i >= 0; i--)
+//#else
+//	for (i = 0; i < LENGTH(blocks); i++)
+//#endif /* INVERSED */
+//		if (blocks[i].signal)
+//			sigaction(SIGRTMIN + i, &sa, NULL);
+//	#endif
 
 	/* pid as an enviromental variable */
 	char envpid[16];
@@ -3420,12 +3399,12 @@ setup(void)
 	setenv("STATUSBAR", envpid, 1);
 
 	/* timerloop as the child */
-	timerpid = fork();
-	if (timerpid == 0) {
-		if (dpy)
-			close(ConnectionNumber(dpy));
-		timerloop();
-	}
+	//timerpid = fork();
+	//if (timerpid == 0) {
+	//	if (dpy)
+	//		close(ConnectionNumber(dpy));
+	//	timerloop();
+	//}
 
 	/* init screen */
 	screen = DefaultScreen(dpy);
@@ -3680,9 +3659,14 @@ showhide(Client *c)
 void
 sigchld(int unused)
 {
-	if (signal(SIGCHLD, sigchld) == SIG_ERR)
-		die("can't install SIGCHLD handler:");
-	while (0 < waitpid(-1, NULL, WNOHANG));
+	//if (signal(SIGCHLD, sigchld) == SIG_ERR)
+	//	die("can't install SIGCHLD handler:");
+	//while (0 < waitpid(-1, NULL, WNOHANG));
+	struct sigaction sa;
+	sa.sa_handler = SIG_DFL;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_NOCLDWAIT;
+	sigaction(SIGCHLD, &sa, 0);
 }
 
 void
@@ -3706,7 +3690,7 @@ sighandler(int signum)
 void
 sighup(int unused)
 {
-	kill(timerpid, SIGKILL);
+	//kill(timerpid, SIGKILL);
 	restart = 1;
 	running = 0;
 }
