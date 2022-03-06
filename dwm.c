@@ -1133,9 +1133,9 @@ createmon(void)
 		m->pertag->curtag = m->pertag->prevtag = 1;
 
 		/* init layouts */
-		for (i = 0; i < LENGTH(tags); i++)
-			m->pertag->ltidxs[i][0] = &layouts[taglayouts[i]];
-		m->pertag->ltidxs[LENGTH(tags)][0] = &layouts[0];
+		m->pertag->ltidxs[0][0] = &layouts[0];
+		for (i = 1; i <= LENGTH(tags); i++)
+			m->pertag->ltidxs[i][0] = &layouts[taglayouts[i - 1]];
 
 		for (i = 0; i <= LENGTH(tags); i++) {
 			/* init nmaster */
