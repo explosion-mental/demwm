@@ -2994,7 +2994,7 @@ run(void)
 				else /* NULL terminate the string */
 					buffer[bt++] = '\0';
 
-				strcpy(blockoutput[i], buffer);
+				strncpy(blockoutput[i], buffer, CMDLENGTH);
 				/* remove lock for the current block */
 				execlock &= ~(1 << i);
 				drawbar(selmon);
