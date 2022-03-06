@@ -2976,17 +2976,13 @@ run(void)
 				/* empty buffer with CMDLENGTH + 1 byte for the null terminator */
 				char buffer[CMDLENGTH + 1] = {0};
 				int bt = read(fds[i + 1].fd, buffer, CMDLENGTH);
+				/* remove lock for the current block */
+				execlock &= ~(1 << i);
 
 				if (bt == -1) { /* if read failed */
 					fprintf(stderr, "dwm: read failed in block %s\n", blocks[i].command);
 					perror(" failed");
 					continue;
-				}
-
-				/* if buffer is full, there is a chance that there is more to read */
-				if (bt == sizeof(buffer)) {
-					char ch;
-					while (read(pipes[i][0], &ch, 1) == 1 && ch != '\n');
 				}
 
 				if (buffer[bt - 1] == '\n') /* chop off ending new line, if one is present */
@@ -2995,9 +2991,14 @@ run(void)
 					buffer[bt++] = '\0';
 
 				strncpy(blockoutput[i], buffer, CMDLENGTH);
-				/* remove lock for the current block */
-				execlock &= ~(1 << i);
 				drawbar(selmon);
+
+				/* if buffer is full, there is a chance that there is more to read */
+				if (bt == CMDLENGTH) {
+					char ch[16];
+					while (read(pipes[i][0], ch, sizeof(ch)) == 0); /* read until EOF */
+				}
+
 			} else if (fds[i + 1].revents & POLLHUP) {
 				fprintf(stderr, "dwm: blocks hangup\n");
 				perror(" failed");
