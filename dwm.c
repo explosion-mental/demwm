@@ -2981,7 +2981,8 @@ run(void)
 				if (buffer[bt - 1] == '\n') /* chop off ending new line, if one is present */
 					buffer[bt - 1] = '\0';
 
-				if (bt == sizeof(buffer)) { /* there is more than CMDLENGTH characters */
+				/* if buffer is full, there is a chance that there is more to read */
+				if (bt == sizeof(buffer)) {
 					char ch;
 					while (read(pipes[i][0], &ch, 1) == 1 && ch != '\n');
 				}
