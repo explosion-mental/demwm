@@ -827,8 +827,7 @@ cleanup(void)
 	while (mons)
 		cleanupmon(mons);
 	//kill(timerpid, SIGKILL);
-	for (i = 0; i < LENGTH(blocks); i++)
-	{
+	for (i = 0; i < LENGTH(blocks); i++) {
 		close(pipes[i][0]);
 		close(pipes[i][1]);
 	}
@@ -2958,7 +2957,8 @@ run(void)
 			exit(EXIT_FAILURE);
 		}
 
-		if (fds[0].revents & POLLIN) { /* handle display fd */
+		/* handle display fd */
+		if (fds[0].revents & POLLIN) {
 			while (running && XPending(dpy)) {
 				XNextEvent(dpy, &ev);
 				if (handler[ev.type])
@@ -2969,8 +2969,9 @@ run(void)
 			perror(" failed");
 			exit(1);
 		}
-		for (i = 0; i < LENGTH(blocks); i++)
-		{
+
+		/* handle blocks */
+		for (i = 0; i < LENGTH(blocks); i++) {
 			if (fds[i + 1].revents & POLLIN) {
 				char buffer[CMDLENGTH] = {0};
 				int bt = read(fds[i + 1].fd, buffer, sizeof(buffer));
