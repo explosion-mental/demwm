@@ -2992,13 +2992,6 @@ run(void)
 
 				strncpy(blockoutput[i], buffer, CMDLENGTH);
 				drawbar(selmon);
-
-				/* if buffer is full, there is a chance that there is more to read */
-				if (bt == CMDLENGTH) {
-					char ch[16];
-					while (read(pipes[i][0], ch, sizeof(ch)) == 0); /* read until EOF */
-				}
-
 			} else if (fds[i + 1].revents & POLLHUP) {
 				fprintf(stderr, "dwm: blocks hangup\n");
 				perror(" failed");
