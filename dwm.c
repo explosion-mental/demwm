@@ -2977,9 +2977,15 @@ run(void)
 		{
 			if (fds[i + 1].revents & POLLIN) {
 				char buffer[CMDLENGTH] = {0};
-				int bt = read(fds[i + 1].fd, buffer, LENGTH(buffer));
+				int bt = read(fds[i + 1].fd, buffer, sizeof(buffer));
 				if (buffer[bt - 1] == '\n') /* chop off ending new line, if one is present */
 					buffer[bt - 1] = '\0';
+
+				if (bt == sizeof(buffer)) { /* there is more than CMDLENGTH characters */
+					char ch;
+					while (read(pipes[i][0], &ch, 1) == 1 && ch != '\n');
+				}
+
 				strcpy(blockoutput[i], buffer);
 				/* remove lock for the current block */
 				execlock &= ~(1 << i);
