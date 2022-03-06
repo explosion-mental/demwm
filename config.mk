@@ -44,6 +44,7 @@ LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS} -lXrender ${XCBLIBS} ${
 # flags
 O_BASIC  = -march=native -Ofast -flto=auto
 CPPFLAGS = -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${ICONS} ${SYSTRAY} ${TAG_PREVIEW} ${TAGNUM}
+#CFLAGS   = -g -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Wno-unused-function -O0 ${INCS} ${CPPFLAGS}
 CFLAGS   = -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Wno-unused-function ${O_BASIC} ${INCS} ${CPPFLAGS}
 LDFLAGS  = ${LIBS}
 
@@ -52,4 +53,4 @@ LDFLAGS  = ${LIBS}
 #LDFLAGS = ${LIBS}
 
 # compiler and linker
-CC = gcc
+CC = tcc

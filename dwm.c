@@ -826,16 +826,13 @@ cleanup(void)
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 	while (mons)
 		cleanupmon(mons);
-	kill(timerpid, SIGKILL);
-	#ifdef INVERSED
-	for (i = LENGTH(blocks) - 1; i >= 0; i--)
-	#else
+	//kill(timerpid, SIGKILL);
 	for (i = 0; i < LENGTH(blocks); i++)
-	#endif /* INVERSED */
 	{
 		close(pipes[i][0]);
 		close(pipes[i][1]);
 	}
+
 #ifdef SYSTRAY
 	if (systray) {
 		while (systray->icons)
@@ -1136,17 +1133,22 @@ createmon(void)
 		m->pertag = ecalloc(1, sizeof(Pertag));
 		m->pertag->curtag = m->pertag->prevtag = 1;
 
+		/* init layouts */
+		for (i = 0; i < LENGTH(tags); i++) {
+			m->pertag->sellts[i] = m->sellt;
+			m->pertag->ltidxs[i][0] = &layouts[taglayouts[i]];
+			m->pertag->ltidxs[i][1] = m->lt[0];
+		}
+		m->pertag->sellts[LENGTH(tags)] = m->sellt;
+		m->pertag->ltidxs[LENGTH(tags)][0] = &layouts[0];
+		m->pertag->ltidxs[LENGTH(tags)][1] = m->lt[0];
+
 		for (i = 0; i <= LENGTH(tags); i++) {
 			/* init nmaster */
 			m->pertag->nmasters[i] = m->nmaster;
 
 			/* init mfacts */
 			m->pertag->mfacts[i] = m->mfact;
-
-			/* init layouts */
-			m->pertag->sellts[i] = m->sellt;
-			m->pertag->ltidxs[i][0] = taglayouts[i - 1] && taglayouts[i - 1] < LENGTH(layouts) ? &layouts[taglayouts[i - 1]] : &layouts[0];
-			m->pertag->ltidxs[i][1] = m->lt[0];
 
 			/* init showbar */
 			if (pertagbar)
@@ -1294,14 +1296,14 @@ drawbar(Monitor *m)
 		x += w;
 	}
 	/* monocle, count clients if there are more than one */
-	if (m->lt[m->sellt]->arrange == monocle || m->lt[m->sellt]->arrange == alphamonocle) {
+	if (m->lt[m->sellt]->arrange == &monocle || m->lt[m->sellt]->arrange == &alphamonocle) {
 		for (a = 0, s = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), a++)
 			if (c == m->stack)
 				s = a;
 		if (!s && a)
 			s = a;
 		if (a > 1) {
-			if (m->lt[m->sellt]->arrange == monocle)
+			if (m->lt[m->sellt]->arrange == &monocle)
 				snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d/%d]", s, a);
 			else
 				snprintf(m->ltsymbol, sizeof m->ltsymbol, "{%d/%d}", s, a);
@@ -1312,7 +1314,7 @@ drawbar(Monitor *m)
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
 	if ((w = bw - tw - x) > bh) {
-		if (m->lt[m->sellt]->arrange == clear) { /* hide title in clear layout */
+		if (m->lt[m->sellt]->arrange == &clear) { /* hide title in clear layout */
 			drw_setscheme(drw, scheme[SchemeNorm]);
 			drw_rect(drw, x, 0, w, bh, 1, 1);
 			drw_map(drw, m->barwin, 0, 0, bw, bh);
@@ -2969,11 +2971,7 @@ run(void)
 			perror(" failed");
 			exit(1);
 		}
-		#ifdef INVERSED
-		for (i = LENGTH(blocks) - 1; i >= 0; i--)
-		#else
 		for (i = 0; i < LENGTH(blocks); i++)
-		#endif /* INVERSED */
 		{
 			if (fds[i + 1].revents & POLLIN) {
 				char buffer[CMDLENGTH] = {0};

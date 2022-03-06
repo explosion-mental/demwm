@@ -20,9 +20,12 @@ static const int pertag       = 1;        /* 0 means global layout across all ta
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
 static const int scalepreview = 4;        /* tag previews scaling */
-static const int scrollsensetivity    = 30;	/* 1 means resize window by 1 pixel for each scroll event */
-static const unsigned int baralpha    = 120;	/* bar opacity from 0 to 255, default is 185*/
-static const unsigned int borderalpha = OPAQUE;	/* borders, default is 0xffU (OPAQUE) */
+/* 1 means resize window by 1 pixel for each scroll event */
+#define scrollsensetivity    30
+/* bar opacity from 0 to 255, default is 185*/
+#define baralpha    120
+/* borders, default is 0xffU (OPAQUE) */
+#define borderalpha OPAQUE
 
 static const char *fonts[] = {
 	"Monofur Nerd Font:size=10:antialias=true:autohint=true", /* Mono */
