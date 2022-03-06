@@ -2973,8 +2973,9 @@ run(void)
 		/* handle blocks */
 		for (i = 0; i < LENGTH(blocks); i++) {
 			if (fds[i + 1].revents & POLLIN) {
-				char buffer[CMDLENGTH] = {0};
-				int bt = read(fds[i + 1].fd, buffer, sizeof(buffer));
+				/* empty buffer with CMDLENGTH + 1 byte for the null terminator */
+				char buffer[CMDLENGTH + 1] = {0};
+				int bt = read(fds[i + 1].fd, buffer, CMDLENGTH);
 
 				if (bt == -1) { /* if read failed */
 					fprintf(stderr, "dwm: read failed in block %s\n", blocks[i].command);
@@ -2982,14 +2983,16 @@ run(void)
 					continue;
 				}
 
-				if (buffer[bt - 1] == '\n') /* chop off ending new line, if one is present */
-					buffer[bt - 1] = '\0';
-
 				/* if buffer is full, there is a chance that there is more to read */
 				if (bt == sizeof(buffer)) {
 					char ch;
 					while (read(pipes[i][0], &ch, 1) == 1 && ch != '\n');
 				}
+
+				if (buffer[bt - 1] == '\n') /* chop off ending new line, if one is present */
+					buffer[bt - 1] = '\0';
+				else /* NULL terminate the string */
+					buffer[bt++] = '\0';
 
 				strcpy(blockoutput[i], buffer);
 				/* remove lock for the current block */
