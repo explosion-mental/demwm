@@ -6,6 +6,7 @@ My build of dwm
 # Requirements
 - In order to build dwm you need the Xlib header files.
 - Xcb header files for the `swallow patch`.
+- Any(?) C99 compiler (gcc and tcc tested)
 ## Optional
 - [pywal](https://github.com/dylanaraps/pywal)
 	* if not installed it will set colors to (hopefully) default dwm colors
@@ -37,7 +38,8 @@ My build of dwm
 - Dynamic and static scratchpads
 - Centered title only if there is space left
 - Status text handling, like dwmblocks, but asynchronous (see below)
-- Windows remember their tags, they don't go into the first tag when restarting
+- Windows remember their tags, they all don't stack into the first tag when
+  restarting
 
 # Status text
 I've decided to integrate dwmblocks into dwm itself.
