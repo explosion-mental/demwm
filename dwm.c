@@ -1134,14 +1134,9 @@ createmon(void)
 		m->pertag->curtag = m->pertag->prevtag = 1;
 
 		/* init layouts */
-		for (i = 0; i < LENGTH(tags); i++) {
-			m->pertag->sellts[i] = m->sellt;
+		for (i = 0; i < LENGTH(tags); i++)
 			m->pertag->ltidxs[i][0] = &layouts[taglayouts[i]];
-			m->pertag->ltidxs[i][1] = m->lt[0];
-		}
-		m->pertag->sellts[LENGTH(tags)] = m->sellt;
 		m->pertag->ltidxs[LENGTH(tags)][0] = &layouts[0];
-		m->pertag->ltidxs[LENGTH(tags)][1] = m->lt[0];
 
 		for (i = 0; i <= LENGTH(tags); i++) {
 			/* init nmaster */
@@ -1149,6 +1144,9 @@ createmon(void)
 
 			/* init mfacts */
 			m->pertag->mfacts[i] = m->mfact;
+
+			m->pertag->sellts[i] = m->sellt;
+			m->pertag->ltidxs[i][1] = m->lt[0];
 
 			/* init showbar */
 			if (pertagbar)
