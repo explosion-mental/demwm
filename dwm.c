@@ -2975,6 +2975,13 @@ run(void)
 			if (fds[i + 1].revents & POLLIN) {
 				char buffer[CMDLENGTH] = {0};
 				int bt = read(fds[i + 1].fd, buffer, sizeof(buffer));
+
+				if (bt == -1) { /* if read failed */
+					fprintf(stderr, "dwm: read failed in block %s\n", blocks[i].command);
+					perror(" failed");
+					continue;
+				}
+
 				if (buffer[bt - 1] == '\n') /* chop off ending new line, if one is present */
 					buffer[bt - 1] = '\0';
 
