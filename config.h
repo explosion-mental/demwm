@@ -21,11 +21,11 @@ static const int pertagbar    = 0;        /* 0 means using pertag, but with the 
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
 static const int scalepreview = 4;        /* tag previews scaling */
 /* 1 means resize window by 1 pixel for each scroll event */
-#define scrollsensetivity    30
+#define scrollsensetivity	30
 /* bar opacity from 0 to 255, default is 185*/
-#define baralpha    120
+#define baralpha		120
 /* borders, default is 0xffU (OPAQUE) */
-#define borderalpha OPAQUE
+#define borderalpha		OPAQUE
 
 static const char *fonts[] = {
 	"Monofur Nerd Font:size=10:antialias=true:autohint=true", /* Mono */
@@ -65,8 +65,8 @@ static const unsigned int alphas[][2]   = {
 	[SchemeUrgent] = { OPAQUE,	baralpha },
 	[SchemeLt]     = { OPAQUE,	baralpha },
 	[SchemeTitle]  = { OPAQUE,	OPAQUE,	 },
-	[SchemeStatus] = { OPAQUE,	baralpha },
-	[SchemeDelim]  = { OPAQUE,	baralpha },
+	[SchemeStatus] = { OPAQUE,	baralpha + 40},
+	[SchemeDelim]  = { OPAQUE,	baralpha + 40},
 	[SchemeSys]    = { OPAQUE,	baralpha },
 	[SchemeNotify] = { OPAQUE,	baralpha },
 	[SchemeIndOn]  = { OPAQUE,	baralpha },
@@ -108,7 +108,7 @@ static const Block blocks[] = {
 	{ color3, "sb-music",				0,		11},
 //	{ color3, "sb-tasks",				10,		12},
 	{ color4, "sb-notes",				0,		13},
-	{ color5, "cat /tmp/recordingicon 2>/dev/null",	0,		14},
+	{ color5, "cat /tmp/recordingicon",	0,		14},
 //	{ color6, "sb-count",				0,		21},
 };
 
