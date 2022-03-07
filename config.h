@@ -108,7 +108,7 @@ static const Block blocks[] = {
 	{ color3, "sb-music",				0,		11},
 //	{ color3, "sb-tasks",				10,		12},
 	{ color4, "sb-notes",				0,		13},
-	{ color5, "cat /tmp/recordingicon",	0,		14},
+	{ color5, "echo '';cat /tmp/recordingicon",	0,		14},
 //	{ color6, "sb-count",				0,		21},
 };
 
