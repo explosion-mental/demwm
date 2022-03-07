@@ -2007,6 +2007,11 @@ getcmd(int i, char *button)
 	/* lock execution of block until current instance finishes execution */
 	execlock |= 1 << i;
 
+	/* dummy write to wake (update) the block even when the command output
+	 * is empty */
+	int j = 0;
+	write(pipes[i][1], &j, sizeof(j));
+
 	if (fork() == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
