@@ -485,7 +485,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 /* dynamic scratchpads (this selects an unused tag) */
 #define SCRATCHPAD_MASK		(1 << (NUMTAGS + 1))
 
-static char blockoutput[LENGTH(blocks)][CMDLENGTH] = {0};
+static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0};
 static int pipes[LENGTH(blocks)][2];
 static int execlock = 0; /* ensure only one child process exists per block at an instance */
 
@@ -2993,8 +2993,7 @@ run(void)
 		for (i = 0; i < LENGTH(blocks); i++) {
 			if (fds[i + 1].revents & POLLIN) {
 				/* empty buffer with CMDLENGTH + 1 byte for the null terminator */
-				char buffer[CMDLENGTH + 1] = {0};
-				int bt = read(fds[i + 1].fd, buffer, CMDLENGTH);
+				int bt = read(fds[i + 1].fd, blockoutput[i], CMDLENGTH);
 				/* remove lock for the current block */
 				execlock &= ~(1 << i);
 
@@ -3004,12 +3003,11 @@ run(void)
 					continue;
 				}
 
-				if (buffer[bt - 1] == '\n') /* chop off ending new line, if one is present */
-					buffer[bt - 1] = '\0';
+				if (blockoutput[i][bt - 1] == '\n') /* chop off ending new line, if one is present */
+					blockoutput[i][bt - 1] = '\0';
 				else /* NULL terminate the string */
-					buffer[bt++] = '\0';
+					blockoutput[i][bt++] = '\0';
 
-				strncpy(blockoutput[i], buffer, CMDLENGTH);
 				drawbar(selmon);
 			} else if (fds[i + 1].revents & POLLHUP) {
 				fprintf(stderr, "dwm: blocks hangup\n");
