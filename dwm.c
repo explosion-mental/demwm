@@ -484,7 +484,6 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 
 /* dynamic scratchpads (this selects an unused tag) */
 #define SCRATCHPAD_MASK		(1 << (NUMTAGS + 1))
-#define STATUSLENGTH		(LENGTH(blocks) * CMDLENGTH + 1)
 
 static char blockoutput[LENGTH(blocks)][CMDLENGTH] = {0};
 static int pipes[LENGTH(blocks)][2];
