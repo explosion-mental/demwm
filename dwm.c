@@ -499,7 +499,7 @@ struct Pertag {
 	int showbars[LENGTH(tags) + 1];		/* display bar for the current tag */
 	Client *prevzooms[LENGTH(tags) + 1];	/* store zoom information */
 	int enablegaps[LENGTH(tags) + 1];	/* added with vanitygaps */
-	unsigned int gaps[NUMTAGS + 1];		/* gaps per tag */
+	unsigned int gaps[LENGTH(tags) + 1];	/* gaps per tag */
 };
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
