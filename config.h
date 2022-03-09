@@ -3,7 +3,7 @@
 /* appearance */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const int systraypinningfailfirst = 1;   /* 1: if pinning fails, display systray on the first monitor, False: display systray on the last monitor*/
-static unsigned int borderpx  = 4;        /* border pixel of windows */
+static unsigned int borderpx  = 5;        /* border pixel of windows */
 static unsigned int snap      = 10;       /* snap pixel */
 static unsigned int gappih    = 15;       /* horiz inner gap between windows */
 static unsigned int gappiv    = 20;       /* vert inner gap between windows */
@@ -20,12 +20,8 @@ static const int pertag       = 1;        /* 0 means global layout across all ta
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
 static const int scalepreview = 4;        /* tag previews scaling */
-/* 1 means resize window by 1 pixel for each scroll event */
-#define scrollsensetivity	30
-/* bar opacity from 0 to 255, default is 185*/
+/* bar opacity from 0 to 255, default is 185 (OPAQUE = 255) */
 #define baralpha		120
-/* borders, default is 0xffU (OPAQUE) */
-#define borderalpha		OPAQUE
 
 static const char *fonts[] = {
 	"Monofur Nerd Font:size=10:antialias=true:autohint=true", /* Mono */
@@ -37,6 +33,7 @@ static const char *fonts[] = {
 //	"Noto Color Emoji:pixelsize=16:antialias=true:autohint=true: style=Regular", /* Emojis */
 	"JoyPixels:size=10:antialias=true:autohint=true" /* Emojis */
 };
+
 /* pywal */
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8];
 static char color6[8], color7[8], color8[8], bg_wal[8], fg_wal[8], cursor_wal[8];
@@ -54,7 +51,7 @@ static const char *colors[][2]	        = {
 	[SchemeNotify] = { fg_wal,	color0 }, /* bar on urgent tag */
 	[SchemeIndOn]  = { color4,	color0 }, /* rectangle on sel tag */
 	[SchemeIndOff] = { color2,	color0 }, /* rectangle on norm tag */
-	[BorderNorm]   = { color0 },	/* normal window border */
+	[BorderNorm]   = { bg_wal },	/* normal window border */
 	[BorderSel]    = { color2 },	/* selected window border */
 	[BorderUrg]    = { fg_wal },	/* urgent window border */
 };
@@ -71,9 +68,9 @@ static const unsigned int alphas[][2]   = {
 	[SchemeNotify] = { OPAQUE,	baralpha },
 	[SchemeIndOn]  = { OPAQUE,	baralpha },
 	[SchemeIndOff] = { OPAQUE,	baralpha },
-	[BorderNorm]   = { 0 },
-	[BorderSel]    = { borderalpha },
-	[BorderUrg]    = { borderalpha },
+	[BorderNorm]   = { OPAQUE },
+	[BorderSel]    = { baralpha },
+	[BorderUrg]    = { OPAQUE },
 };
 
 /* status bar */
@@ -117,7 +114,7 @@ static const Block blocks[] = {
 /* max number of character that one block command can output */
 #define CMDLENGTH		50
 /* delimeter between blocks commands. NULL character ('\0') means no delimeter. */
-static char delimiter[] = " ";
+static const char delimiter[] = " ";
 
 /* tags */
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
@@ -181,6 +178,8 @@ static const Rule rules[] = {
 };
 
 /* resizemousescroll direction argument list */
+/* 1 means resize window by 1 pixel for each scroll event on resizemousescroll */
+#define scrollsensetivity	30
 static const int scrollargs[4][2] = {
 	/* width change         height change */
 	{ -scrollsensetivity,	0 },
