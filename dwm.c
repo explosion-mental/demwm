@@ -350,7 +350,6 @@ static void sigterm(int unused);
 static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
-static void timerloop(void);
 static void togglebar(const Arg *arg);
 static void fakefullscreen(const Arg *arg);
 static void togglefloating(const Arg *arg);
@@ -420,7 +419,6 @@ static pid_t winpid(Window w);
 static unsigned int sleepinterval = 0, maxinterval = 0, count = 0;
 static const char broken[] = "broken";
 static unsigned int stsw = 0, blocknum;
-static pid_t timerpid = -1;
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh, blw = 0;      /* bar geometry */
@@ -818,7 +816,6 @@ cleanup(void)
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 	while (mons)
 		cleanupmon(mons);
-	//kill(timerpid, SIGKILL);
 	for (i = 0; i < LENGTH(blocks); i++) {
 		close(pipes[i][0]);
 		close(pipes[i][1]);
@@ -2727,7 +2724,6 @@ quit(const Arg *arg)
 void
 refresh(const Arg *arg)
 {
-	//kill(timerpid, SIGKILL);
 	restart = 1;
 	running = 0;
 }
@@ -3432,14 +3428,6 @@ setup(void)
 	snprintf(envpid, LENGTH(envpid), "%d", getpid());
 	setenv("STATUSBAR", envpid, 1);
 
-	/* timerloop as the child */
-	//timerpid = fork();
-	//if (timerpid == 0) {
-	//	if (dpy)
-	//		close(ConnectionNumber(dpy));
-	//	timerloop();
-	//}
-
 	/* init screen */
 	screen = DefaultScreen(dpy);
 	sw = DisplayWidth(dpy, screen);
@@ -3714,7 +3702,6 @@ sighandler(int signum)
 void
 sighup(int unused)
 {
-	//kill(timerpid, SIGKILL);
 	restart = 1;
 	running = 0;
 }
@@ -3789,49 +3776,6 @@ tagmon(const Arg *arg)
 		}
 	} else
 		sendmon(c, dirtomon(arg->i));
-}
-
-void
-timerloop(void)
-{
-
-	int i;
-	unsigned int interval = 0, maxinterval = 0;
-
-#ifdef INVERSED
-	for (i = LENGTH(blocks) - 1; i >= 0; i--)
-#else
-	for (i = 0; i < LENGTH(blocks); i++)
-#endif /* INVERSED */
-		if (blocks[i].interval) {
-			maxinterval = MAX(blocks[i].interval, maxinterval);
-			interval = gcd(blocks[i].interval, interval);
-		}
-
-	unsigned int count = 0;
-	struct timespec sleeptime = {interval, 0};
-	struct timespec tosleep = sleeptime;
-	pid_t parentpid = getppid();
-
-	while (1) {
-		/* update count to [1, maxinterval] */
-		count = (count + interval - 1) % maxinterval + 1;
-
-		/* sleep for sleeptime even while being interrupted */
-		while (nanosleep(&tosleep, &tosleep) == -1);
-		tosleep = sleeptime;
-
-		/* check if any block needs to update */
-	#ifdef INVERSED
-		for (i = LENGTH(blocks) - 1; i >= 0; i--)
-	#else
-		for (i = 0; i < LENGTH(blocks); i++)
-	#endif /* INVERSED */
-		{
-			if ((blocks[i].interval != 0 && count % blocks[i].interval == 0) || count == -1 || count == 0)
-				kill(parentpid, SIGRTMIN+blocks[i].signal); /* notify parent to update blocks X */
-		}
-	}
 }
 
 void
