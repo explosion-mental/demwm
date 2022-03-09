@@ -3706,8 +3706,8 @@ sigchld(int unused)
 	//	die("can't install SIGCHLD handler:");
 	//while (0 < waitpid(-1, NULL, WNOHANG));
 	struct sigaction sa;
-	sa.sa_handler = SIG_DFL;
-	sa.sa_flags = SA_NOCLDWAIT;
+	sa.sa_handler = sigchld;
+	sa.sa_flags = SA_NOCLDSTOP | SA_RESTART;
 	sigemptyset(&sa.sa_mask);
 	if (sigaction(SIGCHLD, &sa, 0) == -1)
 		die("can't install SIGCHLD handler:");
