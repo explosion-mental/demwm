@@ -81,14 +81,6 @@
 #define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
 #define Button6			6
 #define Button7			7
-/* status bar signals */
-#ifdef __OpenBSD__
-#define SIGPLUS			SIGUSR1+1
-#define SIGMINUS		SIGUSR1-1
-#else
-#define SIGPLUS			SIGRTMIN
-#define SIGMINUS		SIGRTMIN
-#endif
 #ifdef SYSTRAY
 /* XEMBED messages */
 #define VERSION_MAJOR               0
@@ -2977,8 +2969,10 @@ run(void)
 	while (running) {
 
 		if ((poll(fds, LENGTH(blocks) + 1, -1)) == -1) {
-			if (errno == EINTR) /* signal caught */
+			if (errno == EINTR) { /* signal caught */
+				fprintf(stderr, "dwm: poll INTERRUPTED by a signal, ignoring..\n");
 				continue;
+			}
 			fprintf(stderr, "dwm: poll ");
 			perror("failed");
 			exit(EXIT_FAILURE);
@@ -3417,24 +3411,21 @@ setup(void)
 	signal(SIGALRM, sigalrm); /* exit */
 
 	//FIXME SA_RESTART shoud not 'kill' poll
-//	/* ignore all real time signals */
-//	struct sigaction ig;
-//	ig.sa_handler = SIG_IGN;
-//	for (i = SIGRTMIN; i <= SIGRTMAX; i++)
-//		sigaction(i, &ig, NULL);
-//
-//	/* handle defined real time signals */
-//	struct sigaction sa;
-//	sa.sa_handler = sighandler;
-//	sa.sa_flags = SA_RESTART;
-//#ifdef INVERSED
-//	for (i = LENGTH(blocks) - 1; i >= 0; i--)
-//#else
-//	for (i = 0; i < LENGTH(blocks); i++)
-//#endif /* INVERSED */
-//		if (blocks[i].signal)
-//			sigaction(SIGRTMIN + i, &sa, NULL);
-//	#endif
+	/* ignore all real time signals */
+	struct sigaction ig;
+	ig.sa_handler = SIG_IGN;
+	sigemptyset(&ig.sa_mask);
+	for (i = SIGRTMIN; i <= SIGRTMAX; i++)
+		sigaction(i, &ig, NULL);
+
+	/* handle defined real time signals */
+	struct sigaction sa;
+	sa.sa_handler = sighandler;
+	sa.sa_flags = SA_RESTART;
+	sigemptyset(&sa.sa_mask);
+	for (i = 0; i < LENGTH(blocks); i++)
+		if (blocks[i].signal)
+			sigaction(SIGRTMIN + i, &sa, NULL);
 
 	/* pid as an enviromental variable */
 	char envpid[16];
@@ -3717,19 +3708,7 @@ sigchld(int unused)
 void
 sighandler(int signum)
 {
-	XEvent event;
-
-	getsigcmds(signum-SIGPLUS);
-
-	/* send a custom Atom in PropertyNotify event to the root window */
-	event.type = PropertyNotify;
-	//event.window = root;
-	//event.send_event = True;
-	//event.xclient.message_type = customatom;
-	event.xproperty.atom = dwmstatus;
-	event.xproperty.window = root;
-	XSendEvent(dpy, root, False, PropertyNotify, &event);
-	XFlush(dpy);
+	getsigcmds(signum-SIGRTMIN);
 }
 
 void
@@ -3850,7 +3829,7 @@ timerloop(void)
 	#endif /* INVERSED */
 		{
 			if ((blocks[i].interval != 0 && count % blocks[i].interval == 0) || count == -1 || count == 0)
-				kill(parentpid, SIGMINUS+blocks[i].signal); /* notify parent to update blocks X */
+				kill(parentpid, SIGRTMIN+blocks[i].signal); /* notify parent to update blocks X */
 		}
 	}
 }
