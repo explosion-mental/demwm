@@ -6,7 +6,7 @@ backend=wal		# colorz - schemer2 - wal - haishoku - colorthief
 
 # post run hooks
 postrun() {
-	killall glava; glava 1&>/dev/null &
+	killall glava; glava 1>/dev/null &
 	xwallpaper --zoom "$bgloc"
 	#pkill dunst; dunst &
 	ln -sf "${HOME}/.cache/wal/dunstrc"	"${HOME}/.config/dunst/dunstrc"
@@ -28,4 +28,4 @@ wal -i "$randomimg" --backend $backend -qnt || exit 1
 
 ln -sf "$randomimg" "$bgloc"
 
-postrun & disown
+postrun &
