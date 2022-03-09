@@ -425,6 +425,7 @@ static Client *termforwin(const Client *c);
 static pid_t winpid(Window w);
 
 /* variables */
+static unsigned int sleepinterval = 0, maxinterval = 0, count = 0;
 static const char broken[] = "broken";
 static unsigned int stsw = 0, blocknum;
 static pid_t timerpid = -1;
@@ -2964,13 +2965,20 @@ run(void)
 		fds[i + 1].fd = pipes[i][0];
 		fds[i + 1].events = POLLIN;
 		getcmd(i, NULL);
+		if (blocks[i].interval) {
+			maxinterval = MAX(blocks[i].interval, maxinterval);
+			sleepinterval = gcd(blocks[i].interval, sleepinterval);
+		}
 	}
 
+	alarm(sleepinterval);
 	/* main event loop */
 	XSync(dpy, False);
 	while (running) {
 
 		if ((poll(fds, LENGTH(blocks) + 1, -1)) == -1) {
+			if (errno == EINTR) /* signal caught */
+				continue;
 			fprintf(stderr, "dwm: poll ");
 			perror("failed");
 			exit(EXIT_FAILURE);
@@ -3384,6 +3392,15 @@ setmfact(const Arg *arg)
 }
 
 void
+sigalrm(int unused)
+{
+	getcmds(count);
+	alarm(sleepinterval);
+	count = (count + sleepinterval - 1) % maxinterval + 1;
+
+}
+
+void
 setup(void)
 {
 	XSetWindowAttributes wa;
@@ -3392,11 +3409,12 @@ setup(void)
 
 	/* clean up any zombies immediately */
 	//FIXME original sigchld 'killed' poll, sigaction sigchld doesn't let `dwm_random_wall` script run
-	//sigchld(0);
+	sigchld(0);
 
 	/* init signals handlers */
 	signal(SIGHUP, sighup); /* restart */
 	signal(SIGTERM, sigterm); /* exit */
+	signal(SIGALRM, sigalrm); /* exit */
 
 	//FIXME SA_RESTART shoud not 'kill' poll
 //	/* ignore all real time signals */
@@ -3689,9 +3707,11 @@ sigchld(int unused)
 	//while (0 < waitpid(-1, NULL, WNOHANG));
 	struct sigaction sa;
 	sa.sa_handler = SIG_DFL;
-	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_NOCLDWAIT;
-	sigaction(SIGCHLD, &sa, 0);
+	sigemptyset(&sa.sa_mask);
+	if (sigaction(SIGCHLD, &sa, 0) == -1)
+		die("can't install SIGCHLD handler:");
+	while (0 < waitpid(-1, NULL, WNOHANG));
 }
 
 void
