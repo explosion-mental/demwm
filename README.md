@@ -21,6 +21,8 @@ My build of dwm
 - Before updating (`git pull`), change your configs (config.h) to config.def.h
 - An incomplete [documentation](doc.md) about dwm functions.
 - To redirect error mesagges to a file `exec dwm 2> "$HOME"/.cache/dwm.log`
+- edit `config.mk` and change `CC = cc`, I have it default to `tcc` since it's
+  very very fast and I can make changes in the go.
 
 # Features
 - Gaps (vanitygaps)
@@ -51,11 +53,6 @@ Why? Some reasons:
 - This way we could expand and play around with 'blocks' (different colors for
   different blocks, for example)
 
-You may notice two intances of `dwm` running (with `pidof dwm`, for example).
-This is because dwm creates a child process that acts as a timer for the
-blocks, since `dwm` cannot sleep or wait. This could be setted up as another
-program in the future but, for now I will leave this as is.
-
 ## How to interact with blocks
 A block is only a group that consist of 3 things: command, interval and signal.
 
@@ -65,18 +62,18 @@ could define the command as `echo "This is a block"`.
 The interval is how many X seconds you want to pass before re-**run**ning the
 command and update the output. Can be 0, which means never.
 
-The signal is a number where you can re-**run** the command.
-Say a signal number `Y` which, for example, I will define as `11`. Then `Y +
-34` -> `11 + 34` -> `45`, and you will need this result in order to actually
-use the signal with `kill`, In this case: `kill -45 $(pgrep -o dwm)`. `pgrep -o
-dwm` gets the parent process which names matches dwm. That is not the
-reccomended way of doing it. This build of `dwm` sets an _enviromental
-variable_ called `STATUSBAR` which value is the _pid_ of the dwm parent.
+The signal is a number where you can re-**run** the command. Say a signal
+number `Y` which, for example, I will define as `11`. Then `Y + 34` -> `11 +
+34` -> `45`, and you will need this result in order to actually use the signal
+with `kill`, In this case: `kill -45 $(pidof dwm)`. `pidof dwm` gets the pid of
+dwm, but there is a more friendly way. This build of `dwm` sets an
+_enviromental variable_ called `STATUSBAR` which value is the _pid_ of the dwm.
 In short do: `kill -45 $STATUSBAR`.
-Another option to update a block with a signal is to use `xsetroot -name 1`, to
-update a block with signal 1, for example.
-**You must assign signal for a block, this value cannot be 0.**
 
+Signaling mentioned above shouldn't work with BSD's, so a recommended way to
+update a block with a signal is to use `xsetroot -name 1`, to update a block
+with signal 1, for example.
+You can do much more with `xsetroot`, see below..
 
 ## Scripts
 
