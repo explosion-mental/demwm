@@ -405,7 +405,6 @@ static void random_wall(const Arg *arg);
 //static void toggletopbar(const Arg *arg);
 //static void toggleborder(const Arg *arg);
 static void togglevacant(const Arg *arg);
-static void reorganizetags(void);
 static void togglestatus(const Arg *arg);
 static void spawncmd(const Arg *arg);
 
@@ -1086,8 +1085,8 @@ comboview(const Arg *arg)
 
 		/* tagallmaster: clients in the master area should be the same
 		 * after we add a new tag */
-		const Client *selected = selmon->sel;
-		const Client **masters = ecalloc(selmon->nmaster, sizeof(Client *));
+		Client *const selected = selmon->sel;
+		Client **const masters = ecalloc(selmon->nmaster, sizeof(Client *));
 		/* collect (from last to first) references to all clients in the master area */
 		Client *c;
 		size_t i;
@@ -3398,7 +3397,6 @@ setup(void)
 	int i;
 
 	/* clean up any zombies immediately */
-	//FIXME original sigchld 'killed' poll, sigaction sigchld doesn't let `dwm_random_wall` script run
 	sigchld(0);
 
 	/* init signals handlers */
@@ -3406,7 +3404,6 @@ setup(void)
 	signal(SIGTERM, sigterm); /* exit */
 	signal(SIGALRM, sigalrm); /* exit */
 
-	//FIXME SA_RESTART shoud not 'kill' poll
 	/* ignore all real time signals */
 	struct sigaction ig;
 	ig.sa_handler = SIG_IGN;
