@@ -416,6 +416,7 @@ static pid_t winpid(Window w);
 
 /* variables */
 static unsigned int sleepinterval = 0, maxinterval = 0, count = 0;
+static unsigned int lasttags;
 static const char broken[] = "broken";
 static unsigned int stsw = 0, blocknum;
 static int screen;
@@ -1120,7 +1121,7 @@ createmon(void)
 	unsigned int i;
 
 	m = ecalloc(1, sizeof(Monitor));
-	m->tagset[0] = m->tagset[1] = 1;
+	m->tagset[0] = m->tagset[1] = lasttags != 0 ? lasttags : 1;
 	m->mfact = mfact;
 	m->nmaster = nmaster;
 	m->showbar = showbar;
@@ -4814,12 +4815,12 @@ toggletopbar(const Arg *arg)
 int
 main(int argc, char *argv[])
 {
-	if (argc == 2) {
-		if (!strcmp("-v", argv[1]))
-			die("dwm-"VERSION);
-		else if (!strcmp("--restart", argv[1]))
+	if (argc == 3 && !strcmp("--restart", argv[1])) {
 			restart = 1;
-	} else if (argc != 1)
+			lasttags = atoi(argv[2]);
+	} else if (argc == 2 && !strcmp("-v", argv[1]))
+		die("dwm-"VERSION);
+	else if (argc != 1)
 		die("usage: dwm [-v]");
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
@@ -4835,8 +4836,10 @@ main(int argc, char *argv[])
 	#endif /* __OpenBSD__ */
 	scan();
 	run();
-	if (restart) execlp(argv[0], argv[0], "--restart", (char *) NULL);
+	char t[12];
+	snprintf(t, sizeof(t), "%d", selmon->tagset[selmon->seltags]);
 	cleanup();
+	if (restart) execlp(argv[0], argv[0], "--restart", t, (char *) NULL);
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
 }
