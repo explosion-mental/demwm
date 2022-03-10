@@ -803,7 +803,7 @@ checkotherwm(void)
 void
 cleanup(void)
 {
-	Arg a = {.ui = ~0};
+	Arg a = {.ui = 0};
 	Layout foo = { "", NULL };
 	Monitor *m;
 	size_t i;
