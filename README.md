@@ -42,6 +42,7 @@ My build of dwm
 - Status text handling, like dwmblocks, but asynchronous (see below)
 - Windows remember their tags, they all don't stack into the first tag when
   restarting
+- Remember the selected tags when restarting
 
 # Status text
 I've decided to integrate dwmblocks into dwm itself.
@@ -192,16 +193,20 @@ Here are some that I converted into a patch:
 - shift-tools (shift windows,tags or both either with an active client or not)
 
 # What's Next?
-Currently I don't wish more 'features' but here are some ideas:
+Currently I don't wish more 'features' but I'm tweaking from time to time, here
+are some ideas:
 
 ## Some little TODOS:
 - tapresize **corners**
 - toggle border
 - depatch cfacts(?)
 - Make _systray_ background the same color as the bar
-- toggleable pertag. This features a workflow
-  in which you can have the such 'dynamic' window management of dwm and also have a pertag
-  workflow. Can this be implememnted just like the hidevacant patch? meaning, with a simple flag variable. Maybe intead of a lot of if / else we just re-arrange (re-start / re-setup) the pertag variables to default one and somehow maintain them the same while pertag is active.
+- toggleable pertag. This features a workflow in which you can have the such
+  'dynamic' window management of dwm and also have a pertag workflow. Can this
+  be implememnted just like the hidevacant patch? meaning, with a simple flag
+  variable. Maybe intead of a lot of if / else we just re-arrange (re-start /
+  re-setup) the pertag variables to default one and somehow maintain them the
+  same while pertag is active.
 	* another idea. maybe just doing all the above but only for the layout..
 - <s>use fork/exec/dup2 instead of popen in `getcmd` funcs (to remove delay).</s>
 - <s>Make _tag previews_ more solid</s> and prevent from being shown in the preview of the preview...
@@ -236,3 +241,4 @@ Currently I don't wish more 'features' but here are some ideas:
 - status text (blocks) handled by dwm itself (Feb 12 2022)
 	* Asynchronous block handling (Feb 25 2022)
 - Windows remember their tags, useful when restarting (Feb 28 2022)
+- Remember the selected tags when restarting (Mar 09 2022)
