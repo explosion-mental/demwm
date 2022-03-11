@@ -803,7 +803,7 @@ checkotherwm(void)
 void
 cleanup(void)
 {
-	Arg a = {.ui = 0};
+	Arg a = {.ui = ~0};
 	Layout foo = { "", NULL };
 	Monitor *m;
 	size_t i;
@@ -816,10 +816,6 @@ cleanup(void)
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 	while (mons)
 		cleanupmon(mons);
-	for (i = 0; i < LENGTH(blocks); i++) {
-		close(pipes[i][0]);
-		close(pipes[i][1]);
-	}
 
 #ifdef SYSTRAY
 	if (systray) {
@@ -3014,6 +3010,12 @@ run(void)
 			}
 		}
 	}
+
+	/* close the pipes after running */
+	for (i = 0; i < LENGTH(blocks); i++) {
+		close(pipes[i][0]);
+		close(pipes[i][1]);
+	}
 }
 
 void
@@ -4843,8 +4845,8 @@ main(int argc, char *argv[])
 	run();
 	char t[12];
 	snprintf(t, sizeof(t), "%d", selmon->tagset[selmon->seltags]);
-	cleanup();
 	if (restart) execlp(argv[0], argv[0], "--restart", t, (char *) NULL);
+	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
 }
