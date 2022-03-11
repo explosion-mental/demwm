@@ -759,7 +759,7 @@ buttonpress(XEvent *e)
 			click = ClkStatusText;
 			int len, i;
 			//int last = LENGTH(blocks) - 1;
-		#ifdef INVERSED
+		#if INVERSED
 			for (i = LENGTH(blocks) - 1; i >= 0; i--)
 		#else
 			for (i = 0; i < LENGTH(blocks); i++)
@@ -2036,7 +2036,7 @@ void
 getcmds(int time)
 {
 	int i;
-#ifdef INVERSED
+#if INVERSED
 	for (i = LENGTH(blocks) - 1; i >= 0; i--)
 #else
 	for (i = 0; i < LENGTH(blocks); i++)
@@ -2051,7 +2051,7 @@ void
 getsigcmds(unsigned int signal)
 {
 	int i;
-#ifdef INVERSED
+#if INVERSED
 	for (i = LENGTH(blocks) - 1; i >= 0; i--)
 #else
 	for (i = 0; i < LENGTH(blocks); i++)
@@ -2073,7 +2073,7 @@ getstatus(int width)
 	if (!showstatus)
 		return stsw = 0;
 
-#ifdef INVERSED
+#if INVERSED
 	for (i = 0; i < LENGTH(blocks); i++)
 #else
 	for (i = LENGTH(blocks) - 1; i >= 0; i--)
@@ -2943,7 +2943,7 @@ run(void)
 	fds[0].fd = ConnectionNumber(dpy);
 	fds[0].events = POLLIN;
 
-	#ifdef INVERSED
+	#if INVERSED
 	for (i = LENGTH(blocks) - 1; i >= 0; i--)
 	#else
 	for (i = 0; i < LENGTH(blocks); i++)
