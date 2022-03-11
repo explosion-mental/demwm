@@ -53,6 +53,7 @@ static const char *colors[][2]	        = {
 	[SchemeIndOff] = { color2,	color0 }, /* rectangle on norm tag */
 	[BorderNorm]   = { bg_wal },	/* normal window border */
 	[BorderSel]    = { color2 },	/* selected window border */
+	[BorderFloat]  = { color6 },	/* selected floating window border */
 	[BorderUrg]    = { fg_wal },	/* urgent window border */
 };
 static const unsigned int alphas[][2]   = {
@@ -70,6 +71,7 @@ static const unsigned int alphas[][2]   = {
 	[SchemeIndOff] = { OPAQUE,	baralpha },
 	[BorderNorm]   = { OPAQUE },
 	[BorderSel]    = { baralpha },
+	[BorderFloat]  = { baralpha },
 	[BorderUrg]    = { OPAQUE },
 };
 

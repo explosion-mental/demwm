@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/poll.h>
@@ -95,7 +96,7 @@ enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
 	SchemeStatus, SchemeDelim, SchemeSys, SchemeNotify, SchemeIndOff,
-	SchemeIndOn, BorderNorm, BorderSel, BorderUrg }; /* color schemes */
+	SchemeIndOn, BorderNorm, BorderSel, BorderFloat, BorderUrg }; /* color schemes */
 enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8 }; /* scratchpads */
 enum { NetSupported, NetWMName,
 #ifdef ICONS
@@ -1409,7 +1410,7 @@ focus(Client *c)
 		detachstack(c);
 		attachstack(c);
 		grabbuttons(c, 1);
-		XSetWindowBorder(dpy, c->win, scheme[BorderSel][ColFg].pixel);
+		XSetWindowBorder(dpy, c->win, scheme[c->isfloating ? BorderFloat : BorderSel][ColFg].pixel);
 		setfocus(c);
 		if (c->mon->lt[c->mon->sellt]->arrange) {
 			/* Move all visible tiled clients that are not marked as on top below the bar window */
@@ -2767,6 +2768,7 @@ resizeclient(Client *c, int x, int y, int w, int h)
 		c->h = wc.height += c->bw * 2;
 		wc.border_width = 0;
 	}
+
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
 	/* since enternotify is deleted (because I don't use the mouse and I
@@ -3836,8 +3838,18 @@ togglefloating(const Arg *arg)
 	if (c->isfullscreen && c->fakefullscreen != 1) /* no support for fullscreen windows */
 		return;
 	c->isfloating = !c->isfloating || c->isfixed;
-	if (selmon->sel->isfloating)
-		resize(c, c->x, c->y, c->w, c->h, 0);
+
+	if (selmon->sel->isfloating) {
+		if (selmon->sel->bw != borderpx) {
+			selmon->sel->oldbw = selmon->sel->bw;
+			selmon->sel->bw = borderpx;
+		}
+		/* apply float color, since oldbw has the old color */
+		XSetWindowBorder(dpy, c->win, scheme[BorderFloat][ColFg].pixel);
+		resize(selmon->sel, selmon->sel->x, selmon->sel->y,
+		       selmon->sel->w - selmon->sel->bw * 2, selmon->sel->h - selmon->sel->bw * 2, 0);
+	} else
+		XSetWindowBorder(dpy, c->win, scheme[BorderSel][ColFg].pixel);
 
 	c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
 	c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
