@@ -299,7 +299,7 @@ static const Key keys[] = {
 	//{ MODKEY,			XK_s,	togglescratch,	{.ui = Sp1 } },/* bc */
 
 				/* Navigation */
-	{ MODKEY,			XK_j,	focusstack,	{ .i = -1 }		},
+	{ MODKEY,			XK_j,	focusstack,	{ .i = 1 }		},
 	{ MODKEY|ShiftMask,		XK_j,	pushstack,	{ .i = 1 }		},
 
 	{ MODKEY|ControlMask,		XK_j,	shifttag,	{ .i = -1 }		},
@@ -308,7 +308,7 @@ static const Key keys[] = {
 	{ MODKEY|ControlMask,		XK_k,	shifttag,	{ .i = +1 }		},
 
 	{ MODKEY|ShiftMask,		XK_k,	pushstack,	{ .i = -1 }		},
-	{ MODKEY,                       XK_k,	focusstack,	{ .i = +1 }		},
+	{ MODKEY,                       XK_k,	focusstack,	{ .i = -1 }		},
 
 	{ MODKEY,                       XK_h,	setmfact,	{ .f = -0.02 }		},
 	{ MODKEY|ShiftMask,		XK_h,	shiftboth,	{ .i = -1 }		},
