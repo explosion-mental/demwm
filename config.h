@@ -109,7 +109,7 @@ static const Block blocks[] = {
 //	{ color6, "sb-count",				0,		21},
 };
 
-/* if inversed, inverse the order of the blocks */
+/* 1 means inverse the order of the blocks, 0 means normal order */
 #define INVERSED		1
 /* max number of character that one block command can output */
 #define CMDLENGTH		50
