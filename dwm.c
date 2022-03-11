@@ -2948,6 +2948,7 @@ run(void)
 	#endif /* INVERSED */
 	{
 		pipe(pipes[i]);
+		//fcntl(pipes[i], F_SETFD, O_NONBLOCK);
 		fds[i + 1].fd = pipes[i][0];
 		fds[i + 1].events = POLLIN;
 		getcmd(i, NULL);
@@ -2997,6 +2998,13 @@ run(void)
 					fprintf(stderr, "dwm: read failed in block %s\n", blocks[i].command);
 					perror(" failed");
 					continue;
+				}
+
+				if (bt == CMDLENGTH) { /* there is a change there is more to read if bt is full */
+					char buf[CMDLENGTH] = {0};
+					/* read until 'EOF' (no characters left) */
+					while (read(fds[i + 1].fd, buf, sizeof(buf)) == 0);
+					fprintf(stderr, "dwm: block %d has more characters than CMDLENGTH '%s'\n", i, buf);
 				}
 
 				if (blockoutput[i][bt - 1] == '\n') /* chop off ending new line, if one is present */
