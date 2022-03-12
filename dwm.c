@@ -2948,7 +2948,7 @@ run(void)
 	#endif /* INVERSED */
 	{
 		pipe(pipes[i]);
-		//fcntl(pipes[i], F_SETFD, O_NONBLOCK);
+		fcntl(pipes[i], F_SETFD, O_NONBLOCK);
 		fds[i + 1].fd = pipes[i][0];
 		fds[i + 1].events = POLLIN;
 		getcmd(i, NULL);
@@ -3404,7 +3404,6 @@ sigalrm(int unused)
 	getcmds(count);
 	alarm(sleepinterval);
 	count = (count + sleepinterval - 1) % maxinterval + 1;
-
 }
 
 void
@@ -3418,16 +3417,9 @@ setup(void)
 	sigchld(0);
 
 	/* init signals handlers */
-	signal(SIGHUP, sighup); /* restart */
+	signal(SIGHUP, sighup);   /* restart */
 	signal(SIGTERM, sigterm); /* exit */
-	signal(SIGALRM, sigalrm); /* exit */
-
-	/* ignore all real time signals */
-	struct sigaction ig;
-	ig.sa_handler = SIG_IGN;
-	sigemptyset(&ig.sa_mask);
-	for (i = SIGRTMIN; i <= SIGRTMAX; i++)
-		sigaction(i, &ig, NULL);
+	signal(SIGALRM, sigalrm); /* timer */
 
 	/* handle defined real time signals */
 	struct sigaction sa;
