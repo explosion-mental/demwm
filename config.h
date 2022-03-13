@@ -121,7 +121,7 @@ static const char delimiter[] = " ";
 /* tags */
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
 static const int taglayouts[] = {    0,   1,    0,   0,    0,    0,    0,    0,    0 };
-static const char *tagsalt[]  = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+static const char *tagsalt[]  = { "I", "2", "III", "4", "V", "6", "VII", "8", "IX" };
 
 static const Rule rules[] = {
 	/* flags: class, instance, title, wintype, role, tags, isfloating,
