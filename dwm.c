@@ -424,14 +424,15 @@ static Client *termforwin(const Client *c);
 static pid_t winpid(Window w);
 
 /* variables */
-static unsigned int sleepinterval = 0, maxinterval = 0, count = 0;
-static unsigned int lasttags;
 static const char broken[] = "broken";
-static unsigned int stsw = 0, blocknum;
-static int screen;
-static int sw, sh;           /* X display screen geometry width, height */
-static int bh, blw = 0;      /* bar geometry */
-static int lrpad;            /* sum of left and right padding for text */
+static unsigned int sleepinterval = 0, maxinterval = 0, count = 0;
+static unsigned int lasttags; /* keep selected tags on restart */
+static unsigned int stsw = 0; /* status width */
+static unsigned int blocknum; /* blocks idx in mouse click */
+static int combo = 0;         /* combo flag */
+static int sw, sh;            /* X display screen geometry width, height */
+static int bh, blw = 0;       /* bar geometry */
+static int lrpad;             /* sum of left and right padding for text */
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
 static void (*handler[LASTEvent]) (XEvent *) = {
@@ -460,6 +461,7 @@ static unsigned long systrayorientation = 0; /* _NET_SYSTEM_TRAY_ORIENTATION_HOR
 #endif /* SYSTRAY */
 static Atom wmatom[WMLast], netatom[NetLast], dwmstatus, dwmtags;
 static int running = 1, restart = 0;
+static int depth, screen, useargb = 0;
 static Cur *cursor[CurLast];
 static Clr **scheme;
 static Display *dpy;
@@ -467,12 +469,9 @@ static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
 static xcb_connection_t *xcon;
-static int useargb = 0;
 static Visual *visual;
-static int depth;
 static Colormap cmap;
 static Client *scratchpad_last_showed = NULL;
-static int combo = 0;
 
 static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 
