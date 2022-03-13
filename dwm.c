@@ -394,10 +394,18 @@ static int enablegaps = 1;	/* if not gaps per tag */
 static void togglesmartgaps(const Arg *arg);
 static void togglegaps(const Arg *arg);
 static void defaultgaps(const Arg *arg);
-static void incrgaps(const Arg *arg);
 static void getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc);
 static void getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *sr);
 static void setgaps(int oh, int ov, int ih, int iv);
+static void incrgaps(const Arg *arg);	/* inner + outter gaps */
+
+static void incrigaps(const Arg *arg);	/* inner gaps (horiz + vert) */
+static void incrivgaps(const Arg *arg);	/* vertical inner gaps */
+static void incrihgaps(const Arg *arg);	/* horizontal inner gaps */
+
+static void incrogaps(const Arg *arg);	/* outter gaps (horiz + vert) */
+static void incrohgaps(const Arg *arg);	/* vertcal outter gaps */
+static void incrovgaps(const Arg *arg);	/* horizontal outter gaps */
 
 /* Customs */
 static void swaptags(const Arg *arg);
@@ -3164,6 +3172,66 @@ getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *s
 	*sf = sfacts;		/* total factor of stack area */
 	*mr = msize - mtotal;	/* the remainder (rest) of pixels after a cfacts master split */
 	*sr = ssize - stotal;	/* the remainder (rest) of pixels after a cfacts stack split */
+}
+void
+incrigaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh,
+		selmon->gappov,
+		selmon->gappih + arg->i,
+		selmon->gappiv + arg->i
+	);
+}
+void
+incrogaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh + arg->i,
+		selmon->gappov + arg->i,
+		selmon->gappih,
+		selmon->gappiv
+	);
+}
+void
+incrohgaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh + arg->i,
+		selmon->gappov,
+		selmon->gappih,
+		selmon->gappiv
+	);
+}
+void
+incrovgaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh,
+		selmon->gappov + arg->i,
+		selmon->gappih,
+		selmon->gappiv
+	);
+}
+void
+incrihgaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh,
+		selmon->gappov,
+		selmon->gappih + arg->i,
+		selmon->gappiv
+	);
+}
+void
+incrivgaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh,
+		selmon->gappov,
+		selmon->gappih,
+		selmon->gappiv + arg->i
+	);
 }
 /* vanitygaps */
 

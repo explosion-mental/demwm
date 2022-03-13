@@ -699,6 +699,11 @@ centeredmaster(Monitor *m)
 	}
 }
 
+/*
+ * clear
+ * - hides all visible windows, and title, to show you the nice wallpaper
+ * (or to hide stuff)
+ */
 static void
 clear(Monitor *m)
 {
@@ -798,69 +803,3 @@ clear(Monitor *m)
 //		}
 //	}
 //}
-
-/* All of what i consider "core" of vanitygaps are on dwm.c since I don't plan
- * to don't use gaps, here I the 'too much customization' functions. */
-
-/*
-static void
-incrigaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh,
-		selmon->gappov,
-		selmon->gappih + arg->i,
-		selmon->gappiv + arg->i
-	);
-}
-static void
-incrogaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh + arg->i,
-		selmon->gappov + arg->i,
-		selmon->gappih,
-		selmon->gappiv
-	);
-}
-static void
-incrohgaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh + arg->i,
-		selmon->gappov,
-		selmon->gappih,
-		selmon->gappiv
-	);
-}
-static void
-incrovgaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh,
-		selmon->gappov + arg->i,
-		selmon->gappih,
-		selmon->gappiv
-	);
-}
-static void
-incrihgaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh,
-		selmon->gappov,
-		selmon->gappih + arg->i,
-		selmon->gappiv
-	);
-}
-static void
-incrivgaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh,
-		selmon->gappov,
-		selmon->gappih,
-		selmon->gappiv + arg->i
-	);
-}
-*/
