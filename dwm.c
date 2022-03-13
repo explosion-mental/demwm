@@ -352,9 +352,9 @@ static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
 static void togglebar(const Arg *arg);
-static void fakefullscreen(const Arg *arg);
+static void togglefakefullscreen(const Arg *arg);
 static void togglefloating(const Arg *arg);
-static void fullscreen(const Arg *arg);
+static void togglefullscreen(const Arg *arg);
 static void togglescratch(const Arg *arg);
 static void toggletag(const Arg *arg);
 static void toggleview(const Arg *arg);
@@ -2646,8 +2646,6 @@ propertynotify(XEvent *e)
 				/* parsing commands */
 				if (!strcmp(n, "cyclelayout"))
 					cyclelayout(&((Arg) { .i = arg }));
-				else if (!strcmp(n, "fullscreen"))
-					fullscreen(NULL);
 				else if (!strcmp(n, "incrgaps"))
 					incrgaps(&((Arg) { .i = arg }));
 				else if (!strcmp(n, "incrogaps"))
@@ -2676,6 +2674,10 @@ propertynotify(XEvent *e)
 					togglebar(NULL);
 				else if (!strcmp(n, "togglefloating"))
 					togglefloating(NULL);
+				else if (!strcmp(n, "togglefullscreen"))
+					togglefullscreen(NULL);
+				else if (!strcmp(n, "togglefakefullscreen"))
+					togglefakefullscreen(NULL);
 				else if (!strcmp(n, "togglegaps"))
 					togglegaps(NULL);
 				else if (!strcmp(n, "togglesmartgaps"))
@@ -3891,7 +3893,7 @@ togglebar(const Arg *arg)
 }
 
 void
-fakefullscreen(const Arg *arg)
+togglefakefullscreen(const Arg *arg)
 {
 	Client *c = selmon->sel;
 	if (!c)
@@ -3938,7 +3940,7 @@ togglefloating(const Arg *arg)
 }
 
 void
-fullscreen(const Arg *arg)
+togglefullscreen(const Arg *arg)
 {
 	Client *c = selmon->sel;
 	if (!c)
