@@ -1350,14 +1350,6 @@ drawbar(Monitor *m)
 	drw_map(drw, m->barwin, 0, 0, bw, bh);
 }
 
-#ifndef __OpenBSD__
-void
-dummysighandler(int signum)
-{
-    return; /* this signal handler should do nothing */
-}
-#endif
-
 void
 drawbars(void)
 {
