@@ -2483,7 +2483,8 @@ motionnotify(XEvent *e)
 		while (ev->x >= x && ++i < LENGTH(tags));
 
 	     	if (i < LENGTH(tags)) {
-			if ((i + 1) != selmon->previewshow && !(selmon->tagset[selmon->seltags] & 1 << i)) {
+			if ((i + 1) != selmon->previewshow
+			&& !(selmon->tagset[selmon->seltags] & 1 << i)) {
 	     			selmon->previewshow = i + 1;
 	     			showtagpreview(i);
 			} else if (selmon->tagset[selmon->seltags] & 1 << i) {
@@ -3916,9 +3917,9 @@ toggleview(const Arg *arg)
 	int i;
 
 	if (newtagset) {
-#ifdef TAG_PREVIEW
-         switchtag();
-#endif /* TAG_PREVIEW */
+		#ifdef TAG_PREVIEW
+		switchtag();
+		#endif /* TAG_PREVIEW */
 		selmon->tagset[selmon->seltags] = newtagset;
 
 		if (pertag) {
@@ -4318,9 +4319,9 @@ view(const Arg *arg)
 
 	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
  		return;
-#ifdef TAG_PREVIEW
-         switchtag();
-#endif /* TAG_PREVIEW */
+	#ifdef TAG_PREVIEW
+	switchtag();
+	#endif /* TAG_PREVIEW */
 	selmon->seltags ^= 1; /* toggle sel tagset */
 
 	if (pertag) {
