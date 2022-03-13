@@ -114,7 +114,7 @@ static const Block blocks[] = {
 /* 1 means inverse the order of the blocks, 0 means normal order */
 #define INVERSED		1
 /* max number of character that one block command can output */
-#define CMDLENGTH		50
+#define CMDLENGTH		55
 /* delimeter between blocks commands. NULL character ('\0') means no delimeter. */
 static const char delimiter[] = " ";
 
