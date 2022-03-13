@@ -769,11 +769,11 @@ buttonpress(XEvent *e)
 			click = ClkStatusText;
 			int len, i;
 			//int last = LENGTH(blocks) - 1;
-		#if INVERSED
+			#if INVERSED
 			for (i = LENGTH(blocks) - 1; i >= 0; i--)
-		#else
+			#else
 			for (i = 0; i < LENGTH(blocks); i++)
-		#endif /* INVERSED */
+			#endif /* INVERSED */
 			{
 				if (*blockoutput[i] == '\0') //ignore command that output NULL or '\0'
 					continue;
@@ -2034,12 +2034,7 @@ void
 getcmds(int time)
 {
 	int i;
-#if INVERSED
-	for (i = LENGTH(blocks) - 1; i >= 0; i--)
-#else
-	for (i = 0; i < LENGTH(blocks); i++)
-#endif /* INVERSED */
-	{
+	for (i = 0; i < LENGTH(blocks); i++) {
 		if ((blocks[i].interval != 0 && time % blocks[i].interval == 0) || time == -1)
 			getcmd(i, NULL);
 	}
@@ -2049,12 +2044,7 @@ void
 getsigcmds(unsigned int signal)
 {
 	int i;
-#if INVERSED
-	for (i = LENGTH(blocks) - 1; i >= 0; i--)
-#else
-	for (i = 0; i < LENGTH(blocks); i++)
-#endif /* INVERSED */
-	{
+	for (i = 0; i < LENGTH(blocks); i++) {
 		if (blocks[i].signal == signal)
 			getcmd(i, NULL);
 	}
@@ -2071,12 +2061,7 @@ getstatus(int width)
 	if (!showstatus)
 		return stsw = 0;
 
-#if INVERSED
-	for (i = 0; i < LENGTH(blocks); i++)
-#else
-	for (i = LENGTH(blocks) - 1; i >= 0; i--)
-#endif /* INVERSED */
-	{
+	for (i = 0; i < LENGTH(blocks); i++) {
 		if (*blockoutput[i] == '\0') /* ignore command that output NULL or '\0' */
 			continue;
 		strcpy(fgcol, blocks[i].color);
