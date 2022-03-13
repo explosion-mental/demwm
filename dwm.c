@@ -480,7 +480,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0};
 static int pipes[LENGTH(blocks)][2];
 static int execlock = 0; /* ensure only one child process exists per block at an instance */
-static int isalarm = 0;
+static int isalarm = 0, isrtsig = 0;
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
@@ -2965,9 +2965,11 @@ run(void)
 
 		if ((poll(fds, LENGTH(blocks) + 1, -1)) == -1) {
 			if (errno == EINTR) { /* signal caught */
-				if (isalarm) { /* SIGALRM */
+				if (isalarm) /* SIGALRM */
 					isalarm = 0; /* restore isalarm */
-				} else
+				else if (isrtsig) /* blocks signal SIGRTMIN + i */
+					isrtsig = 0;
+				else
 					fprintf(stderr, "dwm: poll INTERRUPTED by a signal (EINTR)\n");
 				continue;
 			}
@@ -3705,6 +3707,7 @@ sigchld(int unused)
 void
 sighandler(int signum)
 {
+	isrtsig = 1;
 	getsigcmds(signum-SIGRTMIN);
 }
 
