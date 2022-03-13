@@ -3432,7 +3432,7 @@ setup(void)
 	sigemptyset(&sa.sa_mask);
 	for (i = 0; i < LENGTH(blocks); i++)
 		if (blocks[i].signal)
-			sigaction(SIGRTMIN + block[i].signal, &sa, NULL);
+			sigaction(SIGRTMIN + blocks[i].signal, &sa, NULL);
 
 	/* pid as an enviromental variable */
 	char envpid[16];
