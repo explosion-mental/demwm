@@ -3416,7 +3416,12 @@ setup(void)
 	/* init signals handlers */
 	signal(SIGHUP, sighup);   /* restart */
 	signal(SIGTERM, sigterm); /* exit */
-	signal(SIGALRM, sigalrm); /* timer */
+
+	struct sigaction al;
+	al.sa_handler = sigalrm;
+	al.sa_flags = SA_RESTART;
+	sigemptyset(&al.sa_mask);
+	sigaction(SIGALRM, &al, NULL);
 
 	/* handle defined real time signals */
 	struct sigaction sa;
