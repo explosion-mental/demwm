@@ -2648,6 +2648,20 @@ propertynotify(XEvent *e)
 					cyclelayout(&((Arg) { .i = arg }));
 				else if (!strcmp(n, "fullscreen"))
 					fullscreen(NULL);
+				else if (!strcmp(n, "incrgaps"))
+					incrgaps(&((Arg) { .i = arg }));
+				else if (!strcmp(n, "incrogaps"))
+					incrogaps(&((Arg) { .i = arg }));
+				else if (!strcmp(n, "incrohgaps"))
+					incrohgaps(&((Arg) { .i = arg }));
+				else if (!strcmp(n, "incrovgaps"))
+					incrovgaps(&((Arg) { .i = arg }));
+				else if (!strcmp(n, "incrigaps"))
+					incrigaps(&((Arg) { .i = arg }));
+				else if (!strcmp(n, "incrihgaps"))
+					incrihgaps(&((Arg) { .i = arg }));
+				else if (!strcmp(n, "incrivgaps"))
+					incrivgaps(&((Arg) { .i = arg }));
 				else if (!strcmp(n, "killclient"))
 					killclient(NULL);
 				else if (!strcmp(n, "random_wall"))
