@@ -480,6 +480,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0};
 static int pipes[LENGTH(blocks)][2];
 static int execlock = 0; /* ensure only one child process exists per block at an instance */
+static int isalarm = 0;
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
@@ -2630,7 +2631,7 @@ propertynotify(XEvent *e)
 			int arg;
 			if (gettextprop(root, XA_WM_NAME, n, sizeof(n))) {
 				/* divide into 2 args separated by the first space */
-				for (int i = 0; i <= strlen(n); i++) {
+				for (int i = 0; i <= strnlen(n, 32); i++) {
 					if (n[i] == ' ') {
 						buf = n;
 						buf += i + 1; /* chop the first 'word' */
@@ -2948,7 +2949,6 @@ run(void)
 	#endif /* INVERSED */
 	{
 		pipe(pipes[i]);
-		fcntl(pipes[i], F_SETFD, O_NONBLOCK);
 		fds[i + 1].fd = pipes[i][0];
 		fds[i + 1].events = POLLIN;
 		getcmd(i, NULL);
@@ -2965,7 +2965,10 @@ run(void)
 
 		if ((poll(fds, LENGTH(blocks) + 1, -1)) == -1) {
 			if (errno == EINTR) { /* signal caught */
-				fprintf(stderr, "dwm: poll INTERRUPTED by a signal, ignoring..\n");
+				if (isalarm) { /* SIGALRM */
+					isalarm = 0; /* restore isalarm */
+				} else
+					fprintf(stderr, "dwm: poll INTERRUPTED by a signal (EINTR)\n");
 				continue;
 			}
 			fprintf(stderr, "dwm: poll ");
@@ -2998,13 +3001,6 @@ run(void)
 					fprintf(stderr, "dwm: read failed in block %s\n", blocks[i].command);
 					perror(" failed");
 					continue;
-				}
-
-				if (bt == CMDLENGTH) { /* there is a change there is more to read if bt is full */
-					char buf[CMDLENGTH] = {0};
-					/* read until 'EOF' (no characters left) */
-					while (read(fds[i + 1].fd, buf, sizeof(buf)) == 0);
-					fprintf(stderr, "dwm: block %d has more characters than CMDLENGTH '%s'\n", i, buf);
 				}
 
 				if (blockoutput[i][bt - 1] == '\n') /* chop off ending new line, if one is present */
@@ -3401,6 +3397,7 @@ setmfact(const Arg *arg)
 void
 sigalrm(int unused)
 {
+	isalarm = 1;
 	getcmds(count);
 	alarm(sleepinterval);
 	count = (count + sleepinterval - 1) % maxinterval + 1;
@@ -3697,7 +3694,7 @@ sigchld(int unused)
 	sigemptyset(&sa.sa_mask);
 	if (sigaction(SIGCHLD, &sa, 0) == -1)
 		die("can't install SIGCHLD handler:");
-	while (0 < waitpid(-1, NULL, WNOHANG));
+	//while (0 < waitpid(-1, NULL, WNOHANG));
 }
 
 void
