@@ -2644,37 +2644,37 @@ propertynotify(XEvent *e)
 				}
 
 				/* parsing commands */
-				if (!strcmp(n, "togglebar"))
-					togglebar(NULL);
-				else if (!strcmp(n, "cyclelayout"))
+				if (!strcmp(n, "cyclelayout"))
 					cyclelayout(&((Arg) { .i = arg }));
+				else if (!strcmp(n, "fullscreen"))
+					fullscreen(NULL);
+				else if (!strcmp(n, "killclient"))
+					killclient(NULL);
+				else if (!strcmp(n, "random_wall"))
+					random_wall(NULL);
+				else if (!strcmp(n, "refresh"))
+					refresh(NULL);
 				else if (!strcmp(n, "setlayout"))
 					setlayout(&((Arg) { .v = &layouts[arg] }));
-				else if (!strcmp(n, "view"))
-					view(&((Arg) { .ui = 1 << arg }));
 				else if (!strcmp(n, "tag"))
 					tag(&((Arg) { .ui = 1 << arg }));
+				else if (!strcmp(n, "togglebar"))
+					togglebar(NULL);
 				else if (!strcmp(n, "togglefloating"))
 					togglefloating(NULL);
 				else if (!strcmp(n, "togglegaps"))
 					togglegaps(NULL);
 				else if (!strcmp(n, "togglesmartgaps"))
 					togglesmartgaps(NULL);
-				else if (!strcmp(n, "fullscreen"))
-					fullscreen(NULL);
 				else if (!strcmp(n, "togglevacant"))
 					togglevacant(NULL);
 				else if (!strcmp(n, "togglestatus"))
 					togglestatus(NULL);
-				else if (!strcmp(n, "killclient"))
-					killclient(NULL);
+				else if (!strcmp(n, "view"))
+					view(&((Arg) { .ui = 1 << arg }));
 				else if (!strcmp(n, "xrdb"))
 					xrdb(NULL);
-				else if (!strcmp(n, "random_wall"))
-					random_wall(NULL);
-				else if (!strcmp(n, "refresh"))
-					refresh(NULL);
-				else if (atoi(n) > 0) { /* if atoi returns non 0 and the number is more than 0 it is a signal */
+				else if (atoi(n) > 0) { /* more than 0 it's a signal */
 					getsigcmds(atoi(n));
 					updatestatus();
 				}
