@@ -455,7 +455,7 @@ static const Key keys[] = {
 	{ ShiftMask, XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
 		magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
 	{ MODKEY,		    XK_Print,	SHCMD("dmenurecord")		},
-	{ 0,		    XK_Print,	SHCMD("scrot")			},
+	{ 0,		    XK_Print,	SHCMD("maim ~/Downloads/$(date +'%d-%m_%H_%M_%S').png")			},
 /* panic key */ { MODKEY, XK_Delete, SHCMD("mpv '/home/faber/Media/Videos/Fight the Power!.mkv' --loop-file=inf --fs") },
 };
 
