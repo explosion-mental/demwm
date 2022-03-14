@@ -25,6 +25,7 @@ _some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm)
 - To redirect error mesagges to a file `exec dwm 2> "$HOME"/.cache/dwm.log`
 - edit `config.mk` and change `CC = cc`, I have it default to `tcc` since it's
   very very fast and I can make changes in the go.
+- edit `dwm_random_wall` to suit you
 
 # Features
 - Gaps (vanitygaps)
