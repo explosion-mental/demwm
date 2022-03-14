@@ -1,7 +1,9 @@
 # Dwm
 My build of dwm
 
-![Image](rice.gif "dwm")
+![Image](https://explosion-mental.codeberg.page/img/rice.gif "dwm")
+
+_some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm)_
 
 # Requirements
 - In order to build dwm you need the Xlib header files.
