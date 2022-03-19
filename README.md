@@ -211,12 +211,12 @@ are some ideas:
   re-setup) the pertag variables to default one and somehow maintain them the
   same while pertag is active.
 	* another idea. maybe just doing all the above but only for the layout..
-- add `uncursor` to `Rules`: basically if window with `uncursor` enabled, will
+- <s>add `uncursor` to `Rules`: basically if window with `uncursor` enabled, will
   make the cursor go into one corner of the screen when focused (or maybe use
   any coordinates other than the window cordinates). I will find this useful
   since I have gaps, which means no clicking in the window since there are
   gaps. Could prevent accidental clicks or make it more 'safe' (don't touch
-  anything).
+  anything).</s>
 - <s>use fork/exec/dup2 instead of popen in `getcmd` funcs (to remove delay).</s>
 - <s>Make _tag previews_ more solid</s> and prevent from being shown in the preview of the preview...
 - <s>systray toggleable with _#ifdef_ and _#endif_</s>
@@ -251,3 +251,4 @@ are some ideas:
 	* Asynchronous block handling (Feb 25 2022)
 - Windows remember their tags, useful when restarting (Feb 28 2022)
 - Remember the selected tags when restarting (Mar 09 2022)
+- uncursor window rule (Mar 18 2022)
