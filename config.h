@@ -161,7 +161,7 @@ static const Rule rules[] = {
 //	RULE(.class = "libreoffice",	.noswallow = 1)
 //	RULE(.class = "Firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
 	RULE(.class = "firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
-	RULE(.class = "Brave-browser",	.tags = 1 << 4, .isfakefullscreen = 1)
+	RULE(.class = "Brave-browser",	.tags = 1 << 4, .isfakefullscreen = 1, .uncursor = 1)
 	RULE(.class = "Pavucontrol",	.isfloating = 1)
 	RULE(.class = "Pcmanfm",	.isfloating = 1)
 //	RULE(.title = "pulsemixer",  .isfloating = 1)
@@ -170,7 +170,6 @@ static const Rule rules[] = {
 	RULE(.title = "Event Tester",	.noswallow = 1) /* xev */
 	RULE(.class = "QjackCtl",	.isfloating = 1)
 	RULE(.title = "Firefox Update", .isfloating = 1)
-	RULE(.class = "Brave-browser",	.uncursor = 1)
 	//customs
 	RULE(.class = "Video",		.isfloating = 1)
 	RULE(.title = "noswallow",	.noswallow = 1)
