@@ -685,7 +685,7 @@ swallow(Client *p, Client *c)
 	wc.border_width = p->bw;
 	XConfigureWindow(dpy, p->win, CWBorderWidth, &wc);
 	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
-	XSetWindowBorder(dpy, c->win, scheme[c->isfloating ? BorderFloat : BorderSel][ColFg].pixel);
+	XSetWindowBorder(dpy, p->win, scheme[c->isfloating ? BorderFloat : BorderSel][ColFg].pixel);
 
 	arrange(p->mon);
 	configure(p);
