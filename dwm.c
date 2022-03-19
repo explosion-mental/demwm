@@ -144,7 +144,7 @@ struct Client {
 	int isfixed, isurgent, neverfocus, oldstate;
 	/* rules */
 	int isfloating, isfullscreen, isterminal, noswallow;
-	int fakefullscreen, alwaysontop;
+	int fakefullscreen, alwaysontop, uncursor;
 	pid_t pid;
 	#ifdef ICONS
 	unsigned int icw, ich;
@@ -214,6 +214,7 @@ typedef struct {
 	int isterminal;
 	int noswallow;
 	int isfakefullscreen;
+	int uncursor;
 	int monitor;
 } Rule;
 
@@ -520,6 +521,7 @@ applyrules(Client *c)
 	c->isfloating = 0;
 	c->tags = 0;
 	c->alwaysontop = 0;
+	c->uncursor = 0;
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
@@ -539,6 +541,7 @@ applyrules(Client *c)
 			c->isfloating = r->isfloating;
 			c->tags |= r->tags;
 			c->fakefullscreen = r->isfakefullscreen;
+			c->uncursor = r->uncursor;
 
 			for (m = mons; m && m->num != r->monitor; m = m->next);
 			if (m)
@@ -1444,10 +1447,14 @@ focus(Client *c)
 					wc.sibling = f->win;
 				}
 		}
+
+		if (c->uncursor) /* put the cursor in the bottom right */
+			XWarpPointer(dpy, None, root, 0, 0, 0, 0, sw, sh);
 	} else {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 	}
+
 	selmon->sel = c;
 	if (selmon->lt[selmon->sellt]->arrange == alphamonocle)
 		arrangemon(selmon);
