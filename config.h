@@ -44,7 +44,7 @@ static const char *colors[][2]	        = {
 	[SchemeSel]    = { color0,	color1 }, /* selected tag */
 	[SchemeUrgent] = { fg_wal,	color0 }, /* urgent tag */
 	[SchemeLt]     = { fg_wal,	color0 }, /* layout */
-	[SchemeTitle]  = { color0,	color2 }, /* window title */
+	[SchemeTitle]  = { color2,	color0 }, /* window title */
 	[SchemeStatus] = { fg_wal,	color0 }, /* status bar */
 	[SchemeDelim]  = { fg_wal,	color0 }, /* delimiter */
 	[SchemeSys]    = { color0,	color0 }, /* system tray */
@@ -62,7 +62,7 @@ static const unsigned int alphas[][2]   = {
 	[SchemeSel]    = { OPAQUE,	baralpha },
 	[SchemeUrgent] = { OPAQUE,	baralpha },
 	[SchemeLt]     = { OPAQUE,	baralpha },
-	[SchemeTitle]  = { OPAQUE,	OPAQUE,	 },
+	[SchemeTitle]  = { OPAQUE,	baralpha + 40},
 	[SchemeStatus] = { OPAQUE,	baralpha + 40},
 	[SchemeDelim]  = { OPAQUE,	baralpha + 40},
 	[SchemeSys]    = { OPAQUE,	baralpha },
@@ -119,6 +119,7 @@ static const Block blocks[] = {
 static const char delimiter[] = " ";
 
 /* tags */
+//static const char *tags[] = { "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉" };
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
 static const int taglayouts[] = {    0,   1,    0,   0,    0,    0,    0,    0,    0 };
 static const char *tagsalt[]  = { "I", "2", "III", "4", "V", "6", "VII", "8", "IX" };
