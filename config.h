@@ -161,6 +161,7 @@ static const Rule rules[] = {
 	RULE(.title = "Event Tester",	.noswallow = 1) /* xev */
 	RULE(.class = "QjackCtl",	.isfloating = 1)
 	RULE(.title = "Firefox Update", .isfloating = 1)
+	RULE(.class = "Brave-browser",	.uncursor = 1)
 	//customs
 	RULE(.class = "Video",		.isfloating = 1)
 	RULE(.title = "noswallow",	.noswallow = 1)
