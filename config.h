@@ -125,16 +125,25 @@ static const int taglayouts[] = {    0,   1,    0,   0,    0,    0,    0,    0, 
 static const char *tagsalt[]  = { "I", "2", "III", "4", "V", "6", "VII", "8", "IX" };
 
 static const Rule rules[] = {
-	/* flags: class, instance, title, wintype, role, tags, isfloating,
-	 * isterminal, noswallow, isfakefullscreen, monitor
-	 *
-	 * order is actually important here (e.g. if .noswallow is before
-	 * .isterminal then it would not take effect)
+	/*
+	 * Select a window you wish to assign a rule to with xprop.
 	 *
 	 * xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 *	_NET_WM_WINDOW_TYPE(ATOM) = wintype
+	 *
+	 * Assign a flag to the window, by default none are assign.
+	 *
+	 * Avaliable flags:
+	 *  monitor, in which monitor the window will spawn
+	 *  tags, in which tags the window will spawn
+	 *  isfloating, enable floating
+	 *  isterminal, will make the window swallow child ones
+	 *  isfakefullscreen, enable fakefullscreen
+	 *  nowswallow, don't swallow this window
+	 *  uncursor, puts the cursor in the bottom right whenever the window
+	 * is focused (useful when there are gaps)
 	 */
 	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "DIALOG",	.isfloating = 1)
 	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "UTILITY",.isfloating = 1)
