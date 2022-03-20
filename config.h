@@ -44,7 +44,7 @@ static const char *colors[][2]	        = {
 	[SchemeSel]    = { color0,	color1 }, /* selected tag */
 	[SchemeUrgent] = { fg_wal,	color0 }, /* urgent tag */
 	[SchemeLt]     = { fg_wal,	color0 }, /* layout */
-	[SchemeTitle]  = { color2,	color0 }, /* window title */
+	[SchemeTitle]  = { color0,	color2 }, /* window title */
 	[SchemeStatus] = { fg_wal,	color0 }, /* status bar */
 	[SchemeDelim]  = { fg_wal,	color0 }, /* delimiter */
 	[SchemeSys]    = { color0,	color0 }, /* system tray */
@@ -114,7 +114,7 @@ static const Block blocks[] = {
 /* 1 means inverse the order of the blocks, 0 means normal order */
 #define INVERSED		1
 /* max number of character that one block command can output */
-#define CMDLENGTH		55
+#define CMDLENGTH		65
 /* delimeter between blocks commands. NULL character ('\0') means no delimeter. */
 static const char delimiter[] = " ";
 
