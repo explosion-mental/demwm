@@ -3769,7 +3769,7 @@ sigchld(int unused)
 	sigemptyset(&sa.sa_mask);
 	if (sigaction(SIGCHLD, &sa, 0) == -1)
 		die("can't install SIGCHLD handler:");
-	//while (0 < waitpid(-1, NULL, WNOHANG));
+	while (0 < waitpid(-1, NULL, WNOHANG));
 }
 
 void
