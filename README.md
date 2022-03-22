@@ -211,6 +211,10 @@ are some ideas:
   re-setup) the pertag variables to default one and somehow maintain them the
   same while pertag is active.
 	* another idea. maybe just doing all the above but only for the layout..
+- Make a window 'transient' like with a keybinding. Usecase for this will be to
+  have a video playing (any window) in a 'non-intrusive' position, say the
+  bottom right, and make it impossible to focus that window; initially thought only by keybinding (focusstack),
+  but I'm open for make a flag to also ignore mouse buttons.
 - <s>add `uncursor` to `Rules`: basically if window with `uncursor` enabled, will
   make the cursor go into one corner of the screen when focused (or maybe use
   any coordinates other than the window cordinates). I will find this useful
