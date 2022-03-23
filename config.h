@@ -14,6 +14,7 @@ static int smartgaps          = 0;        /* 1 means no outer gap when there is 
 static int swallowfloating    = 0;        /* 1 means swallow floating windows by default */
 static int showbar            = 1;        /* 0 means no bar */
 static int showstatus         = 1;        /* 0 means no status text */
+static const int underlntitle = 1;        /* 1 means an underline on the title */
 static const int topbar       = 1;        /* 0 means bottom bar */
 static const int barh         = 8;        /* 1 or more means bar height */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */

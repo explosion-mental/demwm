@@ -1343,10 +1343,14 @@ drawbar(Monitor *m)
 				drw_text(drw, x, 0, w, bh, lrpad / 2 + (m->sel->icon ? m->sel->icw : 0), m->sel->name, 0);
 				if (m->sel->icon)
 					drw_pic(drw, x, (bh - m->sel->ich) / 2, m->sel->icw, m->sel->ich, m->sel->icon);
+				if (underlntitle)
+					drw_rect(drw, x + (m->sel->icon ? m->sel->icw + lrpad / 2: 0), bh - boxs - 1, w - (m->sel->icon ? m->sel->icw + lrpad : 0), 1, 1, 0);
 			} else { /* center window title and icon */
 				drw_text(drw, x, 0, w, bh, (w - TEXTW(m->sel->name) + (m->sel->icon ? m->sel->icw + lrpad : 0)) / 2, m->sel->name, 0);
 				if (m->sel->icon)
 					drw_pic(drw, x + (w - TEXTW(m->sel->name) - m->sel->icw) / 2, (bh - m->sel->ich) / 2, m->sel->icw, m->sel->ich, m->sel->icon);
+				if (underlntitle)
+					drw_rect(drw, x + (w - TEXTW(m->sel->name) + (m->sel->icon ? m->sel->icw + lrpad : 0)) / 2, bh - boxs - 1, TEXTW(m->sel->name) - lrpad, 1, 1, 0);
 			}
 		#else
 			drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
