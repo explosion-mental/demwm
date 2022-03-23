@@ -4790,6 +4790,8 @@ scratchpad_show_first(void)
 void
 togglealwaysontop(const Arg *arg)
 {
+	if (!selmon->sel)
+		return;
 	if (!selmon->sel->isfloating) /* only floating clients can be always on top */
 		togglefloating(NULL);
 	selmon->sel->alwaysontop = !selmon->sel->alwaysontop;
