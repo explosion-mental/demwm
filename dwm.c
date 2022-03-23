@@ -1405,6 +1405,7 @@ focus(Client *c)
 		//losefullscreen(c);
 		unfocus(selmon->sel, 0);
 	}
+
 	if (c) {
 		if (c->mon != selmon)
 			selmon = c->mon;
@@ -2768,11 +2769,11 @@ resizeclient(Client *c, int x, int y, int w, int h)
 
 	/* don't draw borders if monocle/alphamonocle/only 1 client */
 	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next))
-	    || (c->mon->lt[c->mon->sellt]->arrange == &monocle
-	    ||  c->mon->lt[c->mon->sellt]->arrange == &alphamonocle))
-	    && (c->fakefullscreen == 1 || !c->isfullscreen)
-	    && !c->isfloating
-	    && c->mon->lt[c->mon->sellt]->arrange != NULL) {
+	|| (c->mon->lt[c->mon->sellt]->arrange == &monocle
+	||  c->mon->lt[c->mon->sellt]->arrange == &alphamonocle))
+	&& (c->fakefullscreen == 1 || !c->isfullscreen)
+	&& !c->isfloating
+	&& c->mon->lt[c->mon->sellt]->arrange != NULL) {
 		c->w = wc.width += c->bw * 2;
 		c->h = wc.height += c->bw * 2;
 		wc.border_width = 0;
