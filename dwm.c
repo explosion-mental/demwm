@@ -1351,7 +1351,10 @@ drawbar(Monitor *m)
 		#else
 			drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
 		#endif /* ICONS */
-			if (m->sel->isfloating)
+			if (m->sel->alwaysontop) {
+				drw_setscheme(drw, scheme[SchemeLt]);
+				drw_rect(drw, x, 0, w, boxw, 1, 0);
+			} else if (m->sel->isfloating)
 				drw_rect(drw, bw - tw - boxw - 1, boxs, boxw, boxw, m->sel->isfixed, 0);
 		} else {
 			drw_setscheme(drw, scheme[SchemeNorm]);
