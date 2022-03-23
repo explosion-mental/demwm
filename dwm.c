@@ -409,6 +409,7 @@ static void incrohgaps(const Arg *arg);	/* vertcal outter gaps */
 static void incrovgaps(const Arg *arg);	/* horizontal outter gaps */
 
 /* Customs */
+static void togglealwaysontop(const Arg *arg);
 static void swaptags(const Arg *arg);
 //static void loadrandom_wall(const Arg *arg);
 static void random_wall(const Arg *arg);
@@ -4783,6 +4784,15 @@ scratchpad_show_first(void)
 
 
 /* Customs */
+void
+togglealwaysontop(const Arg *arg)
+{
+	if (!selmon->sel->isfloating) /* only floating clients can be always on top */
+		togglefloating(NULL);
+	selmon->sel->alwaysontop = !selmon->sel->alwaysontop;
+	focus(NULL);
+}
+
 void
 togglevacant(const Arg *arg)
 {
