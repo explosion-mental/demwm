@@ -162,7 +162,7 @@ static const Rule rules[] = {
 //	RULE(.class = "libreoffice",	.noswallow = 1)
 //	RULE(.class = "Firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
 	RULE(.class = "firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
-	RULE(.class = "Brave-browser",	.tags = 1 << 4, .isfakefullscreen = 1, .uncursor = 1)
+	RULE(.class = "Brave-browser",	.tags = 1 << 4, .isfakefullscreen = 1)
 	RULE(.class = "Pavucontrol",	.isfloating = 1)
 	RULE(.class = "Pcmanfm",	.isfloating = 1)
 //	RULE(.title = "pulsemixer",  .isfloating = 1)
