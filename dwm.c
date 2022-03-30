@@ -2073,9 +2073,9 @@ getstatus(int width)
 
 
 	#if INVERSED
-	for (i = LENGTH(blocks) - 1; i >= 0; i--)
-	#else
 	for (i = 0; i < LENGTH(blocks); i++)
+	#else
+	for (i = LENGTH(blocks) - 1; i >= 0; i--)
 	#endif /* INVERSED */
 	{
 		if (*blockoutput[i] == '\0') /* ignore command that output NULL or '\0' */
