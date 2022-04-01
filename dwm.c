@@ -772,7 +772,12 @@ buttonpress(XEvent *e)
 			click = ClkStatusText;
 			int len, i;
 			//int last = LENGTH(blocks) - 1;
-			for (i = 0; i < LENGTH(blocks); i++) {
+			#if INVERSED
+			for (i = LENGTH(blocks) - 1; i >= 0; i--)
+			#else
+			for (i = 0; i < LENGTH(blocks); i++)
+			#endif /* INVERSED */
+			{
 				if (*blockoutput[i] == '\0') //ignore command that output NULL or '\0'
 					continue;
 				len = TEXTW(blockoutput[i]) - lrpad + TEXTW(delimiter) - lrpad;
