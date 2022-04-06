@@ -2021,6 +2021,9 @@ remove_all(char *str, char to_remove)
 void
 getcmd(int i, char *button)
 {
+	if (!selmon->showbar)
+		return;
+
 	if (execlock & 1 << i) { /* block is already running */
 		fprintf(stderr, "dwm: ignoring block %d, command %s\n", i, blocks[i].command);
 		return;
@@ -3896,6 +3899,7 @@ togglebar(const Arg *arg)
 	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
 #endif /* SYSTRAY */
 	arrange(selmon);
+	getcmds(-1);
 }
 
 void
