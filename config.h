@@ -192,7 +192,7 @@ static const Rule rules[] = {
 
 /* resizemousescroll direction argument list */
 /* 1 means resize window by 1 pixel for each scroll event on resizemousescroll */
-#define scrollsensetivity	30
+#define scrollsensetivity	18
 static const int scrollargs[4][2] = {
 	/* width change         height change */
 	{ -scrollsensetivity,	0 },
