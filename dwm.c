@@ -136,6 +136,7 @@ struct Client {
 	char name[256];
 	float mina, maxa;
 	float cfact;
+	int sfx, sfy, sfw, sfh; /* old float geometry */
 	int x, y, w, h;
 	int oldx, oldy, oldw, oldh;
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
@@ -2406,7 +2407,10 @@ manage(Window w, XWindowAttributes *wa)
 	c->y = MAX(c->y, ((c->mon->by == c->mon->my) && (c->x + (c->w / 2) >= c->mon->wx)
 		&& (c->x + (c->w / 2) < c->mon->wx + c->mon->ww)) ? bh : c->mon->my);
 //	c->bw = borderpx;
-	c->bw = c->mon->borderpx;
+	c->bw = c->isfloating ? fborderpx : c->mon->borderpx;
+	/* center the window (floating) */
+	c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
+	c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
 
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
@@ -2419,9 +2423,11 @@ manage(Window w, XWindowAttributes *wa)
 	updatesizehints(c);
 	updatewmhints(c);
 
-	/* always center (at least floating) */
-	c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
-	c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
+	/* store float size and position */
+	c->sfx = c->x;
+	c->sfy = c->y;
+	c->sfw = c->w;
+	c->sfh = c->h;
 
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
@@ -3932,19 +3938,24 @@ togglefloating(const Arg *arg)
 	c->isfloating = !c->isfloating || c->isfixed;
 
 	if (selmon->sel->isfloating) {
-		if (selmon->sel->bw != borderpx) {
-			selmon->sel->oldbw = selmon->sel->bw;
-			selmon->sel->bw = borderpx;
-		}
+		selmon->sel->bw = fborderpx;
+		configure(selmon->sel);
 		/* apply float color, since oldbw has the old color */
 		XSetWindowBorder(dpy, c->win, scheme[BorderFloat][ColFg].pixel);
-		resize(selmon->sel, selmon->sel->x, selmon->sel->y,
-		       selmon->sel->w - selmon->sel->bw * 2, selmon->sel->h - selmon->sel->bw * 2, 0);
-	} else
-		XSetWindowBorder(dpy, c->win, scheme[BorderSel][ColFg].pixel);
 
-	c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
-	c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
+		/* restore last known float dimensions */
+		resize(selmon->sel, selmon->sel->sfx, selmon->sel->sfy,
+		       selmon->sel->sfw, selmon->sel->sfh, 0);
+	} else {
+		selmon->sel->bw = borderpx;
+		configure(selmon->sel);
+		/* save last known float dimensions */
+		selmon->sel->sfx = selmon->sel->x;
+		selmon->sel->sfy = selmon->sel->y;
+		selmon->sel->sfw = selmon->sel->w;
+		selmon->sel->sfh = selmon->sel->h;
+		XSetWindowBorder(dpy, c->win, scheme[BorderSel][ColFg].pixel);
+	}
 
 	arrange(c->mon);
 }

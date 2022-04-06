@@ -4,6 +4,7 @@
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const int systraypinningfailfirst = 1;   /* 1: if pinning fails, display systray on the first monitor, False: display systray on the last monitor*/
 static unsigned int borderpx  = 5;        /* border pixel of windows */
+static unsigned int fborderpx = 2;        /* border pixel of floating windows */
 static unsigned int snap      = 10;       /* snap pixel */
 static unsigned int gappih    = 15;       /* horiz inner gap between windows */
 static unsigned int gappiv    = 20;       /* vert inner gap between windows */
