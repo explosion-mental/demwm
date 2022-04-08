@@ -126,8 +126,8 @@ xsetroot -name 'incrivgaps X'
 xsetroot -name 'cyclelayout X'
 xsetroot -name 'setlayout L'	# L is an index of an existing layout (from 0 to the last)
 xsetroot -name 'view N'		# N is a tag
-xsetroot -name 'tag N'		# N is a tag
-xsetroot -name 'toggletag N'	# N is a tag
+xsetroot -name 'tag N'
+xsetroot -name 'toggletag N'
 xsetroot -name defaultgaps
 xsetroot -name killclient
 xsetroot -name random_wall
