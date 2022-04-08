@@ -2022,7 +2022,7 @@ remove_all(char *str, char to_remove)
 void
 getcmd(int i, char *button)
 {
-	if (!selmon->showbar)
+	if (!selmon->showbar || !showstatus)
 		return;
 
 	if (execlock & 1 << i) { /* block is already running */
@@ -2079,7 +2079,6 @@ getstatus(int width)
 
 	if (!showstatus)
 		return stsw = 0;
-
 
 	#if INVERSED
 	for (i = 0; i < LENGTH(blocks); i++)
@@ -4877,8 +4876,10 @@ void
 togglestatus(const Arg *arg)
 {
 	showstatus = !showstatus;
+	getcmds(-1);
 	updatestatus();
 }
+
 void
 shiftswaptags(const Arg *arg)
 {
