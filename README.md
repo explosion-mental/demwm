@@ -116,22 +116,31 @@ other purposes, like managing dwm (similar to the `fakesignal` patch).
 
 * Commands:
 ```sh
-xsetroot -name 'cyclelayout X'	# X can be -1 or +1
+xsetroot -name 'incrgaps X'	# X can be -1 or +1
+xsetroot -name 'incrogaps X'
+xsetroot -name 'incrohgaps X'
+xsetroot -name 'incrovgaps X'
+xsetroot -name 'incrigaps X'
+xsetroot -name 'incrihgaps X'
+xsetroot -name 'incrivgaps X'
+xsetroot -name 'cyclelayout X'
 xsetroot -name 'setlayout L'	# L is an index of an existing layout (from 0 to the last)
 xsetroot -name 'view N'		# N is a tag
 xsetroot -name 'tag N'		# N is a tag
 xsetroot -name 'toggletag N'	# N is a tag
-xsetroot -name togglebar
-xsetroot -name togglefloating
-xsetroot -name togglegaps
-xsetroot -name togglesmartgaps
-xsetroot -name fullscreen
-xsetroot -name togglevacant
-xsetroot -name togglestatus
+xsetroot -name defaultgaps
 xsetroot -name killclient
-xsetroot -name xrdb
 xsetroot -name random_wall
 xsetroot -name refresh
+xsetroot -name togglebar
+xsetroot -name togglefloating
+xsetroot -name togglefullscreen
+xsetroot -name togglefakefullscreen
+xsetroot -name togglegaps
+xsetroot -name togglesmartgaps
+xsetroot -name togglevacant
+xsetroot -name togglestatus
+xsetroot -name xrdb
 xsetroot -name zoom
 xsetroot -name zoomswap
 xsetroot -name S		# S is an existing signal of a block (without adding 34)

@@ -2675,6 +2675,8 @@ propertynotify(XEvent *e)
 					incrihgaps(&((Arg) { .i = arg }));
 				else if (!strcmp(n, "incrivgaps"))
 					incrivgaps(&((Arg) { .i = arg }));
+				else if (!strcmp(n, "defaultgaps"))
+					defaultgaps(NULL);
 				else if (!strcmp(n, "killclient"))
 					killclient(NULL);
 				else if (!strcmp(n, "random_wall"))
