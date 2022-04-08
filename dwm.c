@@ -2641,7 +2641,7 @@ propertynotify(XEvent *e)
 	if ((ev->window == root)) { /* root events */
 		if (ev->atom == dwmstatus) /* update bar */
 			updatestatus();
-		if (ev->atom == XA_WM_NAME) { /* 'fake' signal */
+		if (ev->atom == XA_WM_NAME) { /* parse `xsetroot -name' */
 			char n[32], *buf;
 			int arg;
 			if (gettextprop(root, XA_WM_NAME, n, sizeof(n))) {
@@ -2657,7 +2657,7 @@ propertynotify(XEvent *e)
 					}
 				}
 
-				/* parsing commands */
+				/* functions */
 				if (!strcmp(n, "cyclelayout"))
 					cyclelayout(&((Arg) { .i = arg }));
 				else if (!strcmp(n, "incrgaps"))
