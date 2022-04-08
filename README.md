@@ -132,6 +132,8 @@ xsetroot -name killclient
 xsetroot -name xrdb
 xsetroot -name random_wall
 xsetroot -name refresh
+xsetroot -name zoom
+xsetroot -name zoomswap
 xsetroot -name S		# S is an existing signal of a block (without adding 34)
 ```
 

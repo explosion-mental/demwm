@@ -2707,6 +2707,10 @@ propertynotify(XEvent *e)
 					view(&((Arg) { .ui = 1 << arg }));
 				else if (!strcmp(n, "xrdb"))
 					xrdb(NULL);
+				else if (!strcmp(n, "zoom"))
+					zoom(NULL);
+				else if (!strcmp(n, "zoomswap"))
+					zoomswap(NULL);
 				else if (atoi(n) > 0) { /* more than 0 it's a signal */
 					getsigcmds(atoi(n));
 					updatestatus();
