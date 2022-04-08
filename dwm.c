@@ -2701,6 +2701,8 @@ propertynotify(XEvent *e)
 					togglevacant(NULL);
 				else if (!strcmp(n, "togglestatus"))
 					togglestatus(NULL);
+				else if (!strcmp(n, "toggletag"))
+					toggletag(&((Arg) { .ui = 1 << arg }));
 				else if (!strcmp(n, "view"))
 					view(&((Arg) { .ui = 1 << arg }));
 				else if (!strcmp(n, "xrdb"))

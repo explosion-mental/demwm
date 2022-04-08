@@ -116,11 +116,12 @@ other purposes, like managing dwm (similar to the `fakesignal` patch).
 
 * Commands:
 ```sh
-xsetroot -name togglebar
 xsetroot -name 'cyclelayout N'	# N can be -1 or +1
 xsetroot -name 'setlayout N'	# N is an index of an existing layout (0 to the last)
 xsetroot -name 'view N'		# N is a tag
 xsetroot -name 'tag N'		# N is a tag
+xsetroot -name 'toggletag N'	# N is a tag
+xsetroot -name togglebar
 xsetroot -name togglefloating
 xsetroot -name togglegaps
 xsetroot -name togglesmartgaps
