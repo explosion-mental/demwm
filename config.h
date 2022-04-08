@@ -454,22 +454,22 @@ static const Key keys[] = {
 	{ MODKEY,	         	XK_F3,	SHCMD("dmenumount")			},
 	{ MODKEY,		 	XK_F4,	SHCMD("dmenuumount")			},
 //	{ MODKEY,		 	XK_F4,	SHCMD("syncthing & kill -55 $(pidof dwmblocks)") },
-//					XK_F5,
 //	{ MODKEY,	         	XK_F6,	SHCMD("dmenumount")			},
 //	{ MODKEY,		 	XK_F7,	SHCMD("dmenumountq")			},
 //	{ MODKEY,	 		XK_F7,	SHCMD("st -e nvim -c VimwikiIndex") },
 	{ MODKEY,		 	XK_F8,	SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
 	{ MODKEY,			XK_F9,	SHCMD("setkeys & notify-send -t 2400 \
 		'Keyboard remapping⌨️ ' 'WAIT!\nRerunning <b>customs</b> shorcuts'")	},
-	{ MODKEY,			XK_F10,	SHCMD("setxkbmap -layout us -variant altgr-intl -option nodeadkeys & notify-send 'Keyboard⌨️ ' 'Keyboard remapping...\nRunning keyboard defaults, US altgr-intl variant with nodeadkeys...'") },
-	//{ MODKEY,			XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
+	{ MODKEY,			XK_F10,	SHCMD("setxkbmap -layout us -variant altgr-intl -option nodeadkeys && \
+		notify-send 'Keyboard⌨️ ' 'Keyboard remapping...\nRunning keyboard defaults, US altgr-intl variant with nodeadkeys...'") },
+//	{ MODKEY,			XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
 	{ MODKEY,                       XK_F11,	random_wall,		{0}	},
 	{ MODKEY,                       XK_F12,	xrdb,			{0}	},
-	//remove black bar on the screenshot %90 percent accuracy
-	{ ShiftMask, XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
+	/* remove black bars on the screenshot, 90% percent accuracy */
+	{ ShiftMask,	XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
 		magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
-	{ MODKEY,		    XK_Print,	SHCMD("dmenurecord")		},
-	{ 0,		    XK_Print,	SHCMD("maim ~/Downloads/$(date +'%d-%m_%H_%M_%S').png")			},
+	{ MODKEY,	XK_Print,	SHCMD("dmenurecord")		},
+	{ 0,		XK_Print,	SHCMD("maim ~/Downloads/$(date +'%d-%m_%H_%M_%S').png")			},
 /* panic key */ { MODKEY, XK_Delete, SHCMD("mpv '/home/faber/Media/Videos/Fight the Power!.mkv' --loop-file=inf --fs") },
 };
 
@@ -486,7 +486,7 @@ static const Button buttons[] = {
 
 	{ ClkLtSymbol,          0,              Button1,        togglegaps,     {0} },
 	{ ClkLtSymbol,          0,              Button2,        togglevacant,   {0} },
-	//{ ClkLtSymbol,          0,              Button3,        togglevacant,   {0} },
+//	{ ClkLtSymbol,          0,              Button3,        togglevacant,   {0} },
 //	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
 //	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
 	{ ClkLtSymbol,          0,              Button4,        cyclelayout,    {.i = +1 } },
