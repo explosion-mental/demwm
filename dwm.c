@@ -184,7 +184,6 @@ struct Monitor {
 	int gappiv;           /* vertical gap between windows */
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
-	unsigned int borderpx;
 	unsigned int seltags;
 	unsigned int sellt;
 	unsigned int tagset[2];
@@ -1136,7 +1135,6 @@ createmon(void)
 	m->nmaster = nmaster;
 	m->showbar = showbar;
 	m->topbar = topbar;
-	m->borderpx = borderpx;
 	/* gaps per tag */
 	m->gappih = gappih;
 	m->gappiv = gappiv;
@@ -2405,8 +2403,7 @@ manage(Window w, XWindowAttributes *wa)
 	/* only fix client y-offset, if the client center might cover the bar */
 	c->y = MAX(c->y, ((c->mon->by == c->mon->my) && (c->x + (c->w / 2) >= c->mon->wx)
 		&& (c->x + (c->w / 2) < c->mon->wx + c->mon->ww)) ? bh : c->mon->my);
-//	c->bw = borderpx;
-	c->bw = c->isfloating ? fborderpx : c->mon->borderpx;
+	c->bw = c->isfloating ? fborderpx : borderpx;
 	/* center the window (floating) */
 	c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
 	c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
@@ -4837,39 +4834,9 @@ togglevacant(const Arg *arg)
 	drawbar(selmon);
 }
 
-static int oldborder;
-//TODO
 void
 toggleborder(const Arg *arg)
 {
-	Client *c;
-	//int prev_borderpx = selmon->borderpx;
-
-	oldborder = selmon->borderpx;
-	if (selmon->borderpx == 0)
-		selmon->borderpx = oldborder;
-	else {
-		oldborder = selmon->borderpx;
-		selmon->borderpx = 0;
-	}
-	for (c = selmon->clients; c; c = c->next) {
-		if (borderpx == 0)
-			c->bw = selmon->borderpx;
-		else
-			c->bw = selmon->borderpx = 0;
-		//if (c->isfloating || !selmon->lt[selmon->sellt]->arrange) {
-		//	resize(c, c->x, c->y, c->w-(arg->i*2), c->h-(arg->i*2), 0);
-		//}
-	}
-
-
-	//if (oldborder == 0) {
-	//	oldborder  = borderpx;
-	//	borderpx = 0;
-	//} else {
-	//	borderpx  = oldborder;
-	//}
-	arrange(NULL);
 }
 
 void
