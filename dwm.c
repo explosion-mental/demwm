@@ -2998,6 +2998,14 @@ run(void)
 	XSync(dpy, False);
 	while (running) {
 
+		/* bar hidden, then skip poll */
+		if (!selmon->showbar || !showstatus) {
+			XNextEvent(dpy, &ev);
+			if (handler[ev.type])
+				handler[ev.type](&ev); /* call handler */
+			continue;
+		}
+
 		if ((poll(fds, LENGTH(blocks) + 1, -1)) == -1) {
 			if (errno == EINTR) { /* signal caught */
 				if (isalarm) /* SIGALRM */
