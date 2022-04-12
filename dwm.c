@@ -2051,20 +2051,18 @@ void
 getcmds(int time)
 {
 	int i;
-	for (i = 0; i < LENGTH(blocks); i++) {
+	for (i = 0; i < LENGTH(blocks); i++)
 		if ((blocks[i].interval != 0 && time % blocks[i].interval == 0) || time == -1)
 			getcmd(i, NULL);
-	}
 }
 
 void
 getsigcmds(unsigned int signal)
 {
 	int i;
-	for (i = 0; i < LENGTH(blocks); i++) {
+	for (i = 0; i < LENGTH(blocks); i++)
 		if (blocks[i].signal == signal)
 			getcmd(i, NULL);
-	}
 }
 
 int
