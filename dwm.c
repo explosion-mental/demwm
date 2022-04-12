@@ -2639,11 +2639,12 @@ propertynotify(XEvent *e)
 		if (ev->atom == dwmstatus) /* update bar */
 			updatestatus();
 		if (ev->atom == XA_WM_NAME) { /* parse `xsetroot -name' */
-			char n[32], *buf;
-			int arg;
+			const int size = 32;
+			char n[size], *buf;
+			int arg = 0;
 			if (gettextprop(root, XA_WM_NAME, n, sizeof(n))) {
 				/* divide into 2 args separated by the first space */
-				for (int i = 0; i <= strnlen(n, 32); i++) {
+				for (int i = 0; i <= size; i++) {
 					if (n[i] == ' ') {
 						buf = n;
 						buf += i + 1; /* chop the first 'word' */
