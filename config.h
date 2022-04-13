@@ -143,7 +143,7 @@ static const Rule rules[] = {
 	 *  isfloating, enable floating
 	 *  isterminal, will make the window swallow child ones
 	 *  isfakefullscreen, enable fakefullscreen
-	 *  nowswallow, don't swallow this window
+	 *  noswallow, don't swallow this window
 	 *  uncursor, puts the cursor in the bottom right whenever the window
 	 * is focused (useful when there are gaps)
 	 */
