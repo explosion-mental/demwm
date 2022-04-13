@@ -174,6 +174,7 @@ static const Rule rules[] = {
 	RULE(.title = "Firefox Update", .isfloating = 1)
 	//customs
 	RULE(.class = "Video",		.isfloating = 1)
+	RULE(.class = "dialect",	.isfloating = 1)
 	RULE(.title = "noswallow",	.noswallow = 1)
 	RULE(.title = "mpvfloat",	.isfloating = 1)
 	RULE(.instance = "mpvfloat",	.isfloating = 1)
