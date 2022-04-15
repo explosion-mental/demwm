@@ -123,7 +123,7 @@ static const char delimiter[] = " ";
 /* tags */
 //static const char *tags[] = { "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉" };
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
-static const int taglayouts[] = {    0,   1,    0,   0,    0,    0,    0,    0,    0 };
+static const int taglayouts[] = {    0,   1,    0,   0,    1,    0,    0,    0,    0 };
 static const char *tagsalt[]  = { "I", "2", "III", "4", "V", "6", "VII", "8", "IX" };
 
 static const Rule rules[] = {
@@ -421,9 +421,9 @@ static const Key keys[] = {
 	//{ 0,	XF86XK_RFKill,			random_wall, {0}		},
 	{ MODKEY,		XK_p,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && { mpc play && mpdnoti 2000 ;} || mpc pause")},
 	{ MODKEY,		XK_p,		updateblock,		{ .ui = 11 }	},
-	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 900")	},
+	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 1200")	},
 	{ MODKEY,	XK_bracketleft,		updateblock,		{ .ui = 11 }	},
-	{ MODKEY,	XK_bracketright,	SHCMD("mpc next && mpdnoti 900")	},
+	{ MODKEY,	XK_bracketright,	SHCMD("mpc next && mpdnoti 1200")	},
 	{ MODKEY,	XK_bracketright,	updateblock,		{ .ui = 11 }	},
 	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")			},
 
