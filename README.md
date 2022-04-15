@@ -60,7 +60,7 @@ Why? Some reasons:
 
 _A note about_ **usage**: The asyc status text is done by the `poll` system
 call. This build `exec`s scripts every `X` seconds async, which stock dwm
-doesn't.
+doesn't. You won't notice any change if you normally use `dwmblocks`.
 
 
 **You can avoid executing all the scripts completly by hidding the bar or the
