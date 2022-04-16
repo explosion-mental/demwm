@@ -3,7 +3,7 @@ My build of dwm
 
 ![Image](https://explosion-mental.codeberg.page/img/rice.gif "dwm")
 
-_some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm)_
+_some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm.html#Screenshots)_
 
 # Requirements
 - In order to build dwm you need the Xlib header files.
