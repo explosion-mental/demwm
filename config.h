@@ -85,8 +85,8 @@ static const Block blocks[] = {
 	{ color3, "sb-battery",				10,		3},
 	{ color4, "sb-internet",			10,		4},
 	{ color5, "sb-mailbox",				0,		5},
-	{ color6, "sb-moonphase",			18000,		6},
-	{ color1, "sb-forecast",			18000,		7},
+	{ color6, "sb-moonphase",			0,		6},
+	{ color1, "sb-forecast",			0,		7},
 	{ color8, "sb-volume",				0,		8},
 //	{ color2, "sb-price btc Bitcoin 💰",		9000,		21},
 //	{ color2, "sb-price eth Ethereum 🍸",		9000,		23},
@@ -168,7 +168,7 @@ static const Rule rules[] = {
 	RULE(.class = "Pcmanfm",	.isfloating = 1)
 //	RULE(.title = "pulsemixer",  .isfloating = 1)
 	RULE(.title = "About Mozilla Firefox",	.isfloating = 1)
-	RULE(.class = "St", .isterminal = 1)
+	RULE(.class = "St",		.isterminal = 1)
 	RULE(.title = "Event Tester",	.noswallow = 1) /* xev */
 	RULE(.class = "QjackCtl",	.isfloating = 1)
 	RULE(.title = "Firefox Update", .isfloating = 1)
@@ -244,7 +244,7 @@ static const Layout layouts[] = {
 
 #define SPKEYS(MOD,KEY,NUM) \
 	{ MOD,			KEY,	togglescratch,	{ .ui = NUM } },
-/* helper for spawning shell commands in the pre dwm-5.0 fashion, maybe use shkd? */
+/* helper for spawning shell commands */
 #define SHCMD(cmd)	spawn, { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 /* helper macro for the custom command of mine 'spawncmd' */
 #define CMDCMD(cmd) 	spawncmd,{ .v = cmd }
@@ -421,9 +421,9 @@ static const Key keys[] = {
 	//{ 0,	XF86XK_RFKill,			random_wall, {0}		},
 	{ MODKEY,		XK_p,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && { mpc play && mpdnoti 2000 ;} || mpc pause")},
 	{ MODKEY,		XK_p,		updateblock,		{ .ui = 11 }	},
-	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 1200")	},
+	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 900")	},
 	{ MODKEY,	XK_bracketleft,		updateblock,		{ .ui = 11 }	},
-	{ MODKEY,	XK_bracketright,	SHCMD("mpc next && mpdnoti 1200")	},
+	{ MODKEY,	XK_bracketright,	SHCMD("mpc next && mpdnoti 900")	},
 	{ MODKEY,	XK_bracketright,	updateblock,		{ .ui = 11 }	},
 	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")			},
 
@@ -495,7 +495,7 @@ static const Button buttons[] = {
 //	{ ClkLtSymbol,          0,              Button4,        focusstack,	{.i = +1} },
 //	{ ClkLtSymbol,          0,              Button5,        focusstack,	{.i = -1} },
 
-	{ ClkWinTitle,          0,              Button1,	SHCMD("maim -sDq ~/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
+	{ ClkWinTitle,          0,              Button1,	SHCMD("maim -usDq ~/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
 	{ ClkWinTitle,          0,              Button2,	zoomswap,       {0} },
 	{ ClkWinTitle,          0,              Button2,	killclient,	{0} },
 	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -us -e 'mv $f ~/Downloads'") },
