@@ -133,7 +133,6 @@ static const Rule rules[] = {
 	 * xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
-	 *	_NET_WM_WINDOW_TYPE(ATOM) = wintype
 	 *
 	 * Assign a flag to the window, by default none are assign.
 	 *
@@ -147,10 +146,6 @@ static const Rule rules[] = {
 	 *  uncursor, puts the cursor in the bottom right whenever the window
 	 * is focused (useful when there are gaps)
 	 */
-	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "DIALOG",	.isfloating = 1)
-	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "UTILITY",.isfloating = 1)
-	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "TOOLBAR",.isfloating = 1)
-	RULE(.wintype = "_NET_WM_WINDOW_TYPE" "SPLASH",	.isfloating = 1)
 	RULE(.class = "Gimp",		.tags = 1 << 7)
 	RULE(.class = "vlc",		.tags = 1 << 6)
 	RULE(.class = "qutebrowser",	.tags = 1 << 5)

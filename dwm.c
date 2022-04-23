@@ -77,17 +77,17 @@
 //#define TAGMASK		((1 << LENGTH(tags)) - 1)
 #define TAGMASK     		((1 << NUMTAGS) - 1)
 #define SPTAG(i) 		((1 << LENGTH(tags)) << (i))
-#define SPTAGMASK   		(((1 << LENGTH(scratchpads))-1) << LENGTH(tags))
+#define SPTAGMASK		(((1 << LENGTH(scratchpads)) - 1) << LENGTH(tags))
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 #define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
 #define Button6			6
 #define Button7			7
 #ifdef SYSTRAY
 /* XEMBED messages */
-#define VERSION_MAJOR               0
-#define VERSION_MINOR               0
-#define XEMBED_MAPPED              (1 << 0)
-#define XEMBED_EMBEDDED_VERSION (VERSION_MAJOR << 16) | VERSION_MINOR
+#define VERSION_MAJOR		0
+#define VERSION_MINOR		0
+#define XEMBED_MAPPED		(1 << 0)
+#define XEMBED_EMBEDDED_VERSION	(VERSION_MAJOR << 16) | VERSION_MINOR
 
 enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 #endif /* SYSTRAY */
@@ -111,7 +111,7 @@ enum { NetSupported, NetWMName,
        NetSystemTrayVisual, NetWMWindowTypeDock, NetSystemTrayOrientationHorz,
 #endif /* SYSTRAY */
        NetLast }; /* EWMH atoms */
-enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMWindowRole, WMLast }; /* default atoms */
+enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 
@@ -207,8 +207,6 @@ typedef struct {
 	const char *class;
 	const char *instance;
 	const char *title;
-	const char *wintype;
-	const char *role;
 	unsigned int tags;
 	int isfloating;
 	int isterminal;
@@ -515,8 +513,6 @@ applyrules(Client *c)
 	const Rule *r;
 	Monitor *m;
 	XClassHint ch = { NULL, NULL };
-	Atom wintype;
-	char role[64];
 
 	/* rule matching */
 	c->isfloating = 0;
@@ -526,16 +522,12 @@ applyrules(Client *c)
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
-	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
-	wintype  = getatomprop(c, netatom[NetWMWindowType]);
 
 	for (i = 0; i < LENGTH(rules); i++) {
 		r = &rules[i];
 		if ((!r->title || strstr(c->name, r->title))
 		&& (!r->class || strstr(class, r->class))
-		&& (!r->role || strstr(role, r->role))
-		&& (!r->instance || strstr(instance, r->instance))
-		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False)))
+		&& (!r->instance || strstr(instance, r->instance)))
 		{
 			c->isterminal = r->isterminal;
 			c->noswallow  = r->noswallow;
@@ -712,7 +704,6 @@ unswallow(Client *c)
 	updatetitle(c);
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);
-
 
 	XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 
@@ -3565,7 +3556,6 @@ setup(void)
 	wmatom[WMDelete]               = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wmatom[WMState]                = XInternAtom(dpy, "WM_STATE", False);
 	wmatom[WMTakeFocus]            = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
-	wmatom[WMWindowRole]           = XInternAtom(dpy, "WM_WINDOW_ROLE", False);
 	netatom[NetWMStateAbove]       = XInternAtom(dpy, "_NET_WM_STATE_ABOVE", False);
 	netatom[NetActiveWindow]       = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	netatom[NetSupported]          = XInternAtom(dpy, "_NET_SUPPORTED", False);
@@ -3990,7 +3980,6 @@ togglescratch(const Arg *arg)
 {
 	Client *c;
 	unsigned int found = 0, scratchtag = SPTAG(arg->ui);
-	Arg sparg = {.v = scratchpads[arg->ui] };
 
 	for (c = selmon->clients; c && !(found = c->tags & scratchtag); c = c->next);
 	if (found) {
@@ -4006,7 +3995,7 @@ togglescratch(const Arg *arg)
 		}
 	} else {
 		selmon->tagset[selmon->seltags] |= scratchtag;
-		spawn(&sparg);
+		spawn(&((Arg) { .v = scratchpads[arg->ui] }));
 	}
 }
 
@@ -4506,7 +4495,7 @@ winpid(Window w)
 
 	free(r);
 
-	if (result == (pid_t)-1)
+	if (result == (pid_t) - 1)
 		result = 0;
 
 #endif /* __linux__ */
