@@ -181,7 +181,7 @@ static const Rule rules[] = {
 	RULE(.instance = "pre"  ,	.tags = SPTAG(Sp4), .isfloating = 1)
 	RULE(.instance = "music",	.tags = SPTAG(Sp5), .isfloating = 1)
 	RULE(.instance = "pulsemixer",	.tags = SPTAG(Sp6), .isfloating = 1)
-	RULE(.instance = "samedir",	.tags = SPTAG(Sp7), .isfloating = 1, isterminal = 1)
+	RULE(.instance = "samedir",	.tags = SPTAG(Sp7), .isfloating = 1, .isterminal = 1)
 	RULE(.instance = "testi",	.tags = SPTAG(Sp8), .isfloating = 1)
 	//RULE(.instance = "normal",	.tags = SPTAG(7))
 	//RULE(.instance = "emacsfloat",	.tags = SPTAG(8), .isfloating = 1)
