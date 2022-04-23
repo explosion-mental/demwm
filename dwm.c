@@ -142,7 +142,7 @@ struct Client {
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
 	unsigned int tags;
-	int isfixed, isurgent, neverfocus, oldstate, hintsvalid;
+	int isfixed, isurgent, neverfocus, oldstate;
 	/* rules */
 	int isfloating, isfullscreen, isterminal, noswallow;
 	int fakefullscreen, alwaysontop, uncursor;
@@ -589,8 +589,6 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 	if (*w < bh)
 		*w = bh;
 	if (resizehints || (c->isfloating && floathints) || !c->mon->lt[c->mon->sellt]->arrange) {
-		if (!c->hintsvalid)
-			updatesizehints(c);
 		/* see last two sentences in ICCCM 4.1.2.3 */
 		baseismin = c->basew == c->minw && c->baseh == c->minh;
 		if (!baseismin) { /* temporarily remove base dimensions */
@@ -2416,6 +2414,7 @@ manage(Window w, XWindowAttributes *wa)
 		c->alwaysontop = 1;
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMFullscreen])
 		setfullscreen(c, 1);
+	updatesizehints(c);
 	updatewmhints(c);
 
 	/* store float size and position */
@@ -2727,7 +2726,7 @@ propertynotify(XEvent *e)
 				arrange(c->mon);
 			break;
 		case XA_WM_NORMAL_HINTS:
-			c->hintsvalid = 0;
+			updatesizehints(c);
 			break;
 		case XA_WM_HINTS:
 			updatewmhints(c);
@@ -4357,7 +4356,6 @@ updatesizehints(Client *c)
 	} else
 		c->maxa = c->mina = 0.0;
 	c->isfixed = (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh);
-	c->hintsvalid = 1;
 }
 
 void
