@@ -22,8 +22,7 @@ static const int pertag       = 1;        /* 0 means global layout across all ta
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
 static const int scalepreview = 4;        /* tag previews scaling */
-/* bar opacity from 0 to 255, default is 185 (OPAQUE = 255) */
-#define baralpha		120
+#define baralpha		120       /* bar opacity from 0 to 255/OPAQUE */
 
 static const char *fonts[] = {
 	"Monofur Nerd Font:size=10:antialias=true:autohint=true", /* Mono */
