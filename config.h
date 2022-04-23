@@ -175,13 +175,13 @@ static const Rule rules[] = {
 	RULE(.instance = "mpvfloat",	.isfloating = 1)
 
 	/* scratchpads */
-	RULE(.instance = "term",	.tags = SPTAG(Sp1), .isfloating = 1)
+	RULE(.instance = "term",	.tags = SPTAG(Sp1), .isfloating = 1, .isterminal = 1)
 	RULE(.instance = "notes",	.tags = SPTAG(Sp2), .isfloating = 1)
 	RULE(.instance = "calc" ,	.tags = SPTAG(Sp3), .isfloating = 1)
 	RULE(.instance = "pre"  ,	.tags = SPTAG(Sp4), .isfloating = 1)
 	RULE(.instance = "music",	.tags = SPTAG(Sp5), .isfloating = 1)
 	RULE(.instance = "pulsemixer",	.tags = SPTAG(Sp6), .isfloating = 1)
-	RULE(.instance = "term",	.tags = SPTAG(Sp7), .isfloating = 1)
+	RULE(.instance = "samedir",	.tags = SPTAG(Sp7), .isfloating = 1, isterminal = 1)
 	RULE(.instance = "testi",	.tags = SPTAG(Sp8), .isfloating = 1)
 	//RULE(.instance = "normal",	.tags = SPTAG(7))
 	//RULE(.instance = "emacsfloat",	.tags = SPTAG(8), .isfloating = 1)
@@ -274,7 +274,7 @@ static const char *scratchpads[][256] = {
 	[Sp5] = { "st", "-n", "music", "-g", "105x27", "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", "-e", "ncmpcpp", "-q", NULL }, /* music */
 	//[Sp6] = { "st", "-n", "pulsemixer", "-g", "100x25", "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "pulsemixer", NULL }, /* pulsemixer */
 	[Sp6] = { "/bin/sh", "-c", pulsepad, NULL },
-	[Sp7] = { "samedir", "-n", "term", "-g", "115x30", NULL }, /* samedir */
+	[Sp7] = { "samedir", "-n", "samedir", "-g", "115x30", NULL }, /* samedir */
 	[Sp8] = { "st", "-n", "testi", "-g", FURSIZE, "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
 };
 
