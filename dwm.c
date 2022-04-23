@@ -1142,6 +1142,7 @@ createmon(void)
 
 		/* init layouts */
 		m->pertag->ltidxs[0][0] = &layouts[0];
+
 		for (i = 1; i <= LENGTH(tags); i++)
 			m->pertag->ltidxs[i][0] = &layouts[taglayouts[i - 1]];
 
@@ -2961,8 +2962,8 @@ restack(Monitor *m)
 void
 run(void)
 {
-	XEvent ev;
 	int i;
+	XEvent ev;
 	struct pollfd fds[LENGTH(blocks) + 1] = {0};
 
 	fds[0].fd = ConnectionNumber(dpy);
@@ -3000,8 +3001,8 @@ run(void)
 		if ((poll(fds, LENGTH(blocks) + 1, -1)) == -1) {
 			if (errno == EINTR) { /* signal caught */
 				if (isalarm) /* SIGALRM */
-					isalarm = 0; /* restore isalarm */
-				else if (isrtsig) /* blocks signal SIGRTMIN + i */
+					isalarm = 0;
+				else if (isrtsig) /* SIGRTMIN + i */
 					isrtsig = 0;
 				else
 					fprintf(stderr, "dwm: poll INTERRUPTED by a signal (EINTR)\n");
@@ -3165,24 +3166,21 @@ getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 {
 	unsigned int n, oe, ie;
 	Client *c;
-	if (pertag)
-		oe = ie = selmon->pertag->enablegaps[selmon->pertag->curtag];
-	else
-		oe = ie = enablegaps;
-	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
-	if (smartgaps && n == 1) {
-		oe = 0;     /* outer gaps disabled when only one client */
-	}
 
-	/* disable gaps if they are disabled */
-	if (selmon->lt[selmon->sellt]->gaps)
+	oe = ie = pertag ? selmon->pertag->enablegaps[selmon->pertag->curtag] : enablegaps;
+
+	/* get the number of clients */
+	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+
+	/* outer gaps disabled when only one client or is disabled in the layout */
+	if ((smartgaps && n == 1) || selmon->lt[selmon->sellt]->gaps)
 		oe = 0;
 
-	*oh = m->gappoh*oe; /* outer horizontal gap */
-	*ov = m->gappov*oe; /* outer vertical gap   */
-	*ih = m->gappih*ie; /* inner horizontal gap */
-	*iv = m->gappiv*ie; /* inner vertical gap   */
-	*nc = n;            /* number of clients    */
+	*oh = m->gappoh * oe;	/* outer horizontal gap */
+	*ov = m->gappov * oe;	/* outer vertical gap   */
+	*ih = m->gappih * ie;	/* inner horizontal gap */
+	*iv = m->gappiv * ie;	/* inner vertical gap   */
+	*nc = n;		/* number of clients    */
 }
 void
 getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *sr)
@@ -3431,15 +3429,13 @@ setlayout(const Arg *arg)
 		} else
 			selmon->sellt ^= 1;
 	}
-	if (pertag) {
-		if (arg && arg->v) {
+	if (arg && arg->v) {
+		if (pertag) {
 			selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt] = (Layout *)arg->v;
 			selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 		}
-	} else {
-		if (arg && arg->v)
-			selmon->lt[selmon->sellt] = (Layout *)arg->v;
-	}
+	} else
+		selmon->lt[selmon->sellt] = (Layout *)arg->v;
 
 	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
 	if (selmon->sel)
@@ -3480,13 +3476,17 @@ setmfact(const Arg *arg)
 
 	if (!arg || !selmon->lt[selmon->sellt]->arrange)
 		return;
+
 	f = arg->f < 1.0 ? arg->f + selmon->mfact : arg->f - 1.0;
+
 	if (f < 0.05 || f > 0.95)
 		return;
+
 	if (pertag)
 		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag] = f;
 	else
 		selmon->mfact = f;
+
 	arrange(selmon);
 }
 
@@ -4437,7 +4437,7 @@ view(const Arg *arg)
 			if (arg->ui == ~0)
 				selmon->pertag->curtag = 0;
 			else {
-				for (i=0; !(arg->ui & 1 << i); i++) ;
+				for (i = 0; !(arg->ui & 1 << i); i++);
 				selmon->pertag->curtag = i + 1;
 			}
 		} else {
@@ -4451,7 +4451,7 @@ view(const Arg *arg)
 		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 		selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
 
-		if (gapspertag) {
+		if (gapspertag) { /* store gaps in 2 bits */
 			selmon->gappoh = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff) >> 0;
 			selmon->gappov = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff00) >> 8;
 			selmon->gappih = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff0000) >> 16;
