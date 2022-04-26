@@ -655,7 +655,9 @@ swallow(Client *p, Client *c)
 {
 	if (c->noswallow || c->isterminal)
 		return;
-	if (!swallowfloating && c->isfloating)
+
+	if (((!swallowfloating && c->isfloating) && !c->isfullscreen)
+	|| (!swallowffs && c->isfullscreen))
 		return;
 
 	detach(c);

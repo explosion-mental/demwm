@@ -13,6 +13,7 @@ static unsigned int gappov    = 20;       /* vert outer gap between windows and 
 static int hidevacant         = 1;        /* 1 means hide vacant tags */
 static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static int swallowfloating    = 0;        /* 1 means swallow floating windows by default */
+static int swallowffs         = 1;        /* 1 means swallow fullscreen windows by default */
 static int showbar            = 1;        /* 0 means no bar */
 static int showstatus         = 1;        /* 0 means no status text */
 static const int underlntitle = 1;        /* 1 means an underline on the title */
