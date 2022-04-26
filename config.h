@@ -17,7 +17,7 @@ static int showbar            = 1;        /* 0 means no bar */
 static int showstatus         = 1;        /* 0 means no status text */
 static const int underlntitle = 1;        /* 1 means an underline on the title */
 static const int topbar       = 1;        /* 0 means bottom bar */
-static const int barh         = 8;        /* 1 or more means bar height */
+static const int barh         = 9;        /* 1 or more means bar height */
 static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
 static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
 static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
@@ -230,10 +230,10 @@ static const Layout layouts[] = {
 /* key definitions */
 #define MODKEY Mod4Mask
 #define TAGKEYS(KEY,TAG) \
-	{ MODKEY,                       KEY,	comboview,      { .ui = 1 << TAG } }, \
-	{ MODKEY|ShiftMask,             KEY,	combotag,       { .ui = 1 << TAG } }, \
-	/*{ MODKEY|ControlMask,           KEY,	toggleview,     { .ui = 1 << TAG } },*/\
-	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,      { .ui = 1 << TAG } }, \
+	{ MODKEY,                       KEY,	comboview,      { .ui = 1 << TAG } },	\
+	{ MODKEY|ShiftMask,             KEY,	combotag,       { .ui = 1 << TAG } },	\
+	/*{ MODKEY|ControlMask,           KEY,	toggleview,     { .ui = 1 << TAG } },*/	\
+	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,      { .ui = 1 << TAG } },	\
 	{ MODKEY|ControlMask,		KEY,	swaptags,	{ .ui = 1 << TAG } },
 
 #define SPKEYS(MOD,KEY,NUM) \
@@ -244,20 +244,14 @@ static const Layout layouts[] = {
 #define CMDCMD(cmd) 	spawncmd,{ .v = cmd }
 /* macro for any dmenu commands, colorize them */
 #define DMENUARGS "-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
-/* macro defining commands */
-#define EXEC(name,cmd)	static const char *name[] = { "/bin/sh", "-c", cmd, NULL };
 /* commands */
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
 static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
 static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
-//static const char *passmenu[]  = { "passmenu", "-i", "-l", "25", "-p", "Passmenu:", DMENUARGS, NULL };
-//static const char *termcmd[]   = { terminalcmd, NULL };
-EXEC(termcmd, "st")
 static const char *syncthing[] = { "surf", "127.0.0.1:1210", NULL };
 static const char *web[]       = { "surf", "start.duckduckgo.com", NULL };
 static const char *vifm[]      = { "st", "-e", "vifmrun", NULL };
 static const char *samevifm[]  = { "samedirvifm", NULL };
-//EXEC(samedmenu, "samedirmenu"
 static const char pulsepad[] = "st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer";
 
 /* macro for nvim to start on insertmode on the last line */
@@ -281,7 +275,7 @@ static const Key keys[] = {
 	/* modifier(s)			key	function	argument */
 
 				/* Commands */
-	{ MODKEY,		   XK_Return,	spawn,		{ .v = termcmd }	},
+	{ MODKEY,		   XK_Return,	SHCMD("st")				},
 	{ MODKEY,			XK_d,   spawn,		{ .v = dmenucmd }	},
 	{ MODKEY|ShiftMask,		XK_d,   spawn,		{ .v = samedmenu }	},
 	{ MODKEY,			XK_m,	spawn,		{ .v = vifm }		},
