@@ -236,15 +236,17 @@ static const Layout layouts[] = {
 	/*{ MODKEY|ControlMask,           KEY,	toggleview,     { .ui = 1 << TAG } },*/	\
 	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,      { .ui = 1 << TAG } },	\
 	{ MODKEY|ControlMask,		KEY,	swaptags,	{ .ui = 1 << TAG } },
-
 #define SPKEYS(MOD,KEY,NUM) \
 	{ MOD,			KEY,	togglescratch,	{ .ui = NUM } },
+
 /* helper for spawning shell commands */
 #define SHCMD(cmd)	spawn, { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
-/* helper macro for the custom command of mine 'spawncmd' */
-#define CMDCMD(cmd) 	spawncmd,{ .v = cmd }
-/* macro for any dmenu commands, colorize them */
-#define DMENUARGS "-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
+
+/* macros of common comand line arguments */
+#define DMENUARGS	"-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
+#define NOTES		"-e", "nvim", "+$", "+startinsert!"
+#define FURSIZE		"90x25"
+
 /* commands */
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
 static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
@@ -255,9 +257,6 @@ static const char *vifm[]      = { "st", "-e", "vifmrun", NULL };
 static const char *samevifm[]  = { "samedirvifm", NULL };
 static const char pulsepad[] = "st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer";
 
-/* macro for nvim to start on insertmode on the last line */
-#define NOTES		"-e", "nvim", "+$", "+startinsert!"
-#define FURSIZE		"90x25"
 /* scratchpads */
 static const char *scratchpads[][256] = {
 	[Sp1] = { "st", "-n", "term", "-g", "115x30" , NULL }, /* terminal */
@@ -417,7 +416,7 @@ static const Key keys[] = {
 	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")			},
 
 			/* Custom bindings (may be better using shkd) */
-	{ MODKEY,			XK_b,	CMDCMD("Books001")		},
+	{ MODKEY,			XK_b,	SHCMD("Books001")		},
 	{ MODKEY|ShiftMask,		XK_u,	SHCMD("bookmenu")		},
 	{ MODKEY|ShiftMask,		XK_b,	SHCMD("Boletin001")		},
 	{ MODKEY,		        XK_c,	SHCMD("st -f 'Monofur Nerd Font:pixelsize=22:antialias=true:autohint=true' -e calcurse")},

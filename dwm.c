@@ -343,6 +343,7 @@ static void showtagpreview(int tag);
 static void switchtag(void);
 static void updatepreview(void);
 #endif /* TAG_PREVIEW */
+static void sigalrm(int unused);
 static void sigchld(int unused);
 static void sighandler(int signum);
 static void sighup(int unused);
@@ -415,7 +416,6 @@ static void random_wall(const Arg *arg);
 //static void toggleborder(const Arg *arg);
 static void togglevacant(const Arg *arg);
 static void togglestatus(const Arg *arg);
-static void spawncmd(const Arg *arg);
 
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
@@ -3833,24 +3833,6 @@ spawn(const Arg *arg)
 		setsid();
 		execvp(((char **)arg->v)[0], (char **)arg->v);
 		fprintf(stderr, "dwm: execvp %s", ((char **)arg->v)[0]);
-		perror(" failed");
-		exit(EXIT_SUCCESS);
-	}
-}
-
-/* wrapper for exec which appends NULL to the variable */
-void
-spawncmd(const Arg *arg)
-{
-	if (fork() == 0) {
-		if (dpy)
-			close(ConnectionNumber(dpy));
-		setsid();
-		char shcmd[1024];
-		strcpy(shcmd, arg->v);
-		char *command[] = { "/bin/sh", "-c", shcmd, NULL };
-		execvp(command[0], command);
-		fprintf(stderr, "dwm: execvp %s", *command);
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
