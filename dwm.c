@@ -95,7 +95,7 @@ enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
-	SchemeStatus, SchemeDelim, SchemeSys, SchemeNotify, SchemeIndOff,
+	SchemeStatus, SchemeDelim, SchemeSys, SchemeIndUrg, SchemeIndOff,
 	SchemeIndOn, BorderNorm, BorderSel, BorderFloat, BorderUrg }; /* color schemes */
 enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8 }; /* scratchpads */
 enum { NetSupported, NetWMName,
@@ -1291,7 +1291,7 @@ drawbar(Monitor *m)
 		if (occ & 1 << i && !hidevacant) { /* don't draw these when hidevacant */
 			if (urg & 1 << i) {
 				/* urgent underline (top of tag) */
-				drw_setscheme(drw, scheme[SchemeNotify]);
+				drw_setscheme(drw, scheme[SchemeIndUrg]);
                 		drw_rect(drw, x, 0, w, boxs, 1, 0);
 			}
 			/* normal underline (IndOn/Off) */
