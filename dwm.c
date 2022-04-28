@@ -1287,7 +1287,7 @@ drawbar(Monitor *m)
 			continue;
 		w = TEXTW(hidevacant ? tagsalt[i] : tags[i]);
 		drw_setscheme(drw, scheme[urg & 1 << i ? SchemeUrgent : (m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm)]);
-		drw_text(drw, x, 0, w, bh, lrpad / 2, hidevacant ? tagsalt[i] : tags[i], urg & 1 << i);
+		drw_text(drw, x, 0, w, bh, lrpad / 2, hidevacant ? tagsalt[i] : tags[i], 0);
 		if (occ & 1 << i && !hidevacant) { /* don't draw these when hidevacant */
 			if (urg & 1 << i) {
 				/* urgent underline (top of tag) */
