@@ -7,12 +7,10 @@ backend=wal		# colorz - schemer2 - wal - haishoku - colorthief
 # post run hooks
 postrun() {
 	xwallpaper --zoom "$bgloc" &
-	killall -q glava
-	glava 1>/dev/null &
-	#pkill dunst; dunst &
-	ln -sf "${HOME}/.cache/wal/dunstrc"	"${HOME}/.config/dunst/dunstrc"
-	ln -sf "${HOME}/.cache/wal/zathurarc"	"${HOME}/.config/zathura/zathurarc"
-	#glava stuff
+	killall -q glava && glava 1>/dev/null &
+	killall -q -9 dunst && dunst &	# forcefully kill dunst
+	ln -sf "${HOME}/.cache/wal/dunstrc"		"${HOME}/.config/dunst/dunstrc"
+	ln -sf "${HOME}/.cache/wal/zathurarc"		"${HOME}/.config/zathura/zathurarc"
 	ln -sf "${HOME}/.cache/wal/glava_bars.glsl"	"${HOME}/.config/glava/bars.glsl"
 	ln -sf "${HOME}/.cache/wal/glava_circle.glsl"	"${HOME}/.config/glava/circle.glsl"
 	ln -sf "${HOME}/.cache/wal/glava_graph.glsl"	"${HOME}/.config/glava/graph.glsl"
@@ -24,7 +22,7 @@ postrun() {
 randomimg="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
 #randomimg="$(find "$img_path" -iregex '.*.\(jpg\|jpeg\|png\)' -type f | shuf -n 1)"
 
-# if not installed, exit with 1 so dwm uses fallback colors
+# exit 1 so dwm uses fallback colors, in case of errors
 wal -i "$randomimg" --backend $backend -qnt || exit 1
 
 ln -sf "$randomimg" "$bgloc"
