@@ -44,7 +44,7 @@ static const char *colors[][2] = {
 			/* fg		bg           description         */
 	[SchemeNorm]   = { fg_wal,	color0 }, /* normal tags section */
 	[SchemeSel]    = { color0,	color1 }, /* selected tag */
-	[SchemeUrgent] = { fg_wal,	color0 }, /* urgent tag */
+	[SchemeUrgent] = { color0,	fg_wal }, /* urgent tag */
 	[SchemeLt]     = { fg_wal,	color0 }, /* layout */
 	[SchemeTitle]  = { color0,	color2 }, /* window title */
 	[SchemeStatus] = { fg_wal,	color0 }, /* status text */
