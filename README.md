@@ -80,7 +80,7 @@ The interval is how many X seconds you want to pass before re-**run**ning the
 command and update the output. Can be 0, which means never.
 
 ### Signal
-**This is discouraged, use [xsetroot](#Manage-dwm-with-`xsetroot`) instead**
+**This is discouraged, use [xsetroot](#manage-dwm-with-xsetroot) instead**
 
 
 The signal is a number to update the command, requires you to add `+ 34`. Say a
