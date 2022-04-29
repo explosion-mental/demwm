@@ -40,7 +40,7 @@ static const char *fonts[] = {
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8];
 static char color6[8], color7[8], color8[8], bg_wal[8], fg_wal[8], cursor_wal[8];
 
-static const char *colors[][2]	        = {
+static const char *colors[][2] = {
 			/* fg		bg           description         */
 	[SchemeNorm]   = { fg_wal,	color0 }, /* normal tags section */
 	[SchemeSel]    = { color0,	color1 }, /* selected tag */
@@ -58,7 +58,7 @@ static const char *colors[][2]	        = {
 	[BorderFloat]  = { color6 },	/* selected floating window border */
 	[BorderUrg]    = { fg_wal },	/* urgent window border */
 };
-static const unsigned int alphas[][2]   = {
+static const unsigned int alphas[][2] = {
 			/* fg		bg	 */
 	[SchemeNorm]   = { OPAQUE,	baralpha },
 	[SchemeSel]    = { OPAQUE,	baralpha },
