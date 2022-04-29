@@ -2077,7 +2077,7 @@ getstatus(int width)
 	{
 		if (*blockoutput[i] == '\0') /* ignore command that output NULL or '\0' */
 			continue;
-		strcpy(fgcol, blocks[i].color);
+		strncpy(fgcol, blocks[i].color, 8);
 		/* re-load the scheme with the new colors */
 		scheme[SchemeStatus] = drw_scm_create(drw, cols, alphas[SchemeStatus], 2);
 		drw_setscheme(drw, scheme[SchemeStatus]); /* 're-set' the scheme */
@@ -2255,18 +2255,18 @@ fallbackcolors(void)
 {
 	int i;
 
-	strcpy(bg_wal, "#444444");
-	strcpy(fg_wal, "#bbbbbb");
-	strcpy(color0, "#222222");
-	strcpy(color1, "#eeeeee");
-	strcpy(color2, "#005577");
-	strcpy(color3, "#222222");
-	strcpy(color4, "#eeeeee");
-	strcpy(color5, "#222222");
-	strcpy(color6, "#222222");
-	strcpy(color7, "#222222");
-	strcpy(color8, "#222222");
-	strcpy(cursor_wal, "#222222");
+	strncpy(bg_wal, "#444444", 8);
+	strncpy(fg_wal, "#bbbbbb", 8);
+	strncpy(color0, "#222222", 8);
+	strncpy(color1, "#eeeeee", 8);
+	strncpy(color2, "#005577", 8);
+	strncpy(color3, "#222222", 8);
+	strncpy(color4, "#eeeeee", 8);
+	strncpy(color5, "#222222", 8);
+	strncpy(color6, "#222222", 8);
+	strncpy(color7, "#222222", 8);
+	strncpy(color8, "#222222", 8);
+	strncpy(cursor_wal, "#222222", 8);
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
 	fprintf(stderr, "dwm: could not get Xresources colors, switching to fallback colors.\n");
