@@ -13,7 +13,7 @@ options:
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo "CC       = ${CC}"
-	@echo "FEATS    = ${ICONS} ${SYSTRAY} ${TAG_PREVIEWS}"
+	@echo "FEATS    = ${ICONS} ${SYSTRAY} ${TAG_PREVIEWS} ${XINERAMAFLAGS}"
 
 .c.o:
 	${CC} -c ${CFLAGS} $<
