@@ -34,9 +34,9 @@ _some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm.
 - Changing the schemes (colors) at run time
 - More [layouts](https://github.com/explosion-mental/Dwm/blob/main/layouts.c)
 - Custom bar height
-- Different color schemes for Title, Status and Layout (added 4 more shemes on
-  top of the other mentioned: Urgent - Notify - Indicator on/off)
-- Different scheme for border instances
+- Different color schemes: Normal, Selected, Title, Status, Layout, Urgent and
+  **Ind**icator schemes (underlines in tags)
+- Different schemes for border instances
 - Transparency on the bar
 - A beautiful looking config.h file (at least for my taste :)
 - Toggleable 'hide-vacant' patch, which enables alternative tags on toggle
@@ -59,8 +59,10 @@ Why? Some reasons:
 
 
 _A note about_ **usage**: The asyc status text is done by the `poll` system
-call. This build `exec`s scripts every `X` seconds async, which stock dwm
-doesn't. You won't notice any change if you normally use `dwmblocks`.
+call. This build `exec`s scripts every `X` seconds
+[asynchronously](https://github.com/UtkarshVerma/dwmblocks-async#why-dwmblocks-async),
+which of course stock dwm doesn't. You won't notice any change in resources if
+you normally use `dwmblocks` or it's variants (all of them exec scripts).
 
 
 **You can avoid executing all the scripts completly by hidding the bar or the
@@ -69,30 +71,33 @@ statustext**.
 ## How to interact with blocks
 A block is only a group that consist of 3 things: command, interval and signal.
 
+### Command
 The command is the block text, just the output of any program. For example you
 could define the command as `echo "This is a block"`.
 
+### Interval
 The interval is how many X seconds you want to pass before re-**run**ning the
 command and update the output. Can be 0, which means never.
 
-The signal is a number where you can re-**run** the command. Say a signal
-number `Y` which, for example, I will define as `11`. Then `Y + 34` -> `11 +
-34` -> `45`, and you will need this result in order to actually use the signal
-with `kill`, In this case: `kill -45 $(pidof dwm)`. `pidof dwm` gets the pid of
-dwm, but there is a more friendly way. This build of `dwm` sets an
-_enviromental variable_ called `STATUSBAR` which value is the _pid_ of the dwm.
-In short do: `kill -45 $STATUSBAR`.
+### Signal
+**This is discouraged, use [xsetroot](#Manage-dwm-with-`xsetroot`) instead**
 
-Signaling mentioned above shouldn't work with BSD's, so a recommended way to
-update a block with a signal is to use `xsetroot -name 1`, to update a block
-with signal 1, for example.
-You can do much more with `xsetroot`, see below..
+
+The signal is a number to update the command, requires you to add `+ 34`. Say a
+signal number `Y` which, for example, I will define as `Y = 11`. Then `Y + 34`
+-> `11 + 34` -> `45`, and you will need this result in order to actually use
+the signal with `kill`, In this case: `kill -45 $(pidof dwm)`. `pidof dwm` gets
+the pid of dwm, but there is a more friendly way. This build of `dwm` sets an
+_enviromental variable_ called `STATUSBAR` which value is the _pid_ of the dwm.
+In short do: `kill -45 $STATUSBAR`. This depends on real time signals, so it's
+Linux specific.
+
 
 ## Scripts
-
 For clicking to do anything you have to make a dedicated script which handles
-the `BLOCK_BUTTON` _enviromental variable_, here an example:
+the `BLOCK_BUTTON` _variable_, here an example:
 ```sh
+# handle dwm blocks
 case $BLOCK_BUTTON in
 	1) notify-send "You've clicked mouse button $BLOCK_BUTTON" ;;
 	2) notify-send "Right click" ;;
@@ -100,9 +105,14 @@ case $BLOCK_BUTTON in
 	4) pamixer --allow-boost -i 1 ;; # volume up
 	5) pamixer --allow-boost -d 1 ;; # volume down
 	6) "$TERMINAL" -e "$EDITOR" "$0" ;; # edit the block
+	7) "$TERMINAL" -e "$EDITOR" "$0" & ;; # edit the block without locking it
 esac
 
+# If nothing is playing, don't output anything
 [ "$(mpc status '%state%')" = 'paused' ] && echo '' && exit
+
+# dislpay text
+echo "Playing: $(mpc current --format '[[%artist% - ]%title%]|[%file%]')"
 ```
 
 To define the value of `BLOCK_BUTTON`, you have to edit _config.h_ mouse
@@ -114,7 +124,6 @@ important to echo something (even `''`) to 'notify dwm' that the block has
 changed.
 
 # Manage dwm with `xsetroot`
-
 Since dwm handles the text itself, we can use the 'name' of the root window for
 other purposes, like managing dwm (similar to the `fakesignal` patch).
 
@@ -123,7 +132,7 @@ other purposes, like managing dwm (similar to the `fakesignal` patch).
 - It can accept functions that require an argument, e.g `xsetroot -name 'cyclelayout -1'` but remember to use `'` or `"` around it.
 
 
-* Commands:
+## Commands
 ```sh
 xsetroot -name 'incrgaps X'	# X can be -1 or +1
 xsetroot -name 'incrogaps X'
@@ -200,7 +209,7 @@ The script is copied/deleted to `${PREFIX}/bin` by default, `PREFIX` path can
 be changed in config.mk.
 
 **NOTE**: I run some custom 'hooks' in `postrun` function which forks to the
-background, you can delete everything and change at your liking the function.
+background, you can delete everything and change the function at your liking.
 
 # Patches
 My little collection of patches, which aren't necessarily applied to this. You
@@ -215,6 +224,9 @@ curl -sL https://github.com/explosion-mental/Dwm/commit/d8e4af59c570c4b8ef36ef89
 ```
 Here are some that I converted into a patch:
 - shift-tools (shift windows,tags or both either with an active client or not)
+- integrated status text (TODO: add the `poll` version)
+- gruvbox theme (for the bar)
+- truecenteredtitle
 
 # What's Next?
 Currently I don't wish more 'features' but I'm tweaking from time to time, here
@@ -250,12 +262,12 @@ are some ideas:
 - <s>a better way of handling layouts at startup</s>
 
 ## Some wishing pains:
-- change `dwm_random_wall` script to an actual function on C.
 - pertag cursor position. Save the state of the cursor position between tags.
-- Can `tcc` (tiny C Compiler) be used along side with the **alpha** patch? yes, with macros for `baralpha` and `boderalpha` compiles but if `tcc` is being used it crashes.
+- <s>change `dwm_random_wall` script to an actual function on C.</s> Why? being a script is much easier to tweak.
+- <s>Can `tcc` (tiny C Compiler) be used along side with the **alpha** patch? yes, with macros for `baralpha` and `boderalpha` compiles but if `tcc` is being used it crashes.</s>
 - <s>integrate dwmblocks into dwm with statuscmd patch.</s>
 - <s>Make gaps an option(?)</s>
-- <s>getenv("TERMINAL")</s>
+- <s>getenv("TERMINAL")</s> Tbh the macro it's better option
 
 # Mayor improvements:
 - xrdb patch finally working with pywal without restarting or recompiling (Mar
@@ -274,6 +286,9 @@ are some ideas:
 - Borders colors and general colors now have different schemes (Oct 16 2021)
 - status text (blocks) handled by dwm itself (Feb 12 2022)
 	* Asynchronous block handling (Feb 25 2022)
+	* Do not call `poll` if the bar is not in use (Apr 12 2022)
+- Call dwm functions with `xsetroot -name` [(Feb 21 2022)](https://codeberg.org/explosion-mental/Dwm/commit/f03519c70c5c9ada10afda3b6175ea5dfa9b1755)
 - Windows remember their tags, useful when restarting (Feb 28 2022)
+- Fixed some patches bugs that the compiler fixes (Mar 06 2022)
 - Remember the selected tags when restarting (Mar 09 2022)
 - uncursor window rule (Mar 18 2022)
