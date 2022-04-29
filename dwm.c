@@ -412,7 +412,7 @@ static void togglealwaysontop(const Arg *arg);
 static void swaptags(const Arg *arg);
 //static void loadrandom_wall(const Arg *arg);
 static void random_wall(const Arg *arg);
-//static void toggletopbar(const Arg *arg);
+static void toggletopbar(const Arg *arg);
 //static void toggleborder(const Arg *arg);
 static void togglevacant(const Arg *arg);
 static void togglestatus(const Arg *arg);
@@ -2691,6 +2691,8 @@ propertynotify(XEvent *e)
 					togglevacant(NULL);
 				else if (!strcmp(n, "togglestatus"))
 					togglestatus(NULL);
+				else if (!strcmp(n, "toggletopbar"))
+					toggletopbar(NULL);
 				else if (!strcmp(n, "toggletag"))
 					toggletag(&((Arg) { .ui = 1 << arg }));
 				else if (!strcmp(n, "view"))
@@ -4891,15 +4893,28 @@ random_wall(const Arg *arg)
 	else
 		xrdb(NULL);
 }
-/*void
+void
 toggletopbar(const Arg *arg)
 {
-	topbar = !topbar;
+	selmon->topbar = !selmon->topbar;
 	updatebarpos(selmon);
+#ifdef SYSTRAY
+	resizebarwin(selmon);
+	XWindowChanges wc;
+	if (!selmon->showbar)
+		wc.y = -bh;
+	else if (selmon->showbar) {
+		wc.y = 0;
+		if (!selmon->topbar)
+			wc.y = selmon->mh - bh;
+	}
+	XConfigureWindow(dpy, systray->win, CWY, &wc);
+#else
+	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
+#endif /* SYSTRAY */
+	arrange(selmon);
 	drawbar(selmon);
-	//arrange(NULL);
-}*/
-/* end of Customs */
+}
 
 int
 main(int argc, char *argv[])

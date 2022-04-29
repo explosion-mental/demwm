@@ -158,6 +158,7 @@ xsetroot -name togglegaps
 xsetroot -name togglesmartgaps
 xsetroot -name togglevacant
 xsetroot -name togglestatus
+xsetroot -name toggletopbar
 xsetroot -name xrdb
 xsetroot -name zoom
 xsetroot -name zoomswap
