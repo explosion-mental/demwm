@@ -156,23 +156,24 @@ static const Rule rules[] = {
 //	RULE(.class = "libreoffice",	.tags = 1 << 3)
 //	RULE(.title = "LibreOffice",	.isfloating = 1, .noswallow = 1)
 //	RULE(.class = "libreoffice",	.noswallow = 1)
-//	RULE(.class = "Firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
 	RULE(.class = "firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
 	RULE(.class = "Brave-browser",	.tags = 1 << 4, .isfakefullscreen = 1)
-	RULE(.class = "Pavucontrol",	.isfloating = 1)
-	RULE(.class = "Pcmanfm",	.isfloating = 1)
-//	RULE(.title = "pulsemixer",  .isfloating = 1)
-	RULE(.title = "About Mozilla Firefox",	.isfloating = 1)
 	RULE(.class = "St",		.isterminal = 1)
 	RULE(.title = "Event Tester",	.noswallow = 1) /* xev */
+	/* floating */
+	RULE(.class = "Pavucontrol",	.isfloating = 1)
+	RULE(.class = "Pcmanfm",	.isfloating = 1)
+	RULE(.title = "About Mozilla Firefox",	.isfloating = 1)
 	RULE(.class = "QjackCtl",	.isfloating = 1)
 	RULE(.title = "Firefox Update", .isfloating = 1)
+	RULE(.title = "Krita - Edit Text", .isfloating = 1)
 	//customs
 	RULE(.class = "Video",		.isfloating = 1)
 	RULE(.class = "dialect",	.isfloating = 1)
-	RULE(.title = "noswallow",	.noswallow = 1)
 	RULE(.title = "mpvfloat",	.isfloating = 1)
 	RULE(.instance = "mpvfloat",	.isfloating = 1)
+	RULE(.title = "noswallow",	.noswallow = 1)
+
 
 	/* scratchpads */
 	RULE(.instance = "term",	.tags = SPTAG(Sp1), .isfloating = 1, .isterminal = 1)
@@ -240,7 +241,7 @@ static const Layout layouts[] = {
 	{ MOD,			KEY,	togglescratch,	{ .ui = NUM } },
 
 /* helper for spawning shell commands */
-#define SHCMD(cmd)	spawn, { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+#define SHCMD(cmd)	spawn, { .v = (const char *[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* macros of common comand line arguments */
 #define DMENUARGS	"-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
@@ -286,6 +287,8 @@ static const Key keys[] = {
 //	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn,		{ .v = passmenu }	},
 	{ MODKEY|ShiftMask,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
 	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
+
+				/* Scratchpads */
 	SPKEYS(MODKEY,			XK_s,	/* terminal	*/	Sp1)
 	SPKEYS(MODKEY,			XK_e,	/* notes	*/	Sp2)
 	SPKEYS(MODKEY,			XK_x,	/* calculator	*/	Sp3)
