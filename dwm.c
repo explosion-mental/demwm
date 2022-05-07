@@ -1303,16 +1303,16 @@ drawbar(Monitor *m)
 		x += w;
 	}
 	/* monocle, count clients if there are more than one */
-	if (m->lt[m->sellt]->arrange == &monocle || m->lt[m->sellt]->arrange == &alphamonocle) {
+	if ((m->lt[m->sellt]->arrange == &monocle || m->lt[m->sellt]->arrange == &alphamonocle) && m->sel) {
 		for (a = 0, s = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), a++)
 			if (c == m->stack)
 				s = a;
 		if (!s && a)
 			s = a;
 		if (a > 1) {
-			if (m->lt[m->sellt]->arrange == &monocle)
+			if (m->lt[m->sellt]->arrange == &monocle) /* monocle */
 				snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d/%d]", s, a);
-			else
+			else	/* alphamonocle */
 				snprintf(m->ltsymbol, sizeof m->ltsymbol, "{%d/%d}", s, a);
 		}
 	}
