@@ -3418,8 +3418,9 @@ setfullscreen(Client *c, int fullscreen)
 			restack(c->mon);
 		} else
 			arrange(c->mon);
-	} else
-		resizeclient(c, c->x, c->y, c->w, c->h);
+	} else /* FIXME resizeclient seems to not take care of the gaps */
+		arrange(c->mon);
+		//resizeclient(c, c->x, c->y, c->w, c->h);
 }
 
 void
