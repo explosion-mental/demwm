@@ -3683,13 +3683,13 @@ shifttagclients(const Arg *arg)
 
 	if (arg->i > 0)	/* left circular shift */
 		do
-			shifted.ui = ((shifted.ui << arg->i)
-			   | (shifted.ui >> (LENGTH(tags) - arg->i))) & ~SPTAGMASK;
+			shifted.ui = (((shifted.ui << arg->i)
+			   | (shifted.ui >> (LENGTH(tags) - arg->i)))) & ~SPTAGMASK;
 		while (tagmask && !(shifted.ui & tagmask));
 	else		/* right circular shift */
 		do
-			shifted.ui = (shifted.ui >> (- arg->i)
-			   | shifted.ui << (LENGTH(tags) + arg->i)) & ~SPTAGMASK;
+			shifted.ui = ((shifted.ui >> (- arg->i)
+			   | shifted.ui << (LENGTH(tags) + arg->i))) & ~SPTAGMASK;
 		while (tagmask && !(shifted.ui & tagmask));
 	tag(&shifted);
 }
