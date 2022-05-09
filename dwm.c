@@ -330,7 +330,6 @@ static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
 static void settagsatom(Window w, unsigned int tags);
-static void shift(void (*func)(const Arg *arg));
 static void shifttag(const Arg *arg);
 static void shifttagclients(const Arg *arg);
 static void shiftview(const Arg *arg);
@@ -3692,20 +3691,6 @@ shifttagclients(const Arg *arg)
 			   | shifted.ui << (LENGTH(tags) + arg->i))) & ~SPTAGMASK;
 		while (tagmask && !(shifted.ui & tagmask));
 	tag(&shifted);
-}
-
-
-void
-shift(void (*func)(const Arg *arg))
-{
-//	Arg shifted;
-//	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
-//
-//	if ((*func)(arg->i) > 0)	/* left circular shift */
-//		shifted.ui = ((shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i))) & ~SPTAGMASK;
-//	else	/* right circular shift */
-//		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i)) & ~SPTAGMASK;
-//	func(&shifted);
 }
 
 void
