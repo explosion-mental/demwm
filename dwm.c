@@ -3432,13 +3432,14 @@ setlayout(const Arg *arg)
 		} else
 			selmon->sellt ^= 1;
 	}
+
 	if (arg && arg->v) {
 		if (pertag) {
 			selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt] = (Layout *)arg->v;
 			selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
-		}
-	} else
-		selmon->lt[selmon->sellt] = (Layout *)arg->v;
+		} else
+			selmon->lt[selmon->sellt] = (Layout *)arg->v;
+	}
 
 	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
 	if (selmon->sel)
