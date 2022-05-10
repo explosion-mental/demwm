@@ -3330,12 +3330,15 @@ setfullscreen(Client *c, int fullscreen)
 {
 	int savestate = 0, restorestate = 0, restorefakefullscreen = 0;
 
-	if ((c->fakefullscreen == 0 && fullscreen && !c->isfullscreen) /* normal fullscreen */
-			|| (c->fakefullscreen == 2 && fullscreen)) /* fake fullscreen --> actual fullscreen */
+	if (fullscreen &&
+	((c->fakefullscreen == 0 && !c->isfullscreen) /* normal fullscreen */
+	|| (c->fakefullscreen == 2))) /* fake fullscreen --> actual fullscreen */
 		savestate = 1; /* go actual fullscreen */
-	else if ((c->fakefullscreen == 0 && !fullscreen && c->isfullscreen) /* normal fullscreen exit */
-			|| (c->fakefullscreen >= 2 && !fullscreen)) /* fullscreen exit --> fake fullscreen */
+	else if (!fullscreen &&
+	((c->fakefullscreen == 0 && c->isfullscreen) /* normal fullscreen exit */
+	|| (c->fakefullscreen >= 2))) /* fullscreen exit --> fake fullscreen */
 		restorestate = 1; /* go back into tiled */
+
 
 	/* If leaving fullscreen and the window was previously fake fullscreen
 	 * (2), then restore that while staying in fullscreen. The exception to
