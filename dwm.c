@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <sys/wait.h>	/* dwm doesn't use wait? */
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
