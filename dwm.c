@@ -3334,11 +3334,10 @@ setfullscreen(Client *c, int fullscreen)
 	((c->fakefullscreen == 0 && !c->isfullscreen) /* normal fullscreen */
 	|| (c->fakefullscreen == 2))) /* fake fullscreen --> actual fullscreen */
 		savestate = 1; /* go actual fullscreen */
-	else if (!fullscreen &&
-	((c->fakefullscreen == 0 && c->isfullscreen) /* normal fullscreen exit */
-	|| (c->fakefullscreen >= 2))) /* fullscreen exit --> fake fullscreen */
-		restorestate = 1; /* go back into tiled */
-
+	else if (!fullscreen) {
+		if ((c->fakefullscreen == 0 && c->isfullscreen) /* normal fullscreen exit */
+		|| (c->fakefullscreen >= 2)) /* fullscreen exit --> fake fullscreen */
+			restorestate = 1; /* go back into tiled */
 
 	/* If leaving fullscreen and the window was previously fake fullscreen
 	 * (2), then restore that while staying in fullscreen. The exception to
@@ -3347,10 +3346,11 @@ setfullscreen(Client *c, int fullscreen)
 	 * keeping fake fullscreen enabled (as otherwise there will be a
 	 * mismatch between the client and the window manager's perception of
 	 * the client's fullscreen state). */
-	if (c->fakefullscreen == 2 && !fullscreen && c->isfullscreen) {
-		restorefakefullscreen = 1;
-		c->isfullscreen = 1;
-		fullscreen = 1;
+		if (c->fakefullscreen == 2 && c->isfullscreen) {
+			restorefakefullscreen = 1;
+			c->isfullscreen = 1;
+			fullscreen = 1;
+		}
 	}
 
 	if (fullscreen != c->isfullscreen) { /* only send property change if necessary */
