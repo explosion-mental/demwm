@@ -1998,17 +1998,6 @@ updateicon(Client *c)
 }
 #endif /* ICONS */
 
-static void
-remove_all(char *str, char to_remove)
-{
-	char *read = str, *write = str;
-	do {
-		while (*read == to_remove) read++;
-		*write++ = *read;
-		read++;
-	} while (*(read-1));
-}
-
 void
 getcmd(int i, char *button)
 {
