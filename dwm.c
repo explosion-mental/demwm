@@ -1493,14 +1493,8 @@ focusstack(const Arg *arg)
 {
 	Client *c = NULL, *i;
 
-	/* Note that this patch is made for dwm 6.2. If applying this on top of
-	 * the latest master then the
-	 * https://dwm.suckless.org/patches/alwaysfullscreen/ patch has been
-	 * merged upstream, which prevents focus to drift from windows that are
-	 * in fake fullscreen. To address this issue use this if statement
-	 * instead:
-	 if (!selmon->sel || (selmon->sel->isfullscreen && selmon->sel->fakefullscreen != 1))
-	 */
+	/* Prevents focus to drift from windows that are in fake fullscreen. */
+	 //if (!selmon->sel || (selmon->sel->isfullscreen && selmon->sel->fakefullscreen != 1))
 
 	if (!selmon->sel)
 		return;
