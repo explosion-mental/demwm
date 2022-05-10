@@ -3001,6 +3001,9 @@ run(void)
 		}
 
 		if ((poll(fds, LENGTH(blocks) + 1, -1)) == -1) {
+			/* FIXME other than SIGALRM and the real time signals,
+			 * there seems to be a signal being que if using
+			 * 'xsetroot -name' sutff */
 			if (errno == EINTR) /* signal caught */
 				continue;
 			fprintf(stderr, "dwm: poll ");
