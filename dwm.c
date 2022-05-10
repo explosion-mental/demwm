@@ -328,6 +328,7 @@ static void setlayout(const Arg *arg);
 static void setcfact(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
+static void setsignal(int sig, void (*handler)(int sig));
 static void seturgent(Client *c, int urg);
 static void settagsatom(Window w, unsigned int tags);
 static void shifttag(const Arg *arg);
@@ -3505,23 +3506,15 @@ setup(void)
 	sigchld(0);
 
 	/* init signals handlers */
-	signal(SIGHUP, sighup);   /* restart */
-	signal(SIGTERM, sigterm); /* exit */
-
-	struct sigaction al;
-	al.sa_handler = sigalrm;
-	al.sa_flags = SA_RESTART;
-	sigemptyset(&al.sa_mask);
-	sigaction(SIGALRM, &al, NULL);
+	setsignal(SIGCHLD, sigchld); /* zombies */
+	setsignal(SIGALRM, sigalrm); /* timer */
+	setsignal(SIGHUP, sighup);   /* restart */
+	setsignal(SIGTERM, sigterm); /* exit */
 
 	/* handle defined real time signals */
-	struct sigaction sa;
-	sa.sa_handler = sighandler;
-	sa.sa_flags = SA_RESTART;
-	sigemptyset(&sa.sa_mask);
 	for (i = 0; i < LENGTH(blocks); i++)
 		if (blocks[i].signal)
-			sigaction(SIGRTMIN + blocks[i].signal, &sa, NULL);
+			setsignal(SIGRTMIN + blocks[i].signal, sighandler);
 
 	/* pid as an enviromental variable */
 	char envpid[16];
@@ -3622,6 +3615,22 @@ setup(void)
 	XSelectInput(dpy, root, wa.event_mask);
 	grabkeys();
 	focus(NULL);
+}
+
+void
+setsignal(int sig, void (*handler)(int unused))
+{
+	struct sigaction sa;
+
+	sa.sa_handler = handler;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+
+	if (sigaction(sig, &sa, 0) == -1) {
+		fprintf(stderr, "signal %d ", sig);
+		perror("failed to setup");
+		exit(EXIT_FAILURE);
+	}
 }
 
 
@@ -3775,15 +3784,6 @@ sigalrm(int unused)
 void
 sigchld(int unused)
 {
-	//if (signal(SIGCHLD, sigchld) == SIG_ERR)
-	//	die("can't install SIGCHLD handler:");
-	//while (0 < waitpid(-1, NULL, WNOHANG));
-	struct sigaction sa;
-	sa.sa_handler = sigchld;
-	sa.sa_flags = SA_NOCLDSTOP | SA_RESTART;
-	sigemptyset(&sa.sa_mask);
-	if (sigaction(SIGCHLD, &sa, 0) == -1)
-		die("can't install SIGCHLD handler:");
 	while (0 < waitpid(-1, NULL, WNOHANG));
 }
 
