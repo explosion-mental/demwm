@@ -3495,15 +3495,6 @@ setmfact(const Arg *arg)
 }
 
 void
-sigalrm(int unused)
-{
-	isalarm = 1;
-	getcmds(count);
-	alarm(sleepinterval);
-	count = (count + sleepinterval - 1) % maxinterval + 1;
-}
-
-void
 setup(void)
 {
 	XSetWindowAttributes wa;
@@ -3770,6 +3761,15 @@ showhide(Client *c)
 		showhide(c->snext);
 		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 	}
+}
+
+void
+sigalrm(int unused)
+{
+	isalarm = 1;
+	getcmds(count);
+	alarm(sleepinterval);
+	count = (count + sleepinterval - 1) % maxinterval + 1;
 }
 
 void
