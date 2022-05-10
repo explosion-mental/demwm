@@ -3772,7 +3772,6 @@ showhide(Client *c)
 void
 sigalrm(int unused)
 {
-	isalarm = 1;
 	getcmds(count);
 	alarm(sleepinterval);
 	count = (count + sleepinterval - 1) % maxinterval + 1;
@@ -3787,7 +3786,6 @@ sigchld(int unused)
 void
 sighandler(int signum)
 {
-	isrtsig = 1;
 	getsigcmds(signum-SIGRTMIN);
 }
 
