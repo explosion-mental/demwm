@@ -3024,9 +3024,9 @@ run(void)
 					handler[ev.type](&ev); /* call handler */
 			}
 		} else if (fds[0].revents & POLLHUP) {
-			fprintf(stderr, "dwm: main event loop, hang up\n");
+			fprintf(stderr, "dwm: main event loop, hang up");
 			perror(" failed");
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 
 		/* handle blocks */
@@ -3050,9 +3050,9 @@ run(void)
 
 				drawbar(selmon);
 			} else if (fds[i + 1].revents & POLLHUP) {
-				fprintf(stderr, "dwm: blocks hangup\n");
+				fprintf(stderr, "dwm: block %d hangup", i);
 				perror(" failed");
-				exit(1);
+				exit(EXIT_FAILURE);
 			}
 		}
 	}
