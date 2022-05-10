@@ -486,7 +486,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 
 static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0};
 static int pipes[LENGTH(blocks)][2];
-static int execlock = 0; /* ensure only one child process exists per block at an instance */
+static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
@@ -2016,7 +2016,7 @@ getcmd(int i, char *button)
 		return;
 
 	if (execlock & 1 << i) { /* block is already running */
-		fprintf(stderr, "dwm: ignoring block %d, command %s\n", i, blocks[i].command);
+		//fprintf(stderr, "dwm: ignoring block %d, command %s\n", i, blocks[i].command);
 		return;
 	}
 
