@@ -3354,15 +3354,12 @@ setfullscreen(Client *c, int fullscreen)
 	}
 
 	if (fullscreen != c->isfullscreen) { /* only send property change if necessary */
-		if (fullscreen)
-			XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
-				PropModeReplace, (unsigned char *) &netatom[NetWMFullscreen], 1);
-		else
-			XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
-				PropModeReplace, (unsigned char *) 0, 0);
+		XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32, PropModeReplace,
+			(unsigned char *) (fullscreen ? &netatom[NetWMFullscreen] : 0), 1);
+
+		c->isfullscreen = fullscreen;
 	}
 
-	c->isfullscreen = fullscreen;
 
 	/* Some clients, e.g. firefox, will send a client message informing the
 	 * window manager that it is going into fullscreen after receiving the
