@@ -3511,10 +3511,12 @@ setup(void)
 	setsignal(SIGHUP, sighup);   /* restart */
 	setsignal(SIGTERM, sigterm); /* exit */
 
-	/* handle defined real time signals */
+	#ifdef __linux__
+	/* handle defined real time signals (linux only) */
 	for (i = 0; i < LENGTH(blocks); i++)
 		if (blocks[i].signal)
 			setsignal(SIGRTMIN + blocks[i].signal, sighandler);
+	#endif /* __linux__ */
 
 	/* pid as an enviromental variable */
 	char envpid[16];
