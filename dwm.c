@@ -97,7 +97,7 @@ enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
 	SchemeStatus, SchemeDelim, SchemeSys, SchemeIndUrg, SchemeIndOff,
 	SchemeIndOn, BorderNorm, BorderSel, BorderFloat, BorderUrg }; /* color schemes */
-enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8 }; /* scratchpads */
+enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8, Sp9, Sp10 }; /* scratchpads */
 enum { NetSupported, NetWMName,
 #ifdef ICONS
        NetWMIcon,

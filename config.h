@@ -171,7 +171,7 @@ static const Rule rules[] = {
 	RULE(.class = "Video",		.isfloating = 1)
 	RULE(.class = "dialect",	.isfloating = 1)
 	RULE(.title = "mpvfloat",	.isfloating = 1)
-	RULE(.instance = "mpvfloat",	.isfloating = 1)
+	RULE(.instance = "mpvfloat",	.tags = SPTAG(Sp9), .isfloating = 1)
 	RULE(.title = "noswallow",	.noswallow = 1)
 
 
@@ -270,6 +270,7 @@ static const char *scratchpads[][256] = {
 	[Sp6] = { "/bin/sh", "-c", pulsepad, NULL },
 	[Sp7] = { "samedir", "-n", "samedir", "-g", "115x30", NULL }, /* samedir */
 	[Sp8] = { "st", "-n", "testi", "-g", FURSIZE, "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
+	[Sp9] = { "st", "-n", "mpvfloat", "-g", "115x30" , NULL }, /* terminal */
 };
 
 static const Key keys[] = {
@@ -298,6 +299,7 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,		XK_p,	updateblock,		{ .ui = 8 }	},
 	SPKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	Sp7)
 	SPKEYS(MODKEY|ControlMask,	XK_e,	/* notes - is	*/	Sp8)
+	SPKEYS(MODKEY|ShiftMask,	XK_n,	/* notes - is	*/	Sp9)
 	//SCRATCHKEYS(MODKEY|ControlMask,	XK_e,	/* stnormal	*/	7)
 	{ MODKEY|ControlMask,		XK_v,	scratchpad_remove,	{0} },
 	{ MODKEY,                       XK_v,	scratchpad_show,	{0} },
@@ -309,10 +311,10 @@ static const Key keys[] = {
 	{ MODKEY,			XK_j,	focusstack,	{ .i = 1 }		},
 	{ MODKEY|ShiftMask,		XK_j,	pushstack,	{ .i = 1 }		},
 
-	{ MODKEY|ControlMask,		XK_j,	shifttag,	{ .i = -1 }		},
-	{ MODKEY|ControlMask|ShiftMask,	XK_j,  shifttagclients,	{ .i = -1 }		},
-	{ MODKEY|ControlMask|ShiftMask,	XK_k,  shifttagclients,	{ .i = +1 }		},
-	{ MODKEY|ControlMask,		XK_k,	shifttag,	{ .i = +1 }		},
+	{ MODKEY|ControlMask|ShiftMask,	XK_j,	shifttag,	{ .i = -1 }		},
+	{ MODKEY|ControlMask,		XK_j,  shifttagclients,	{ .i = -1 }		},
+	{ MODKEY|ControlMask,		XK_k,  shifttagclients,	{ .i = +1 }		},
+	{ MODKEY|ControlMask|ShiftMask,	XK_k,	shifttag,	{ .i = +1 }		},
 
 	{ MODKEY|ShiftMask,		XK_k,	pushstack,	{ .i = -1 }		},
 	{ MODKEY,                       XK_k,	focusstack,	{ .i = -1 }		},
