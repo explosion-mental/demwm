@@ -2067,7 +2067,7 @@ getstatus(int width)
 		all -= len;
 		drw_text(drw, all, 0, len, bh, 0, blockoutput[i], 0);
 		/* draw delimiter */
-		if (delimiter == '\0') /* ignore no delimiter */
+		if (*delimiter == '\0') /* ignore no delimiter */
 			continue;
 		drw_setscheme(drw, scheme[SchemeDelim]);
 		all -= delimlen;
