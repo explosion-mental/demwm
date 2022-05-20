@@ -2597,6 +2597,87 @@ propertynotify(XEvent *e)
 	Window trans;
 	XPropertyEvent *ev = &e->xproperty;
 
+	if ((ev->window == root) && (ev->atom == XA_WM_NAME)) { /* parse xsetroot -name */
+		const int size = 32;
+		char n[size], *buf;
+		int arg = 0;
+		if (gettextprop(root, XA_WM_NAME, n, sizeof(n))) {
+			/* divide into 2 args separated by the first space */
+			for (int i = 0; i <= size; i++) {
+				if (n[i] == ' ') {
+					buf = n;
+					buf += i + 1; /* chop the first 'word' */
+					arg = atoi(buf); /* store as an int */
+
+					n[i] = '\0'; /* chop every after the space */
+					break;
+				}
+			}
+
+			/* functions */
+			if (!strcmp(n, "cyclelayout"))
+				cyclelayout(&((Arg) { .i = arg }));
+			else if (!strcmp(n, "incrgaps"))
+				incrgaps(&((Arg) { .i = arg }));
+			else if (!strcmp(n, "incrogaps"))
+				incrogaps(&((Arg) { .i = arg }));
+			else if (!strcmp(n, "incrohgaps"))
+				incrohgaps(&((Arg) { .i = arg }));
+			else if (!strcmp(n, "incrovgaps"))
+				incrovgaps(&((Arg) { .i = arg }));
+			else if (!strcmp(n, "incrigaps"))
+				incrigaps(&((Arg) { .i = arg }));
+			else if (!strcmp(n, "incrihgaps"))
+				incrihgaps(&((Arg) { .i = arg }));
+			else if (!strcmp(n, "incrivgaps"))
+				incrivgaps(&((Arg) { .i = arg }));
+			else if (!strcmp(n, "defaultgaps"))
+				defaultgaps(NULL);
+			else if (!strcmp(n, "killclient"))
+				killclient(NULL);
+			else if (!strcmp(n, "random_wall"))
+				random_wall(NULL);
+			else if (!strcmp(n, "refresh"))
+				refresh(NULL);
+			else if (!strcmp(n, "setlayout"))
+				setlayout(&((Arg) { .v = &layouts[arg] }));
+			else if (!strcmp(n, "tag"))
+				tag(&((Arg) { .ui = 1 << arg }));
+			else if (!strcmp(n, "togglebar"))
+				togglebar(NULL);
+			else if (!strcmp(n, "togglefloating"))
+				togglefloating(NULL);
+			else if (!strcmp(n, "togglefullscreen"))
+				togglefullscreen(NULL);
+			else if (!strcmp(n, "togglefakefullscreen"))
+				togglefakefullscreen(NULL);
+			else if (!strcmp(n, "togglegaps"))
+				togglegaps(NULL);
+			else if (!strcmp(n, "togglesmartgaps"))
+				togglesmartgaps(NULL);
+			else if (!strcmp(n, "togglevacant"))
+				togglevacant(NULL);
+			else if (!strcmp(n, "togglestatus"))
+				togglestatus(NULL);
+			else if (!strcmp(n, "toggletopbar"))
+				toggletopbar(NULL);
+			else if (!strcmp(n, "toggletag"))
+				toggletag(&((Arg) { .ui = 1 << arg }));
+			else if (!strcmp(n, "view"))
+				view(&((Arg) { .ui = 1 << arg }));
+			else if (!strcmp(n, "xrdb"))
+				xrdb(NULL);
+			else if (!strcmp(n, "zoom"))
+				zoom(NULL);
+			else if (!strcmp(n, "zoomswap"))
+				zoomswap(NULL);
+			else if (atoi(n) > 0) { /* more than 0 it's a signal */
+				getsigcmds(atoi(n));
+				updatestatus();
+			}
+		}
+	}
+
 #ifdef SYSTRAY
 	if ((c = wintosystrayicon(ev->window))) {
 		if (ev->atom == XA_WM_NORMAL_HINTS) {
@@ -2608,89 +2689,7 @@ propertynotify(XEvent *e)
 	}
 #endif /* SYSTRAY */
 
-	if ((ev->window == root)) { /* root events */
-		if (ev->atom == XA_WM_NAME) { /* parse `xsetroot -name' */
-			const int size = 32;
-			char n[size], *buf;
-			int arg = 0;
-			if (gettextprop(root, XA_WM_NAME, n, sizeof(n))) {
-				/* divide into 2 args separated by the first space */
-				for (int i = 0; i <= size; i++) {
-					if (n[i] == ' ') {
-						buf = n;
-						buf += i + 1; /* chop the first 'word' */
-						arg = atoi(buf); /* store as an int */
-
-						n[i] = '\0'; /* chop every after the space */
-						break;
-					}
-				}
-
-				/* functions */
-				if (!strcmp(n, "cyclelayout"))
-					cyclelayout(&((Arg) { .i = arg }));
-				else if (!strcmp(n, "incrgaps"))
-					incrgaps(&((Arg) { .i = arg }));
-				else if (!strcmp(n, "incrogaps"))
-					incrogaps(&((Arg) { .i = arg }));
-				else if (!strcmp(n, "incrohgaps"))
-					incrohgaps(&((Arg) { .i = arg }));
-				else if (!strcmp(n, "incrovgaps"))
-					incrovgaps(&((Arg) { .i = arg }));
-				else if (!strcmp(n, "incrigaps"))
-					incrigaps(&((Arg) { .i = arg }));
-				else if (!strcmp(n, "incrihgaps"))
-					incrihgaps(&((Arg) { .i = arg }));
-				else if (!strcmp(n, "incrivgaps"))
-					incrivgaps(&((Arg) { .i = arg }));
-				else if (!strcmp(n, "defaultgaps"))
-					defaultgaps(NULL);
-				else if (!strcmp(n, "killclient"))
-					killclient(NULL);
-				else if (!strcmp(n, "random_wall"))
-					random_wall(NULL);
-				else if (!strcmp(n, "refresh"))
-					refresh(NULL);
-				else if (!strcmp(n, "setlayout"))
-					setlayout(&((Arg) { .v = &layouts[arg] }));
-				else if (!strcmp(n, "tag"))
-					tag(&((Arg) { .ui = 1 << arg }));
-				else if (!strcmp(n, "togglebar"))
-					togglebar(NULL);
-				else if (!strcmp(n, "togglefloating"))
-					togglefloating(NULL);
-				else if (!strcmp(n, "togglefullscreen"))
-					togglefullscreen(NULL);
-				else if (!strcmp(n, "togglefakefullscreen"))
-					togglefakefullscreen(NULL);
-				else if (!strcmp(n, "togglegaps"))
-					togglegaps(NULL);
-				else if (!strcmp(n, "togglesmartgaps"))
-					togglesmartgaps(NULL);
-				else if (!strcmp(n, "togglevacant"))
-					togglevacant(NULL);
-				else if (!strcmp(n, "togglestatus"))
-					togglestatus(NULL);
-				else if (!strcmp(n, "toggletopbar"))
-					toggletopbar(NULL);
-				else if (!strcmp(n, "toggletag"))
-					toggletag(&((Arg) { .ui = 1 << arg }));
-				else if (!strcmp(n, "view"))
-					view(&((Arg) { .ui = 1 << arg }));
-				else if (!strcmp(n, "xrdb"))
-					xrdb(NULL);
-				else if (!strcmp(n, "zoom"))
-					zoom(NULL);
-				else if (!strcmp(n, "zoomswap"))
-					zoomswap(NULL);
-				else if (atoi(n) > 0) { /* more than 0 it's a signal */
-					getsigcmds(atoi(n));
-					updatestatus();
-				}
-			}
-		}
-	}
-	else if (ev->state == PropertyDelete)
+	if (ev->state == PropertyDelete)
 		return; /* ignore */
 	else if ((c = wintoclient(ev->window))) {
 		switch(ev->atom) {
