@@ -243,6 +243,9 @@ static const Layout layouts[] = {
 /* helper for spawning shell commands */
 #define SHCMD(cmd)	spawn, { .v = (const char *[]){ "/bin/sh", "-c", cmd, NULL } }
 
+/* helper for spawning shell commands in scratchpads */
+#define SH(cmd)		{ "/bin/sh", "-c", cmd, NULL }
+
 /* macros of common comand line arguments */
 #define DMENUARGS	"-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
 #define NOTES		"-e", "nvim", "+$", "+startinsert!"
@@ -252,18 +255,16 @@ static const Layout layouts[] = {
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
 static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
 static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
-static const char pulsepad[] = "st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer";
 
 /* scratchpads */
-static const char *scratchpads[][256] = {
+static const char *scratchpads[][64] = {
 	[Sp1] = { "st", "-n", "term", "-g", "115x30" , NULL }, /* terminal */
 	[Sp2] = { "st", "-n", "notes", "-g", FURSIZE, "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", NOTES, "/home/faber/Docs/testi/notes", NULL }, /* notes */
 	[Sp3] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL }, /* calculator */
 	//[Sp4] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL }, /* uni */
 	[Sp4] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/testi-is", NULL }, /* uni */
 	[Sp5] = { "st", "-n", "music", "-g", "105x27", "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", "-e", "ncmpcpp", "-q", NULL }, /* music */
-	//[Sp6] = { "st", "-n", "pulsemixer", "-g", "100x25", "-f", "SauceCodePro Nerd Font: style=Mono Regular:size=12", "-e", "pulsemixer", NULL }, /* pulsemixer */
-	[Sp6] = { "/bin/sh", "-c", pulsepad, NULL },
+	[Sp6] = SH("st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer"), /* pulsepad */
 	[Sp7] = { "samedir", "-n", "samedir", "-g", "115x30", NULL }, /* samedir */
 	[Sp8] = { "st", "-n", "testi", "-g", FURSIZE, "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
 	[Sp9] = { "st", "-n", "mpvfloat", "-g", "115x30" , NULL }, /* terminal */
