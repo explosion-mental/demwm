@@ -1437,9 +1437,9 @@ focus(Client *c)
 			 * the user has already changed the focus to the tiled
 			 * window (or another client in that case). */
 			//if (c->tags == SCRATCHPAD_MASK || (c->tags & SPTAGMASK))
-			//	wc.sibling = c->win;//c->win;
+				wc.sibling = c->win;//c->win;
 			//else
-				wc.sibling = c->mon->barwin;//c->win;
+			//	wc.sibling = c->mon->barwin;//c->win;
 
 			for (f = c->mon->stack; f; f = f->snext)
 				if (f != c && f->isfloating && ISVISIBLE(f) && !f->alwaysontop) {
