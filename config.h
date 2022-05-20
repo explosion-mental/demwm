@@ -252,10 +252,6 @@ static const Layout layouts[] = {
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
 static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
 static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
-static const char *syncthing[] = { "surf", "127.0.0.1:1210", NULL };
-static const char *web[]       = { "surf", "start.duckduckgo.com", NULL };
-static const char *vifm[]      = { "st", "-e", "vifmrun", NULL };
-static const char *samevifm[]  = { "samedirvifm", NULL };
 static const char pulsepad[] = "st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer";
 
 /* scratchpads */
@@ -277,15 +273,12 @@ static const Key keys[] = {
 	/* modifier(s)			key	function	argument */
 
 				/* Commands */
-	{ MODKEY,		   XK_Return,	SHCMD("st")				},
 	{ MODKEY,			XK_d,   spawn,		{ .v = dmenucmd }	},
 	{ MODKEY|ShiftMask,		XK_d,   spawn,		{ .v = samedmenu }	},
-	{ MODKEY,			XK_m,	spawn,		{ .v = vifm }		},
-	{ MODKEY|ShiftMask,		XK_m,	spawn,		{ .v = samevifm }	},
 	{ MODKEY,	       XK_apostrophe,	spawn,		{ .v = clip }		},
-	{ MODKEY|ShiftMask,		XK_w,	spawn,		{ .v = web }		},
-	{ MODKEY|ControlMask,		XK_w,	spawn,		{ .v = syncthing }	},
-//	{ MODKEY|ShiftMask,    XK_apostrophe,	spawn,		{ .v = passmenu }	},
+	{ MODKEY,		   XK_Return,	SHCMD("st")				},
+	{ MODKEY,			XK_m,	SHCMD("st -e vifmrun")			},
+	{ MODKEY|ShiftMask,		XK_m,	SHCMD("samedirvifm")			},
 	{ MODKEY|ShiftMask,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
 	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
 
