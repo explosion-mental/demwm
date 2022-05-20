@@ -459,7 +459,7 @@ static Atom xatom[XLast];
 static Systray *systray = NULL;
 static unsigned long systrayorientation = 0; /* _NET_SYSTEM_TRAY_ORIENTATION_HORZ */
 #endif /* SYSTRAY */
-static Atom wmatom[WMLast], netatom[NetLast], dwmstatus, dwmtags;
+static Atom wmatom[WMLast], netatom[NetLast], dwmtags;
 static int running = 1, restart = 0;
 static int depth, screen, useargb = 0;
 static Cur *cursor[CurLast];
@@ -2609,8 +2609,6 @@ propertynotify(XEvent *e)
 #endif /* SYSTRAY */
 
 	if ((ev->window == root)) { /* root events */
-		if (ev->atom == dwmstatus) /* update bar */
-			updatestatus();
 		if (ev->atom == XA_WM_NAME) { /* parse `xsetroot -name' */
 			const int size = 32;
 			char n[size], *buf;
@@ -3517,7 +3515,6 @@ setup(void)
 
 	/* init atoms */
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
-	dwmstatus                      = XInternAtom(dpy, "UPDATE_DWM_STATUSBAR", False);
 	dwmtags                        = XInternAtom(dpy, "_DWM_TAGS", False);
 	wmatom[WMProtocols]            = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	wmatom[WMDelete]               = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
