@@ -4824,28 +4824,6 @@ swaptags(const Arg *arg)
 	focus(NULL);
 	arrange(selmon);
 }
-//void
-//random_wall(const Arg *arg)
-//{
-	//char *img = "/home/faber/Media/Pictures/Wallpapers";
-	//char *bgloc = "${XDG_DATA_HOME:-$HOME/.local/share/}/bg";
-	//symlink()
-
-	//img_path="$HOME/Media/Pictures/Wallpapers"
-////	const char bglock = "";
-////	if ((bclock = getenv("XDG_DATA_HOME/bg")) == NULL)
-////		bglock = getenv("HOME/.local/bg");
-//	//loadrandom_wall(NULL);
-//	//wait(NULL);
-//	system("dwm_random_wall");
-//	xrdb(NULL);
-	//char cmd[50];
-	//if (tag)
-	//	snprintf(cmd, sizeof(cmd), "%s --hide --show %d &", preview_path, tag);
-	//else
-	//	snprintf(cmd, sizeof(cmd), "%s --hide &", preview_path);
-	//system(cmd);
-//}
 void
 random_wall(const Arg *arg)
 {
