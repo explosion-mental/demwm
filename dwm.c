@@ -2951,6 +2951,7 @@ run(void)
 	fds[0].fd = ConnectionNumber(dpy);
 	fds[0].events = POLLIN;
 
+	/* init blocks */
 	#if INVERSED
 	for (i = LENGTH(blocks) - 1; i >= 0; i--)
 	#else
@@ -2967,9 +2968,10 @@ run(void)
 		}
 	}
 
-	alarm(sleepinterval);
-	/* main event loop */
+	alarm(sleepinterval); /* timer */
 	XSync(dpy, False);
+
+	/* main event loop */
 	while (running) {
 
 		/* bar hidden, then skip poll */
@@ -2991,7 +2993,7 @@ run(void)
 			exit(EXIT_FAILURE);
 		}
 
-		/* handle display fd */
+		/* handle X display fd */
 		if (fds[0].revents & POLLIN) {
 			while (running && XPending(dpy)) {
 				XNextEvent(dpy, &ev);
@@ -3764,7 +3766,7 @@ sigchld(int unused)
 void
 sighandler(int signum)
 {
-	getsigcmds(signum-SIGRTMIN);
+	getsigcmds(signum - SIGRTMIN);
 }
 
 void
