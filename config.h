@@ -303,6 +303,7 @@ static const Key keys[] = {
 
 				/* Navigation */
 	{ MODKEY,			XK_j,	focusstack,	{ .i = 1 }		},
+//	{ MODKEY|ShiftMask,		XK_j,	movefloatvert,	{ .i = 1 }		},
 	{ MODKEY|ShiftMask,		XK_j,	pushstack,	{ .i = 1 }		},
 
 	{ MODKEY|ControlMask|ShiftMask,	XK_j,	shifttag,	{ .i = -1 }		},
@@ -310,16 +311,19 @@ static const Key keys[] = {
 	{ MODKEY|ControlMask,		XK_k,  shifttagclients,	{ .i = +1 }		},
 	{ MODKEY|ControlMask|ShiftMask,	XK_k,	shifttag,	{ .i = +1 }		},
 
+//	{ MODKEY|ShiftMask,		XK_k,	movefloatvert,	{ .i = -1 }		},
 	{ MODKEY|ShiftMask,		XK_k,	pushstack,	{ .i = -1 }		},
 	{ MODKEY,                       XK_k,	focusstack,	{ .i = -1 }		},
 
 	{ MODKEY,                       XK_h,	setmfact,	{ .f = -0.02 }		},
+//	{ MODKEY,                       XK_h,	movefloathorz,	{ .i = -1 }		},
 	{ MODKEY|ShiftMask,		XK_h,	shiftboth,	{ .i = -1 }		},
 	{ MODKEY|ControlMask,		XK_h,	shiftswaptags,	{ .i = -1 }		},
 //	{ MODKEY|ShiftMask,             XK_h,	setcfact,	{ .f = +0.05 }		},
 //	{ MODKEY|ShiftMask,             XK_l,	setcfact,	{ .f = -0.05 }		},
 	{ MODKEY|ControlMask,		XK_l,	shiftswaptags,	{ .i = +1 }		},
 	{ MODKEY|ShiftMask,             XK_l,	shiftboth,	{ .i = +1 }		},
+//	{ MODKEY,                       XK_l,	movefloathorz,	{ .i = +1 }		},
 	{ MODKEY,                       XK_l,	setmfact,	{ .f = +0.02 }		},
 
 	{ MODKEY,                       XK_o, shiftviewclients,	{ .i = +1 }		},
