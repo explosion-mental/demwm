@@ -483,9 +483,9 @@ static const Button buttons[] = {
 	{ ClkTagBar,            0,              Button4,	shiftview,	{.i = +1 } },
 	{ ClkTagBar,            0,              Button5,	shiftview,	{.i = -1 } },
 
-	{ ClkLtSymbol,          0,              Button1,        togglegaps,     {0} },
-	{ ClkLtSymbol,          0,              Button2,        togglevacant,   {0} },
-//	{ ClkLtSymbol,          0,              Button3,        togglevacant,   {0} },
+	{ ClkLtSymbol,          0,              Button1,        togglegaps,	{0} },
+	{ ClkLtSymbol,          0,              Button2,        togglevacant,	{0} },
+	{ ClkLtSymbol,          0,              Button3,        togglebar,	{0} },
 //	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
 //	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
 	{ ClkLtSymbol,          0,              Button4,        cyclelayout,    {.i = +1 } },
