@@ -409,6 +409,8 @@ static void incrovgaps(const Arg *arg);	/* horizontal outter gaps */
 
 /* Customs */
 static void togglealwaysontop(const Arg *arg);
+static void movefloathorz(const Arg *arg);
+static void movefloatvert(const Arg *arg);
 static void swaptags(const Arg *arg);
 //static void loadrandom_wall(const Arg *arg);
 static void random_wall(const Arg *arg);
@@ -4779,10 +4781,22 @@ togglevacant(const Arg *arg)
 }
 
 void
-toggleborder(const Arg *arg)
+movefloathorz(const Arg *arg)
 {
+	if (!selmon->sel->isfloating)
+		return;
+
+	resize(selmon->sel, selmon->sel->x + arg->i, selmon->sel->y, selmon->sel->w, selmon->sel->h, 1);
 }
 
+void
+movefloatvert(const Arg *arg)
+{
+	if (!selmon->sel->isfloating)
+		return;
+
+	resize(selmon->sel, selmon->sel->x, selmon->sel->y + arg->i, selmon->sel->w, selmon->sel->h, 1);
+}
 void
 togglestatus(const Arg *arg)
 {
