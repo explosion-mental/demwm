@@ -411,6 +411,9 @@ static void incrovgaps(const Arg *arg);	/* horizontal outter gaps */
 static void togglealwaysontop(const Arg *arg);
 static void movefloathorz(const Arg *arg);
 static void movefloatvert(const Arg *arg);
+static void movfh_setmfact(const Arg *arg);
+static void movfv_pushstack(const Arg *arg);
+
 static void swaptags(const Arg *arg);
 //static void loadrandom_wall(const Arg *arg);
 static void random_wall(const Arg *arg);
@@ -4781,7 +4784,7 @@ togglevacant(const Arg *arg)
 }
 
 void
-reusehorz(const Arg *arg)
+movfh_setmfact(const Arg *arg)
 {
 	if (selmon->sel->isfloating)
 		movefloathorz(&((Arg) { .i = arg->f > 0 ? movefloat : -movefloat }));
@@ -4790,7 +4793,7 @@ reusehorz(const Arg *arg)
 }
 
 void
-reusevert(const Arg *arg)
+movfv_pushstack(const Arg *arg)
 {
 	if (selmon->sel->isfloating)
 		movefloatvert(&((Arg) { .i = arg->i > 0 ? movefloat : -movefloat }));
