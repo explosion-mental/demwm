@@ -2606,12 +2606,12 @@ propertynotify(XEvent *e)
 	XPropertyEvent *ev = &e->xproperty;
 
 	if ((ev->window == root) && (ev->atom == XA_WM_NAME)) { /* parse xsetroot -name */
-		const int size = 32;
-		char n[size], *buf;
+		const int cmdsize = 32;
+		char n[cmdsize], *buf;
 		int arg = 0;
-		if (gettextprop(root, XA_WM_NAME, n, sizeof(n))) {
+		if (gettextprop(root, XA_WM_NAME, n, cmdsize)) {
 			/* divide into 2 args separated by the first space */
-			for (int i = 0; i <= size; i++) {
+			for (int i = 0; i <= cmdsize; i++) {
 				if (n[i] == ' ') {
 					buf = n;
 					buf += i + 1; /* chop the first 'word' */
