@@ -142,10 +142,12 @@ struct Client {
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
 	unsigned int tags;
+
+	/* flags */
 	int isfixed, isurgent, neverfocus, oldstate, hintsvalid;
-	/* rules */
 	int isfloating, isfullscreen, isterminal, noswallow;
 	int fakefullscreen, alwaysontop, uncursor;
+
 	pid_t pid;
 	#ifdef ICONS
 	unsigned int icw, ich;
@@ -184,11 +186,10 @@ struct Monitor {
 	int gappiv;           /* vertical gap between windows */
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
+	int showbar, topbar;  /* bar flags */
 	unsigned int seltags;
 	unsigned int sellt;
 	unsigned int tagset[2];
-	int showbar;
-	int topbar;
 	Client *clients;
 	Client *sel;
 	Client *stack;
@@ -208,6 +209,8 @@ typedef struct {
 	const char *instance;
 	const char *title;
 	unsigned int tags;
+
+	/* flags */
 	int isfloating;
 	int isterminal;
 	int noswallow;
