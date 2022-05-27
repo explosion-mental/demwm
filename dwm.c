@@ -3852,13 +3852,13 @@ togglebar(const Arg *arg)
 		wc.y = 0;
 		if (!selmon->topbar)
 			wc.y = selmon->mh - bh;
+		getcmds(-1);
 	}
 	XConfigureWindow(dpy, systray->win, CWY, &wc);
 #else
 	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
 #endif /* SYSTRAY */
 	arrange(selmon);
-	getcmds(-1);
 }
 
 void
