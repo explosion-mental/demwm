@@ -4781,6 +4781,24 @@ togglevacant(const Arg *arg)
 }
 
 void
+reusehorz(const Arg *arg)
+{
+	if (selmon->sel->isfloating)
+		movefloathorz(&((Arg) { .i = arg->f > 0 ? movefloat : -movefloat }));
+	else
+		setmfact(arg);
+}
+
+void
+reusevert(const Arg *arg)
+{
+	if (selmon->sel->isfloating)
+		movefloatvert(&((Arg) { .i = arg->i > 0 ? movefloat : -movefloat }));
+	else
+		pushstack(arg);
+}
+
+void
 movefloathorz(const Arg *arg)
 {
 	if (!selmon->sel->isfloating)
@@ -4797,6 +4815,7 @@ movefloatvert(const Arg *arg)
 
 	resize(selmon->sel, selmon->sel->x, selmon->sel->y + arg->i, selmon->sel->w, selmon->sel->h, 1);
 }
+
 void
 togglestatus(const Arg *arg)
 {
@@ -4816,6 +4835,7 @@ shiftswaptags(const Arg *arg)
 		shifted.ui = ((shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i))) & ~SPTAGMASK;
 	swaptags(&shifted);
 }
+
 void
 swaptags(const Arg *arg)
 {
@@ -4839,6 +4859,7 @@ swaptags(const Arg *arg)
 	focus(NULL);
 	arrange(selmon);
 }
+
 void
 random_wall(const Arg *arg)
 {
@@ -4847,6 +4868,7 @@ random_wall(const Arg *arg)
 	else
 		xrdb(NULL);
 }
+
 void
 toggletopbar(const Arg *arg)
 {

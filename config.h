@@ -204,6 +204,7 @@ static const float mfact     = 0.55;	/* factor of master area size [0.05..0.95] 
 static const int nmaster     = 1;	/* number of clients in master area */
 static const int resizehints = 0;	/* 1 means respect size hints in tiled resizals */
 static const int floathints  = 0;	/* 1 means respect size hints if the window is floating */
+static const int movefloat   = 22;
 
 static const Layout layouts[] = {
 	/* symbol	arrange function   gaps (enabled if omitted)			*/
