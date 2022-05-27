@@ -146,7 +146,7 @@ static const Rule rules[] = {
 	 *  uncursor, puts the cursor in the bottom right whenever the window
 	 * is focused (useful when there are gaps)
 	 */
-	RULE(.class = "Gimp",		.tags = 1 << 7)
+//	RULE(.class = "Gimp",		.tags = 1 << 7)
 	RULE(.class = "vlc",		.tags = 1 << 6)
 	RULE(.class = "qutebrowser",	.tags = 1 << 5)
 	RULE(.class = "Surf",		.tags = 1 << 7)
