@@ -225,7 +225,7 @@ curl -sL https://github.com/explosion-mental/Dwm/commit/d8e4af59c570c4b8ef36ef89
 ```
 Here are some that I converted into a patch:
 - shift-tools (shift windows,tags or both either with an active client or not)
-- integrated status text (TODO: add the `poll` version)
+- integrated status text <s>(TODO: add the `poll` version)</s>
 - gruvbox theme (for the bar)
 - truecenteredtitle
 
