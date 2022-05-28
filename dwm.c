@@ -123,9 +123,9 @@ typedef union {
 } Arg;
 
 typedef struct {
-	unsigned int click;
-	unsigned int mask;
-	unsigned int button;
+	const unsigned int click;
+	const unsigned int mask;
+	const unsigned int button;
 	void (*func)(const Arg *arg);
 	const Arg arg;
 } Button;
@@ -161,8 +161,8 @@ struct Client {
 };
 
 typedef struct {
-	unsigned int mod;
-	KeySym keysym;
+	const unsigned int mod;
+	const KeySym keysym;
 	void (*func)(const Arg *);
 	const Arg arg;
 } Key;
@@ -208,15 +208,15 @@ typedef struct {
 	const char *class;
 	const char *instance;
 	const char *title;
-	unsigned int tags;
+	const unsigned int tags;
 
 	/* flags */
-	int isfloating;
-	int isterminal;
-	int noswallow;
-	int isfakefullscreen;
-	int uncursor;
-	int monitor;
+	const int isfloating;
+	const int isterminal;
+	const int noswallow;
+	const int isfakefullscreen;
+	const int uncursor;
+	const int monitor;
 } Rule;
 
 #ifdef SYSTRAY
