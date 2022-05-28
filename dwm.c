@@ -123,6 +123,13 @@ typedef union {
 } Arg;
 
 typedef struct {
+	const char *color;
+	const char *command;
+	const unsigned int interval;
+	const unsigned int signal;
+} Block;
+
+typedef struct {
 	const unsigned int click;
 	const unsigned int mask;
 	const unsigned int button;
@@ -130,8 +137,9 @@ typedef struct {
 	const Arg arg;
 } Button;
 
-typedef struct Monitor Monitor;
 typedef struct Client Client;
+typedef struct Monitor Monitor;
+
 struct Client {
 	char name[256];
 	float mina, maxa;
@@ -225,13 +233,6 @@ typedef struct {
 	Client *icons;
 } Systray;
 #endif /* SYSTRAY */
-
-typedef struct {
-	const char *color;
-	const char *command;
-	const unsigned int interval;
-	const unsigned int signal;
-} Block;
 
 /* function declarations */
 static void applyrules(Client *c);
