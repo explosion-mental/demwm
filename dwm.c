@@ -334,7 +334,7 @@ static void setmfact(const Arg *arg);
 static void setup(void);
 static void setsignal(int sig, void (*handler)(int sig));
 static void seturgent(Client *c, int urg);
-static void settagsatom(Window w, unsigned int tags);
+static void settagsatom(Client *c);
 static void shifttag(const Arg *arg);
 static void shifttagclients(const Arg *arg);
 static void shiftview(const Arg *arg);
@@ -1082,7 +1082,7 @@ combotag(const Arg *arg)
 		selmon->sel->tags = newtags;
 	}
 
-	settagsatom(selmon->sel->win, selmon->sel->tags);
+	settagsatom(selmon->sel);
 	focus(NULL);
 	arrange(selmon);
 }
@@ -2377,7 +2377,7 @@ manage(Window w, XWindowAttributes *wa)
 			XFree(ptags);
 		}
 	}
-	settagsatom(c->win, c->tags);
+	settagsatom(c);
 
 	if (c->x + WIDTH(c) > c->mon->mx + c->mon->mw)
 		c->x = c->mon->mx + c->mon->mw - WIDTH(c);
@@ -3630,10 +3630,10 @@ seturgent(Client *c, int urg)
 }
 
 void
-settagsatom(Window w, unsigned int tags)
+settagsatom(Client *c)
 {
-	XChangeProperty(dpy, w, dwmtags, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char*)&tags, 1);
+	XChangeProperty(dpy, c->win, dwmtags, XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char*)&c->tags, 1);
 }
 
 void
@@ -3811,7 +3811,7 @@ tag(const Arg *arg)
 {
 	if (selmon->sel && arg->ui & TAGMASK) {
 		selmon->sel->tags = arg->ui & TAGMASK;
-		settagsatom(selmon->sel->win, selmon->sel->tags);
+		settagsatom(selmon->sel);
 		focus(NULL);
 		arrange(selmon);
 	}
@@ -3964,7 +3964,7 @@ toggletag(const Arg *arg)
 	newtags = selmon->sel->tags ^ (arg->ui & TAGMASK);
 	if (newtags) {
 		selmon->sel->tags = newtags;
-		settagsatom(selmon->sel->win, selmon->sel->tags);
+		settagsatom(selmon->sel);
 		focus(NULL);
 		arrange(selmon);
 	}
