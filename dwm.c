@@ -2350,8 +2350,10 @@ manage(Window w, XWindowAttributes *wa)
 	/* geometry */
 	c->x = c->oldx = wa->x;
 	c->y = c->oldy = wa->y;
-	c->w = c->oldw = wa->width;
-	c->h = c->oldh = wa->height;
+	c->sfw = c->w = c->oldw = wa->width;
+	c->sfh = c->h = c->oldh = wa->height;
+	c->sfx = -9999;
+	c->sfy = -9999;
 	c->oldbw = wa->border_width;
 	c->cfact = 1.0;
 
@@ -2400,12 +2402,6 @@ manage(Window w, XWindowAttributes *wa)
 		setfullscreen(c, 1);
 	updatesizehints(c);
 	updatewmhints(c);
-
-	/* store float size and position */
-	c->sfx = c->x;
-	c->sfy = c->y;
-	c->sfw = c->w;
-	c->sfh = c->h;
 
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
@@ -3900,9 +3896,12 @@ togglefloating(const Arg *arg)
 		/* apply float color, since oldbw has the old color */
 		XSetWindowBorder(dpy, c->win, scheme[BorderFloat][ColFg].pixel);
 
-		/* restore last known float dimensions */
-		resize(selmon->sel, selmon->sel->sfx, selmon->sel->sfy,
-		       selmon->sel->sfw, selmon->sel->sfh, 0);
+		if (selmon->sel->sfx == -9999) /* first time floating */
+			resize(selmon->sel, selmon->sel->x, selmon->sel->y,
+				selmon->sel->w, selmon->sel->h, 0);
+		else	/* restore last known float dimensions */
+			resize(selmon->sel, selmon->sel->sfx, selmon->sel->sfy,
+			       selmon->sel->sfw, selmon->sel->sfh, 0);
 	} else {
 		selmon->sel->bw = borderpx;
 		configure(selmon->sel);
