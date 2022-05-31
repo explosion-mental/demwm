@@ -686,6 +686,7 @@ swallow(Client *p, Client *c)
 	updateicon(p);
 #endif /* ICONS */
 	updatetitle(p);
+	settagsatom(p);
 
 	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
 
