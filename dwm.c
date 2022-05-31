@@ -2329,7 +2329,7 @@ manage(Window w, XWindowAttributes *wa)
 	Window trans = None;
 	XWindowChanges wc;
 	int format;
-	unsigned int *ptags;
+	unsigned char *ptags = NULL;
 	unsigned long n, extra;
 	Atom atom;
 	//XEvent xev;
@@ -2372,8 +2372,8 @@ manage(Window w, XWindowAttributes *wa)
 		applyrules(c);
 		term = termforwin(c);
 		if (XGetWindowProperty(dpy, c->win, dwmtags, 0L, 1L, False, XA_CARDINAL,
-		&atom, &format, &n, &extra, (unsigned char **)&ptags) == Success && n == 1 && *ptags != 0) {
-			c->tags = *ptags;
+		&atom, &format, &n, &extra, &ptags) == Success && ptags) {
+			c->tags = *(unsigned int *)ptags;
 			XFree(ptags);
 		}
 	}
@@ -3633,7 +3633,7 @@ void
 settagsatom(Client *c)
 {
 	XChangeProperty(dpy, c->win, dwmtags, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char*)&c->tags, 1);
+			PropModeReplace, (unsigned char *)&c->tags, 1);
 }
 
 void
