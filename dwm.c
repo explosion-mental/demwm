@@ -335,6 +335,7 @@ static void setup(void);
 static void setsignal(int sig, void (*handler)(int sig));
 static void seturgent(Client *c, int urg);
 static void settagsatom(Client *c);
+static void shift(unsigned int *tag, int i);
 static void shifttag(const Arg *arg);
 static void shifttagclients(const Arg *arg);
 static void shiftview(const Arg *arg);
@@ -3638,16 +3639,24 @@ settagsatom(Client *c)
 }
 
 void
+shift(unsigned int *tag, int i)
+{
+	if (i > 0) /* left circular shift */
+		*tag = ((*tag << i) | (*tag >> (LENGTH(tags) - i))) & ~SPTAGMASK;
+	else       /* right circular shift */
+		*tag = (*tag >> (- i) | *tag << (LENGTH(tags) + i)) & ~SPTAGMASK;
+}
+
+void
 shifttag(const Arg *arg)
 {
 	Arg shifted;
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+
 	if (!selmon->clients)
 		return;
-	if (arg->i > 0)	/* left circular shift */
-		shifted.ui = ((shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i))) & ~SPTAGMASK;
-	else	/* right circular shift */
-		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i)) & ~SPTAGMASK;
+
+	shift(&shifted.ui, arg->i);
 	tag(&shifted);
 }
 
@@ -3664,16 +3673,10 @@ shifttagclients(const Arg *arg)
 		if (!(c->tags & SPTAGMASK))
 			tagmask = tagmask | c->tags;
 
-	if (arg->i > 0)	/* left circular shift */
-		do
-			shifted.ui = (((shifted.ui << arg->i)
-			   | (shifted.ui >> (LENGTH(tags) - arg->i)))) & ~SPTAGMASK;
-		while (tagmask && !(shifted.ui & tagmask));
-	else		/* right circular shift */
-		do
-			shifted.ui = ((shifted.ui >> (- arg->i)
-			   | shifted.ui << (LENGTH(tags) + arg->i))) & ~SPTAGMASK;
-		while (tagmask && !(shifted.ui & tagmask));
+	do {
+		shift(&shifted.ui, arg->i);
+	} while (tagmask && !(shifted.ui & tagmask));
+
 	tag(&shifted);
 }
 
@@ -3683,10 +3686,7 @@ shiftview(const Arg *arg)
 	Arg shifted;
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
-	if (arg->i > 0)	/* left circular shift */
-		shifted.ui = ((shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i))) & ~SPTAGMASK;
-	else	/* right circular shift */
-		shifted.ui = (shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i)) & ~SPTAGMASK;
+	shift(&shifted.ui, arg->i);
 	view(&shifted);
 }
 
@@ -3707,18 +3707,10 @@ shiftviewclients(const Arg *arg)
 	//if (filter > LENGTH(tags))
 	tagmask = filter;
 
-	if (arg->i > 0)	/* left circular shift */
-		do {
-			shifted.ui = (shifted.ui << arg->i)
-			   | (shifted.ui >> (LENGTH(tags) - arg->i));
-			shifted.ui &= ~SPTAGMASK;
-		} while (tagmask && !(shifted.ui & tagmask));
-	else		/* right circular shift */
-		do {
-			shifted.ui = (shifted.ui >> (- arg->i)
-			   | shifted.ui << (LENGTH(tags) + arg->i));
-			shifted.ui &= ~SPTAGMASK;
-		} while (tagmask && !(shifted.ui & tagmask));
+	do {
+		shift(&shifted.ui, arg->i);
+	} while (tagmask && !(shifted.ui & tagmask));
+
 	view(&shifted);
 }
 
@@ -3728,10 +3720,7 @@ shiftboth(const Arg *arg)
 	Arg shifted;
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
-	if (arg->i > 0)	/* left circular shift */
-		shifted.ui = ((shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i))) & ~SPTAGMASK;
-	else		/* right circular shift */
-		shifted.ui = ((shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i))) & ~SPTAGMASK;
+	shift(&shifted.ui, arg->i);
 	tag(&shifted);
 	view(&shifted);
 }
@@ -4836,10 +4825,8 @@ shiftswaptags(const Arg *arg)
 {
 	Arg shifted;
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
-	if (arg->i > 0)	/* left circular shift */
-		shifted.ui = ((shifted.ui << arg->i) | (shifted.ui >> (LENGTH(tags) - arg->i))) & ~SPTAGMASK;
-	else		/* right circular shift */
-		shifted.ui = ((shifted.ui >> (- arg->i) | shifted.ui << (LENGTH(tags) + arg->i))) & ~SPTAGMASK;
+
+	shift(&shifted.ui, arg->i);
 	swaptags(&shifted);
 }
 
