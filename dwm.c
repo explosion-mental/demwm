@@ -3650,8 +3650,7 @@ shift(unsigned int *tag, int i)
 void
 shifttag(const Arg *arg)
 {
-	Arg shifted;
-	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
 
 	if (!selmon->clients)
 		return;
@@ -3664,18 +3663,17 @@ void
 shifttagclients(const Arg *arg)
 {
 
-	Arg shifted;
+	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
 	Client *c;
 	unsigned int tagmask = 0;
-	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
 	for (c = selmon->clients; c; c = c->next)
 		if (!(c->tags & SPTAGMASK))
 			tagmask = tagmask | c->tags;
 
-	do {
+	do
 		shift(&shifted.ui, arg->i);
-	} while (tagmask && !(shifted.ui & tagmask));
+	while (tagmask && !(shifted.ui & tagmask));
 
 	tag(&shifted);
 }
@@ -3683,8 +3681,7 @@ shifttagclients(const Arg *arg)
 void
 shiftview(const Arg *arg)
 {
-	Arg shifted;
-	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
 
 	shift(&shifted.ui, arg->i);
 	view(&shifted);
@@ -3693,23 +3690,21 @@ shiftview(const Arg *arg)
 void
 shiftviewclients(const Arg *arg)
 {
-	Arg shifted;
+	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
 	Client *c;
 	unsigned int tagmask = 0, filter = 0;
-	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 
 	for (c = selmon->clients; c; c = c->next)
 		if (!(c->tags & SPTAGMASK))
 			filter = filter | c->tags;
 
-	/* FIXME at least two tags are going to be with a client in order to
+	/* TODO at least two tags are going to be with a client in order to
 	 * shiftviewclient, else shiftview normally */
-	//if (filter > LENGTH(tags))
 	tagmask = filter;
 
-	do {
+	do
 		shift(&shifted.ui, arg->i);
-	} while (tagmask && !(shifted.ui & tagmask));
+	while (tagmask && !(shifted.ui & tagmask));
 
 	view(&shifted);
 }
@@ -3717,8 +3712,7 @@ shiftviewclients(const Arg *arg)
 void
 shiftboth(const Arg *arg)
 {
-	Arg shifted;
-	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
 
 	shift(&shifted.ui, arg->i);
 	tag(&shifted);
@@ -4823,8 +4817,7 @@ togglestatus(const Arg *arg)
 void
 shiftswaptags(const Arg *arg)
 {
-	Arg shifted;
-	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
 
 	shift(&shifted.ui, arg->i);
 	swaptags(&shifted);
