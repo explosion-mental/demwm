@@ -4810,7 +4810,9 @@ void
 togglestatus(const Arg *arg)
 {
 	showstatus = !showstatus;
-	getcmds(-1);
+
+	if (selmon->showbar && showstatus)
+		getcmds(-1);
 	updatestatus();
 }
 
