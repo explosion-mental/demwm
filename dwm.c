@@ -2240,9 +2240,7 @@ losefullscreen(Client *next)
 		setfullscreen(sel, 0);
 }
 
-/* Wrapper function to load colors, since it appears at least 3 times. The
- * logic is: if 'fallback' value is 0, load the colors normally (pywal); but if
- * it does has a value, then use fallback colors */
+/* Wrapper function to load colors, since it appears at least 3 times. */
 void
 fallbackcolors(void)
 {
@@ -2260,8 +2258,10 @@ fallbackcolors(void)
 	strncpy(color7, "#222222", 8);
 	strncpy(color8, "#222222", 8);
 	strncpy(cursor_wal, "#222222", 8);
+
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
+
 	fprintf(stderr, "dwm: could not get Xresources colors, switching to fallback colors.\n");
 }
 
