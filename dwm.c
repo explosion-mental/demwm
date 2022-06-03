@@ -2272,19 +2272,18 @@ xrdbloadcolor(XrmDatabase xrdb, const char *name, char *var)
 	char *type;
 	int i;
 
-	if (XrmGetResource(xrdb, name, NULL, &type, &value) == True) { /* exist */
-		if (strnlen(value.addr, 8) == 7 && value.addr[0] == '#') { /* is a hex color */
-			for (i = 1; i < 7; i++) {
-				if ((value.addr[i] < 48)
-				|| (value.addr[i] > 57 && value.addr[i] < 65)
-				|| (value.addr[i] > 70 && value.addr[i] < 97)
-				|| (value.addr[i] > 102))
-					break;
-			}
-			if (i == 7) {
-				strncpy(var, value.addr, 7);
-				var[7] = '\0';
-			}
+	if (XrmGetResource(xrdb, name, NULL, &type, &value) == True
+	&& (strnlen(value.addr, 8) == 7 && value.addr[0] == '#')) { /* is a hex color */
+		for (i = 1; i < 7; i++) {
+			if ((value.addr[i] < 48)
+			|| (value.addr[i] > 57 && value.addr[i] < 65)
+			|| (value.addr[i] > 70 && value.addr[i] < 97)
+			|| (value.addr[i] > 102))
+				break;
+		}
+		if (i == 7) {
+			strncpy(var, value.addr, 7);
+			var[7] = '\0';
 		}
         }
 }
@@ -2293,17 +2292,15 @@ xrdbloadcolor(XrmDatabase xrdb, const char *name, char *var)
 void
 readxresources(void)
 {
-	Display *display;
-	char *resm;
+	Display *display = XOpenDisplay(NULL);
+	char *resm = XResourceManagerString(display);
 	XrmDatabase xrdb;
-
-	display = XOpenDisplay(NULL);
-	resm = XResourceManagerString(display);
 
 	if (!resm)
 		return;
 
 	xrdb = XrmGetStringDatabase(resm);
+
 	if (xrdb != NULL) {
 		xrdbloadcolor(xrdb, "background", bg_wal);
 		xrdbloadcolor(xrdb, "foreground", fg_wal);
@@ -2317,10 +2314,10 @@ readxresources(void)
 		xrdbloadcolor(xrdb, "color6", color6);
 		xrdbloadcolor(xrdb, "color7", color7);
 		xrdbloadcolor(xrdb, "color8", color8);
- 		XrmDestroyDatabase(xrdb);	/* close the database */
 	} else
 		fallbackcolors();
 
+	XrmDestroyDatabase(xrdb);
 	XCloseDisplay(display);
 }
 
