@@ -167,6 +167,7 @@ static const Rule rules[] = {
 	RULE(.class = "QjackCtl",	.isfloating = 1)
 	RULE(.title = "Firefox Update", .isfloating = 1)
 	RULE(.title = "Krita - Edit Text", .isfloating = 1)
+	RULE(.class = "Blueman-manager",.isfloating = 1)
 	//customs
 	RULE(.class = "Video",		.isfloating = 1)
 	RULE(.class = "dialect",	.isfloating = 1)
@@ -287,7 +288,7 @@ static const Key keys[] = {
 				/* Scratchpads */
 	SPKEYS(MODKEY,			XK_s,	/* terminal	*/	Sp1)
 	SPKEYS(MODKEY,			XK_e,	/* notes	*/	Sp2)
-	SPKEYS(MODKEY,			XK_x,	/* calculator	*/	Sp3)
+	SPKEYS(MODKEY|ControlMask,	XK_x,	/* calculator	*/	Sp3)
 	SPKEYS(MODKEY|ControlMask,	XK_s,	/* uni		*/	Sp4)
 	SPKEYS(MODKEY,			XK_n,	/* music	*/	Sp5)
 	SPKEYS(MODKEY|ShiftMask,	XK_p,	/* pulsemixer	*/	Sp6)
@@ -299,6 +300,8 @@ static const Key keys[] = {
 	{ MODKEY|ControlMask,		XK_v,	scratchpad_remove,	{0} },
 	{ MODKEY,                       XK_v,	scratchpad_show,	{0} },
 	{ MODKEY|ShiftMask,             XK_v,	scratchpad_hide,	{0} },
+
+	{ MODKEY,			XK_x,	SHCMD("rofi -show calc -modi calc -no-show-match -no-sort") },
 	//{ MODKEY|ControlMask,          	XK_v,	scratchpad_remove,	{0} },
 	//{ MODKEY,			XK_s,	togglescratch,	{.ui = Sp1 } },/* bc */
 
