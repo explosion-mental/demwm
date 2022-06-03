@@ -332,7 +332,7 @@ static void setlayout(const Arg *arg);
 static void setcfact(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
-static void setsignal(int sig, void (*handler)(int sig));
+static void setsignal(int sig, void (*sahandler)(int sig));
 static void seturgent(Client *c, int urg);
 static void settagsatom(Client *c);
 static void shift(unsigned int *tag, int i);
@@ -3602,11 +3602,11 @@ setup(void)
 }
 
 void
-setsignal(int sig, void (*handler)(int unused))
+setsignal(int sig, void (*sahandler)(int unused))
 {
 	struct sigaction sa;
 
-	sa.sa_handler = handler;
+	sa.sa_handler = sahandler;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_NOCLDSTOP | SA_RESTART;
 
