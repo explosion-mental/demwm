@@ -260,7 +260,7 @@ static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
 static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
 
 /* scratchpads */
-static const char *scratchpads[][64] = {
+static const char *scratchpads[][32] = {
 	[Sp1] = { "st", "-n", "term", "-g", "115x30" , NULL }, /* terminal */
 	[Sp2] = { "st", "-n", "notes", "-g", FURSIZE, "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", NOTES, "/home/faber/Docs/testi/notes", NULL }, /* notes */
 	[Sp3] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL }, /* calculator */
