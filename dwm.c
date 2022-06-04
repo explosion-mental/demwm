@@ -383,6 +383,7 @@ static Monitor *wintomon(Window w);
 static int xerror(Display *dpy, XErrorEvent *ee);
 static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
+static void xrloadcol(XrmDatabase db, const char *name, char *var);
 static void xrdb(const Arg *arg);
 static void xinitvisual(void);
 static void zoom(const Arg *arg);
@@ -2268,13 +2269,13 @@ fallbackcolors(void)
 }
 
 void
-xrdbloadcolor(XrmDatabase xrdb, const char *name, char *var)
+xrloadcol(XrmDatabase db, const char *name, char *var)
 {
 	XrmValue value;
 	char *type;
 	int i;
 
-	if (XrmGetResource(xrdb, name, NULL, &type, &value) == True
+	if (XrmGetResource(db, name, NULL, &type, &value) == True
 	&& (strnlen(value.addr, 8) == 7 && value.addr[0] == '#')) { /* is a hex color */
 		for (i = 1; i < 7; i++) {
 			if ((value.addr[i] < 48)
@@ -2296,30 +2297,30 @@ readxresources(void)
 {
 	Display *display = XOpenDisplay(NULL);
 	char *resm = XResourceManagerString(display);
-	XrmDatabase xrdb;
+	XrmDatabase d;
 
 	if (!resm)
 		return;
 
-	xrdb = XrmGetStringDatabase(resm);
+	d = XrmGetStringDatabase(resm);
 
-	if (xrdb != NULL) {
-		xrdbloadcolor(xrdb, "background", bg_wal);
-		xrdbloadcolor(xrdb, "foreground", fg_wal);
-		xrdbloadcolor(xrdb, "cursor", cursor_wal);
-		xrdbloadcolor(xrdb, "color0", color0);
-		xrdbloadcolor(xrdb, "color1", color1);
-		xrdbloadcolor(xrdb, "color2", color2);
-		xrdbloadcolor(xrdb, "color3", color3);
-		xrdbloadcolor(xrdb, "color4", color4);
-		xrdbloadcolor(xrdb, "color5", color5);
-		xrdbloadcolor(xrdb, "color6", color6);
-		xrdbloadcolor(xrdb, "color7", color7);
-		xrdbloadcolor(xrdb, "color8", color8);
+	if (d != NULL) {
+		xrloadcol(d, "background", bg_wal);
+		xrloadcol(d, "foreground", fg_wal);
+		xrloadcol(d, "cursor", cursor_wal);
+		xrloadcol(d, "color0", color0);
+		xrloadcol(d, "color1", color1);
+		xrloadcol(d, "color2", color2);
+		xrloadcol(d, "color3", color3);
+		xrloadcol(d, "color4", color4);
+		xrloadcol(d, "color5", color5);
+		xrloadcol(d, "color6", color6);
+		xrloadcol(d, "color7", color7);
+		xrloadcol(d, "color8", color8);
 	} else
 		fallbackcolors();
 
-	XrmDestroyDatabase(xrdb);
+	XrmDestroyDatabase(d);
 	XCloseDisplay(display);
 }
 
