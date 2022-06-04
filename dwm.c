@@ -3134,21 +3134,6 @@ togglegaps(const Arg *arg)
 	arrange(NULL);
 }
 void
-defaultgaps(const Arg *arg)
-{
-	setgaps(gappoh, gappov, gappih, gappiv);
-}
-void
-incrgaps(const Arg *arg)
-{
-	setgaps(
-		selmon->gappoh + arg->i,
-		selmon->gappov + arg->i,
-		selmon->gappih + arg->i,
-		selmon->gappiv + arg->i
-	);
-}
-void
 getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 {
 	unsigned int n, oe, ie;
@@ -3193,6 +3178,21 @@ getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *s
 	*sf = sfacts;		/* total factor of stack area */
 	*mr = msize - mtotal;	/* remainder (rest) of pixels after a cfacts master split */
 	*sr = ssize - stotal;	/* remainder (rest) of pixels after a cfacts stack split */
+}
+void
+defaultgaps(const Arg *arg)
+{
+	setgaps(gappoh, gappov, gappih, gappiv);
+}
+void
+incrgaps(const Arg *arg)
+{
+	setgaps(
+		selmon->gappoh + arg->i,
+		selmon->gappov + arg->i,
+		selmon->gappih + arg->i,
+		selmon->gappiv + arg->i
+	);
 }
 void
 incrigaps(const Arg *arg)
