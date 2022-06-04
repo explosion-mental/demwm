@@ -287,7 +287,7 @@ static void keypress(XEvent *e);
 static void keyrelease(XEvent *e);
 static void killclient(const Arg *arg);
 static void losefullscreen(Client *next);
-static void fallbackcolors();
+static void fallbackcolors(void);
 static void readxresources(void);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
@@ -295,7 +295,7 @@ static void maprequest(XEvent *e);
 static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
-static void pop(Client *);
+static void pop(Client *c);
 static Client *prevtiled(Client *c);
 static void propertynotify(XEvent *e);
 static void pushstack(const Arg *arg);
@@ -392,7 +392,7 @@ static void zoomswap(const Arg *arg);
 static void scratchpad_hide(const Arg *arg);
 static void scratchpad_remove(const Arg *arg);
 static void scratchpad_show(const Arg *arg);
-static void scratchpad_show_client(Client * c);
+static void scratchpad_show_client(Client *c);
 static int scratchpad_last_showed_is_killed (void);
 static void scratchpad_show_first(void);
 
@@ -481,7 +481,7 @@ static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
 static xcb_connection_t *xcon;
-static Visual *visual;
+static Visual *visual = NULL;
 static Colormap cmap;
 static Client *scratchpad_last_showed = NULL;
 
@@ -3176,20 +3176,23 @@ getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *s
 	float mfacts = 0, sfacts = 0;
 	int mtotal = 0, stotal = 0;
 	Client *c;
+
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++)
 		if (n < m->nmaster)
 			mfacts += c->cfact;
 		else
 			sfacts += c->cfact;
+
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++)
 		if (n < m->nmaster)
 			mtotal += msize * (c->cfact / mfacts);
 		else
 			stotal += ssize * (c->cfact / sfacts);
+
 	*mf = mfacts;		/* total factor of master area */
 	*sf = sfacts;		/* total factor of stack area */
-	*mr = msize - mtotal;	/* the remainder (rest) of pixels after a cfacts master split */
-	*sr = ssize - stotal;	/* the remainder (rest) of pixels after a cfacts stack split */
+	*mr = msize - mtotal;	/* remainder (rest) of pixels after a cfacts master split */
+	*sr = ssize - stotal;	/* remainder (rest) of pixels after a cfacts stack split */
 }
 void
 incrigaps(const Arg *arg)
@@ -3470,10 +3473,10 @@ setmfact(const Arg *arg)
 	if (f < 0.05 || f > 0.95)
 		return;
 
+	selmon->mfact = f;
+
 	if (pertag)
-		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag] = f;
-	else
-		selmon->mfact = f;
+		selmon->pertag->mfacts[selmon->pertag->curtag] = f;
 
 	arrange(selmon);
 }
@@ -3635,7 +3638,7 @@ void
 settagsatom(Client *c)
 {
 	XChangeProperty(dpy, c->win, dwmtags, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)&c->tags, 1);
+			PropModeReplace, (unsigned char *)&(c->tags), 1);
 }
 
 void
@@ -4086,7 +4089,7 @@ updatebars(void)
 		.background_pixel = 0,
 		.border_pixel = 0,
 		.colormap = cmap,
-		.event_mask = ButtonPressMask|ExposureMask
+		.event_mask = ButtonPressMask | ExposureMask
 	#ifdef TAG_PREVIEW
 		PointerMotionMask
 	#endif /* TAG_PREVIEW */
@@ -4336,8 +4339,8 @@ xinitvisual(void)
 	XVisualInfo *infos, tpl = { .screen = screen, .depth = 32, .class = TrueColor };
 
 	infos = XGetVisualInfo(dpy, masks, &tpl, &nitems);
-	visual = NULL;
-	for(i = 0; i < nitems; i ++) {
+
+	for (i = 0; i < nitems; i++) {
 		fmt = XRenderFindVisualFormat(dpy, infos[i].visual);
 		if (fmt->type == PictTypeDirect && fmt->direct.alphaMask) {
 			visual = infos[i].visual;
