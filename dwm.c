@@ -4090,7 +4090,7 @@ updatebars(void)
 		.colormap = cmap,
 		.event_mask = ButtonPressMask | ExposureMask
 	#ifdef TAG_PREVIEW
-		PointerMotionMask
+		| PointerMotionMask
 	#endif /* TAG_PREVIEW */
 	};
 	XClassHint ch = {"dwm", "dwm"};
