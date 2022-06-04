@@ -228,7 +228,6 @@ static const Layout layouts[] = {
 	//{ ")M(",	ego },
 	{ "🥏",		NULL },			/* no layout function means floating behavior */
 	{ "[ ]",	clear },		/* hides all visible clients, enjoy your nice wallpaper */
-	{ NULL,		NULL },			/* dummy layout, don't delete */
 };
 
 /* key definitions */

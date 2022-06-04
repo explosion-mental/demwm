@@ -1191,19 +1191,24 @@ createmon(void)
 void
 cyclelayout(const Arg *arg)
 {
+	unsigned int idx = 0;
 	Layout *l;
-	for (l = (Layout *)layouts; l != selmon->lt[selmon->sellt]; l++);
+
+	for (l = (Layout *)layouts; l != selmon->lt[selmon->sellt]; l++, idx++);
+
 	if (arg->i > 0) {
-		if (l->symbol && (l + 1)->symbol)
-			setlayout(&((Arg) { .v = (l + 1) }));
+		if (idx < LENGTH(layouts) - 1)
+			idx = idx + arg->i;
 		else
-			setlayout(&((Arg) { .v = layouts }));
+			idx = 0;
 	} else {
-		if (l != layouts && (l - 1)->symbol)
-			setlayout(&((Arg) { .v = (l - 1) }));
+		if (idx > 0)
+			idx = idx + arg->i;
 		else
-			setlayout(&((Arg) { .v = &layouts[LENGTH(layouts) - 2] }));
+			idx = LENGTH(layouts) - 1;
 	}
+
+	setlayout(&((Arg) { .v = &layouts[idx] }));
 }
 
 void
