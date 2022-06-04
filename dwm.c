@@ -22,19 +22,19 @@
  */
 #include <errno.h>
 #include <locale.h>
+#include <poll.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <poll.h>
-#include <sys/wait.h>	/* dwm doesn't use wait? */
+#include <sys/wait.h>
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
+#include <X11/XF86keysym.h>
 #include <X11/XKBlib.h>
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
@@ -49,7 +49,7 @@
 #ifdef __OpenBSD__
 #include <sys/sysctl.h>
 #include <kvm.h>
-#endif /* __OpenBSD */
+#endif /* __OpenBSD__ */
 #ifdef TAG_PREVIEW
 #include <Imlib2.h>
 #endif /* TAG_PREVIEW */
@@ -60,7 +60,6 @@
 
 #include "drw.h"
 #include "util.h"
-#include <X11/XF86keysym.h>	/* XF86 Keys */
 
 /* macros */
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)

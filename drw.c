@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #ifdef ICONS
-//#include <stdint.h>
 #include <Imlib2.h>
 #endif /* ICONS */
 #include <X11/Xlib.h>
