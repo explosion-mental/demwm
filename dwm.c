@@ -4472,7 +4472,7 @@ getparentprocess(pid_t p)
 {
 	unsigned int v = 0;
 
-#if defined(__linux__)
+#ifdef __linux__
 	FILE *f;
 	char buf[256];
 	snprintf(buf, sizeof(buf) - 1, "/proc/%u/stat", (unsigned)p);
@@ -4480,11 +4480,11 @@ getparentprocess(pid_t p)
 	if (!(f = fopen(buf, "r")))
 		return 0;
 
-	//fscanf(f, "%*u %*s %*c %u", &v);
 	if (fscanf(f, "%*u %*s %*c %u", (unsigned *)&v) != 1)
 		v = (pid_t)0;
+
 	fclose(f);
-#elif defined(__FreeBSD__)
+#elif __FreeBSD__
 	struct kinfo_proc *proc = kinfo_getproc(p);
 	if (!proc)
 		return (pid_t)0;
