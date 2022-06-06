@@ -195,6 +195,7 @@ struct Monitor {
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
 	int showbar, topbar;  /* bar flags */
+	int hidevacant;
 	unsigned int seltags;
 	unsigned int sellt;
 	unsigned int tagset[2];
@@ -761,10 +762,10 @@ buttonpress(XEvent *e)
 			occ |= c->tags == 255 ? 0 : c->tags;
 		do {
 			/* do not reserve space for vacant tags */
-			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i) && hidevacant)
+			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i) && m->hidevacant)
 				continue;
-			x += TEXTW(hidevacant ? tagsalt[i] : tags[i]);
-		} while (ev->x >= x && ++i < (hidevacant ? LENGTH(tagsalt) : LENGTH(tags)));
+			x += TEXTW(m->hidevacant ? tagsalt[i] : tags[i]);
+		} while (ev->x >= x && ++i < (m->hidevacant ? LENGTH(tagsalt) : LENGTH(tags)));
 		if (i < LENGTH(tags)) {
 			click = ClkTagBar;
 			arg.ui = 1 << i;
@@ -1141,6 +1142,7 @@ createmon(void)
 	m->nmaster = nmaster;
 	m->showbar = showbar;
 	m->topbar = topbar;
+	m->hidevacant = hidevacant;
 	/* gaps per tag */
 	m->gappih = gappih;
 	m->gappiv = gappiv;
@@ -1301,12 +1303,12 @@ drawbar(Monitor *m)
 
 	for (i = 0; i < LENGTH(tags); i++) {
 		/* apply 'hidevacant' only to the selected monitor */
-		if (hidevacant && (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i)))
+		if (m->hidevacant && (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i)))
 			continue;
-		w = TEXTW(hidevacant ? tagsalt[i] : tags[i]);
+		w = TEXTW(m->hidevacant ? tagsalt[i] : tags[i]);
 		drw_setscheme(drw, scheme[urg & 1 << i ? SchemeUrgent : (m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm)]);
-		drw_text(drw, x, 0, w, bh, lrpad / 2, hidevacant ? tagsalt[i] : tags[i], 0);
-		if (occ & 1 << i && !hidevacant) { /* don't draw these when hidevacant */
+		drw_text(drw, x, 0, w, bh, lrpad / 2, m->hidevacant ? tagsalt[i] : tags[i], 0);
+		if (occ & 1 << i && !m->hidevacant) { /* don't draw these when hidevacant */
 			if (urg & 1 << i) {
 				/* urgent underline (top of tag) */
 				drw_setscheme(drw, scheme[SchemeIndUrg]);
@@ -1657,7 +1659,7 @@ switchtag(void)
 	Imlib_Image image;
 
 	for (c = selmon->clients; c; c = c->next)
-		occ |= c->tags == 255 && hidevacant ? 0 : c->tags;
+		occ |= c->tags == 255 && selmon->hidevacant ? 0 : c->tags;
 	//	occ |= c->tags == 255 ? 0 : c->tags;
 	for (i = 0; i < LENGTH(tags); i++) {
 		if (selmon->tagset[selmon->seltags] & 1 << i) {
@@ -4773,7 +4775,7 @@ togglealwaysontop(const Arg *arg)
 void
 togglevacant(const Arg *arg)
 {
-	hidevacant = !hidevacant;
+	selmon->hidevacant = !selmon->hidevacant;
 	drawbar(selmon);
 }
 
