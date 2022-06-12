@@ -1814,7 +1814,7 @@ updatesystray(void)
 			sendevent(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->win, 0, 0);
 			XSync(dpy, False);
 		} else {
-			fprintf(stderr, "dwm: unable to obtain system tray\n");
+			fprintf(stderr, "demwm: unable to obtain system tray\n");
 			free(systray);
 			systray = NULL;
 			return;
@@ -2035,7 +2035,7 @@ getcmd(int i, char *button)
 		if (button)
 			setenv("BLOCK_BUTTON", button, 1);
 		execlp("/bin/sh", "sh", "-c", blocks[i].command, (char *) NULL);
-		fprintf(stderr, "dwm: block %d, execlp %s", i, blocks[i].command);
+		fprintf(stderr, "demwm: block %d, execlp %s", i, blocks[i].command);
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
@@ -2271,7 +2271,7 @@ fallbackcolors(void)
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
 
-	fprintf(stderr, "dwm: could not get Xresources colors, switching to fallback colors.\n");
+	fprintf(stderr, "demwm: could not get Xresources colors, switching to fallback colors.\n");
 }
 
 void
@@ -3003,7 +3003,7 @@ run(void)
 			 * 'xsetroot -name' sutff */
 			if (errno == EINTR) /* signal caught */
 				continue;
-			fprintf(stderr, "dwm: poll ");
+			fprintf(stderr, "demwm: poll ");
 			perror("failed");
 			exit(EXIT_FAILURE);
 		}
@@ -3016,7 +3016,7 @@ run(void)
 					handler[ev.type](&ev); /* call handler */
 			}
 		} else if (fds[0].revents & POLLHUP) {
-			fprintf(stderr, "dwm: main event loop, hang up");
+			fprintf(stderr, "demwm: main event loop, hang up");
 			perror(" failed");
 			exit(EXIT_FAILURE);
 		}
@@ -3030,7 +3030,7 @@ run(void)
 				execlock &= ~(1 << i);
 
 				if (bt == -1) { /* if read failed */
-					fprintf(stderr, "dwm: read failed in block %s\n", blocks[i].command);
+					fprintf(stderr, "demwm: read failed in block %s\n", blocks[i].command);
 					perror(" failed");
 					continue;
 				}
@@ -3042,7 +3042,7 @@ run(void)
 
 				drawbar(selmon);
 			} else if (fds[i + 1].revents & POLLHUP) {
-				fprintf(stderr, "dwm: block %d hangup", i);
+				fprintf(stderr, "demwm: block %d hangup", i);
 				perror(" failed");
 				exit(EXIT_FAILURE);
 			}
@@ -3525,7 +3525,7 @@ setup(void)
 	xinitvisual();
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
 	if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
-		fprintf(stderr, "dwm: no fonts could be loaded, status bar hidden.\n");
+		fprintf(stderr, "demwm: no fonts could be loaded, status bar hidden.\n");
 		showbar = 0;
 	}
 	lrpad = drw->fonts->h;
@@ -3594,7 +3594,7 @@ setup(void)
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8,
-		PropModeReplace, (unsigned char *) "dwm", 3);
+		PropModeReplace, (unsigned char *) "demwm", 3);
 	XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 	/* EWMH support per view */
@@ -3795,7 +3795,7 @@ spawn(const Arg *arg)
 			close(ConnectionNumber(dpy));
 		setsid();
 		execvp(((char **)arg->v)[0], (char **)arg->v);
-		fprintf(stderr, "dwm: execvp %s", ((char **)arg->v)[0]);
+		fprintf(stderr, "demwm: execvp %s", ((char **)arg->v)[0]);
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
@@ -4177,7 +4177,7 @@ updatebars(void)
 		| PointerMotionMask
 	#endif /* TAG_PREVIEW */
 	};
-	XClassHint ch = {"dwm", "dwm"};
+	XClassHint ch = {"demwm", "demwm"};
 
 	for (m = mons; m; m = m->next) {
 		if (m->barwin)
@@ -4662,7 +4662,7 @@ xerror(Display *dpy, XErrorEvent *ee)
 	|| (ee->request_code == X_GrabKey && ee->error_code == BadAccess)
 	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
 		return 0;
-	fprintf(stderr, "dwm: fatal error: request code=%d, error code=%d\n",
+	fprintf(stderr, "demwm: fatal error: request code=%d, error code=%d\n",
 		ee->request_code, ee->error_code);
 	return xerrorxlib(dpy, ee); /* may call exit */
 }
@@ -4678,7 +4678,7 @@ xerrordummy(Display *dpy, XErrorEvent *ee)
 int
 xerrorstart(Display *dpy, XErrorEvent *ee)
 {
-	die("dwm: another window manager is already running");
+	die("demwm: another window manager is already running");
 	return -1;
 }
 
@@ -4942,7 +4942,7 @@ swaptags(const Arg *arg)
 void
 random_wall(const Arg *arg)
 {
-	if (system("dwm_random_wall") != 0)
+	if (system("demwm_random_wall") != 0)
 		fallbackcolors();
 	else
 		xrdb(NULL);
@@ -4978,15 +4978,15 @@ main(int argc, char *argv[])
 			restart = 1;
 			lasttags = atoi(argv[2]);
 	} else if (argc == 2 && !strcmp("-v", argv[1]))
-		die("dwm-"VERSION);
+		die("demwm-"VERSION);
 	else if (argc != 1)
-		die("usage: dwm [-v]");
+		die("usage: demwm [-v]");
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
 	if (!(dpy = XOpenDisplay(NULL)))
-		die("dwm: cannot open display");
+		die("demwm: cannot open display");
 	if (!(xcon = XGetXCBConnection(dpy)))
-		die("dwm: cannot get xcb connection");
+		die("demwm: cannot get xcb connection");
 	checkotherwm();
 	XrmInitialize();
 	setup();
