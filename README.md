@@ -1,6 +1,6 @@
 # Dynamic Explosion Mental's Window Manager
 
-![Image](https://explosion-mental.codeberg.page/img/rice.gif "dwm")
+![Image](https://explosion-mental.codeberg.page/img/screensus/rice.gif "dwm")
 
 _some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm.html#Screenshots)_
 
