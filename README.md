@@ -262,7 +262,8 @@ are some ideas:
 - <s>a better way of handling layouts at startup</s>
 
 ## Some wishing pains:
-- Rename the proyect
+- s/dwm/demwm/
+- <s>Rename the proyect</s>
 - pertag cursor position. Save the state of the cursor position between tags.
 - <s>change `dwm_random_wall` script to an actual function on C.</s> Why? being a script is much easier to tweak.
 - <s>Can `tcc` (tiny C Compiler) be used along side with the **alpha** patch? yes, with macros for `baralpha` and `boderalpha` compiles but if `tcc` is being used it crashes.</s>
