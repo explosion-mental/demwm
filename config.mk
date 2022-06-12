@@ -1,5 +1,5 @@
-# dwm version
-VERSION = 6.2
+# demwm version
+VERSION = 0.0
 
 # Customize below to fit your system
 

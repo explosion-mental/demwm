@@ -1,30 +1,29 @@
 # Dynamic Explosion Mental's Window Manager
 
-![Image](https://explosion-mental.codeberg.page/img/screensus/rice.gif "dwm")
+![Image](https://explosion-mental.codeberg.page/img/screensus/rice.gif "demwm")
 
 _some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm.html#Screenshots)_
 
 # Requirements
-- In order to build dwm you need the Xlib header files.
+- In order to build demwm you need the Xlib header files.
 - Xcb header files for the `swallow patch`.
 - Any(?) C99 compiler (gcc and tcc tested)
 ## Optional
 - [pywal](https://github.com/dylanaraps/pywal)
-	* if not installed it will set colors to (hopefully) default dwm colors
+	* if not installed it will set colors to (hopefully) default demwm colors
 - [libxft-bgra](https://github.com/uditkarode/libxft-bgra)
 	* There are emojis on config.h, replacing the unicode characters to
 	  non-unicode will make independant of libxft-bgra.
 - xwallpaper
 	* You can use other program to set the wallpaper,
-	  [see](https://github.com/explosion-mental/Dwm/blob/main/dwm_random_wall)
+	  [see](https://github.com/explosion-mental/demwm/blob/main/demwm_random_wall)
 
 # Suggestions
 - Before updating (`git pull`), change your configs (config.h) to config.def.h
-- An incomplete [documentation](doc.md) about dwm functions.
-- To redirect error mesagges to a file `exec dwm 2> "$HOME"/.cache/dwm.log`
+- To redirect error mesagges to a file `exec demwm 2> "$HOME"/.cache/demwm.log`
 - edit `config.mk` and change `CC = cc`, I have it default to `tcc` since it's
   very very fast and I can make changes in the go.
-- edit `dwm_random_wall` to suit you
+- edit `demwm_random_wall` to suit you
 
 # Features
 - Gaps (vanitygaps)
@@ -79,7 +78,7 @@ The interval is how many X seconds you want to pass before re-**run**ning the
 command and update the output. Can be 0, which means never.
 
 ### Signal
-**This is discouraged, use [xsetroot](#manage-dwm-with-xsetroot) instead**
+**This is discouraged, use [xsetroot](#manage-demwm-with-xsetroot) instead**
 
 
 The signal is a number to update the command, requires you to add `+ 34`. Say a
@@ -122,9 +121,9 @@ Take a look at the last line. **Before exiting it does `echo ''`**. It is
 important to echo something (even `''`) to 'notify dwm' that the block has
 changed.
 
-# Manage dwm with `xsetroot`
-Since dwm handles the text itself, we can use the 'name' of the root window for
-other purposes, like managing dwm (similar to the `fakesignal` patch).
+# Manage demwm with `xsetroot`
+Since demwm handles the text itself, we can use the 'name' of the root window for
+other purposes, like managing demwm (similar to the `fakesignal` patch).
 
 - Give it a function, for example `xsetroot -name togglebar`, will toggle the bar
 - or a standalone `signal number` of one of the blocks, e.g `xsetroot -name 1` will update block 1
@@ -197,7 +196,7 @@ uncomment the line with `#TAG_PREVIEW`
 
 **requires imlib2**
 
-# dwm_random_wall
+# demwm_random_wall
 This is a little script chooses a random file from the `img_dir` directory
 variable, runs **pywal** with the chosen image and symlinks to `bgloc` to make
 it accesible to other programs.
