@@ -2558,6 +2558,8 @@ movemouse(const Arg *arg)
 				nx = selmon->wx + selmon->ww - WIDTH(c);
 			if (abs(selmon->wy - ny) < snap)
 				ny = selmon->wy;
+			else if (abs(selmon->my - ny) < snap)
+				ny = selmon->my;
 			else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) < snap)
 				ny = selmon->wy + selmon->wh - HEIGHT(c);
 			if (!c->isfloating && selmon->lt[selmon->sellt]->arrange
