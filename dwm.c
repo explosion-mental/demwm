@@ -4782,6 +4782,8 @@ togglevacant(const Arg *arg)
 void
 movfh_setmfact(const Arg *arg)
 {
+	if (!selmon->sel)
+		return;
 	if (selmon->sel->isfloating)
 		movefloathorz(&((Arg) { .i = arg->f > 0 ? movefloat : -movefloat }));
 	else
@@ -4791,6 +4793,8 @@ movfh_setmfact(const Arg *arg)
 void
 movfv_pushstack(const Arg *arg)
 {
+	if (!selmon->sel)
+		return;
 	if (selmon->sel->isfloating)
 		movefloatvert(&((Arg) { .i = arg->i > 0 ? movefloat : -movefloat }));
 	else
