@@ -4804,7 +4804,7 @@ movfv_pushstack(const Arg *arg)
 void
 movefloathorz(const Arg *arg)
 {
-	if (!selmon->sel->isfloating)
+	if (!selmon->sel->isfloating || selmon->sel->isfullscreen || !selmon->sel)
 		return;
 
 	resize(selmon->sel, selmon->sel->x + arg->i, selmon->sel->y, selmon->sel->w, selmon->sel->h, 1);
@@ -4813,7 +4813,7 @@ movefloathorz(const Arg *arg)
 void
 movefloatvert(const Arg *arg)
 {
-	if (!selmon->sel->isfloating)
+	if (!selmon->sel->isfloating || selmon->sel->isfullscreen || !selmon->sel)
 		return;
 
 	resize(selmon->sel, selmon->sel->x, selmon->sel->y + arg->i, selmon->sel->w, selmon->sel->h, 1);
