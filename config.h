@@ -355,10 +355,15 @@ static const Key keys[] = {
 //	{ MODKEY|ShiftMask,	    XK_grave,	toggletopbar,		{0}		},
 	{ MODKEY|ShiftMask,             XK_F5,	quit,           	{0}		},
 	{ MODKEY,			XK_F5,	refresh,		{0}		},
-	{ MODKEY,                   XK_comma,	focusmon,	{ .i = -1 }		},
+
+				/* monitor */
 	{ MODKEY|ShiftMask,         XK_comma,	tagmon,		{ .i = -1 }		},
+	{ MODKEY|ShiftMask,         XK_comma,	focusmon,	{ .i = -1 }		},
+	{ MODKEY,                   XK_comma,	focusmon,	{ .i = -1 }		},
 	{ MODKEY|ShiftMask,        XK_period,	tagmon,		{ .i = +1 }		},
+	{ MODKEY|ShiftMask,        XK_period,	focusmon,	{ .i = +1 }		},
 	{ MODKEY,                  XK_period,	focusmon,	{ .i = +1 }		},
+
 	{ MODKEY,                       XK_0,	view,		{.ui = ~SPTAGMASK }	},
 	{ MODKEY|ShiftMask,             XK_0,	tag,		{.ui = ~SPTAGMASK }	},
 	{ MODKEY|ControlMask,		XK_0,	view,		{.ui = ~0 }		},
