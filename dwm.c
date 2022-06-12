@@ -3137,7 +3137,7 @@ togglegaps(const Arg *arg)
 			!selmon->pertag->enablegaps[selmon->pertag->curtag];
 	else
 		enablegaps = !enablegaps;
-	arrange(NULL);
+	arrange(selmon);
 }
 void
 getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
@@ -3145,7 +3145,7 @@ getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 	unsigned int n, oe, ie;
 	Client *c;
 
-	oe = ie = pertag ? selmon->pertag->enablegaps[selmon->pertag->curtag] : enablegaps;
+	oe = ie = pertag ? m->pertag->enablegaps[m->pertag->curtag] : enablegaps;
 
 	/* get the number of clients */
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
