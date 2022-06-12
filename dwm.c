@@ -3151,7 +3151,7 @@ getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
 
 	/* outer gaps disabled when only one client or is disabled in the layout */
-	if ((smartgaps && n == 1) || selmon->lt[selmon->sellt]->gaps)
+	if ((smartgaps && n == 1) || m->lt[m->sellt]->gaps)
 		oe = 0;
 
 	*oh = m->gappoh * oe;	/* outer horizontal gap */
