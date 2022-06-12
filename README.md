@@ -1,5 +1,4 @@
-# Dwm
-My build of dwm
+# Dynamic Explosion Mental's Window Manager
 
 ![Image](https://explosion-mental.codeberg.page/img/rice.gif "dwm")
 
