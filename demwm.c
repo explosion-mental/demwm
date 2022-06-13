@@ -1727,7 +1727,7 @@ resizebarwin(Monitor *m)
 	XMoveResizeWindow(dpy, m->barwin, m->wx, m->by, w, bh);
 }
 unsigned int
-getsystraywidth()
+getsystraywidth(void)
 {
 	unsigned int w = 0;
 	Client *i;
@@ -4176,7 +4176,7 @@ updateblock(const Arg *arg)
 }
 
 void
-updateclientlist()
+updateclientlist(void)
 {
 	Client *c;
 	Monitor *m;
