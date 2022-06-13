@@ -22,7 +22,7 @@
  * Every window that is spawned goes through by manage(), so it is another good
  * start.
  *
- * To understand everything else, start reading main(),
+ * To understand everything else, start reading main(), commit messages,
  * www.x.org/docs/X11/xlib.pdf and the comments I left, happy hacking.
  */
 #include <errno.h>
