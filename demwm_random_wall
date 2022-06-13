@@ -1,14 +1,16 @@
 #!/bin/sh
 
+# script that calls pywal to a random image and links it to img_lock
+
 img_dir="${HOME}/Media/Pictures/Wallpapers"
-bgloc="${XDG_DATA_HOME:-$HOME/.local/share}/bg"
+img_lock="${XDG_DATA_HOME:-$HOME/.local/share}/bg"
 backend=wal		# colorz - schemer2 - wal - haishoku - colorthief
 
-# post run hooks
+# post run hooks, everything here runs in the background
 postrun() {
-	xwallpaper --zoom "$bgloc" &
-	killall -q glava && glava 1>/dev/null &
-	killall -q -9 dunst && dunst &	# forcefully kill dunst
+	xwallpaper --zoom "$img_lock" &		# set wallpaper
+	killall --quiet glava && glava 1>/dev/null &
+	killall --quiet -9 dunst && dunst &	# forcefully kill dunst
 	ln -sf "${HOME}/.cache/wal/dunstrc"		"${HOME}/.config/dunst/dunstrc"
 	ln -sf "${HOME}/.cache/wal/zathurarc"		"${HOME}/.config/zathura/zathurarc"
 	ln -sf "${HOME}/.cache/wal/glava_bars.glsl"	"${HOME}/.config/glava/bars.glsl"
@@ -19,12 +21,11 @@ postrun() {
 	ln -sf "${HOME}/.cache/wal/glava_wave.glsl"	"${HOME}/.config/glava/wave.glsl"
 }
 
-randomimg="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
+random_img="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
 #randomimg="$(find "$img_path" -iregex '.*.\(jpg\|jpeg\|png\)' -type f | shuf -n 1)"
 
-# exit 1 so dwm uses fallback colors, in case of errors
-wal -i "$randomimg" --backend $backend -qnt || exit 1
+wal -i "$random_img" --backend $backend -qnt
 
-ln -sf "$randomimg" "$bgloc"
+ln -sf "$random_img" "$img_lock"
 
 postrun &

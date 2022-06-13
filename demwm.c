@@ -4896,6 +4896,9 @@ swaptags(const Arg *arg)
 void
 random_wall(const Arg *arg)
 {
+	/* only reason to use system() here is because I'm thinking about other
+	 * way of handling this. Sorry paranoic system() haters, yes should be
+	 * using bare waitpid(), fork() and exec() */
 	system("demwm_random_wall");
 	xrdb(NULL);
 }
