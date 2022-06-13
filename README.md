@@ -261,7 +261,8 @@ are some ideas:
 - <s>a better way of handling layouts at startup</s>
 
 ## Some wishing pains:
-- s/dwm/demwm/
+- Write a proper manpage
+- <s>s/dwm/demwm/</s>
 - <s>Rename the proyect</s>
 - pertag cursor position. Save the state of the cursor position between tags.
 - <s>change `dwm_random_wall` script to an actual function on C.</s> Why? being a script is much easier to tweak.
