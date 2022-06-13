@@ -120,6 +120,10 @@ static const Block blocks[] = {
 /* delimeter between blocks commands. NULL character ('\0') means no delimeter. */
 static const char delimiter[] = " ";
 
+/* properties			res_name  res_class */
+static char *systrayclass[2] = { "demwm", "demwm" };
+static char *barclass[2]     = { "demwm", "demwm" };
+
 /* tags */
 //static const char *tags[] = { "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉" };
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };

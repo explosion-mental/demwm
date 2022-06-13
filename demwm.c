@@ -920,8 +920,8 @@ clientmessage(XEvent *e)
 			updatesystrayicongeom(c, wa.width, wa.height);
 			XAddToSaveSet(dpy, c->win);
 			XSelectInput(dpy, c->win, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
-			//XClassHint ch = {"dwmsystray", "dwmsystray"};
-			//XSetClassHint(dpy, c->win, &ch);
+			XClassHint ch = { systrayclass[0], systrayclass[1] };
+			XSetClassHint(dpy, c->win, &ch);
 			swa.background_pixel  = 0;
 			//swa.background_pixel  = scheme[SchemeNorm][ColBg].pixel;	/* use parents background color */
 			//swa.background_pixel  = 0;
@@ -4177,7 +4177,8 @@ updatebars(void)
 		| PointerMotionMask
 	#endif /* TAG_PREVIEW */
 	};
-	XClassHint ch = {"demwm", "demwm"};
+
+	XClassHint ch = { barclass[0], barclass[1] };
 
 	for (m = mons; m; m = m->next) {
 		if (m->barwin)
