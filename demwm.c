@@ -292,7 +292,6 @@ static void keypress(XEvent *e);
 static void keyrelease(XEvent *e);
 static void killclient(const Arg *arg);
 static void losefullscreen(Client *next);
-static void fallbackcolors(void);
 static void readxresources(void);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
@@ -2251,31 +2250,6 @@ losefullscreen(Client *next)
 		return;
 	if (sel->isfullscreen && sel->fakefullscreen != 1 && ISVISIBLE(sel) && sel->mon == next->mon && !next->isfloating)
 		setfullscreen(sel, 0);
-}
-
-/* Wrapper function to load colors, since it appears at least 3 times. */
-void
-fallbackcolors(void)
-{
-	int i;
-
-	strncpy(bg_wal, "#444444", 8);
-	strncpy(fg_wal, "#bbbbbb", 8);
-	strncpy(color0, "#222222", 8);
-	strncpy(color1, "#eeeeee", 8);
-	strncpy(color2, "#005577", 8);
-	strncpy(color3, "#222222", 8);
-	strncpy(color4, "#eeeeee", 8);
-	strncpy(color5, "#222222", 8);
-	strncpy(color6, "#222222", 8);
-	strncpy(color7, "#222222", 8);
-	strncpy(color8, "#222222", 8);
-	strncpy(cursor_wal, "#222222", 8);
-
-	for (i = 0; i < LENGTH(colors); i++)
-		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
-
-	fprintf(stderr, "demwm: could not get Xresources colors, switching to fallback colors.\n");
 }
 
 void
@@ -4922,10 +4896,8 @@ swaptags(const Arg *arg)
 void
 random_wall(const Arg *arg)
 {
-	if (system("demwm_random_wall") != 0)
-		fallbackcolors();
-	else
-		xrdb(NULL);
+	system("demwm_random_wall");
+	xrdb(NULL);
 }
 
 void
