@@ -476,7 +476,7 @@ static Atom xatom[XLast];
 static Systray *systray = NULL;
 static unsigned long systrayorientation = 0; /* _NET_SYSTEM_TRAY_ORIENTATION_HORZ */
 #endif /* SYSTRAY */
-static Atom wmatom[WMLast], netatom[NetLast], dwmtags;
+static Atom wmatom[WMLast], netatom[NetLast], demwmtags;
 static int running = 1, restart = 0;
 static int depth, screen, useargb = 0;
 static Cur *cursor[CurLast];
@@ -2023,7 +2023,7 @@ getcmd(int i, char *button)
 		return;
 
 	if (execlock & 1 << i) { /* block is already running */
-		//fprintf(stderr, "dwm: ignoring block %d, command %s\n", i, blocks[i].command);
+		//fprintf(stderr, "demwm: ignoring block %d, command %s\n", i, blocks[i].command);
 		return;
 	}
 
@@ -2384,7 +2384,7 @@ manage(Window w, XWindowAttributes *wa)
 		c->mon = selmon;
 		applyrules(c);
 		term = termforwin(c);
-		if (XGetWindowProperty(dpy, c->win, dwmtags, 0L, 1L, False, XA_CARDINAL,
+		if (XGetWindowProperty(dpy, c->win, demwmtags, 0L, 1L, False, XA_CARDINAL,
 		&atom, &format, &n, &extra, &ptags) == Success && ptags) {
 			c->tags = *(unsigned int *)ptags;
 			XFree(ptags);
@@ -3539,7 +3539,7 @@ setup(void)
 
 	/* init atoms */
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
-	dwmtags                        = XInternAtom(dpy, "_DWM_TAGS", False);
+	demwmtags                      = XInternAtom(dpy, "_DEMWM_TAGS", False);
 	wmatom[WMProtocols]            = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	wmatom[WMDelete]               = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wmatom[WMState]                = XInternAtom(dpy, "WM_STATE", False);
@@ -3650,7 +3650,7 @@ seturgent(Client *c, int urg)
 void
 settagsatom(Client *c)
 {
-	XChangeProperty(dpy, c->win, dwmtags, XA_CARDINAL, 32,
+	XChangeProperty(dpy, c->win, demwmtags, XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *)&(c->tags), 1);
 }
 
