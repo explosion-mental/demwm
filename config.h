@@ -39,6 +39,7 @@ static const char *fonts[] = {
 /* pywal */
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8];
 static char color6[8], color7[8], color8[8], bg_wal[8], fg_wal[8], cursor_wal[8];
+static const char fallbackcolor[8] = "#222222"; /* In case some variable couldn't be set */
 
 static char *xrescolors[][2] = {
 	/* variable	xresource */

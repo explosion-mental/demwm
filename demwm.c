@@ -2274,7 +2274,7 @@ readxresources(void)
 			strncpy(xrescolors[i][0], value.addr, 8);
 		else {
 			fprintf(stderr, "dwm: could not read color '%s'\n", xrescolors[i][1]);
-			strncpy(xrescolors[i][0], "#222222", 8);
+			strncpy(xrescolors[i][0], fallbackcolor, 8);
 		}
 		xrescolors[i][0][7] = '\0';
 	}
