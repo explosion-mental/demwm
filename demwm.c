@@ -388,7 +388,6 @@ static Monitor *wintomon(Window w);
 static int xerror(Display *dpy, XErrorEvent *ee);
 static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
-static void xrloadcol(XrmDatabase db, const char *name, char *var);
 static void xrdb(const Arg *arg);
 static void xinitvisual(void);
 static void zoom(const Arg *arg);
@@ -2280,56 +2279,31 @@ fallbackcolors(void)
 }
 
 void
-xrloadcol(XrmDatabase db, const char *name, char *var)
-{
-	XrmValue value;
-	char *type;
-	int i;
-
-	if (XrmGetResource(db, name, NULL, &type, &value) == True
-	&& (strnlen(value.addr, 8) == 7 && value.addr[0] == '#')) { /* is a hex color */
-		for (i = 1; i < 7; i++) {
-			if ((value.addr[i] < 48)
-			|| (value.addr[i] > 57 && value.addr[i] < 65)
-			|| (value.addr[i] > 70 && value.addr[i] < 97)
-			|| (value.addr[i] > 102))
-				break;
-		}
-		if (i == 7) {
-			strncpy(var, value.addr, 7);
-			var[7] = '\0';
-		}
-        }
-}
-
-
-void
 readxresources(void)
 {
 	Display *display = XOpenDisplay(NULL);
 	char *resm = XResourceManagerString(display);
 	XrmDatabase d;
+	XrmValue value;
+	char *type;
+	unsigned int i = 0;
 
-	if (!resm)
+	if (!resm || (d = XrmGetStringDatabase(resm)) == NULL) {
+		XrmDestroyDatabase(d);
+		XCloseDisplay(display);
 		return;
+	}
 
-	d = XrmGetStringDatabase(resm);
-
-	if (d != NULL) {
-		xrloadcol(d, "background", bg_wal);
-		xrloadcol(d, "foreground", fg_wal);
-		xrloadcol(d, "cursor", cursor_wal);
-		xrloadcol(d, "color0", color0);
-		xrloadcol(d, "color1", color1);
-		xrloadcol(d, "color2", color2);
-		xrloadcol(d, "color3", color3);
-		xrloadcol(d, "color4", color4);
-		xrloadcol(d, "color5", color5);
-		xrloadcol(d, "color6", color6);
-		xrloadcol(d, "color7", color7);
-		xrloadcol(d, "color8", color8);
-	} else
-		fallbackcolors();
+	for (i = 0; i < LENGTH(xrescolors); i++) {
+		if (XrmGetResource(d, xrescolors[i][1], NULL, &type, &value) == True /* exist */
+		&& (strnlen(value.addr, 8) == 7 && value.addr[0] == '#')) /* is a hex color */
+			strncpy(xrescolors[i][0], value.addr, 7);
+		else {
+			fprintf(stderr, "dwm: could not read color '%s'\n", xrescolors[i][1]);
+			strncpy(xrescolors[i][0], "#222222", 7);
+		}
+		xrescolors[i][0][7] = '\0';
+	}
 
 	XrmDestroyDatabase(d);
 	XCloseDisplay(display);

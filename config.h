@@ -40,6 +40,22 @@ static const char *fonts[] = {
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8];
 static char color6[8], color7[8], color8[8], bg_wal[8], fg_wal[8], cursor_wal[8];
 
+static char *xrescolors[][2] = {
+	/* variable	xresource */
+	{ color0,	"color0" },
+	{ color1,	"color1" },
+	{ color2,	"color2" },
+	{ color3,	"color3" },
+	{ color4,	"color4" },
+	{ color5,	"color5" },
+	{ color6,	"color6" },
+	{ color7,	"color7" },
+	{ color8,	"color8" },
+	{ bg_wal,	"background" },
+	{ fg_wal,	"foreground" },
+	{ cursor_wal,	"cursor" },
+};
+
 static const char *colors[][2] = {
 			/* fg		bg           description         */
 	[SchemeNorm]   = { fg_wal,	color0 }, /* normal tags section */
