@@ -2297,10 +2297,10 @@ readxresources(void)
 	for (i = 0; i < LENGTH(xrescolors); i++) {
 		if (XrmGetResource(d, xrescolors[i][1], NULL, &type, &value) == True /* exist */
 		&& (strnlen(value.addr, 8) == 7 && value.addr[0] == '#')) /* is a hex color */
-			strncpy(xrescolors[i][0], value.addr, 7);
+			strncpy(xrescolors[i][0], value.addr, 8);
 		else {
 			fprintf(stderr, "dwm: could not read color '%s'\n", xrescolors[i][1]);
-			strncpy(xrescolors[i][0], "#222222", 7);
+			strncpy(xrescolors[i][0], "#222222", 8);
 		}
 		xrescolors[i][0][7] = '\0';
 	}
