@@ -10,20 +10,27 @@ _some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm.
 - Any(?) C99 compiler (gcc and tcc tested)
 ## Optional
 - [pywal](https://github.com/dylanaraps/pywal)
-	* if not installed it will set colors to (hopefully) default demwm colors
+	* if not installed it will set colors to a fallback one defined in config.h
 - [libxft-bgra](https://github.com/uditkarode/libxft-bgra)
 	* There are emojis on config.h, replacing the unicode characters to
 	  non-unicode will make independant of libxft-bgra.
-- xwallpaper
-	* You can use other program to set the wallpaper,
-	  [see](https://github.com/explosion-mental/demwm/blob/main/demwm_random_wall)
+- xwallpaper, dunst, glava, etc
+	* There is a script that calls these programs, nothing will crash if
+	  not installed, please take a look and modify
+	  [demwm_random_wall](https://github.com/explosion-mental/demwm/blob/main/demwm_random_wall)
 
 # Suggestions
-- Before updating (`git pull`), change your configs (config.h) to config.def.h
-- To redirect error mesagges to a file `exec demwm 2> "$HOME"/.cache/demwm.log`
+- To redirect error mesagges to a file `exec demwm 2> "$HOME/.cache/demwm.log"`
 - edit `config.mk` and change `CC = cc`, I have it default to `tcc` since it's
   very very fast and I can make changes in the go.
 - edit `demwm_random_wall` to suit you
+- On `xinitrc` you should call `demwm_random_wall` or `xrdb` or any other
+  program that **set**s the Xresources that demwm would read (without
+  backgrounding it '`&`'). Example of a xinitrc:
+  ```sh
+  demwm_random_wall
+  exec demwm
+  ```
 
 # Features
 - Gaps (vanitygaps)
@@ -44,6 +51,8 @@ _some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm.
 - Windows remember their tags, they all don't stack into the first tag when
   restarting
 - Remember the selected tags when restarting
+- Click to focus, removed the hover to focus functionality.
+- Focus tiled windows and C them on top of floating if they have focus.
 
 # Status text
 I've decided to integrate dwmblocks into dwm itself.
