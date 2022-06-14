@@ -24,7 +24,7 @@ postrun() {
 random_img="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
 #randomimg="$(find "$img_path" -iregex '.*.\(jpg\|jpeg\|png\)' -type f | shuf -n 1)"
 
-wal -i "$random_img" --backend $backend -qnt
+wal -i "$random_img" --backend $backend -qnt && xsetroot -name xrdb
 
 ln -sf "$random_img" "$img_lock"
 

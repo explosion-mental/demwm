@@ -277,6 +277,7 @@ static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
 static const char *dmenuipc[]  = { "dmenu_dwmc", DMENUARGS, NULL };
 static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
 static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
+static const char *random_wall[] = { "demwm_random_wall", NULL };
 
 /* scratchpads */
 static const char *scratchpads[][32] = {
@@ -445,7 +446,6 @@ static const Key keys[] = {
 	{ 0,	XF86XK_AudioPlay,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && { mpc play && mpdnoti 2000 ;} || mpc pause")},
 	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev && mpdnoti 900")	},
 	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next && mpdnoti 900")	},
-	//{ 0,	XF86XK_RFKill,			random_wall, {0}		},
 	{ MODKEY,		XK_p,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && { mpc play && mpdnoti 2000 ;} || mpc pause")},
 	{ MODKEY,		XK_p,		updateblock,		{ .ui = 11 }	},
 	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 900")	},
@@ -491,7 +491,7 @@ static const Key keys[] = {
 	{ MODKEY,			XK_F10,	SHCMD("setxkbmap -layout us -variant altgr-intl -option nodeadkeys && \
 		notify-send 'Keyboard⌨️ ' 'Keyboard remapping...\nRunning keyboard defaults, US altgr-intl variant with nodeadkeys...'") },
 //	{ MODKEY,			XK_F11,	spawn,	SHCMD("setbg $HOME/Media/Pictures/Wallpapers &") },
-	{ MODKEY,                       XK_F11,	random_wall,		{0}	},
+	{ MODKEY,                       XK_F11,	spawn,		{ .v = random_wall }	},
 	{ MODKEY,                       XK_F12,	xrdb,			{0}	},
 	/* remove black bars on the screenshot, 90% percent accuracy */
 	{ ShiftMask,	XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \

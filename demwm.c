@@ -425,8 +425,6 @@ static void movfh_setmfact(const Arg *arg);
 static void movfv_pushstack(const Arg *arg);
 
 static void swaptags(const Arg *arg);
-//static void loadrandom_wall(const Arg *arg);
-static void random_wall(const Arg *arg);
 static void toggletopbar(const Arg *arg);
 //static void toggleborder(const Arg *arg);
 static void togglevacant(const Arg *arg);
@@ -2255,15 +2253,24 @@ losefullscreen(Client *next)
 void
 readxresources(void)
 {
-	Display *display = XOpenDisplay(NULL);
-	char *resm = XResourceManagerString(display);
+	Display *display;
 	XrmDatabase d;
 	XrmValue value;
-	char *type;
+	char *type, *resm;
 	unsigned int i = 0;
 
-	if (!resm || (d = XrmGetStringDatabase(resm)) == NULL) {
-		XrmDestroyDatabase(d);
+	if (!(display = XOpenDisplay(NULL)))
+		fprintf(stderr, "demwm: readxresources: could not open display.\n");
+
+	if (!(resm = XResourceManagerString(display)) || (d = XrmGetStringDatabase(resm)) == NULL) {
+		fprintf(stderr, "demwm: could not open Xrdb database, switching to fallback colors.\n");
+
+		for (i = 0; i < LENGTH(xrescolors); i++) {
+			strncpy(xrescolors[i][0], fallbackcolor, 8);
+			xrescolors[i][0][7] = '\0';
+		}
+
+		//XrmDestroyDatabase(d);
 		XCloseDisplay(display);
 		return;
 	}
@@ -2273,7 +2280,7 @@ readxresources(void)
 		&& (strnlen(value.addr, 8) == 7 && value.addr[0] == '#')) /* is a hex color */
 			strncpy(xrescolors[i][0], value.addr, 8);
 		else {
-			fprintf(stderr, "dwm: could not read color '%s'\n", xrescolors[i][1]);
+			fprintf(stderr, "demwm: could not read color '%s'\n", xrescolors[i][1]);
 			strncpy(xrescolors[i][0], fallbackcolor, 8);
 		}
 		xrescolors[i][0][7] = '\0';
@@ -2603,8 +2610,6 @@ propertynotify(XEvent *e)
 				defaultgaps(NULL);
 			else if (!strcmp(n, "killclient"))
 				killclient(NULL);
-			else if (!strcmp(n, "random_wall"))
-				random_wall(NULL);
 			else if (!strcmp(n, "refresh"))
 				refresh(NULL);
 			else if (!strcmp(n, "setlayout"))
@@ -3525,11 +3530,9 @@ setup(void)
 
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
-	if (restart) {	/* keep the colors the same */
-		xrdb(NULL);
+	if (restart == 1)
 		restart = 0;
-	} else	/* refresh colors */
-		random_wall(NULL);
+	xrdb(NULL);
 
 	/* init system tray */
 	#ifdef SYSTRAY
@@ -4891,16 +4894,6 @@ swaptags(const Arg *arg)
 
 	focus(NULL);
 	arrange(selmon);
-}
-
-void
-random_wall(const Arg *arg)
-{
-	/* only reason to use system() here is because I'm thinking about other
-	 * way of handling this. Sorry paranoic system() haters, yes should be
-	 * using bare waitpid(), fork() and exec() */
-	system("demwm_random_wall");
-	xrdb(NULL);
 }
 
 void
