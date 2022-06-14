@@ -281,9 +281,9 @@ are some ideas:
 - <s>getenv("TERMINAL")</s> Tbh the macro it's better option
 
 # Mayor improvements:
-- xrdb patch finally working with pywal without restarting or recompiling (Mar
-  01 2021)
+- xrdb patch finally working with pywal without restarting or recompiling (Mar 01 2021)
 	* Implemented fallback colors in case any errors (Jan 27 2022)
+		* Now it's configurable, not hardcoded to pywal (Jun 13 2022)
 - Layouts at startup (Apr 04 2021)
 	* A better way of handling this (per monitor) (Aug 08 2021)
 - Gaps per tag instead of per monitor (Apr 04 2021)
