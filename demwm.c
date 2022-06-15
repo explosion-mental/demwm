@@ -2636,6 +2636,8 @@ propertynotify(XEvent *e)
 				toggletopbar(NULL);
 			else if (!strcmp(n, "toggletag"))
 				toggletag(&((Arg) { .ui = 1 << arg }));
+			else if (!strcmp(n, "togglesticky"))
+				togglesticky(NULL);
 			else if (!strcmp(n, "view"))
 				view(&((Arg) { .ui = 1 << arg }));
 			else if (!strcmp(n, "xrdb"))
