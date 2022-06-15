@@ -145,6 +145,7 @@ typedef struct {
 
 typedef struct Client Client;
 typedef struct Monitor Monitor;
+typedef struct Pertag Pertag;
 
 struct Client {
 	char name[256];
@@ -188,7 +189,6 @@ typedef struct {
 	const int gaps;
 } Layout;
 
-typedef struct Pertag Pertag;
 struct Monitor {
 	char ltsymbol[16];
 	float mfact;
