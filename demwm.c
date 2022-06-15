@@ -67,6 +67,8 @@
 #include "util.h"
 
 /* macros */
+#define Button6			6
+#define Button7			7
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
@@ -85,8 +87,7 @@
 #define SPTAGMASK		(((1 << LENGTH(scratchpads)) - 1) << LENGTH(tags))
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 #define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
-#define Button6			6
-#define Button7			7
+
 #ifdef SYSTRAY
 /* XEMBED messages */
 #define VERSION_MAJOR		0
@@ -475,7 +476,7 @@ static Systray *systray = NULL;
 #endif /* SYSTRAY */
 static Atom wmatom[WMLast], netatom[NetLast], demwmtags;
 static int running = 1, restart = 0;
-static int depth, screen, useargb = 0;
+static int depth, screen;
 static Cur *cursor[CurLast];
 static Display *dpy;
 static Drw *drw;
@@ -4384,7 +4385,7 @@ xinitvisual(void)
 			visual = infos[i].visual;
 			depth = infos[i].depth;
 			cmap = XCreateColormap(dpy, root, visual, AllocNone);
-			useargb = 1;
+			/* using ARGB */
 			break;
 		}
 	}
