@@ -25,13 +25,15 @@ FREETYPEINC = /usr/include/freetype2
 
 # Icons, comment if you don't want it
 ICONS = -DICONS
+
+# Tag previews, comment if you don't want it
+TAG_PREVIEW = -DTAG_PREVIEW
+
+# imlib2, dependency of ICONS and TAG_PREVIEW
 IMLIB2LIBS = -lImlib2
 
 # Systray, comment if you don't want it
 SYSTRAY = -DSYSTRAY
-
-# Tag previews, comment if you don't want it
-TAG_PREVIEW = -DTAG_PREVIEW
 
 # XCB libs, required by swallow
 XCBLIBS = -lX11-xcb -lxcb -lxcb-res
