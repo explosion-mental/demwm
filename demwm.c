@@ -470,7 +470,6 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 #ifdef SYSTRAY
 static Atom xatom[XLast];
 static Systray *systray = NULL;
-static unsigned long systrayorientation = 0; /* _NET_SYSTEM_TRAY_ORIENTATION_HORZ */
 #endif /* SYSTRAY */
 static Atom wmatom[WMLast], netatom[NetLast], demwmtags;
 static int running = 1, restart = 0;
@@ -1782,6 +1781,7 @@ updatesystray(void)
 	Monitor *m = systraytomon(NULL);
 	unsigned int x = m->mx + m->mw;
 	unsigned int w = 1, xpad = 0, ypad = 0;
+	unsigned long systrayorientation = 0; /* _NET_SYSTEM_TRAY_ORIENTATION_HORZ */
 
 	//if (systray)
 	//	return;
