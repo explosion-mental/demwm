@@ -1279,7 +1279,7 @@ drawbar(Monitor *m)
 	Client *c;
 	int bw = m->ww; /* bar width */
 
-	if (!m->showbar)
+	if (!m->showbar || !running)
 		return;
 
 	#ifdef SYSTRAY
