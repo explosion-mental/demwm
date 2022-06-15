@@ -3885,25 +3885,21 @@ togglescratch(const Arg *arg)
 {
 	Client *c, *next, *last = NULL, *found = NULL, *monclients = NULL;
 	Monitor *mon;
-	int scratchvisible = 0; // whether the scratchpads are currently visible or not
-	int multimonscratch = 0; // whether we have scratchpads that are placed on multiple monitors
-	int scratchmon = -1; // the monitor where the scratchpads exist
-	int numscratchpads = 0; // count of scratchpads
 	unsigned int scratchtag = SPTAG(arg->ui);
 
-	/* Looping through monitors and client's twice, the first time to work out whether we need
-	   to move clients across from one monitor to another or not */
+	//TODO remove unneeded operations from original renamed-scratchpads
 
-	/* Now for the real deal. The logic should go like:
+	/* Loop through all monitor and if any of them have a scratchpad, use it:
 	    - hidden scratchpads will be shown
 	    - shown scratchpads will be hidden, unless they are being moved to the current monitor
 	    - the scratchpads will be moved to the current monitor if they all reside on the same monitor
-	    - multiple scratchpads residing on separate monitors will be left in place
+	    - multiple scratchpads residing on separate monitors will be left in place (NO)
 	 */
 	for (mon = mons; mon; mon = mon->next) {
 		for (c = mon->stack; c; c = next) {
 			next = c->snext;
-			if (!(c->tags & scratchtag)) /* not a scratchpad */
+
+			if (!(c->tags & scratchtag)) /* not a THE scratchpad */
 				continue;
 
 			/* Record the first found scratchpad client for focus purposes, but prioritise the
@@ -3916,6 +3912,7 @@ togglescratch(const Arg *arg)
 			   not been processed yet, hence we could be processing a scratchpad twice. To avoid
 			   this we detach them and add them to a temporary list (monclients) which is to be
 			   processed later. */
+
 			if (c->mon != selmon) {
 				detach(c);
 				detachstack(c);
@@ -3941,6 +3938,7 @@ togglescratch(const Arg *arg)
 		mon = c->mon;
 		c->mon = selmon;
 		c->tags = scratchtag;
+
 		/* Attach scratchpad clients from other monitors at the bottom of the stack */
 		if (selmon->clients) {
 			for (last = selmon->clients; last && last->next; last = last->next);
@@ -3964,15 +3962,15 @@ togglescratch(const Arg *arg)
 			resizeclient(c, c->x, c->y, c->w, c->h);
 			XRaiseWindow(dpy, c->win);
 		}
-		if (!(selmon->tagset[selmon->seltags] & scratchtag)) /* if it isn't selected alrd, tag it */
+
+		/* if it isn't selected alrd, tag it */
+		if (!(selmon->tagset[selmon->seltags] & scratchtag))
 			selmon->tagset[selmon->seltags] ^= scratchtag;
 	}
 
 	if (found) {
 		focus(ISVISIBLE(found) ? found : NULL);
 		arrange(NULL);
-		//if (found->isfloating)
-		//	XRaiseWindow(dpy, found->win);
 	} else {
 		selmon->tagset[selmon->seltags] |= scratchtag;
 		spawn(&((Arg) { .v = scratchpads[arg->ui] }));
