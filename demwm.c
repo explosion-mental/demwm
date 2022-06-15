@@ -214,7 +214,7 @@ struct Monitor {
 #ifdef TAG_PREVIEW
 	Window tagwin;
 	int previewshow;
-	Pixmap tagmap[TAGNUM];
+	Pixmap *tagmap;
 #endif /* TAG_PREVIEW */
 	const Layout *lt[2];
 	Pertag *pertag;
@@ -877,6 +877,7 @@ cleanupmon(Monitor *mon)
 	for (size_t i = 0; i < LENGTH(tags); i++)
 		if (mon->tagmap[i])
 			XFreePixmap(dpy, mon->tagmap[i]);
+	free(mon->tagmap);
 #endif /* TAG_PREVIEW */
 	XUnmapWindow(dpy, mon->barwin);
 	XDestroyWindow(dpy, mon->barwin);
@@ -1189,6 +1190,11 @@ createmon(void)
 				m->pertag->gaps[i] = ((gappoh & 0xFF) << 0) | ((gappov & 0xFF) << 8) | ((gappih & 0xFF) << 16) | ((gappiv & 0xFF) << 24);
 		}
 	}	/* if pertag */
+
+	#ifdef TAG_PREVIEW
+	m->tagmap = ecalloc(LENGTH(tags), sizeof(Pixmap *));
+	#endif /* TAG_PREVIEW */
+
 	return m;
 }
 
