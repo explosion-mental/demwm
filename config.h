@@ -377,7 +377,8 @@ static const Key keys[] = {
 
 
 				/* miscellaneous */
-	{ MODKEY,			XK_a,	togglevacant,		{0}	},
+	{ MODKEY,			XK_a,	togglesticky,		{0}	},
+//	{ MODKEY,			XK_a,	togglevacant,		{0}	},
 	{ MODKEY|ControlMask,		XK_b,	togglestatus,		{0}	},
 	{ MODKEY,	                XK_q,	killclient,		{0}	},
 	{ MODKEY,			XK_y,	togglealwaysontop,	{0}	},
