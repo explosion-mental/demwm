@@ -34,18 +34,19 @@ _some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm.
 
 # Features
 - Gaps (vanitygaps)
-- [pywal](https://github.com/dylanaraps/pywal) color syncronization by default
-  (xresources reading)
+- Xresources color reading, configurable in config.h. Syncs with
+  [pywal](https://github.com/dylanaraps/pywal) colors by default.
 - Changing the schemes (colors) at run time
 - More [layouts](https://github.com/explosion-mental/Dwm/blob/main/layouts.c)
 - Custom bar height
 - Different color schemes: Normal, Selected, Title, Status, Layout, Urgent and
   **Ind**icator schemes (underlines in tags)
 - Different schemes for border instances
-- Transparency on the bar
+- Transparency while keeping the text opaque on the bar
 - A beautiful looking config.h file (at least for my taste :)
 - Toggleable 'hide-vacant' patch, which enables alternative tags on toggle
-- Dynamic and static scratchpads
+- Dynamic scratchpads: any window can be added or removed as a scratchpad
+- Static scratchpads: defined in config.h and move between monitors
 - Centered title only if there is space left
 - Status text handling, like dwmblocks, but asynchronous (see below)
 - Windows remember their tags, they all don't stack into the first tag when
@@ -292,6 +293,7 @@ are some ideas:
 	* Icons on swallowed - unswallowed windows (Jul 23 2021)
 - Toggleable hide vacants tags (Jul 28 2021)
 	* Now hidevacants activates alternative tags (Oct 15 2021)
+		* Hidevacants multimonitor friendly (Jun 06 2022)
 - System Tray (Aug 06 2021)
 - Tag previews (Aug 10 2021)
 - Borders colors and general colors now have different schemes (Oct 16 2021)
@@ -303,3 +305,4 @@ are some ideas:
 - Fixed some patches bugs that the compiler fixes (Mar 06 2022)
 - Remember the selected tags when restarting (Mar 09 2022)
 - uncursor window rule (Mar 18 2022)
+- Static scratchpads automatically move between monitors (Jun 12 2022)
