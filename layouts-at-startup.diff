@@ -1,0 +1,46 @@
+From: 5b8cdf64ff583bdfed0b4aa35cfe3510c15d29eb Aug 10 2011
+From: https://github.com/mjheagle8
+Subject: dwm: set default tag layout
+
+Mind you, you need to have pertag patch in order to have diferent
+layouts across all "N" tags.
+diff --git a/dwm/config.h b/dwm/config.h
+index 126c864..a29f170 100644
+--- a/dwm/config.h
++++ b/dwm/config.h
+@@ -22,6 +22,7 @@ static int topbar             = 1;        /* 0 means bottom bar */
+
+/* tags */
+static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
++static const int taglayouts[] = {2, 2, 0, 0, 0, 0, 0, 0, 0};
+
+ static const Rule rules[] = {
+ 	/* class      instance    title       tags mask     isfloating   monitor */
+diff --git a/dwm/dwm.c b/dwm/dwm.c
+index ef8db79..3f2ac21 100644
+--- a/dwm/dwm.c
++++ b/dwm/dwm.c
+@@ -1645,6 +1645,21 @@ setup(void) {
+ 	XChangeWindowAttributes(dpy, root, CWEventMask|CWCursor, &wa);
+ 	XSelectInput(dpy, root, wa.event_mask);
+ 	grabkeys();
++
++        /* set default tag layouts */
++        for (int i = 0; i < LENGTH(tags); i++)
++        {
++                if (taglayouts[i]!=0)
++                {
++                        Layout *l;
++                        view(&((Arg) { .ui = 1 << i }));
++                        l = (Layout *)layouts;
++                        for (int j = 0; j < taglayouts[i]; j++)
++                                l++;
++                        setlayout(&((Arg) { .v = l }));
++                }
++        }
++        view(&((Arg) { .ui = 1 << 0 }));
+
+	focus(NULL);
+ }
+
+ void

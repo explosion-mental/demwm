@@ -1,0 +1,25 @@
+diff --git a/dwm.c b/dwm.c
+index 4465af1..004e3d2 100644
+--- a/dwm.c
++++ b/dwm.c
+@@ -1112,7 +1112,7 @@ monocle(Monitor *m)
+ 	if (n > 0) /* override layout symbol */
+ 		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
+ 	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
+-		resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
++		resize(c, m->wx, m->wy, m->ww, m->wh, 0);
++		// if vanity gaps uncomment
++		//resize(c, m->wx + ov, m->wy + oh, m->ww - 2 * ov, m->wh - 2 * oh, 0);
+ }
+
+ void
+@@ -1282,6 +1282,7 @@ resizeclient(Client *c, int x, int y, int w, int h)
+ 	c->oldw = c->w; c->w = wc.width = w;
+ 	c->oldh = c->h; c->h = wc.height = h;
+ 	wc.border_width = c->bw;
++	/* if monocle don't draw borders */
++	if (c->mon->lt[c->mon->sellt]->arrange == monocle && !c->isfloating)
++		wc.border_width = 0;
+ 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
+ 	configure(c);
+ 	XSync(dpy, False);
