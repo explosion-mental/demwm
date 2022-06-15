@@ -3530,8 +3530,6 @@ setup(void)
 
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
-	if (restart == 1)
-		restart = 0;
 	xrdb(NULL);
 
 	/* init system tray */
@@ -4922,8 +4920,7 @@ toggletopbar(const Arg *arg)
 int
 main(int argc, char *argv[])
 {
-	if (argc == 3 && !strcmp("--restart", argv[1])) {
-			restart = 1;
+	if (argc == 3 && !strcmp("--seltags", argv[1])) {
 			lasttags = atoi(argv[2]);
 	} else if (argc == 2 && !strcmp("-v", argv[1]))
 		die("demwm-"VERSION);
@@ -4945,7 +4942,7 @@ main(int argc, char *argv[])
 	run();
 	char t[12];
 	snprintf(t, sizeof(t), "%d", selmon->tagset[selmon->seltags]);
-	if (restart) execlp(argv[0], argv[0], "--restart", t, (char *) NULL);
+	if (restart) execlp(argv[0], argv[0], "--seltags", t, (char *) NULL);
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
