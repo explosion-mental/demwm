@@ -3546,7 +3546,7 @@ setup(void)
 
 	/* init bars */
 	updatebars();
-	updatestatus();
+	drawbar(selmon);
 	#ifdef TAG_PREVIEW
 	updatepreview(); //Is this for the current tag?
 	#endif /* TAG_PREVIEW */
@@ -4379,9 +4379,8 @@ xinitvisual(void)
 	int nitems, i;
 	long masks = VisualScreenMask | VisualDepthMask | VisualClassMask;
 	XRenderPictFormat *fmt;
-	XVisualInfo *infos, tpl = { .screen = screen, .depth = 32, .class = TrueColor };
-
-	infos = XGetVisualInfo(dpy, masks, &tpl, &nitems);
+	XVisualInfo tpl = { .screen = screen, .depth = 32, .class = TrueColor },
+	*infos = XGetVisualInfo(dpy, masks, &tpl, &nitems);
 
 	for (i = 0; i < nitems; i++) {
 		fmt = XRenderFindVisualFormat(dpy, infos[i].visual);
