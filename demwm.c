@@ -475,7 +475,6 @@ static Atom wmatom[WMLast], netatom[NetLast], demwmtags;
 static int running = 1, restart = 0;
 static int depth, screen, useargb = 0;
 static Cur *cursor[CurLast];
-static Clr **scheme;
 static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
@@ -496,6 +495,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 /* dynamic scratchpads (this selects an unused tag) */
 #define SCRATCHPAD_MASK		(1 << (NUMTAGS + 1))
 
+static Clr *scheme[LENGTH(colors)];
 static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0};
 static int pipes[LENGTH(blocks)][2];
 static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
@@ -3529,7 +3529,6 @@ setup(void)
 	cursor[CurMove]   = drw_cur_create(drw, XC_fleur);
 
 	/* init appearance */
-	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 	xrdb(NULL);
 
 	/* init system tray */
