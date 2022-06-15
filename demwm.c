@@ -2363,8 +2363,7 @@ manage(Window w, XWindowAttributes *wa)
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	XSetWindowBorder(dpy, w, scheme[BorderNorm][ColFg].pixel);
 	configure(c); /* propagates border_width, if size doesn't change */
-	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMStateAbove])
-		c->alwaysontop = 1;
+	c->alwaysontop = getatomprop(c, netatom[NetWMState]) == netatom[NetWMStateAbove];
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMFullscreen])
 		setfullscreen(c, 1);
 	updatesizehints(c);
@@ -3451,7 +3450,7 @@ setup(void)
 {
 	XSetWindowAttributes wa;
 	Atom utf8string;
-	int i;
+	char envpid[16];
 
 	/* clean up any zombies immediately */
 	sigchld(0);
@@ -3464,13 +3463,12 @@ setup(void)
 
 	#ifdef __linux__
 	/* handle defined real time signals (linux only) */
-	for (i = 0; i < LENGTH(blocks); i++)
+	for (int i = 0; i < LENGTH(blocks); i++)
 		if (blocks[i].signal)
 			setsignal(SIGRTMIN + blocks[i].signal, sighandler);
 	#endif /* __linux__ */
 
 	/* pid as an enviromental variable */
-	char envpid[16];
 	snprintf(envpid, LENGTH(envpid), "%d", getpid());
 	setenv("STATUSBAR", envpid, 1);
 
