@@ -220,17 +220,18 @@ be changed in config.mk.
 **NOTE**: I run some custom 'hooks' in `postrun` function which forks to the
 background, you can delete everything and change the function at your liking.
 
-# Patches
-My little collection of patches, which aren't necessarily applied to this. You
-can see them and 'unpatch' them if you want to.
+# Patches branch
+My little collection of patches, which aren't necessarily applied to this.
 
 Most of my modification aren't a patch. You can copy the url of the commit and
 then download it.
 
 e.g.
+
 ```
 curl -sL https://github.com/explosion-mental/Dwm/commit/d8e4af59c570c4b8ef36ef8942c58ab89921900f > dwm-default-layouts-pertag.diff
 ```
+
 Here are some that I converted into a patch:
 - shift-tools (shift windows,tags or both either with an active client or not)
 - integrated status text <s>(TODO: add the `poll` version)</s>
