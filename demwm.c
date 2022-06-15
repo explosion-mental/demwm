@@ -4675,7 +4675,7 @@ zoomswap(const Arg *arg)
 	/* if it's floating, make the floating window the new master (which
 	 * means making it not floating) */
 	if (c && c->isfloating)
-		togglefloating(&((Arg) { .v = c }));
+		togglefloating(NULL);
 
 	if (!c->mon->lt[c->mon->sellt]->arrange
 	|| (c && c->isfloating) || !c)
