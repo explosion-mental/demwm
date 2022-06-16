@@ -754,13 +754,6 @@ buttonpress(XEvent *e)
 		focus(NULL);
 	}
 	if (ev->window == selmon->barwin) {
-#ifdef TAG_PREVIEW
-		/* hide preview if we click the bar */
-		if (selmon->previewshow) {
-			XUnmapWindow(dpy, selmon->tagwin);
-			selmon->previewshow = 0;
-		}
-#endif /* TAG_PREVIEW */
 		i = x = 0;
 		for (c = m->clients; c; c = c->next)
 			occ |= c->tags == 255 ? 0 : c->tags;
@@ -773,6 +766,13 @@ buttonpress(XEvent *e)
 		if (i < LENGTH(tags)) {
 			click = ClkTagBar;
 			arg.ui = 1 << i;
+#ifdef TAG_PREVIEW
+			/* hide preview if we click the bar */
+			if (selmon->previewshow) {
+				selmon->previewshow = 0;
+				XUnmapWindow(dpy, selmon->tagwin);
+			}
+#endif /* TAG_PREVIEW */
 		} else if (ev->x < x + blw)
 			click = ClkLtSymbol;
 		else if (ev->x > (x = selmon->ww - stsw
@@ -879,13 +879,11 @@ cleanupmon(Monitor *mon)
 		if (mon->tagmap[i])
 			XFreePixmap(dpy, mon->tagmap[i]);
 	free(mon->tagmap);
-#endif /* TAG_PREVIEW */
-	XUnmapWindow(dpy, mon->barwin);
-	XDestroyWindow(dpy, mon->barwin);
-#ifdef TAG_PREVIEW
 	XUnmapWindow(dpy, mon->tagwin);
 	XDestroyWindow(dpy, mon->tagwin);
 #endif /* TAG_PREVIEW */
+	XUnmapWindow(dpy, mon->barwin);
+	XDestroyWindow(dpy, mon->barwin);
  	free(mon->pertag);
 	free(mon);
 }
@@ -1653,13 +1651,16 @@ updatepreview(void)
 		.colormap = cmap
 	};
 
+	XClassHint ch = { "demwm-preview", "demwm-preview" };
+
 	for (m = mons; m; m = m->next) {
 		m->tagwin = XCreateWindow(dpy, root, m->wx, m->by + bh, m->ww / 4, m->mh / 4, 0, depth,
 		                          CopyFromParent, visual,
 		                          CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask, &wa);
 		XDefineCursor(dpy, m->tagwin, cursor[CurNormal]->cursor);
-		XMapRaised(dpy, m->tagwin);
+		//XMapRaised(dpy, m->tagwin);
 		XUnmapWindow(dpy, m->tagwin);
+		XSetClassHint(dpy, m->barwin, &ch);
 	}
 }
 
@@ -1682,6 +1683,12 @@ getpreview(void)
 			XFreePixmap(dpy, selmon->tagmap[i]);
 			selmon->tagmap[i] = 0;
 		}
+
+		selmon->previewshow = 0;
+		XUnmapWindow(dpy, selmon->tagwin);
+		//XMoveWindow(dpy, selmon->tagwin, -selmon->mx, -selmon->my + bh);
+		XSync(dpy, False);
+		//XFlush(dpy);
 
 		if (!(image = imlib_create_image(sw, sh))) {
 			fprintf(stderr, "demwm: imlib: failed to create image, skiping.\n");
