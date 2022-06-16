@@ -277,7 +277,7 @@ static const Layout layouts[] = {
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
 static const char *dmenuipc[]  = { "dmenu_dwmc", DMENUARGS, NULL };
 static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
-static const char *clip[]      = { "clipmenu", "-i", "-l", "25", DMENUARGS, NULL };
+static const char *clip[]      = { "clipmenu", "-i", "-l", "25", "-mon", "-1", "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0, NULL };
 static const char *random_wall[] = { "demwm_random_wall", NULL };
 
 /* scratchpads */
@@ -438,8 +438,8 @@ static const Key keys[] = {
 	{ 0,	XF86XK_MonBrightnessUp,		SHCMD("sudo brightnessctl -q set +1%")	},
 	{ 0,	XF86XK_MonBrightnessDown,	SHCMD("sudo brightnessctl -q set 1%-")	},
 	{ 0,	XF86XK_AudioPlay,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && { mpc play && mpdnoti 2000 ;} || mpc pause")},
-	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev && mpdnoti 900")	},
-	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next && mpdnoti 900")	},
+	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev && mpdnoti 900; xsetroot -name 11")	},
+	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next && mpdnoti 900; xsetroot -name 11")	},
 	{ MODKEY,		XK_p,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && { mpc play && mpdnoti 2000 ;} || mpc pause")},
 	{ MODKEY,		XK_p,		updateblock,		{ .ui = 11 }	},
 	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 900")	},
