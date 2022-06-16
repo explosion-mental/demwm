@@ -27,7 +27,7 @@ FREETYPEINC = /usr/include/freetype2
 ICONS = -DICONS
 
 # Tag previews, comment if you don't want it
-TAG_PREVIEW = -DTAG_PREVIEW
+#TAG_PREVIEW = -DTAG_PREVIEW
 
 # imlib2, dependency of ICONS and TAG_PREVIEW
 IMLIB2LIBS = -lImlib2
