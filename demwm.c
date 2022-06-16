@@ -4125,7 +4125,7 @@ updatebars(void)
 	};
 
 	#ifdef TAG_PREVIEW
-	XClassHint chpre = { "demwm-preview", "demwm-preview" };
+	XClassHint chpre = { previewclass[0], previewclass[1] };
 	#endif /* TAG_PREVIEW */
 
 	XClassHint ch = { barclass[0], barclass[1] };

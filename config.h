@@ -139,6 +139,7 @@ static const char delimiter[] = " ";
 /* properties:			res_name  res_class */
 static char *systrayclass[2] = { "demwm", "demwm" };
 static char *barclass[2]     = { "demwm", "demwm" };
+static char *previewclass[2] = { "demwm-preview", "demwm-preview" };
 
 /* tags */
 //static const char *tags[] = { "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉" };
