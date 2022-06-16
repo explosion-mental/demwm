@@ -370,6 +370,7 @@ static void togglescratch(const Arg *arg);
 static void toggletag(const Arg *arg);
 static void toggleview(const Arg *arg);
 static void togglesticky(const Arg *arg);
+static void previewtag(const Arg *arg);
 static void unfocus(Client *c, int setfocus);
 static void unmanage(Client *c, int destroyed);
 static void unmapnotify(XEvent *e);
@@ -4931,6 +4932,18 @@ togglesticky(const Arg *arg)
 	selmon->sel->issticky = !selmon->sel->issticky;
 	focus(NULL);
 	arrange(selmon);
+}
+
+void
+previewtag(const Arg *arg)
+{
+	#ifdef TAG_PREVIEW
+	if (selmon->previewshow != (arg->ui + 1))
+		selmon->previewshow = arg->ui + 1;
+	else
+		selmon->previewshow = 0;
+	showtagpreview(arg->ui);
+	#endif /* TAG_PREVIEW */
 }
 
 int
