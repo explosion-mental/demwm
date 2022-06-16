@@ -353,7 +353,6 @@ static void showhide(Client *c);
 #ifdef TAG_PREVIEW
 static void showtagpreview(unsigned int i);
 static void getpreview(void);
-static void updatepreview(void);
 #endif /* TAG_PREVIEW */
 static void sigalrm(int unused);
 static void sigchld(int unused);
@@ -1638,33 +1637,6 @@ getstate(Window w)
 /* Tag preview functions */
 #ifdef TAG_PREVIEW
 void
-updatepreview(void)
-{
-	Monitor *m;
-
-	XSetWindowAttributes wa = {
-		.override_redirect = True,
-		.event_mask = ButtonPressMask|ExposureMask,
-	//	.background_pixmap = 0,
-		.background_pixel = 0,
-		.border_pixel = 0,
-		.colormap = cmap
-	};
-
-	XClassHint ch = { "demwm-preview", "demwm-preview" };
-
-	for (m = mons; m; m = m->next) {
-		m->tagwin = XCreateWindow(dpy, root, m->wx, m->by + bh, m->ww / 4, m->mh / 4, 0, depth,
-		                          CopyFromParent, visual,
-		                          CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask, &wa);
-		XDefineCursor(dpy, m->tagwin, cursor[CurNormal]->cursor);
-		//XMapRaised(dpy, m->tagwin);
-		XUnmapWindow(dpy, m->tagwin);
-		XSetClassHint(dpy, m->barwin, &ch);
-	}
-}
-
-void
 getpreview(void)
 {
 	unsigned int occ = 0, i;
@@ -1684,10 +1656,11 @@ getpreview(void)
 			selmon->tagmap[i] = 0;
 		}
 
+		/* try to unmap the window so it doesn't show the preview on the preview */
 		selmon->previewshow = 0;
 		XUnmapWindow(dpy, selmon->tagwin);
-		//XMoveWindow(dpy, selmon->tagwin, -selmon->mx, -selmon->my + bh);
 		XSync(dpy, False);
+		//XMoveWindow(dpy, selmon->tagwin, -selmon->mx, -selmon->my + bh);
 		//XFlush(dpy);
 
 		if (!(image = imlib_create_image(sw, sh))) {
@@ -1724,7 +1697,8 @@ showtagpreview(unsigned int i)
 			selmon->mw / scalepreview, selmon->mh / scalepreview,
 			0, 0);
 	XSync(dpy, False);
-	XMapWindow(dpy, selmon->tagwin);
+	//XMapWindow(dpy, selmon->tagwin);
+	XMapRaised(dpy, selmon->tagwin);
 }
 #endif /* TAG_PREVIEW */
 
@@ -2456,6 +2430,8 @@ motionnotify(XEvent *e)
 	Client *c;
 	unsigned int i, x, occ = 0;
 
+	/* FIXME when hovering the mouse over the tags and we view the tag, the
+	 * preview window get's in the preview shot (screenshot) */
 
 	if (ev->window == selmon->barwin) {
 		i = x = 0;
@@ -2480,10 +2456,14 @@ motionnotify(XEvent *e)
 			selmon->previewshow = 0;
 			XUnmapWindow(dpy, selmon->tagwin);
 		}
+	} else if (ev->window == selmon->tagwin) {
+		selmon->previewshow = 0;
+		XUnmapWindow(dpy, selmon->tagwin);
 	} else if (selmon->previewshow) {
 		selmon->previewshow = 0;
 		XUnmapWindow(dpy, selmon->tagwin);
 	}
+
 #endif /* TAG_PREVIEW */
 	if (ev->window != root)
 		return;
@@ -3560,9 +3540,6 @@ setup(void)
 	/* init bars */
 	updatebars();
 	drawbar(selmon);
-	#ifdef TAG_PREVIEW
-	updatepreview();
-	#endif /* TAG_PREVIEW */
 	/* supporting window for NetWMCheck */
 	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32,
@@ -4147,9 +4124,24 @@ updatebars(void)
 	#endif /* TAG_PREVIEW */
 	};
 
+	#ifdef TAG_PREVIEW
+	XClassHint chpre = { "demwm-preview", "demwm-preview" };
+	#endif /* TAG_PREVIEW */
+
 	XClassHint ch = { barclass[0], barclass[1] };
 
 	for (m = mons; m; m = m->next) {
+#ifdef TAG_PREVIEW
+		if (!m->tagwin) {
+			m->tagwin = XCreateWindow(dpy, root, m->wx, m->by + bh, m->ww / 4, m->mh / 4, 0, depth,
+			                          InputOutput, visual,
+			                          CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask, &wa);
+			XDefineCursor(dpy, m->tagwin, cursor[CurNormal]->cursor);
+			//XMapRaised(dpy, m->tagwin);
+			XUnmapWindow(dpy, m->tagwin);
+			XSetClassHint(dpy, m->barwin, &chpre);
+		}
+#endif /* TAG_PREVIEW */
 		if (m->barwin)
 			continue;
 		w = m->ww;
