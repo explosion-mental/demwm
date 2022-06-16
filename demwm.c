@@ -1314,7 +1314,7 @@ drawbar(Monitor *m)
 		if (m->hidevacant && (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i)))
 			continue;
 		w = TEXTW(m->hidevacant ? tagsalt[i] : tags[i]);
-		drw_setscheme(drw, scheme[urg & 1 << i ? SchemeUrgent : (m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm)]);
+		drw_setscheme(drw, scheme[urg & 1 << i ? SchemeUrgent : (m->tagset[m->seltags] & 1 << i && m == selmon ? SchemeSel : SchemeNorm)]);
 		drw_text(drw, x, 0, w, bh, lrpad / 2, m->hidevacant ? tagsalt[i] : tags[i], 0);
 		if (occ & 1 << i && !m->hidevacant) { /* don't draw these when hidevacant */
 			if (urg & 1 << i) {
