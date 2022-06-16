@@ -358,6 +358,8 @@ static const Key keys[] = {
 
 	{ MODKEY,                       XK_o, shiftviewclients,	{ .i = +1 }	},
 	{ MODKEY|ShiftMask,             XK_o,	shiftview,	{ .i = +1 }	},
+	//{ MODKEY|ShiftMask,             XK_o,	shiftpreview,	{ .i = +1 }	},
+	//{ MODKEY|ShiftMask,             XK_i,	shiftpreview,	{ .i = -1 }	},
 	{ MODKEY|ShiftMask,             XK_i,	shiftview,	{ .i = -1 }	},
 	{ MODKEY,	                XK_i, shiftviewclients,	{ .i = -1 }	},
 	{ MODKEY,                       XK_0,	view,		{.ui = ~SPTAGMASK } },

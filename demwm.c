@@ -343,6 +343,7 @@ static void setsignal(int sig, void (*sahandler)(int sig));
 static void seturgent(Client *c, int urg);
 static void settagsatom(Client *c);
 static void shift(unsigned int *tag, int i);
+static void shiftpreview(const Arg *arg);
 static void shifttag(const Arg *arg);
 static void shifttagclients(const Arg *arg);
 static void shiftview(const Arg *arg);
@@ -4943,6 +4944,29 @@ previewtag(const Arg *arg)
 	else
 		selmon->previewshow = 0;
 	showtagpreview(arg->ui);
+	#endif /* TAG_PREVIEW */
+}
+
+void
+shiftpreview(const Arg *arg)
+{
+	//TODO needs an index, currenlty it only shows the adjacent tagpreviews
+	#ifdef TAG_PREVIEW
+	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
+	Client *c;
+	unsigned int tagmask = 0;
+
+	for (c = selmon->clients; c; c = c->next)
+		if (!(c->tags & SPTAGMASK))
+			tagmask |= c->tags;
+
+	do
+		shift(&shifted.ui, arg->i);
+	while (tagmask && !(shifted.ui & tagmask));
+
+	//redo <<
+	shifted.ui = ffs(shifted.ui) - 1;
+	previewtag(&shifted);
 	#endif /* TAG_PREVIEW */
 }
 
