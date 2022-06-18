@@ -273,8 +273,9 @@ static const Layout layouts[] = {
 
 /* macros of common comand line arguments */
 #define DMENUARGS	"-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
-#define NOTES		"-e", "nvim", "+$", "+startinsert!"
+#define NOTES		"-e", "nvim", "+$", "+startinsert!" /* last line in insert mode */
 #define FURSIZE		"90x25"
+#define FURFONT		"Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true"
 
 /* commands */
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
@@ -285,16 +286,15 @@ static const char *random_wall[] = { "demwm_random_wall", NULL };
 
 /* scratchpads */
 static const char *scratchpads[][32] = {
-	[Sp1] = { "st", "-n", "term", "-g", "115x30" , NULL }, /* terminal */
-	[Sp2] = { "st", "-n", "notes", "-g", FURSIZE, "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", NOTES, "/home/faber/Docs/testi/notes", NULL }, /* notes */
-	[Sp3] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL }, /* calculator */
-	//[Sp4] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/pre-Uni.txt", NULL }, /* uni */
-	[Sp4] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/testi-is", NULL }, /* uni */
-	[Sp5] = { "st", "-n", "music", "-g", "105x27", "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", "-e", "ncmpcpp", "-q", NULL }, /* music */
-	[Sp6] = SH("st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer"), /* pulsepad */
-	[Sp7] = { "samedir", "-n", "samedir", "-g", "115x30", NULL }, /* samedir */
-	[Sp8] = { "st", "-n", "testi", "-g", FURSIZE, "-f", "Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true", NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
-	[Sp9] = { "st", "-n", "mpvfloat", "-g", "115x30" , NULL }, /* terminal */
+[Sp1] = { "st", "-n", "term", "-g", "115x30" , NULL }, /* terminal */
+[Sp2] = { "st", "-n", "notes", "-g", FURSIZE, "-f", FURFONT, NOTES, "/home/faber/Docs/testi/notes", NULL }, /* notes */
+[Sp3] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL }, /* calculator */
+[Sp4] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/testi-is", NULL }, /* uni */
+[Sp5] = { "st", "-n", "music", "-g", "105x27", "-f", FURFONT, "-e", "ncmpcpp", "-q", NULL }, /* music */
+[Sp6] = SH("st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer"), /* pulsepad */
+[Sp7] = { "samedir", "-n", "samedir", "-g", "115x30", NULL }, /* samedir */
+[Sp8] = { "st", "-n", "testi", "-g", FURSIZE, "-f", FURFONT, NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
+[Sp9] = { "st", "-n", "mpvfloat", "-g", "115x30" , NULL }, /* terminal */
 };
 
 /* modifier can be: Alt, AltGr, Ctrl, Shift, ShiftGr, Super */
