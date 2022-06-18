@@ -313,8 +313,8 @@ static const Key keys[] = {
 	{ MODKEY,			XK_x,	SHCMD("rofi -show calc -modi calc -no-show-match -no-sort") },
 	SPKEYS(MODKEY|ControlMask,	XK_s,	/* uni		*/	Sp4)
 	SPKEYS(MODKEY,			XK_n,	/* music	*/	Sp5)
+	{ MODKEY|ShiftMask,		XK_p,	updateblock,	{ .ui = 8 }	},
 	SPKEYS(MODKEY|ShiftMask,	XK_p,	/* pulsemixer	*/	Sp6)
-	{ MODKEY|ShiftMask,		XK_p,	updateblock,		{ .ui = 8 }	},
 	SPKEYS(MODKEY|ShiftMask,	XK_s,	/* samedir	*/	Sp7)
 	SPKEYS(MODKEY|ControlMask,	XK_e,	/* notes - is	*/	Sp8)
 	SPKEYS(MODKEY|ShiftMask,	XK_n,	/* notes - is	*/	Sp9)
@@ -424,15 +424,11 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,		XK_equal,		SHCMD("mpc volume +3")	},
 	{ MODKEY|ShiftMask,		XK_bracketleft,		SHCMD("mpc seek -10")	},
 	{ MODKEY|ShiftMask,		XK_bracketright,	SHCMD("mpc seek +10")	},
-	{ MODKEY,			XK_minus,	SHCMD("pamixer --allow-boost -d 3")},
-	{ MODKEY,			XK_minus, updateblock,		{ .ui = 8 }	},
-	{ MODKEY,			XK_equal,	SHCMD("pamixer --allow-boost -i 3")},
-	{ MODKEY,			XK_equal, updateblock,		{ .ui = 8 }	},
+	{ MODKEY,			XK_minus,	SHCMD("pamixer -d 3; xsetroot -name 8")},
+	{ MODKEY,			XK_equal,	SHCMD("pamixer --allow-boost -i 3; xsetroot -name 8")},
 	{ MODKEY,			XK_BackSpace,	SHCMD("pamixer -t; xsetroot -name 8")},
-	{ 0,	XF86XK_AudioLowerVolume,	SHCMD("pamixer --allow-boost -d 2")	},
-	{ 0,	XF86XK_AudioLowerVolume,	updateblock,		{ .ui = 8 } 	},
-	{ 0,	XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2")	},
-	{ 0,	XF86XK_AudioRaiseVolume,	updateblock,		{ .ui = 8 }	},
+	{ 0,	XF86XK_AudioLowerVolume,	SHCMD("pamixer -d 2; xsetroot -name 8")},
+	{ 0,	XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2; xsetroot -name 8")},
 	{ 0,	XF86XK_AudioMute,		SHCMD("pamixer -t; xsetroot -name 8")	},
 //{ 0,	XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 //{ 0, XF86XK_ScreenSaver,		SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
@@ -441,15 +437,14 @@ static const Key keys[] = {
 	{ 0,	XF86XK_ScreenSaver,		SHCMD("xset dpms force off")		},
 	{ 0,	XF86XK_MonBrightnessUp,		SHCMD("sudo brightnessctl -q set +1%")	},
 	{ 0,	XF86XK_MonBrightnessDown,	SHCMD("sudo brightnessctl -q set 1%-")	},
-	{ 0,	XF86XK_AudioPlay,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && { mpc play && mpdnoti 2000 ;} || mpc pause")},
+	{ 0,	XF86XK_AudioPlay,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
+			{ mpc play && mpdnoti 2000 ;} || mpc pause; xsetroot -name 11")	},
 	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev && mpdnoti 900; xsetroot -name 11")	},
 	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next && mpdnoti 900; xsetroot -name 11")	},
-	{ MODKEY,		XK_p,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && { mpc play && mpdnoti 2000 ;} || mpc pause")},
-	{ MODKEY,		XK_p,		updateblock,		{ .ui = 11 }	},
-	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 900")	},
-	{ MODKEY,	XK_bracketleft,		updateblock,		{ .ui = 11 }	},
-	{ MODKEY,	XK_bracketright,	SHCMD("mpc next && mpdnoti 900")	},
-	{ MODKEY,	XK_bracketright,	updateblock,		{ .ui = 11 }	},
+	{ MODKEY,		XK_p,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
+			{ mpc play && mpdnoti 2000 ;} || mpc pause; xsetroot -name 11")	},
+	{ MODKEY,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 900; xsetroot -name 11")	},
+	{ MODKEY,	XK_bracketright,	SHCMD("mpc next && mpdnoti 900; xsetroot -name 11")	},
 	{ MODKEY|ControlMask,	XK_p,		SHCMD("mpdnoti")			},
 
 			/* Custom bindings (may be better using shkd) */
