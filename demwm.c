@@ -677,7 +677,7 @@ attachstack(Client *c)
 void
 swallow(Client *p, Client *c)
 {
-	if (c->f & NoSwallow || c->f & Terminal)
+	if (c->f & (Terminal | NoSwallow))
 		return;
 
 	if (((!swallowfloating && c->f & Float) && !(c->f & FS))
@@ -2376,7 +2376,7 @@ manage(Window w, XWindowAttributes *wa)
 	grabbuttons(c, 0);
 	if (!(c->f & Float)) {
 		SETVAL(c, WasFloat, trans != None);
-		SETVAL(c, Float, c->f & WasFloat || c->f & Fixed);
+		SETVAL(c, Float, c->f & (WasFloat | Fixed));
 	}
 	if (c->f & Float)
 		XRaiseWindow(dpy, c->win);
