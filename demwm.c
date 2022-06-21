@@ -69,12 +69,12 @@
 /* macros */
 #define Button6			6
 #define Button7			7
-#define Shift			ShiftMask
-#define Ctrl			ControlMask
 #define Alt			Mod1Mask
 #define AltGr			Mod3Mask
-#define Super			Mod4Mask
+#define Ctrl			ControlMask
+#define Shift			ShiftMask
 #define ShiftGr			Mod5Mask
+#define Super			Mod4Mask
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
