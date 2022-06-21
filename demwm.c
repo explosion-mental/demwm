@@ -1313,7 +1313,7 @@ drawbar(Monitor *m)
 	#endif /* SYSTRAY */
 
 	for (c = m->clients; c; c = c->next) {
-		occ |= c->tags == 255 ? 0 : c->tags;
+		occ |= c->tags == 255 || c->issticky ? 0 : c->tags;
 		if (c->isurgent)
 			urg |= c->tags;
 	}
@@ -1433,8 +1433,12 @@ focus(Client *c)
 {
 	Client *f;
 	XWindowChanges wc;
-	if (!c || !ISVISIBLE(c))
-		for (c = selmon->stack; c && !ISVISIBLE(c); c = c->snext);
+	if (!c || !ISVISIBLE(c)) {
+		for (c = selmon->stack; c && (!ISVISIBLE(c) || (c->issticky && !selmon->sel->issticky)); c = c->snext);
+		if (!c) /* No windows found; check for available stickies */
+			for (c = selmon->stack; c && !ISVISIBLE(c); c = c->snext);
+	}
+
 	if (selmon->sel && selmon->sel != c) {
 		/* if we don't losefullscreen, we can stack fullscren clients */
 		//losefullscreen(c);
