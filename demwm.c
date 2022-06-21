@@ -2366,7 +2366,7 @@ manage(Window w, XWindowAttributes *wa)
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	XSetWindowBorder(dpy, w, scheme[BorderNorm][ColFg].pixel);
 	configure(c); /* propagates border_width, if size doesn't change */
-	c->alwaysontop = getatomprop(c, netatom[NetWMState]) == netatom[NetWMStateAbove];
+	SETVAL(c, AlwOnTop, getatomprop(c, netatom[NetWMState]) == netatom[NetWMStateAbove]);
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMFullscreen])
 		setfullscreen(c, 1);
 	updatesizehints(c);
