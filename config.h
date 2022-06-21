@@ -155,16 +155,18 @@ static const Rule rules[] = {
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 *
+	 * monitor: in which monitor the window will spawn
+	 * tags: in which tags the window will spawn
+	 *
 	 * Assign a flag to the window, by default none are assign.
 	 *
 	 * Avaliable flags:
-	 *  monitor, in which monitor the window will spawn
-	 *  tags, in which tags the window will spawn
-	 *  isfloating, enable floating
-	 *  isterminal, will make the window swallow child ones
-	 *  isfakefullscreen, enable fakefullscreen
-	 *  noswallow, don't swallow this window
-	 *  uncursor, puts the cursor in the bottom right whenever the window
+	 *
+	 ** Float: enable floating
+	 ** Terminal: will make the window swallow child ones
+	 ** FakeFS: enable fakefullscreen
+	 ** NoSwallow: don't swallow this window
+	 ** UnCursor: puts the cursor in the bottom right whenever the window
 	 * is focused (useful when there are gaps)
 	 */
 //	RULE(.class = "Gimp",		.tags = 1 << 7)
@@ -177,35 +179,35 @@ static const Rule rules[] = {
 //	RULE(.class = "libreoffice",	.tags = 1 << 3)
 //	RULE(.title = "LibreOffice",	.isfloating = 1, .noswallow = 1)
 //	RULE(.class = "libreoffice",	.noswallow = 1)
-	RULE(.class = "firefox",	.tags = 1 << 1, .isfakefullscreen = 1)
-	RULE(.class = "Brave-browser",	.tags = 1 << 4, .isfakefullscreen = 1)
-	RULE(.class = "St",		.isterminal = 1)
-	RULE(.title = "Event Tester",	.noswallow = 1) /* xev */
+	RULE(.class = "firefox",	.tags = 1 << 1, .flags = FakeFS)
+	RULE(.class = "Brave-browser",	.tags = 1 << 4, .flags = FakeFS)
+	RULE(.class = "St",		.flags = Terminal)
+	RULE(.title = "Event Tester",	.flags = NoSwallow) /* xev */
 	/* floating */
-	RULE(.class = "Pavucontrol",	.isfloating = 1)
-	RULE(.class = "Pcmanfm",	.isfloating = 1)
-	RULE(.title = "About Mozilla Firefox",	.isfloating = 1)
-	RULE(.class = "QjackCtl",	.isfloating = 1)
-	RULE(.title = "Firefox Update", .isfloating = 1)
-	RULE(.title = "Krita - Edit Text", .isfloating = 1)
-	RULE(.class = "Blueman-manager",.isfloating = 1)
+	RULE(.class = "Pavucontrol",	.flags = Float)
+	RULE(.class = "Pcmanfm",	.flags = Float)
+	RULE(.title = "About Mozilla Firefox",	.flags = Float)
+	RULE(.class = "QjackCtl",	.flags = Float)
+	RULE(.title = "Firefox Update", .flags = Float)
+	RULE(.title = "Krita - Edit Text", .flags = Float)
+	RULE(.class = "Blueman-manager", .flags = Float)
 	//customs
-	RULE(.class = "Video",		.isfloating = 1)
-	RULE(.class = "dialect",	.isfloating = 1)
-	RULE(.title = "mpvfloat",	.isfloating = 1)
-	RULE(.instance = "mpvfloat",	.tags = SPTAG(Sp9), .isfloating = 1)
-	RULE(.title = "noswallow",	.noswallow = 1)
+	RULE(.class = "Video",		.flags = Float)
+	RULE(.class = "dialect",	.flags = Float)
+	RULE(.title = "mpvfloat",	.flags = Float)
+	RULE(.instance = "mpvfloat",	.tags = SPTAG(Sp9), .flags = Float)
+	RULE(.title = "noswallow",	.flags = NoSwallow)
 
 
 	/* scratchpads */
-	RULE(.instance = "term",	.tags = SPTAG(Sp1), .isfloating = 1, .isterminal = 1)
-	RULE(.instance = "notes",	.tags = SPTAG(Sp2), .isfloating = 1)
-	RULE(.instance = "calc" ,	.tags = SPTAG(Sp3), .isfloating = 1)
-	RULE(.instance = "pre"  ,	.tags = SPTAG(Sp4), .isfloating = 1)
-	RULE(.instance = "music",	.tags = SPTAG(Sp5), .isfloating = 1)
-	RULE(.instance = "pulsemixer",	.tags = SPTAG(Sp6), .isfloating = 1)
-	RULE(.instance = "samedir",	.tags = SPTAG(Sp7), .isfloating = 1, .isterminal = 1)
-	RULE(.instance = "testi",	.tags = SPTAG(Sp8), .isfloating = 1)
+	RULE(.instance = "term",	.tags = SPTAG(Sp1), .flags = Float | Terminal)
+	RULE(.instance = "notes",	.tags = SPTAG(Sp2), .flags = Float)
+	RULE(.instance = "calc" ,	.tags = SPTAG(Sp3), .flags = Float)
+	RULE(.instance = "pre"  ,	.tags = SPTAG(Sp4), .flags = Float)
+	RULE(.instance = "music",	.tags = SPTAG(Sp5), .flags = Float)
+	RULE(.instance = "pulsemixer",	.tags = SPTAG(Sp6), .flags = Float)
+	RULE(.instance = "samedir",	.tags = SPTAG(Sp7), .flags = Float | Terminal)
+	RULE(.instance = "testi",	.tags = SPTAG(Sp8), .flags = Float)
 	//RULE(.instance = "normal",	.tags = SPTAG(7))
 	//RULE(.instance = "emacsfloat",	.tags = SPTAG(8), .isfloating = 1)
 };
