@@ -143,6 +143,7 @@ enum {
 	Urg        = 1 << 12, /* urgent */
 	WasFloat   = 1 << 13, /* oldstate: used in fullscreen operations */
 }; /* client flags/state */
+enum { HideVacant = 1 << 0, ShowBar = 1 << 1, TopBar = 1 << 2 }; /* mon flags */
 
 typedef union {
 	int i;
@@ -219,8 +220,7 @@ struct Monitor {
 	int gappiv;           /* vertical gap between windows */
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
-	int showbar, topbar;  /* bar flags */
-	int hidevacant;
+	unsigned int f;       /* flags */
 	unsigned int seltags;
 	unsigned int sellt;
 	unsigned int tagset[2];
@@ -767,10 +767,10 @@ buttonpress(XEvent *e)
 			occ |= c->tags == 255 ? 0 : c->tags;
 		do {
 			/* do not reserve space for vacant tags */
-			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i) && m->hidevacant)
+			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i) && m->f & HideVacant)
 				continue;
-			x += TEXTW(m->hidevacant ? tagsalt[i] : tags[i]);
-		} while (ev->x >= x && ++i < (m->hidevacant ? LENGTH(tagsalt) : LENGTH(tags)));
+			x += TEXTW(m->f & HideVacant ? tagsalt[i] : tags[i]);
+		} while (ev->x >= x && ++i < (m->f & HideVacant ? LENGTH(tagsalt) : LENGTH(tags)));
 		if (i < LENGTH(tags)) {
 			click = ClkTagBar;
 			arg.ui = 1 << i;
@@ -1153,9 +1153,12 @@ createmon(void)
 	m->tagset[0] = m->tagset[1] = lasttags != 0 ? lasttags : 1;
 	m->mfact = mfact;
 	m->nmaster = nmaster;
-	m->showbar = showbar;
-	m->topbar = topbar;
-	m->hidevacant = hidevacant;
+	if (showbar)
+		m->f |= ShowBar;
+	if (topbar)
+		m->f |= TopBar;
+	if (hidevacant)
+		m->f |= HideVacant;
 	/* gaps per tag */
 	m->gappih = gappih;
 	m->gappiv = gappiv;
@@ -1188,7 +1191,7 @@ createmon(void)
 
 			/* init showbar */
 			if (pertagbar)
-				m->pertag->showbars[i] = m->showbar;
+				m->pertag->showbars[i] = m->f & ShowBar;
 
 			/* swap focus and zoomswap*/
 			m->pertag->prevzooms[i] = NULL;
@@ -1298,7 +1301,7 @@ drawbar(Monitor *m)
 	Client *c;
 	int bw = m->ww; /* bar width */
 
-	if (!m->showbar || !running)
+	if (!(m->f & ShowBar) || !running)
 		return;
 
 	#ifdef SYSTRAY
@@ -1321,12 +1324,12 @@ drawbar(Monitor *m)
 
 	for (i = 0; i < LENGTH(tags); i++) {
 		/* apply 'hidevacant' only to the selected monitor */
-		if (m->hidevacant && (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i)))
+		if (m->f & HideVacant && (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i)))
 			continue;
-		w = TEXTW(m->hidevacant ? tagsalt[i] : tags[i]);
+		w = TEXTW(m->f & HideVacant ? tagsalt[i] : tags[i]);
 		drw_setscheme(drw, scheme[urg & 1 << i ? SchemeUrgent : (m->tagset[m->seltags] & 1 << i && m == selmon ? SchemeSel : SchemeNorm)]);
-		drw_text(drw, x, 0, w, bh, lrpad / 2, m->hidevacant ? tagsalt[i] : tags[i], 0);
-		if (occ & 1 << i && !m->hidevacant) { /* don't draw these when hidevacant */
+		drw_text(drw, x, 0, w, bh, lrpad / 2, m->f & HideVacant ? tagsalt[i] : tags[i], 0);
+		if (occ & 1 << i && !(m->f & HideVacant)) { /* don't draw these when hidevacant */
 			if (urg & 1 << i) {
 				/* urgent underline (top of tag) */
 				drw_setscheme(drw, scheme[SchemeIndUrg]);
@@ -2017,7 +2020,7 @@ updateicon(Client *c)
 void
 getcmd(int i, char *button)
 {
-	if (!selmon->showbar || !showstatus)
+	if (!(selmon->f & ShowBar) || !showstatus)
 		return;
 
 	if (execlock & 1 << i) { /* block is already running */
@@ -2453,10 +2456,10 @@ motionnotify(XEvent *e)
 		for (c = selmon->clients; c; c = c->next)
 			occ |= c->tags == 255 ? 0 : c->tags;
 		do {
-			if (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i) && selmon->hidevacant)
+			if (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i) && selmon->f & HideVacant)
 				continue;
-			x += TEXTW(selmon->hidevacant ? tagsalt[i] : tags[i]);
-		} while (ev->x >= x && ++i < (selmon->hidevacant ? LENGTH(tagsalt) : LENGTH(tags)));
+			x += TEXTW(selmon->f & HideVacant ? tagsalt[i] : tags[i]);
+		} while (ev->x >= x && ++i < (selmon->f & HideVacant ? LENGTH(tagsalt) : LENGTH(tags)));
 
 	     	if (i < LENGTH(tags)) {
 			if (selmon->previewshow != (i + 1)
@@ -2968,7 +2971,7 @@ run(void)
 	while (running) {
 
 		/* bar hidden, then skip poll */
-		if (!selmon->showbar || !showstatus) {
+		if (!(selmon->f & ShowBar) || !showstatus) {
 			XNextEvent(dpy, &ev);
 			if (handler[ev.type])
 				handler[ev.type](&ev); /* call handler */
@@ -3802,19 +3805,19 @@ tagmon(const Arg *arg)
 void
 togglebar(const Arg *arg)
 {
+	selmon->f ^= ShowBar;
 	if (pertag && pertagbar)
-		selmon->showbar = selmon->pertag->showbars[selmon->pertag->curtag] = !selmon->showbar;
-	else
-		selmon->showbar = !selmon->showbar;
+		selmon->pertag->showbars[selmon->pertag->curtag] = selmon->f & ShowBar;
+
 	updatebarpos(selmon);
 #ifdef SYSTRAY
 	resizebarwin(selmon);
 	XWindowChanges wc;
-	if (!selmon->showbar)
+	if (!(selmon->f & ShowBar))
 		wc.y = -bh;
-	else if (selmon->showbar) {
+	else if (selmon->f & ShowBar) {
 		wc.y = 0;
-		if (!selmon->topbar)
+		if (!(selmon->f & TopBar))
 			wc.y = selmon->mh - bh;
 		getcmds(-1);
 	}
@@ -4038,7 +4041,7 @@ toggleview(const Arg *arg)
 			selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
 			selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 			selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
-			if (pertagbar && selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
+			if (pertagbar && (selmon->f & ShowBar) != selmon->pertag->showbars[selmon->pertag->curtag])
 				togglebar(NULL);
 		}
 
@@ -4190,10 +4193,10 @@ updatebarpos(Monitor *m)
 {
 	m->wy = m->my;
 	m->wh = m->mh;
-	if (m->showbar) {
+	if (m->f & ShowBar) {
 		m->wh -= bh;
-		m->by = m->topbar ? m->wy : m->wy + m->wh;
-		m->wy = m->topbar ? m->wy + bh : m->wy;
+		m->by = m->f & TopBar ? m->wy : m->wy + m->wh;
+		m->wy = m->f & TopBar ? m->wy + bh : m->wy;
 	} else
 		m->by = -bh;
 }
@@ -4467,7 +4470,7 @@ view(const Arg *arg)
 			selmon->gappiv = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff000000) >> 24;
 		}
 
-		if (pertagbar && selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
+		if (pertagbar && (selmon->f & ShowBar) != selmon->pertag->showbars[selmon->pertag->curtag])
 			togglebar(NULL);
 	} else if (arg->ui & TAGMASK) /* if pertag */
 		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
@@ -4835,7 +4838,7 @@ togglealwaysontop(const Arg *arg)
 void
 togglevacant(const Arg *arg)
 {
-	selmon->hidevacant = !selmon->hidevacant;
+	selmon->f ^= HideVacant;
 	drawbar(selmon);
 }
 
@@ -4884,7 +4887,7 @@ togglestatus(const Arg *arg)
 {
 	showstatus = !showstatus;
 
-	if (selmon->showbar && showstatus)
+	if (selmon->f & ShowBar && showstatus)
 		getcmds(-1);
 	updatestatus();
 }
@@ -4925,16 +4928,16 @@ swaptags(const Arg *arg)
 void
 toggletopbar(const Arg *arg)
 {
-	selmon->topbar = !selmon->topbar;
+	selmon->f ^= TopBar;
 	updatebarpos(selmon);
 #ifdef SYSTRAY
 	resizebarwin(selmon);
 	XWindowChanges wc;
-	if (!selmon->showbar)
+	if (!(selmon->f & ShowBar))
 		wc.y = -bh;
-	else if (selmon->showbar) {
+	else if (selmon->f & ShowBar) {
 		wc.y = 0;
-		if (!selmon->topbar)
+		if (!(selmon->f & TopBar))
 			wc.y = selmon->mh - bh;
 	}
 	XConfigureWindow(dpy, systray->win, CWY, &wc);
