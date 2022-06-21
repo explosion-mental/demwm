@@ -252,18 +252,17 @@ static const Layout layouts[] = {
 
 /* key definitions */
 #define MOD Super
-#define MODKEY MOD /* compatibility with dwm configs */
 
-#define TAGKEYS(KEY,TAG) \
+#define TAGKEYS(KEY,TAG) /* keys from 1 to 9 */ \
 	{ MOD,			KEY,	comboview,      { .ui = 1 << TAG } },	\
 	{ MOD|Shift,		KEY,	combotag,       { .ui = 1 << TAG } },	\
 	/*{ MOD|Ctrl,           KEY,	toggleview,     { .ui = 1 << TAG } },*/	\
-	{ MOD|Ctrl,		KEY,	previewtag,	{ .ui = TAG }	   }, \
-	/* { MOD|Ctrl|Shift, KEY,	toggletag,      { .ui = 1 << TAG } },*/ \
+	{ MOD|Ctrl,		KEY,	previewtag,	{ .ui = TAG }	   },	\
+	/* { MOD|Ctrl|Shift, KEY,	toggletag,      { .ui = 1 << TAG } },*/	\
 	{ MOD|Shift|Ctrl,	KEY,	swaptags,	{ .ui = 1 << TAG } },
 
-#define SPKEYS(MKEY,KEY,NUM) \
-	{ MKEY,			KEY,	togglescratch,	{ .ui = NUM } },
+#define SPKEYS(MKEYS,KEY,NUM) \
+	{ MKEYS,		KEY,	togglescratch,	{ .ui = NUM } },
 
 /* helper for spawning shell commands */
 #define SHCMD(cmd)	spawn, { .v = (const char *[]){ "/bin/sh", "-c", cmd, NULL } }
@@ -297,7 +296,7 @@ static const char *scratchpads[][32] = {
 [Sp9] = { "st", "-n", "mpvfloat", "-g", "115x30" , NULL }, /* terminal */
 };
 
-/* modifier can be: Alt, AltGr, Ctrl, Shift, ShiftGr, Super */
+/* modifier(s) can be: Alt, AltGr, Ctrl, Shift, ShiftGr, Super (or MOD) */
 static const Key keys[] = {
 	/* modifier(s)		key	function	argument */
 
