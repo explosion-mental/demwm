@@ -487,7 +487,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 static Atom xatom[XLast];
 static Systray *systray = NULL;
 #endif /* SYSTRAY */
-static Atom wmatom[WMLast], netatom[NetLast], demwmtags;
+static Atom wmatom[WMLast], netatom[NetLast], demwmtags, demwmmon;
 static int running = 1, restart = 0;
 static int depth, screen;
 static Cur *cursor[CurLast];
@@ -1610,6 +1610,10 @@ getatomprop(Client *c, Atom prop)
 	if (prop == xatom[XembedInfo])
 		req = xatom[XembedInfo];
 #endif /* SYSTRAY */
+
+	if (prop == demwmtags || prop == demwmmon)
+		req = XA_CARDINAL;
+
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
 		&da, &di, &dl, &dl, &p) == Success && p) {
 		atom = *(Atom *)p;
@@ -2301,10 +2305,6 @@ manage(Window w, XWindowAttributes *wa)
 	Client *c, *t = NULL, *term = NULL;
 	Window trans = None;
 	XWindowChanges wc;
-	int format;
-	unsigned char *ptags = NULL;
-	unsigned long n, extra;
-	Atom atom;
 	//XEvent xev;
 
 	c = ecalloc(1, sizeof(Client));
@@ -2344,11 +2344,21 @@ manage(Window w, XWindowAttributes *wa)
 		c->mon = selmon;
 		applyrules(c);
 		term = termforwin(c);
-		if (XGetWindowProperty(dpy, c->win, demwmtags, 0L, 1L, False, XA_CARDINAL,
-		&atom, &format, &n, &extra, &ptags) == Success && ptags) {
-			c->tags = *(unsigned int *)ptags;
-			XFree(ptags);
+		Atom tmptom = None;
+		tmptom = getatomprop(c, demwmtags);
+		if (tmptom != None)
+			c->tags = tmptom & TAGMASK;
+		tmptom = getatomprop(c, demwmmon);
+		if (tmptom != None) {
+			Monitor *m;
+			for (m = mons; m; m = m->next) {
+				if (m->num == tmptom) {
+					c->mon = m;
+					break;
+				}
+			}
 		}
+
 	}
 	settagsatom(c);
 
@@ -3517,6 +3527,7 @@ setup(void)
 	/* init atoms */
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
 	demwmtags                      = XInternAtom(dpy, "_DEMWM_TAGS", False);
+	demwmmon                       = XInternAtom(dpy, "_DEMWM_MON", False);
 	wmatom[WMProtocols]            = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	wmatom[WMDelete]               = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wmatom[WMState]                = XInternAtom(dpy, "WM_STATE", False);
@@ -3622,6 +3633,8 @@ settagsatom(Client *c)
 {
 	XChangeProperty(dpy, c->win, demwmtags, XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *)&(c->tags), 1);
+	XChangeProperty(dpy, c->win, demwmmon, XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *)&(c->mon->num), 1);
 }
 
 void
