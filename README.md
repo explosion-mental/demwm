@@ -17,13 +17,14 @@ _some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm.
 - xwallpaper, dunst, glava, etc
 	* There is a script that calls these programs, nothing will crash if
 	  not installed, please take a look and modify
-	  [demwm_random_wall](https://github.com/explosion-mental/demwm/blob/main/demwm_random_wall)
+	  [demwm_random_wall](#demwm_random_wall)
 
 # Suggestions
 - To redirect error mesagges to a file `exec demwm 2> "$HOME/.cache/demwm.log"`
 - edit `config.mk` and change `CC = cc`, I have it default to `tcc` since it's
   very very fast and I can make changes in the go.
 - edit `demwm_random_wall` to suit you
+- If you are looking for Workspaces, then use [dusk](https://github.com/bakkeby/dusk)
 - On `xinitrc` you should call `demwm_random_wall` or `xrdb` or any other
   program that **set**s the Xresources that demwm would read (without
   backgrounding it '`&`'). Example of a xinitrc:
@@ -60,7 +61,7 @@ I've decided to integrate dwmblocks into dwm itself.
 Why? Some reasons:
 - One config file
 - Remove the 'extra' program (which was a bit annoying for me)
-- Dwm handles the **displaying** of the text and the **clicking** interatcion,
+- demwm handles the **displaying** of the text and the **clicking** interatcion,
   no more signals for the buttons.
 - This way we could expand and play around with 'blocks' (different colors for
   different blocks, for example)
@@ -208,17 +209,14 @@ uncomment the line with `#TAG_PREVIEW`
 
 # demwm_random_wall
 This is a little script chooses a random file from the `img_dir` directory
-variable, runs **pywal** with the chosen image and symlinks to `bgloc` to make
-it accesible to other programs.
-
-Currently it uses `fd`, but you might not have it installed, in that case
-uncomment the next line to use `find`.
+variable, runs **pywal** with the chosen image and symlinks to `bgloc`. Then
+makes the current `demwm` instance execute `xrdb` to refresh the colors, by
+calling `xsetroot -name xrdb`.
 
 The script is copied/deleted to `${PREFIX}/bin` by default, `PREFIX` path can
 be changed in config.mk.
 
-**NOTE**: I run some custom 'hooks' in `postrun` function which forks to the
-background, you can delete everything and change the function at your liking.
+This script is not a dependecy.
 
 # Patches branch
 My little collection of patches, which aren't necessarily applied to this.
@@ -272,6 +270,7 @@ are some ideas:
 - <s>a better way of handling layouts at startup</s>
 
 ## Some wishing pains:
+- new logo (?)
 - Write a proper manpage
 - <s>s/dwm/demwm/</s>
 - <s>Rename the proyect</s>
