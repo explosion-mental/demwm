@@ -521,13 +521,13 @@ static unsigned int execlock = 0; /* ensure only one child process exists per bl
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
+	unsigned int showbars;			/* display bar for the current tag */
+	unsigned int enablegaps;		/* display gaps for the current tag */
 	int nmasters[LENGTH(tags) + 1];		/* number of windows in master area */
 	float mfacts[LENGTH(tags) + 1];		/* mfacts per tag */
 	unsigned int sellts[LENGTH(tags) + 1];	/* selected layouts */
 	const Layout *ltidxs[LENGTH(tags)+1][2];/* matrix of tags and layouts indexes */
-	int showbars[LENGTH(tags) + 1];		/* display bar for the current tag */
 	Client *prevzooms[LENGTH(tags) + 1];	/* store zoom information */
-	int enablegaps[LENGTH(tags) + 1];	/* added with vanitygaps */
 	unsigned int gaps[LENGTH(tags) + 1];	/* gaps per tag */
 };
 
@@ -1176,6 +1176,7 @@ createmon(void)
 		m->pertag = ecalloc(1, sizeof(Pertag));
 		m->pertag->curtag = m->pertag->prevtag = 1;
 
+
 		/* init layouts */
 		m->pertag->ltidxs[0][0] = &layouts[0];
 
@@ -1183,6 +1184,14 @@ createmon(void)
 			m->pertag->ltidxs[i][0] = &layouts[taglayouts[i - 1]];
 
 		for (i = 0; i <= LENGTH(tags); i++) {
+
+			/* init gaps */
+			m->pertag->enablegaps |= 1 << i;
+
+			/* init showbar */
+			if (pertagbar && m->f & ShowBar)
+				m->pertag->showbars |= 1 << i;
+
 			/* init nmaster */
 			m->pertag->nmasters[i] = m->nmaster;
 
@@ -1192,15 +1201,8 @@ createmon(void)
 			m->pertag->sellts[i] = m->sellt;
 			m->pertag->ltidxs[i][1] = m->lt[0];
 
-			/* init showbar */
-			if (pertagbar)
-				m->pertag->showbars[i] = m->f & ShowBar;
-
 			/* swap focus and zoomswap*/
 			m->pertag->prevzooms[i] = NULL;
-
-			/* compatibility with pertag and togglegaps line in createmon */
-			m->pertag->enablegaps[i] = 1;
 
 			if (gapspertag)
 				m->pertag->gaps[i] = ((gappoh & 0xFF) << 0) | ((gappov & 0xFF) << 8) | ((gappih & 0xFF) << 16) | ((gappiv & 0xFF) << 24);
@@ -3149,8 +3151,7 @@ void
 togglegaps(const Arg *arg)
 {
 	if (pertag)
-		selmon->pertag->enablegaps[selmon->pertag->curtag] =
-			!selmon->pertag->enablegaps[selmon->pertag->curtag];
+		selmon->pertag->enablegaps ^= selmon->tagset[selmon->seltags];
 	else
 		enablegaps = !enablegaps;
 	arrange(selmon);
@@ -3161,7 +3162,10 @@ getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 	unsigned int n, oe, ie;
 	Client *c;
 
-	oe = ie = pertag ? m->pertag->enablegaps[m->pertag->curtag] : enablegaps;
+	oe = ie = m->pertag->enablegaps & m->tagset[m->seltags] ? 1 : 0;
+
+	if (!pertag)
+		oe = ie = enablegaps;
 
 	/* get the number of clients */
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
@@ -3847,7 +3851,7 @@ togglebar(const Arg *arg)
 {
 	selmon->f ^= ShowBar;
 	if (pertag && pertagbar)
-		selmon->pertag->showbars[selmon->pertag->curtag] = selmon->f & ShowBar;
+		selmon->pertag->showbars = selmon->f & ShowBar;
 
 	updatebarpos(selmon);
 #ifdef SYSTRAY
@@ -4082,7 +4086,7 @@ toggleview(const Arg *arg)
 			selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
 			selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 			selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
-			if (pertagbar && (selmon->f & ShowBar) != selmon->pertag->showbars[selmon->pertag->curtag])
+			if (pertagbar && (selmon->f & ShowBar) != (selmon->pertag->showbars & selmon->tagset[selmon->seltags]))
 				togglebar(NULL);
 		}
 
@@ -4510,7 +4514,7 @@ view(const Arg *arg)
 			selmon->gappiv = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff000000) >> 24;
 		}
 
-		if (pertagbar && (selmon->f & ShowBar) != selmon->pertag->showbars[selmon->pertag->curtag])
+		if (pertagbar && (selmon->f & ShowBar) != (selmon->pertag->showbars & selmon->tagset[selmon->seltags]))
 			togglebar(NULL);
 	} else if (arg->ui & TAGMASK) /* if pertag */
 		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
