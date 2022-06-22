@@ -453,6 +453,7 @@ static const Key keys[] = {
 	{ MOD,		   XK_Return,	SHCMD("st")			},
 	{ MOD,			XK_m,	SHCMD("st -e vifmrun")		},
 	{ MOD|Shift,		XK_m,	SHCMD("samedirvifm")		},
+	{ MOD|Ctrl,		XK_m,	SHCMD("maim -usDq ${HOME}/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
 	{ MOD|Shift,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
 	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
 	{ MOD,			XK_b,	SHCMD("Books001")		},
@@ -502,8 +503,8 @@ static const Button buttons[] = {
 	{ ClkTagBar,            0,              Button5,	shiftview,	{.i = -1 } },
 
 	{ ClkLtSymbol,          0,              Button1,        togglegaps,	{0} },
-	{ ClkLtSymbol,          0,              Button2,        togglevacant,	{0} },
-	{ ClkLtSymbol,          0,              Button3,        togglebar,	{0} },
+	{ ClkLtSymbol,          0,              Button2,        togglebar,	{0} },
+	{ ClkLtSymbol,          0,              Button3,        togglevacant,	{0} },
 //	{ ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } },
 //	{ ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } },
 	{ ClkLtSymbol,          0,              Button4,        cyclelayout,    {.i = +1 } },
@@ -523,7 +524,7 @@ static const Button buttons[] = {
 	{ ClkStatusText,        0,              Button3,        sendstatusbar,   {.i = 3 } },
 	{ ClkStatusText,        0,              Button4,        sendstatusbar,   {.i = 4 } },
 	{ ClkStatusText,        0,              Button5,        sendstatusbar,   {.i = 5 } },
-	{ ClkStatusText,        Shift,      Button1,        sendstatusbar,   {.i = 6 } },
+	{ ClkStatusText,        Shift,		Button1,        sendstatusbar,   {.i = 6 } },
 
 	{ ClkClientWin,         MOD,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MOD,         Button2,        togglefloating, {0} },
