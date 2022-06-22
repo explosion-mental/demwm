@@ -6,28 +6,28 @@
 /* appearance */
 CUI systraypinning = 0; /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 CUI systraypinningfailfirst = 1; /* 1: if pinning fails, display systray on the first monitor, 0: display systray on the last monitor*/
-CUI borderpx     = 5;        /* border pixel of windows */
-CUI fborderpx    = 2;        /* border pixel of floating windows */
-CUI snap         = 10;       /* snap pixel */
-CUI gappih       = 15;       /* horiz inner gap between windows */
-CUI gappiv       = 20;       /* vert inner gap between windows */
-CUI gappoh       = 15;       /* horiz outer gap between windows and screen edge */
-CUI gappov       = 20;       /* vert outer gap between windows and screen edge */
-CUI hidevacant   = 1;        /* 1 means hide vacant tags */
-CUI hovertofocus = 0;        /* 0 means click to focus */
-CUI topbar       = 1;        /* 0 means bottom bar */
-CI  barh         = 9;        /* 1 or more/less means bar height */
-CUI pertag       = 1;        /* 0 means global layout across all tags (default) */
-CUI pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
-CUI gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
-CUI scalepreview = 4;        /* tag previews scaling */
-CUI swallowfloat = 0;        /* 1 means swallow floating windows by default */
-CUI swallowffs   = 1;        /* 1 means swallow fullscreen windows by default */
-CUI underlntitle = 1;        /* 1 means an underline on the title */
-static int smartgaps  = 0;   /* 1 means no outer gap when there is only one window */
-static int showbar    = 1;   /* 0 means no bar */
-static int showstatus = 1;   /* 0 means no status text */
-#define baralpha      120    /* bar opacity from 0 to 255/OPAQUE */
+CI  barh         = 9;      /* 1 or more/less means bar height */
+CUI borderpx     = 5;      /* border pixel of tiled windows */
+CUI fborderpx    = 2;      /* border pixel of floating windows */
+CUI snap         = 10;     /* number of pixels until the window snaps to the screen border, while moving */
+CUI gappih       = 15;     /* horizontal inner gap between windows */
+CUI gappiv       = 20;     /* vertical inner gap between windows */
+CUI gappoh       = 15;     /* horizontal outer gap between windows and screen edge */
+CUI gappov       = 20;     /* vertical outer gap between windows and screen edge */
+CUI hidevacant   = 1;      /* 1 means hide vacant tags */
+CUI hovertofocus = 0;      /* 0 means click to focus */
+CUI topbar       = 1;      /* 0 means bottom bar */
+CUI pertag       = 1;      /* 0 means global layout across all tags (default) */
+CUI pertagbar    = 0;      /* 0 means using pertag, but with the same barpos */
+CUI gapspertag   = 1;      /* 0 means global gaps across all tags (default) */
+CUI scalepreview = 4;      /* tag previews scaling (scalepreview / screensize) */
+CUI swallowfloat = 0;      /* 1 means swallow floating windows by default */
+CUI swallowffs   = 1;      /* 1 means swallow fullscreen windows by default */
+CUI underlntitle = 1;      /* 1 means an underline on the title */
+static int smartgaps  = 0; /* 1 means no outer gap when there is only one window */
+static int showbar    = 1; /* 0 means no bar */
+static int showstatus = 1; /* 0 means no status text */
+#define baralpha     120   /* bar opacity from 0 to 255/OPAQUE */
 
 static const char *fonts[] = {
 	"Monofur Nerd Font:size=10:antialias=true:autohint=true", /* Mono */
@@ -40,7 +40,7 @@ static const char *fonts[] = {
 	"JoyPixels:size=10:antialias=true:autohint=true" /* Emojis */
 };
 
-/* pywal */
+/* colors */
 static char color0[8], color1[8], color2[8], color3[8], color4[8], color5[8];
 static char color6[8], color7[8], color8[8], bg_wal[8], fg_wal[8];
 static const char fallbackcolor[8] = "#222222"; /* In case some variable couldn't be set */
