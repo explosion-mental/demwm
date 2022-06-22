@@ -2633,7 +2633,7 @@ propertynotify(XEvent *e)
 		int arg = 0;
 		if (gettextprop(root, XA_WM_NAME, n, cmdsize)) {
 			/* divide into 2 args separated by the first space */
-			for (int i = 0; i <= cmdsize; i++) {
+			for (int i = 0; i < cmdsize; i++) {
 				if (n[i] == ' ') {
 					buf = n;
 					buf += i + 1; /* chop the first 'word' */
