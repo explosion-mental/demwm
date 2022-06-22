@@ -94,6 +94,7 @@
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 #define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
 #define SETVAL(C, F, V)		C->f = ((V) ? C->f | F : C->f & ~F)
+#define WINMASK			(CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask)
 
 #ifdef SYSTRAY
 /* XEMBED messages */
@@ -1829,8 +1830,7 @@ updatesystray(void)
 		wa.background_pixel = 0;
 		wa.colormap = cmap;
 		systray->win = XCreateWindow(dpy, root, x - xpad + lrpad / 2, m->by + ypad,
-				w, bh, 0, depth, InputOutput, visual,
-				CWOverrideRedirect|CWBorderPixel|CWBackPixel|CWColormap|CWEventMask, &wa); // CWBackPixmap
+				    w, bh, 0, depth, InputOutput, visual, WINMASK, &wa); // CWBackPixmap
 		//systray->win = XCreateSimpleWindow(dpy, root, x, m->by, w, bh, 0, 0, scheme[SchemeNorm][ColBg].pixel);
 
 		XSelectInput(dpy, systray->win, SubstructureNotifyMask);
@@ -4195,9 +4195,8 @@ updatebars(void)
 	for (m = mons; m; m = m->next) {
 #ifdef TAG_PREVIEW
 		if (!m->tagwin) {
-			m->tagwin = XCreateWindow(dpy, root, m->wx, m->by + bh, m->ww / 4, m->mh / 4, 0, depth,
-			                          InputOutput, visual,
-			                          CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask, &wa);
+			m->tagwin = XCreateWindow(dpy, root, m->wx, m->by + bh,
+			    m->ww / 4, m->mh / 4, 0, depth, InputOutput, visual, WINMASK, &wa);
 			XDefineCursor(dpy, m->tagwin, cursor[CurNormal]->cursor);
 			//XMapRaised(dpy, m->tagwin);
 			XUnmapWindow(dpy, m->tagwin);
@@ -4213,8 +4212,7 @@ updatebars(void)
 			w -= getsystraywidth();
 #endif /* SYSTRAY */
 		m->barwin = XCreateWindow(dpy, root, m->wx, m->by,
-		   w, bh, 0, depth, InputOutput, visual,
-		   CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask, &wa);
+		    w, bh, 0, depth, InputOutput, visual, WINMASK, &wa);
 		XDefineCursor(dpy, m->barwin, cursor[CurNormal]->cursor);
 #ifdef SYSTRAY
 		if (m == systraytomon(m))
