@@ -3340,7 +3340,7 @@ sendevent(Client *c, Atom proto)
 void
 sendstatusbar(const Arg *arg)
 {
-	getcmd(blocknum, (char []){ '0' + arg->i });
+	getcmd(blocknum, (char []){'0' + arg->i, '\0'});
 }
 
 void
