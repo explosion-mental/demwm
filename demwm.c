@@ -684,7 +684,7 @@ swallow(Client *p, Client *c)
 	Window w;
 
 	if ((c->f & (Terminal | NoSwallow))
-	|| ((!swallowfloating && c->f & Float) && !(c->f & FS))
+	|| ((!swallowfloat && c->f & Float) && !(c->f & FS))
 	|| (!swallowffs && c->f & FS))
 		return;
 

@@ -1,30 +1,33 @@
 /* See LICENSE file for copyright and license details. */
 
+#define CI	static const int
+#define CUI	static const unsigned int
+
 /* appearance */
-static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
-static const int systraypinningfailfirst = 1;   /* 1: if pinning fails, display systray on the first monitor, False: display systray on the last monitor*/
-static unsigned int borderpx  = 5;        /* border pixel of windows */
-static unsigned int fborderpx = 2;        /* border pixel of floating windows */
-static unsigned int snap      = 10;       /* snap pixel */
-static unsigned int gappih    = 15;       /* horiz inner gap between windows */
-static unsigned int gappiv    = 20;       /* vert inner gap between windows */
-static unsigned int gappoh    = 15;       /* horiz outer gap between windows and screen edge */
-static unsigned int gappov    = 20;       /* vert outer gap between windows and screen edge */
-static int hidevacant         = 1;        /* 1 means hide vacant tags */
-static int hovertofocus       = 0;        /* 0 means click to focus */
-static int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
-static int swallowfloating    = 0;        /* 1 means swallow floating windows by default */
-static int swallowffs         = 1;        /* 1 means swallow fullscreen windows by default */
-static int showbar            = 1;        /* 0 means no bar */
-static int showstatus         = 1;        /* 0 means no status text */
-static const int underlntitle = 1;        /* 1 means an underline on the title */
-static const int topbar       = 1;        /* 0 means bottom bar */
-static const int barh         = 9;        /* 1 or more means bar height */
-static const int pertag       = 1;        /* 0 means global layout across all tags (default) */
-static const int pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
-static const int gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
-static const int scalepreview = 4;        /* tag previews scaling */
-#define baralpha		120       /* bar opacity from 0 to 255/OPAQUE */
+CUI systraypinning = 0; /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
+CUI systraypinningfailfirst = 1; /* 1: if pinning fails, display systray on the first monitor, 0: display systray on the last monitor*/
+CUI borderpx     = 5;        /* border pixel of windows */
+CUI fborderpx    = 2;        /* border pixel of floating windows */
+CUI snap         = 10;       /* snap pixel */
+CUI gappih       = 15;       /* horiz inner gap between windows */
+CUI gappiv       = 20;       /* vert inner gap between windows */
+CUI gappoh       = 15;       /* horiz outer gap between windows and screen edge */
+CUI gappov       = 20;       /* vert outer gap between windows and screen edge */
+CUI hidevacant   = 1;        /* 1 means hide vacant tags */
+CUI hovertofocus = 0;        /* 0 means click to focus */
+CUI topbar       = 1;        /* 0 means bottom bar */
+CI  barh         = 9;        /* 1 or more/less means bar height */
+CUI pertag       = 1;        /* 0 means global layout across all tags (default) */
+CUI pertagbar    = 0;        /* 0 means using pertag, but with the same barpos */
+CUI gapspertag   = 1;        /* 0 means global gaps across all tags (default) */
+CUI scalepreview = 4;        /* tag previews scaling */
+CUI swallowfloat = 0;        /* 1 means swallow floating windows by default */
+CUI swallowffs   = 1;        /* 1 means swallow fullscreen windows by default */
+CUI underlntitle = 1;        /* 1 means an underline on the title */
+static int smartgaps  = 0;   /* 1 means no outer gap when there is only one window */
+static int showbar    = 1;   /* 0 means no bar */
+static int showstatus = 1;   /* 0 means no status text */
+#define baralpha      120    /* bar opacity from 0 to 255/OPAQUE */
 
 static const char *fonts[] = {
 	"Monofur Nerd Font:size=10:antialias=true:autohint=true", /* Mono */
