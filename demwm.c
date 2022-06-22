@@ -109,8 +109,8 @@ enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
-	SchemeStatus, SchemeDelim, SchemeSys, SchemeIndUrg, SchemeIndOff,
-	SchemeIndOn, BorderNorm, BorderSel, BorderFloat, BorderUrg }; /* color schemes */
+       SchemeStatus, SchemeDelim, SchemeSys, SchemeIndUrg, SchemeIndOff,
+       SchemeIndOn, BorderNorm, BorderSel, BorderFloat, BorderUrg }; /* color schemes */
 enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8, Sp9, Sp10 }; /* scratchpads */
 enum { NetSupported, NetWMName,
 #ifdef ICONS
@@ -466,7 +466,7 @@ static int bh, blw = 0;       /* bar geometry */
 static int lrpad;             /* sum of left and right padding for text */
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
-static void (*handler[LASTEvent]) (XEvent *) = {
+static void (*handler[LASTEvent])(XEvent *) = {
 	[ButtonPress] = buttonpress,
 	[ClientMessage] = clientmessage,
 	[ConfigureRequest] = configurerequest,
@@ -2052,13 +2052,13 @@ getcmd(int i, char *button)
 	if (!(selmon->f & ShowBar) || !showstatus)
 		return;
 
-	if (execlock & 1 << i) { /* block is already running */
+	if (execlock & (1 << i)) { /* block is already running */
 		//fprintf(stderr, "demwm: ignoring block %d, command %s\n", i, blocks[i].command);
 		return;
 	}
 
 	/* lock execution of block until current instance finishes execution */
-	execlock |= 1 << i;
+	execlock |= (1 << i);
 
 	if (fork() == 0) {
 		if (dpy)
