@@ -812,7 +812,8 @@ buttonpress(XEvent *e)
 		} else
 			click = ClkWinTitle;
 	} else if ((c = wintoclient(ev->window))) {
-		//if (ev->button != Button4 && ev->button != Button5)
+		/* scrolling doesn't trigger focus */
+		if (ev->button != Button4 && ev->button != Button5)
 			focus(c);
 		restack(selmon);
 		XAllowEvents(dpy, ReplayPointer, CurrentTime);
