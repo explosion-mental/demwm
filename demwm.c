@@ -93,7 +93,7 @@
 #define SPTAGMASK		(((1 << LENGTH(scratchpads)) - 1) << LENGTH(tags))
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 #define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
-#define SETVAL(C, F, V)		C->f = ((V) ? C->f | F : C->f & ~F)
+#define SETVAL(X, flag, val)	X->f = ((val) ? X->f | flag : X->f & ~flag)
 #define WINMASK			(CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask)
 
 #ifdef SYSTRAY
@@ -355,7 +355,7 @@ static void setmfact(const Arg *arg);
 static void setup(void);
 static void setsignal(int sig, void (*sahandler)(int sig));
 static void seturgent(Client *c, int urg);
-static void settagsatom(Client *c);
+static void setclientatoms(Client *c);
 static void shift(unsigned int *tag, int i);
 static void shiftpreview(const Arg *arg);
 static void shifttag(const Arg *arg);
@@ -456,7 +456,7 @@ static pid_t winpid(Window w);
 
 /* variables */
 static const char broken[] = "broken";
-static unsigned int sleepinterval = 0, maxinterval = 0, count = 0;
+static unsigned int sleepinterval = 0, maxinterval = 0, sleepcount = 0;
 static unsigned int lasttags; /* keep selected tags on restart */
 static unsigned int stsw = 0; /* status width */
 static unsigned int blocknum; /* blocks idx in mouse click */
@@ -514,9 +514,9 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 /* dynamic scratchpads (this selects an unused tag) */
 #define SCRATCHPAD_MASK		(1 << (NUMTAGS + 1))
 
-static Clr *scheme[LENGTH(colors)];
+static Clr *scheme[LENGTH(colors)] = {0};
 static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0};
-static int pipes[LENGTH(blocks)][2];
+static int pipes[LENGTH(blocks)][2] = {0};
 static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
 
 struct Pertag {
@@ -680,10 +680,11 @@ attachstack(Client *c)
 void
 swallow(Client *p, Client *c)
 {
-	if (c->f & (Terminal | NoSwallow))
-		return;
+	XWindowChanges wc;
+	Window w;
 
-	if (((!swallowfloating && c->f & Float) && !(c->f & FS))
+	if ((c->f & (Terminal | NoSwallow))
+	|| ((!swallowfloating && c->f & Float) && !(c->f & FS))
 	|| (!swallowffs && c->f & FS))
 		return;
 
@@ -696,18 +697,17 @@ swallow(Client *p, Client *c)
 	p->swallowing = c;
 	c->mon = p->mon;
 
-	Window w = p->win;
+	w = p->win;
 	p->win = c->win;
 	c->win = w;
 #ifdef ICONS
 	updateicon(p);
 #endif /* ICONS */
 	updatetitle(p);
-	settagsatom(p);
+	setclientatoms(p);
 
 	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
 
-	XWindowChanges wc;
 	wc.border_width = p->bw;
 	XConfigureWindow(dpy, p->win, CWBorderWidth, &wc);
 	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
@@ -721,6 +721,8 @@ swallow(Client *p, Client *c)
 void
 unswallow(Client *c)
 {
+	XWindowChanges wc;
+
 	c->win = c->swallowing->win;
 
 	free(c->swallowing);
@@ -737,7 +739,6 @@ unswallow(Client *c)
 
 	XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 
-	XWindowChanges wc;
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, c->win, CWBorderWidth, &wc);
 	XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
@@ -751,7 +752,7 @@ unswallow(Client *c)
 void
 buttonpress(XEvent *e)
 {
-	unsigned int i, x, click, occ = 0;
+	unsigned int i, x, click, len, occ = 0;
 	Arg arg = {0};
 	Client *c;
 	Monitor *m;
@@ -773,7 +774,7 @@ buttonpress(XEvent *e)
 			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i) && m->f & HideVacant)
 				continue;
 			x += TEXTW(m->f & HideVacant ? tagsalt[i] : tags[i]);
-		} while (ev->x >= x && ++i < (m->f & HideVacant ? LENGTH(tagsalt) : LENGTH(tags)));
+		} while (ev->x >= x && ++i < LENGTH(tags));
 		if (i < LENGTH(tags)) {
 			click = ClkTagBar;
 			arg.ui = 1 << i;
@@ -792,15 +793,14 @@ buttonpress(XEvent *e)
 			#endif /* SYSTRAY */
 			)) {
 			click = ClkStatusText;
-			int len, i;
-			//int last = LENGTH(blocks) - 1;
+
 			#if INVERSED
 			for (i = LENGTH(blocks) - 1; i >= 0; i--)
 			#else
 			for (i = 0; i < LENGTH(blocks); i++)
 			#endif /* INVERSED */
 			{
-				if (*blockoutput[i] == '\0') //ignore command that output NULL or '\0'
+				if (*blockoutput[i] == '\0') /* empty string, ignore */
 					continue;
 				len = TEXTW(blockoutput[i]) - lrpad + TEXTW(delimiter) - lrpad;
 				x += len;
@@ -912,6 +912,7 @@ clientmessage(XEvent *e)
 	if (systray && cme->window == systray->win && cme->message_type == netatom[NetSystemTrayOP]) {
 		/* add systray icons */
 		if (cme->data.l[1] == 0 /* SYSTEM_TRAY_REQUEST_DOCK */) {
+			/* do our little manage() like special treatment for the systray window */
 			c = ecalloc(1, sizeof(Client));
 			if (!(c->win = cme->data.l[2])) {
 				free(c);
@@ -1100,7 +1101,7 @@ combotag(const Arg *arg)
 		selmon->sel->tags = newtags;
 	}
 
-	settagsatom(selmon->sel);
+	setclientatoms(selmon->sel);
 	focus(NULL);
 	arrange(selmon);
 }
@@ -1116,8 +1117,7 @@ comboview(const Arg *arg)
 		/* tagallmaster: clients in the master area should be the same
 		 * after we add a new tag
 		 * Collect (from last to first) references to all clients in the master area */
-		Client *selected = selmon->sel, *masters[selmon->nmaster], *c;
-
+		Client *c, *selected = selmon->sel, *masters[selmon->nmaster];
 		size_t i;
 
 		for (c = nexttiled(selmon->clients), i = 0; c && i < selmon->nmaster; c = nexttiled(c->next), ++i)
@@ -1125,7 +1125,7 @@ comboview(const Arg *arg)
 
 		/* put the master clients at the front of the list > go from
 		 * the 'last' master to the 'first' */
-		for (i = 0; i < selmon->nmaster; ++i)
+		for (i = 0; i < selmon->nmaster; i++)
 			if (masters[i])
 				pop(masters[i]);
 
@@ -1134,6 +1134,7 @@ comboview(const Arg *arg)
 
 		/* toggleview */
 		selmon->tagset[selmon->seltags] |= newtags;
+
 		#ifdef TAG_PREVIEW
 		getpreview();
 		#endif /* TAG_PREVIEW */
@@ -1157,12 +1158,10 @@ createmon(void)
 	m->tagset[0] = m->tagset[1] = lasttags != 0 ? lasttags : 1;
 	m->mfact = mfact;
 	m->nmaster = nmaster;
-	if (showbar)
-		m->f |= ShowBar;
-	if (topbar)
-		m->f |= TopBar;
-	if (hidevacant)
-		m->f |= HideVacant;
+	/* monitor flags */
+	SETVAL(m, ShowBar, showbar);
+	SETVAL(m, TopBar, topbar);
+	SETVAL(m, HideVacant, hidevacant);
 	/* gaps per tag */
 	m->gappih = gappih;
 	m->gappiv = gappiv;
@@ -1218,19 +1217,19 @@ createmon(void)
 void
 cyclelayout(const Arg *arg)
 {
-	unsigned int idx = 0;
 	Layout *l;
+	unsigned int idx = 0;
 
 	for (l = (Layout *)layouts; l != selmon->lt[selmon->sellt]; l++, idx++);
 
 	if (arg->i > 0) {
 		if (idx < LENGTH(layouts) - 1)
-			idx = idx + arg->i;
+			idx += arg->i;
 		else
 			idx = 0;
 	} else {
 		if (idx > 0)
-			idx = idx + arg->i;
+			idx += arg->i;
 		else
 			idx = LENGTH(layouts) - 1;
 	}
@@ -2330,6 +2329,7 @@ manage(Window w, XWindowAttributes *wa)
 	Client *c, *t = NULL, *term = NULL;
 	Window trans = None;
 	XWindowChanges wc;
+	Atom tmptom = None;
 	//XEvent xev;
 
 	c = ecalloc(1, sizeof(Client));
@@ -2350,8 +2350,7 @@ manage(Window w, XWindowAttributes *wa)
 	c->y = c->oldy = wa->y;
 	c->sfw = c->w = c->oldw = wa->width;
 	c->sfh = c->h = c->oldh = wa->height;
-	c->sfx = -9999;
-	c->sfy = -9999;
+	c->sfx = c->sfy = -9999; /* placeholder */
 	c->oldbw = wa->border_width;
 	c->cfact = 1.0;
 
@@ -2369,25 +2368,20 @@ manage(Window w, XWindowAttributes *wa)
 		c->mon = selmon;
 		applyrules(c);
 		term = termforwin(c);
-		Atom tmptom = None;
-		tmptom = getatomprop(c, demwmtags);
-		if (tmptom != None)
+		if ((tmptom = getatomprop(c, demwmtags)) != None)
 			c->tags = tmptom & TAGMASK;
-		tmptom = getatomprop(c, demwmmon);
-		if (tmptom != None) {
-			Monitor *m;
-			for (m = mons; m; m = m->next) {
+		if ((tmptom = getatomprop(c, demwmmon)) != None) {
+			for (Monitor *m = mons; m; m = m->next) {
 				if (m->num == tmptom) {
 					c->mon = m;
 					break;
 				}
 			}
 		}
-		tmptom = getatomprop(c, demwmfloat);
-		if (tmptom != None)
+		if ((tmptom = getatomprop(c, demwmfloat)) != None)
 			c->f |= Float;
 	}
-	settagsatom(c);
+	setclientatoms(c);
 
 	if (c->x + WIDTH(c) > c->mon->mx + c->mon->mw)
 		c->x = c->mon->mx + c->mon->mw - WIDTH(c);
@@ -2496,7 +2490,7 @@ motionnotify(XEvent *e)
 			if (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i) && selmon->f & HideVacant)
 				continue;
 			x += TEXTW(selmon->f & HideVacant ? tagsalt[i] : tags[i]);
-		} while (ev->x >= x && ++i < (selmon->f & HideVacant ? LENGTH(tagsalt) : LENGTH(tags)));
+		} while (ev->x >= x && ++i < LENGTH(tags));
 
 	     	if (i < LENGTH(tags)) {
 			if (selmon->previewshow != (i + 1)
@@ -3134,10 +3128,12 @@ setgaps(int oh, int ov, int ih, int iv)
 	if (ov < 0) ov = 0;
 	if (ih < 0) ih = 0;
 	if (iv < 0) iv = 0;
+
 	selmon->gappoh = oh;
 	selmon->gappov = ov;
 	selmon->gappih = ih;
 	selmon->gappiv = iv;
+
 	if (gapspertag) /* Pertag gaps */
 		selmon->pertag->gaps[selmon->pertag->curtag] =
 			((oh & 0xFF) << 0) | ((ov & 0xFF) << 8) | ((ih & 0xFF) << 16) | ((iv & 0xFF) << 24);
@@ -3405,15 +3401,14 @@ setfullscreen(Client *c, int fullscreen)
 	 * only be stored and restored in that precise order. */
 	if (savestate && !(c->f & FSLock)) {
 		c->oldbw = c->bw;
-		SETVAL(c, WasFloat, c->f & Float);
-		c->f |= FSLock;
 		c->bw = 0;
-		c->f |= Float;
+		SETVAL(c, WasFloat, c->f & Float);
+		c->f |= FSLock | Float;
 		resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 		XRaiseWindow(dpy, c->win);
 	} else if (restorestate && (c->f & FSLock)) {
-		c->bw = c->oldbw;
 		c->f &= ~FSLock;
+		c->bw = c->oldbw;
 		SETVAL(c, Float, c->f & WasFloat);
 		if (restorefakefullscreen || c->fakefullscreen == 3)
 			c->fakefullscreen = 1;
@@ -3601,6 +3596,7 @@ setup(void)
 	/* init bars */
 	updatebars();
 	drawbar(selmon);
+
 	/* supporting window for NetWMCheck */
 	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32,
@@ -3650,13 +3646,14 @@ seturgent(Client *c, int urg)
 
 	if (!(wmh = XGetWMHints(dpy, c->win)))
 		return;
+
 	wmh->flags = urg ? (wmh->flags | XUrgencyHint) : (wmh->flags & ~XUrgencyHint);
 	XSetWMHints(dpy, c->win, wmh);
 	XFree(wmh);
 }
 
 void
-settagsatom(Client *c)
+setclientatoms(Client *c)
 {
 	unsigned int i = c->f & Float;
 	XChangeProperty(dpy, c->win, demwmtags, XA_CARDINAL, 32,
@@ -3770,9 +3767,9 @@ showhide(Client *c)
 void
 sigalrm(int unused)
 {
-	getcmds(count);
+	getcmds(sleepcount);
 	alarm(sleepinterval);
-	count = (count + sleepinterval - 1) % maxinterval + 1;
+	sleepcount = (sleepcount + sleepinterval - 1) % maxinterval + 1;
 }
 
 void
@@ -3821,7 +3818,7 @@ tag(const Arg *arg)
 {
 	if (selmon->sel && arg->ui & TAGMASK) {
 		selmon->sel->tags = arg->ui & TAGMASK;
-		settagsatom(selmon->sel);
+		setclientatoms(selmon->sel);
 		focus(NULL);
 		arrange(selmon);
 	}
@@ -3899,6 +3896,7 @@ togglefloating(const Arg *arg)
 		return;
 	if (c->f & FS && c->fakefullscreen != 1) /* no support for fullscreen windows */
 		return;
+	/* if floating: toggle it, if fixed: true */
 	SETVAL(c, Float, ((c->f & Float) ^ Float) || (c->f & Fixed));
 
 	if (selmon->sel->f & Float) {
@@ -4048,7 +4046,7 @@ toggletag(const Arg *arg)
 	newtags = selmon->sel->tags ^ (arg->ui & TAGMASK);
 	if (newtags) {
 		selmon->sel->tags = newtags;
-		settagsatom(selmon->sel);
+		setclientatoms(selmon->sel);
 		focus(NULL);
 		arrange(selmon);
 	}
@@ -4099,7 +4097,6 @@ unfocus(Client *c, int setfocus)
 	if (!c)
 		return;
 	grabbuttons(c, 0);
-	//c->alwaysontop = 0;
 	XSetWindowBorder(dpy, c->win, scheme[BorderNorm][ColFg].pixel);
 	if (setfocus) {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
@@ -4429,9 +4426,11 @@ updatewmhints(Client *c)
 			wmh->flags &= ~XUrgencyHint;
 			XSetWMHints(dpy, c->win, wmh);
 		} else {
-			SETVAL(c, Urg, wmh->flags & XUrgencyHint);
-			if (c->f & Urg) /* set border to urgent */
+			if (wmh->flags & XUrgencyHint) {
+				c->f |= Urg;
 				XSetWindowBorder(dpy, c->win, scheme[BorderUrg][ColFg].pixel);
+			} else
+				c->f &= ~Urg;
 		}
 		if (wmh->flags & InputHint)
 			SETVAL(c, NeverFocus, !wmh->input);
