@@ -20,6 +20,7 @@ _some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm.
 	  [demwm_random_wall](#demwm_random_wall)
 
 # Suggestions
+- Refer to the man page.
 - To redirect error mesagges to a file `exec demwm 2> "$HOME/.cache/demwm.log"`
 - edit `config.mk` and change `CC = cc`, I have it default to `tcc` since it's
   very very fast and I can make changes in the go.
@@ -65,59 +66,6 @@ Why? Some reasons:
   no more signals for the buttons.
 - This way we could expand and play around with 'blocks' (different colors for
   different blocks, for example)
-
-
-_A note about_ **usage**: The asyc status text is done by the `poll` system
-call. This build `exec`s scripts every `X` seconds
-[asynchronously](https://github.com/UtkarshVerma/dwmblocks-async#why-dwmblocks-async),
-which of course stock dwm doesn't. You won't notice any change in resources if
-you normally use `dwmblocks` or it's variants (all of them exec scripts).
-
-
-**You can avoid executing all the scripts completly by hidding the bar or the
-statustext**.
-
-# Manage demwm with `xsetroot`
-Since demwm handles the text itself, we can use the 'name' of the root window for
-other purposes, like managing demwm (similar to the `fakesignal` patch).
-
-- Give it a function, for example `xsetroot -name togglebar`, will toggle the bar
-- or a standalone `signal number` of one of the blocks, e.g `xsetroot -name 1` will update block 1
-- It can accept functions that require an argument, e.g `xsetroot -name 'cyclelayout -1'` but remember to use `'` or `"` around it.
-
-
-## Commands
-```sh
-xsetroot -name 'incrgaps X'	# X can be -1 or +1
-xsetroot -name 'incrogaps X'
-xsetroot -name 'incrohgaps X'
-xsetroot -name 'incrovgaps X'
-xsetroot -name 'incrigaps X'
-xsetroot -name 'incrihgaps X'
-xsetroot -name 'incrivgaps X'
-xsetroot -name 'cyclelayout X'
-xsetroot -name 'setlayout L'	# L is an index of an existing layout (from 0 to the last)
-xsetroot -name 'view N'		# N is a tag
-xsetroot -name 'tag N'
-xsetroot -name 'toggletag N'
-xsetroot -name defaultgaps
-xsetroot -name killclient
-xsetroot -name random_wall
-xsetroot -name refresh
-xsetroot -name togglebar
-xsetroot -name togglefloating
-xsetroot -name togglefullscreen
-xsetroot -name togglefakefullscreen
-xsetroot -name togglegaps
-xsetroot -name togglesmartgaps
-xsetroot -name togglevacant
-xsetroot -name togglestatus
-xsetroot -name toggletopbar
-xsetroot -name xrdb
-xsetroot -name zoom
-xsetroot -name zoomswap
-xsetroot -name S		# S is an existing signal of a block (without adding 34)
-```
 
 # Toggleable Features
 Here are the "too bloated" features which doesn't affect the workflow, but
@@ -172,7 +120,7 @@ then download it.
 e.g.
 
 ```
-curl -sL https://github.com/explosion-mental/Dwm/commit/d8e4af59c570c4b8ef36ef8942c58ab89921900f > dwm-default-layouts-pertag.diff
+curl -sL https://github.com/explosion-mental/demwm/commit/d8e4af59c570c4b8ef36ef8942c58ab89921900f > dwm-default-layouts-pertag.diff
 ```
 
 Here are some that I converted into a patch:
