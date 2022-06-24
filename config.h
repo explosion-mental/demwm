@@ -536,6 +536,7 @@ static const Button buttons[] = {
 	{ ClkClientWin,         MOD,         Button5,        resizemousescroll, {.v = &scrollargs[1]} },
 	{ ClkClientWin,         MOD,         Button6,        resizemousescroll, {.v = &scrollargs[2]} },
 	{ ClkClientWin,         MOD,         Button7,        resizemousescroll, {.v = &scrollargs[3]} },
+//	{ ClkClientWin,         MOD|Shift,   Button1, SHCMD("maim -usDq ~/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
 //	{ ClkClientWin,   MOD|Shift,     Button4,        focusstack,	{.i = 1 } },
 //	{ ClkClientWin,   MOD|Shift,     Button5,        focusstack,	{.i = -1 } },
 };
