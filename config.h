@@ -302,7 +302,8 @@ static const char *scratchpads[][32] = {
 [Sp9] = { "st", "-n", "mpvfloat", "-g", "115x30" , NULL }, /* terminal */
 };
 
-/* modifier(s) can be: Alt, AltGr, Ctrl, Shift, ShiftGr, Super (or MOD) */
+/* modifier(s) can be: Alt, AltGr, Ctrl, Shift, ShiftGr, Super (or MOD)
+ * To understand the function/argument parameter, please refer to the man page demwm(1) */
 static const Key keys[] = {
 	/* modifier(s)		key	function	argument */
 
