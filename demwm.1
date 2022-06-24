@@ -1,204 +1,435 @@
-.TH DWM 1 dwm\-VERSION
-.SH NAME
-dwm \- dynamic window manager
-.SH SYNOPSIS
-.B dwm
-.RB [ \-v ]
-.SH DESCRIPTION
-dwm is a dynamic window manager for X. It manages windows in tiled, monocle
-and floating layouts. Either layout can be applied dynamically, optimising the
-environment for the application in use and the task performed.
-.P
-In tiled layouts windows are managed in a master and stacking area. The master
-area on the left contains one window by default, and the stacking area on the
-right contains all other windows. The number of master area windows can be
-adjusted from zero to an arbitrary number. In monocle layout all windows are
-maximised to the screen size. In floating layout windows can be resized and
-moved freely. Dialog windows are always managed floating, regardless of the
-layout applied.
-.P
-Windows are grouped by tags. Each window can be tagged with one or multiple
-tags. Selecting certain tags displays all windows with these tags.
-.P
-Each screen contains a small status bar which displays all available tags, the
-layout, the title of the focused window, and the text read from the root window
-name property, if the screen is focused. A floating window is indicated with an
-empty square and a maximised floating window is indicated with a filled square
-before the windows title.  The selected tags are indicated with a different
-color. The tags of the focused window are indicated with a filled square in the
-top left corner.  The tags which are applied to one or more windows are
-indicated with an empty square in the top left corner.
-.P
-dwm draws a small border around windows to indicate the focus state.
-.SH OPTIONS
+.TH "DEMWM" "1" 
+.SH "NAME"
+.PP
+demwm - Dynamic Explosion-Mental’s Window Manager
+.SH "SYNOPSIS"
+.PP
+\fBdemwm\fP [ -v ]
+.SH "DESCRIPTION"
+.PP
+A custom fork of dwm(1), a (tiling) window manager for X. You have customs \fBrules\fP and \fBlayouts\fP to use and set that handles clients in different ways.
+
+
+.PP
+Windows are grouped by tags. Each window can be tagged with one or multiple tags. Selecting certain tags displays all windows with these tags.
+
+
+.PP
+Each monitor has it’s own set of tags and therefore, one window can only belong to one monitor; meaning you can’t view the same window in two different \fBindependent\fP monitors, of course this is possible if you mirror in between outputs (monitors).
+
+
+.PP
+The status bar text is filled with command outputs (stdout) defined in config.h. \fBdemwm\fP will use the greatest common divisor of the \fBinterval\fP value of the \fBblocks\fP array to have a constant value in order to call and update blocks that need it, so keep an eye on this. This will only display on the selected monitor.
+.SH "OPTIONS"
 .TP
-.B \-v
-prints version information to standard output, then exits.
-.SH USAGE
-.SS Status bar
-.TP
-.B X root window name
-is read and displayed in the status text area. It can be set with the
-.BR xsetroot (1)
-command.
-.TP
-.B Button1
-click on a tag label to display all windows with that tag, click on the layout
-label toggles between tiled and floating layout.
-.TP
-.B Button3
-click on a tag label adds/removes all windows with that tag to/from the view.
-.TP
-.B Mod1\-Button1
-click on a tag label applies that tag to the focused window.
-.TP
-.B Mod1\-Button3
-click on a tag label adds/removes that tag to/from the focused window.
-.SS Keyboard commands
-.TP
-.B Mod1\-Shift\-Return
-Start
-.BR st(1).
-.TP
-.B Mod1\-p
-Spawn
-.BR dmenu(1)
-for launching other programs.
-.TP
-.B Mod1\-,
-Focus previous screen, if any.
-.TP
-.B Mod1\-.
-Focus next screen, if any.
-.TP
-.B Mod1\-Shift\-,
-Send focused window to previous screen, if any.
-.TP
-.B Mod1\-Shift\-.
-Send focused window to next screen, if any.
-.TP
-.B Mod1\-Right
-Focus tag on the right, if any.
-.TP
-.B Mod1\-Left
-Focus tag on the left, if any.
-.TP
-.B Mod1\-Shift\-Right
-Send focused window to tag on the right, if any.
-.TP
-.B Mod1\-Shift\-Left
-Send focused window to tag on the left, if any.
-.TP
-.B Mod1\-b
-Toggles bar on and off.
-.TP
-.B Mod1\-t
-Sets tiled layout.
-.TP
-.B Mod1\-f
-Sets floating layout.
-.TP
-.B Mod1\-m
-Sets monocle layout.
-.TP
-.B Mod1\-space
-Toggles between current and previous layout.
-.TP
-.B Mod1\-Control\-,
-Cycles backwards in layout list.
-.TP
-.B Mod1\-Control\-.
-Cycles forwards in layout list.
-.TP
-.B Mod1\-j
-Focus next window.
-.TP
-.B Mod1\-k
-Focus previous window.
-.TP
-.B Mod1\-i
-Increase number of windows in master area.
-.TP
-.B Mod1\-d
-Decrease number of windows in master area.
-.TP
-.B Mod1\-l
-Increase master area size.
-.TP
-.B Mod1\-h
-Decrease master area size.
-.TP
-.B Mod1\-Return
-Zooms/cycles focused window to/from master area (tiled layouts only).
-.TP
-.B Mod1\-Shift\-c
-Close focused window.
-.TP
-.B Mod1\-Shift\-space
-Toggle focused window between tiled and floating state.
-.TP
-.B Mod1\-Tab
-Toggles to the previously selected tags.
-.TP
-.B Mod1\-Shift\-[1..n]
-Apply nth tag to focused window.
-.TP
-.B Mod1\-Shift\-0
-Apply all tags to focused window.
-.TP
-.B Mod1\-Control\-Shift\-[1..n]
-Add/remove nth tag to/from focused window.
-.TP
-.B Mod1\-[1..n]
-View all windows with nth tag.
-.TP
-.B Mod1\-0
-View all windows with any tag.
-.TP
-.B Mod1\-Control\-[1..n]
-Add/remove all windows with nth tag to/from the view.
-.TP
-.B Mod1\-Shift\-q
-Quit dwm.
-.TP
-.B Mod1\-Control\-Shift\-q
-Restart dwm.
-.SS Mouse commands
-.TP
-.B Mod1\-Button1
-Move focused window while dragging. Tiled windows will be toggled to the floating state.
-.TP
-.B Mod1\-Button2
-Toggles focused window between floating and tiled state.
-.TP
-.B Mod1\-Button3
-Resize focused window while dragging. Tiled windows will be toggled to the floating state.
-.SH CUSTOMIZATION
-dwm is customized by creating a custom config.h and (re)compiling the source
-code. This keeps it fast, secure and simple.
-.SH SIGNALS
-.TP
-.B SIGHUP - 1
+\fB-v\fP
+Print the version number and exit.
+.SH "SIGNALS"
+.SS "SIGHUP - 1"
+.PP
 Restart the dwm process.
-.TP
-.B SIGTERM - 15
+.SS "SIGTERM - 15"
+.PP
 Cleanly terminate the dwm process.
-.SH SEE ALSO
-.BR dmenu (1),
-.BR st (1)
-.SH ISSUES
+.SH "CONFIGURATION"
+.PP
+dwm is customized by creating a custom config.h and (re)compiling the source code. This keeps it simple, since reading a config file isn’t that hard (but adds unneeded complexity), and in many aspects more customizable. I try my best to comment about the variables in config.h, since they don’t do anything crazy, so it should be very straight foward what does what.
+
+
+.PP
+What do you need to know? User functions, described below.
+.SH "FUNCTIONS"
+.SS "cyclelayout"
+.PP
+Moves the layouts index depending on the argument. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "defaultgaps"
+.PP
+Set the gaps to the values defined in config.h. 
+.br
+
+.PP
+No arguments.
+.SS "focusmon"
+.PP
+Focus monitor 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "focusstack"
+.PP
+More like, ’focus client’. Focuses the next/prev client (window). 
+.br
+
+.PP
+Takes an \fBinteger\fP as an argument, bidirectional (+1 or -1).
+.SS "incnmaster"
+.PP
+Increase master, sutracts/adds the first stack (slave) window to the master stack (left side on default tile layout). 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "incrgaps"
+.PP
+Increases or decreses \fBinner\fP, \fBouter\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "incrigaps"
+.PP
+Increases or decreses the \fBinner\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "incrihgaps"
+.PP
+Increases or decreses the \fBinner\fP, and \fBhorizontal\fP gaps by the argument given. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "incrivgaps"
+.PP
+Increases or decreses the \fBinner\fP and \fBvertical\fP gaps by the argument given. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "incrogaps"
+.PP
+Increases or decreses the \fBouter\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "incrohgaps"
+.PP
+Increases or decreses the \fBouter\fP, and \fBhorizontal\fP gaps by the argument given. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "incrovgaps"
+.PP
+Increases or decreses the \fBouter\fP and \fBvertical\fP gaps by the argument given. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "killclient"
+.PP
+The name describe it, kills a window client. 
+.br
+
+.PP
+No arguments.
+.SS "movefh\d\s-2setmfact\s+2\u"
+.PP
+A custom fuction of mine which reuses two functions: \fBmovefloathoriz\fP and \fBsetmfact\fP
+This is just because setmfact has no effect if I have a floating window. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "movefloathorz"
+.PP
+Moves the current \fBfloating\fP windows horizontaly by the argument given. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "movefloatvert"
+.PP
+Moves the current \fBfloating\fP windows verticaly by the argument given. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "movefv\d\s-2pushstack\s+2\u"
+.PP
+A custom fuction of mine which reuses two functions: \fBmovefloatvert\fP and \fBpushstack\fP
+This is just because \fBpushstack\fP has no effect if I have a floating window. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "pushstack"
+.PP
+\fIPushes\fP the current client to be the next/previous client in the stack. 
+.br
+Note: Currently with this function the client can become the master, this is not intended since for this we have \fBzoom\fP. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "quit"
+.PP
+Quits demwm. 
+.br
+
+.PP
+No arguments.
+.SS "refresh"
+.PP
+Restarts or refreshes the current \fBdemwm\fP instance.
+This keeps all clients into their tags and corresponding monitors, as well as leaves the clients in a floating state and fullscreened, in case they have that property.
+This won’t keep the layouts of the tags, the state of gaps (enabled/disabled), master/slaves relations, etc. If you wish these \fIworkspace\fP like feature, checkout dusk(1). 
+.br
+
+.PP
+No arguments.
+.SS "scratchpad\d\s-2hide\s+2\u"
+.PP
+Adds the current client to the \fBdynamic\fP scratchpads list, hiding it. See SCRATCHPADS section. 
+.br
+
+.PP
+No arguments.
+.SS "scratchpad\d\s-2remove\s+2\u"
+.PP
+Removes the current client to the \fBdynamic\fP scratchpads list. See SCRATCHPADS section. 
+.br
+
+.PP
+No arguments.
+.SS "scratchpad\d\s-2show\s+2\u"
+.PP
+Show a dynamic scratchpad from the list. If more than one window exist in the list, this functions cycles between them from first to last added. See SCRATCHPADS section. 
+.br
+
+.PP
+No arguments.
+.SS "setmfact"
+.PP
+\fBSets\fP the \fBmaster\fP \fBfactor\fP area, modifies the \fCmfact\fP (master factor area) value at runtime. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "shiftboth"
+.PP
+\fCshiftview\fP + \fCshifttag\fP 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "shifttag"
+.PP
+\fCtag\fP the current window to the next/previous \fIN\fP tag. \fIN\fP being defined by the argument. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "shifttagclients"
+.PP
+\fCtag\fP the current window to the next/previous \fIN\fP \fBoccupied\fP tag, a tag with at least one client. \fIN\fP being defined by the argument. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "shiftview"
+.PP
+\fCview\fP the current window to the next/previous \fIN\fP tag. \fIN\fP being defined by the argument. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "shiftviewclients"
+.PP
+\fCview\fP the current window to the next/previous \fIN\fP \fBoccupied\fP tag, a tag with at least one client. \fIN\fP being defined by the argument. 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "spawn"
+.PP
+A wrapper for \fIexec\fP function. This executes shell commands. 
+.br
+
+.PP
+It takes a \fIvoid\fP argument: an array of chars with a last element of \fBNULL\fP. The wrapper macro \fBSHCMD\fP sets \fC/bin/sh \-c\fP as the command, which allows you to do shell tricks (\fC&&\fP, \fC||\fP, \fC&\fP, etc)
+.SS "tag"
+.PP
+“\fItag\fP” the current window to a tag. Basically like moving the windows to a ’workspace’ or a “\fIdifferent desktop\fP”, which is only a way of thinking since dwm doesn’t implements those.
+.SS "tagmon"
+.PP
+Like \fCtag\fP but to the other monitor. Sends the window to the next monitor (display 0, 1, etc..). 
+.br
+
+.PP
+It takes an \fIinteger\fP argument and its bidirectional.
+.SS "togglealwaysontop"
+.PP
+Add or remove the \fIalwaysontop\fP state of a client. \fBAlwaysontop\fP means to be on top of all windows (including the bar), useful when combined with the sticky flag. 
+.br
+
+.PP
+No arguments.
+.SS "togglebar"
+.PP
+(Un)hides the bar. 
+.br
+
+.PP
+No arguments.
+.SS "togglefakefullscreen"
+.PP
+Add or remove the \fIfakefullscreen\fP state property of the client. \fBFakeFullScreen\fP means to have the window in a fullscreen state, in a window basis, but treat it as a normal window, in a window manager basis. This results in having fullscreened windows that can be tiled, floating, etc. and the window doesn’t necessarily occupies the hole screen. 
+.br
+
+.PP
+No arguments.
+.SS "togglefloating"
+.PP
+Toggles floating behaviour on windows. This depends on the current state of the window. 
+.br
+
+.PP
+No arguments.
+.SS "togglefullscreen"
+.PP
+Add or remove the \fIfullscreen\fP state property of the client. 
+.br
+
+.PP
+No arguments.
+.SS "togglestatus"
+.PP
+(Un)hides the status text blocks, keeping the bar up if active. 
+.br
+
+.PP
+No arguments.
+.SS "togglesticky"
+.PP
+Add or remove the \fIsticky\fP state of a client. \fBSticky\fP means that the window will be visible in all tags. 
+.br
+
+.PP
+No arguments.
+.SS "toggletag"
+.PP
+Like tag but it can stack, meaning you can ’tag’ multiple tags. This is toggleable.
+.SS "toggletopbar"
+.PP
+Inverse the position of the bar. If the bar is on the top, puts it on the bottom; if the bar is on the bottom, puts it on the top. 
+.br
+
+.PP
+No arguments.
+.SS "togglevacant"
+.PP
+(Un)hides the vacant (empty) tags. 
+.br
+
+.PP
+No arguments.
+.SS "toggleview"
+.PP
+Like view but it can stack, meaning you can ’view’ multiple tags. This is toggleable.
+.SS "updateblock"
+.PP
+updates a status bar block text. 
+.br
+
+.PP
+It takes an (unsigned) \fIinteger\fP argument, which correspond to the signal number of the block you wish to update. 
+.br
+
+.PP
+\fINote\fP: Since the blocks updates are asynchronous (in the background), the signaling is ’instantaneous’. Say you have a same keybinding that executes some command related to the status block, and you also define the same keybinding to update the block using this function; most likely updating the block will be faster and thus the block will not be affected by the other command.
+.SS "view"
+.PP
+View the contents of a tag, you can think of it like moving to a tag.
+.SS "xrdb"
+.PP
+Refreshes or reloads the colors, reads their Xresource value and arranges all the monitors (which actually displays the new colors, if any). 
+.br
+
+.PP
+No arguments.
+.SS "zoom"
+.PP
+Swaps between the first window on the master stack to the current window. If you are already on the first master window, it uses the second master window. 
+.br
+
+.PP
+No arguments.
+.SS "zoomswap"
+.PP
+Variation of the \fCzoom\fP function that maintains the positions of the windows. 
+.br
+
+.PP
+No arguments.
+.SH "SCRATCHPADS"
+.PP
+I have two patches: \fIscratchpads\fP and \fIdynamic scratchpads\fP. Both of these do different functions so they work well so here goes a bit of explanation:
+.SS "dynamic scratchpads"
+.PP
+Any window can be added or removed as a scratchpad. You can add multiple clients to this “\fIlist\fP” of dynamic scratchpads but the catch is that to get to a certain client the binding will cycle through them (meaning more key presses).
+.SS "static scratchpads"
+.PP
+Allows you  to \fIstore\fP a client on a tag that isn’t visible. When you call that client by pressing a keybinding you basically \fCtoggleview\fP that tag and you will see the client store. This scratchpad can be maintained (called) between multiple monitors. 
+.br
+
+.PP
+For this you need to define a \fCRule\fP for that client (res name or class) and add it to the tag \fCSP(X)\fP, which X represents the same index in the array of the \fCscratchpads\fP array. For simpler understanding just use the sample variables I defined which are \fCSp1\fP to \fCSp9\fP and make sure these match in between the \fCRule\fP tags, the binding and the definition of the command inside the array \fCscratchpads\fP.
+.SH "EXAMPLES"
+.SS "Usage of \fCspawn\fP and \fCSHCMD\fP"
+.RS
+.nf
+\fCstatic const char *ncmpcpp[] = { "st", "-e", "ncmpcpp", NULL };
+static Key keys[] = {
+	/* modifier(s)      key         function        argument        */
+	{ MODKEY            XK_n,       spawn,      { .v = ncmpcpp }    },
+	{ MODKEY            XK_m,       SHCMD("st -e ncmpcpp")          },
+   ...
+};
+\fP
+.fi
+.RE
+.SS "Defining a \fBstatic\fP scratchpad"
+.RS
+.nf
+\fCstatic const Rule rules[] = {
+  	RULE(.instance = "term", .tags = SPTAG(Sp1))
+    ...
+};
+static const char *scratchpads[][32] = {
+[Sp1] = { "st", "-n", "term", NULL }, /* terminal */
+...
+};
+static const Key keys[] = {
+	SPKEYS(MOD,		XK_s,      Sp1)
+    ...
+};
+\fP
+.fi
+.RE
+.SH "ISSUES"
+.PP
 Java applications which use the XToolkit/XAWT backend may draw grey windows
-only. The XToolkit/XAWT backend breaks ICCCM-compliance in recent JDK 1.5 and early
-JDK 1.6 versions, because it assumes a reparenting window manager. Possible workarounds
-are using JDK 1.4 (which doesn't contain the XToolkit/XAWT backend) or setting the
-environment variable
-.BR AWT_TOOLKIT=MToolkit
-(to use the older Motif backend instead) or running
-.B xprop -root -f _NET_WM_NAME 32a -set _NET_WM_NAME LG3D
-or
-.B wmname LG3D
-(to pretend that a non-reparenting window manager is running that the
-XToolkit/XAWT backend can recognize) or when using OpenJDK setting the environment variable
-.BR _JAVA_AWT_WM_NONREPARENTING=1 .
-.SH BUGS
-Send all bug reports with a patch to hackers@suckless.org.
+only. The XToolkit/XAWT backend breaks ICCCM-compliance in recent JDK 1.5 and
+early JDK 1.6 versions, because it assumes a reparenting window manager.
+Possible workarounds are using JDK 1.4 (which doesn’t contain the XToolkit/XAWT
+backend) or setting the environment variable \fCAWT_TOOLKIT=MToolkit\fP (to use the
+older Motif backend instead) or running \fCxprop \-root \-f _NET_WM_NAME 32a \-set
+_NET_WM_NAME LG3D\fP or \fCwmname LG3D\fP (to pretend that a non-reparenting window
+manager is running that the XToolkit/XAWT backend can recognize) or when using
+OpenJDK setting the environment variable \fC_JAVA_AWT_WM_NONREPARENTING=1\fP
+.SH "SEE ALSO"
+.PP
+dwm(1)
+.SH "BUGS"
+.PP
+\fIhttps://github.com/explosion-mental/demwm\fP 
+.br
+\fIhttps://codeberg.org/explosion-mental/demwm\fP
