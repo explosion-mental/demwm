@@ -38,6 +38,10 @@ dwm is customized by creating a custom config.h and (re)compiling the source cod
 
 .PP
 What do you need to know? User functions, described below.
+
+
+.PP
+\fINOTE\fP: Function that do take an argument, are bidirectional: this means that number signs define the behaviour of the function. ( \fC\-1\fP / \fC+1\fP )
 .SH "FUNCTIONS"
 .SS "cyclelayout"
 .PP
@@ -45,7 +49,21 @@ Moves the layouts index depending on the argument.
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
+.SS "combotag"
+.PP
+Select multiple tags to \fCtag\fP by pressing all the right keys as a combo: you can press multiple tags by holding the modifier(s) keys (MOD by default). 
+.br
+
+.PP
+Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+.SS "comboview"
+.PP
+Select multiple tags to \fCview\fP by pressing all the right keys as a combo: you can press multiple tags by holding the modifier(s) keys (MOD by default). 
+.br
+
+.PP
+Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .SS "defaultgaps"
 .PP
 Set the gaps to the values defined in config.h. 
@@ -59,70 +77,70 @@ Focus monitor
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "focusstack"
 .PP
 More like, ’focus client’. Focuses the next/prev client (window). 
 .br
 
 .PP
-Takes an \fBinteger\fP as an argument, bidirectional (+1 or -1).
+Takes an \fIinteger\fP as an argument.
 .SS "incnmaster"
 .PP
 Increase master, sutracts/adds the first stack (slave) window to the master stack (left side on default tile layout). 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "incrgaps"
 .PP
 Increases or decreses \fBinner\fP, \fBouter\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "incrigaps"
 .PP
 Increases or decreses the \fBinner\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "incrihgaps"
 .PP
 Increases or decreses the \fBinner\fP, and \fBhorizontal\fP gaps by the argument given. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "incrivgaps"
 .PP
 Increases or decreses the \fBinner\fP and \fBvertical\fP gaps by the argument given. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "incrogaps"
 .PP
 Increases or decreses the \fBouter\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "incrohgaps"
 .PP
 Increases or decreses the \fBouter\fP, and \fBhorizontal\fP gaps by the argument given. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "incrovgaps"
 .PP
 Increases or decreses the \fBouter\fP and \fBvertical\fP gaps by the argument given. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "killclient"
 .PP
 The name describe it, kills a window client. 
@@ -137,21 +155,21 @@ This is just because setmfact has no effect if I have a floating window.
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIfloat\fP argument and passes it to \fCsetmfact\fP. The argument for the \fCmovefloathoriz\fP is defined in config.h as the variable \fCmovefloat\fP.
 .SS "movefloathorz"
 .PP
 Moves the current \fBfloating\fP windows horizontaly by the argument given. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "movefloatvert"
 .PP
 Moves the current \fBfloating\fP windows verticaly by the argument given. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "movefv\d\s-2pushstack\s+2\u"
 .PP
 A custom fuction of mine which reuses two functions: \fBmovefloatvert\fP and \fBpushstack\fP
@@ -159,7 +177,7 @@ This is just because \fBpushstack\fP has no effect if I have a floating window.
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument and passes it to \fCpushstack\fP. The argument for the \fCmovefloatvert\fP is defined in config.h as the variable \fCmovefloat\fP.
 .SS "pushstack"
 .PP
 \fIPushes\fP the current client to be the next/previous client in the stack. 
@@ -168,7 +186,7 @@ Note: Currently with this function the client can become the master, this is not
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "quit"
 .PP
 Quits demwm. 
@@ -212,42 +230,42 @@ No arguments.
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIfloat\fP argument, usually less than \fC1\fP.
 .SS "shiftboth"
 .PP
 \fCshiftview\fP + \fCshifttag\fP 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "shifttag"
 .PP
 \fCtag\fP the current window to the next/previous \fIN\fP tag. \fIN\fP being defined by the argument. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "shifttagclients"
 .PP
 \fCtag\fP the current window to the next/previous \fIN\fP \fBoccupied\fP tag, a tag with at least one client. \fIN\fP being defined by the argument. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "shiftview"
 .PP
 \fCview\fP the current window to the next/previous \fIN\fP tag. \fIN\fP being defined by the argument. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "shiftviewclients"
 .PP
 \fCview\fP the current window to the next/previous \fIN\fP \fBoccupied\fP tag, a tag with at least one client. \fIN\fP being defined by the argument. 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "spawn"
 .PP
 A wrapper for \fIexec\fP function. This executes shell commands. 
@@ -258,13 +276,16 @@ It takes a \fIvoid\fP argument: an array of chars with a last element of \fBNULL
 .SS "tag"
 .PP
 “\fItag\fP” the current window to a tag. Basically like moving the windows to a ’workspace’ or a “\fIdifferent desktop\fP”, which is only a way of thinking since dwm doesn’t implements those.
+
+.PP
+Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .SS "tagmon"
 .PP
 Like \fCtag\fP but to the other monitor. Sends the window to the next monitor (display 0, 1, etc..). 
 .br
 
 .PP
-It takes an \fIinteger\fP argument and its bidirectional.
+It takes an \fIinteger\fP argument.
 .SS "togglealwaysontop"
 .PP
 Add or remove the \fIalwaysontop\fP state of a client. \fBAlwaysontop\fP means to be on top of all windows (including the bar), useful when combined with the sticky flag. 
@@ -316,7 +337,11 @@ Add or remove the \fIsticky\fP state of a client. \fBSticky\fP means that the wi
 No arguments.
 .SS "toggletag"
 .PP
-Like tag but it can stack, meaning you can ’tag’ multiple tags. This is toggleable.
+Like tag but it can stack, meaning you can ’tag’ multiple tags. This is toggleable. 
+.br
+
+.PP
+Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .SS "toggletopbar"
 .PP
 Inverse the position of the bar. If the bar is on the top, puts it on the bottom; if the bar is on the bottom, puts it on the top. 
@@ -333,7 +358,11 @@ No arguments.
 No arguments.
 .SS "toggleview"
 .PP
-Like view but it can stack, meaning you can ’view’ multiple tags. This is toggleable.
+Like view but it can stack, meaning you can ’view’ multiple tags. This is toggleable. 
+.br
+
+.PP
+Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .SS "updateblock"
 .PP
 updates a status bar block text. 
@@ -347,7 +376,11 @@ It takes an (unsigned) \fIinteger\fP argument, which correspond to the signal nu
 \fINote\fP: Since the blocks updates are asynchronous (in the background), the signaling is ’instantaneous’. Say you have a same keybinding that executes some command related to the status block, and you also define the same keybinding to update the block using this function; most likely updating the block will be faster and thus the block will not be affected by the other command.
 .SS "view"
 .PP
-View the contents of a tag, you can think of it like moving to a tag.
+View the contents of a tag, you can think of it like moving to a tag. 
+.br
+
+.PP
+Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .SS "xrdb"
 .PP
 Refreshes or reloads the colors, reads their Xresource value and arranges all the monitors (which actually displays the new colors, if any). 
