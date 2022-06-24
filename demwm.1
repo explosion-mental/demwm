@@ -4,7 +4,7 @@
 demwm - Dynamic Explosion-Mental’s Window Manager
 .SH "SYNOPSIS"
 .PP
-\fBdemwm\fP [ -v ]
+\fBdemwm\fP [ \fB-v\fP ]
 .SH "DESCRIPTION"
 .PP
 A custom fork of dwm(1), a (tiling) window manager for X. You have customs \fBrules\fP and \fBlayouts\fP to use and set that handles clients in different ways.
@@ -20,6 +20,17 @@ Each monitor has it’s own set of tags and therefore, one window can only belon
 
 .PP
 The status bar text is filled with command outputs (stdout) defined in config.h. \fBdemwm\fP will use the greatest common divisor of the \fBinterval\fP value of the \fBblocks\fP array to have a constant value in order to call and update blocks that need it, so keep an eye on this. This will only display on the selected monitor.
+
+.PP
+\fIA note about usage\fP: The status text is done by the poll(3) system call, this exec(3)’s scripts every \fCX\fP (determined by the Greatest Common Divisor) seconds \fBasynchronously\fP, which of course stock dwm doesn’t. You won’t notice any change in resources if you normally use \fCdwmblocks\fP or it’s variants (all of them exec(3) scripts).
+
+
+.PP
+If the bar or the statustext it’s hidden, there would be \fBno\fP need to call poll(3) and status blocks won’t \fBever\fP be exec(3)uted.
+
+
+.PP
+\fBdemwm\fP reacts to the \fCX root window name\fP (\fCWM_NAME\fP) property of the \fIroot\fP window to make custom actions. No IPC bloat! See PSEUDO-IPC section.
 .SH "OPTIONS"
 .TP
 \fB-v\fP
@@ -69,7 +80,7 @@ _
 	the command and update the output. Can be 0, which means never.
 _
 \fBsignal\fP	A number used to manually update the block.
-	Can be 0, which won’t allow you to update the block manually
+	Can be 0, which won’t allow you to signal the block.
 .TE
 .TB ""
 
@@ -456,6 +467,17 @@ Allows you  to \fIstore\fP a client on a tag that isn’t visible. When you call
 
 .PP
 For this you need to define a \fCRule\fP for that client (res name or class) and add it to the tag \fCSP(X)\fP, which X represents the same index in the array of the \fCscratchpads\fP array. For simpler understanding just use the sample variables I defined which are \fCSp1\fP to \fCSp9\fP and make sure these match in between the \fCRule\fP tags, the binding and the definition of the command inside the array \fCscratchpads\fP.
+.SH "PSEUDO-IPC"
+.PP
+Since demwm handles the text itself, it can use the name of the root window for other purposes, like managing demwm (similar to the \fCfakesignal\fP patch).
+
+
+.PP
+How does this work? You set the X root window name property with a function, see FUNCTIONS section, and an argument, if it needs one. You can also directly input a status text block \fBsignal\fP number and this will manually trigger that block, without the need of signals (\fCkill\fP).
+
+
+.PP
+You can use any program that sets the property mentioned above, common programs are xsetroot(1) and xprop(1).
 .SH "EXAMPLES"
 .SS "Usage of \fCspawn\fP and \fCSHCMD\fP"
 .RS
@@ -517,7 +539,15 @@ echo "Playing: $(mpc current --format '[[%artist% - ]%title%]|[%file%]')"
 \fP
 .fi
 .RE
-
+.SS "IPC like comunication"
+.RS
+.nf
+\fCxsetroot -name 'incrgaps +10'
+#or with xprop
+xprop -root -set WM_NAME 'incrgaps +10'
+\fP
+.fi
+.RE
 
 .SH "ISSUES"
 .PP
@@ -532,7 +562,7 @@ manager is running that the XToolkit/XAWT backend can recognize) or when using
 OpenJDK setting the environment variable \fC_JAVA_AWT_WM_NONREPARENTING=1\fP
 .SH "SEE ALSO"
 .PP
-dwm(1)
+dwm(1), poll(3), exec(3), xsetroot(1), xprop(1)
 .SH "BUGS"
 .PP
 \fIhttps://github.com/explosion-mental/demwm\fP 
