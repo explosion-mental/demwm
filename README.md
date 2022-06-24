@@ -77,61 +77,6 @@ you normally use `dwmblocks` or it's variants (all of them exec scripts).
 **You can avoid executing all the scripts completly by hidding the bar or the
 statustext**.
 
-## How to interact with blocks
-A block is only a group that consist of 3 things: command, interval and signal.
-
-### Command
-The command is the block text, just the output of any program. For example you
-could define the command as `echo "This is a block"`.
-
-### Interval
-The interval is how many X seconds you want to pass before re-**run**ning the
-command and update the output. Can be 0, which means never.
-
-### Signal
-**This is discouraged, use [xsetroot](#manage-demwm-with-xsetroot) instead**
-
-
-The signal is a number to update the command, requires you to add `+ 34`. Say a
-signal number `Y` which, for example, I will define as `Y = 11`. Then `Y + 34`
--> `11 + 34` -> `45`, and you will need this result in order to actually use
-the signal with `kill`, In this case: `kill -45 $(pidof dwm)`. `pidof dwm` gets
-the pid of dwm, but there is a more friendly way. This build of `dwm` sets an
-_enviromental variable_ called `STATUSBAR` which value is the _pid_ of the dwm.
-In short do: `kill -45 $STATUSBAR`. This depends on real time signals, so it's
-Linux specific.
-
-
-## Scripts
-For clicking to do anything you have to make a dedicated script which handles
-the `BLOCK_BUTTON` _variable_, here an example:
-```sh
-# handle dwm blocks
-case $BLOCK_BUTTON in
-	1) notify-send "You've clicked mouse button $BLOCK_BUTTON" ;;
-	2) notify-send "Right click" ;;
-	3) notify-send "Middle click" ;;
-	4) pamixer --allow-boost -i 1 ;; # volume up
-	5) pamixer --allow-boost -d 1 ;; # volume down
-	6) "$TERMINAL" -e "$EDITOR" "$0" ;; # edit the block
-	7) "$TERMINAL" -e "$EDITOR" "$0" & ;; # edit the block without locking it
-esac
-
-# If nothing is playing, don't output anything
-[ "$(mpc status '%state%')" = 'paused' ] && echo '' && exit
-
-# dislpay text
-echo "Playing: $(mpc current --format '[[%artist% - ]%title%]|[%file%]')"
-```
-
-To define the value of `BLOCK_BUTTON`, you have to edit _config.h_ mouse
-buttons bindings `sendstatusbar`.
-
-
-Take a look at the last line. **Before exiting it does `echo ''`**. It is
-important to echo something (even `''`) to 'notify dwm' that the block has
-changed.
-
 # Manage demwm with `xsetroot`
 Since demwm handles the text itself, we can use the 'name' of the root window for
 other purposes, like managing demwm (similar to the `fakesignal` patch).

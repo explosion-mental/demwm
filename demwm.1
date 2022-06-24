@@ -31,6 +31,18 @@ Restart the dwm process.
 .SS "SIGTERM - 15"
 .PP
 Cleanly terminate the dwm process.
+.SH "ENVIROMENT"
+.SS "STATUSBAR"
+.PP
+demwm sets an \fIenviromental variable\fP called \fCSTATUSBAR\fP which value is set to the
+\fIpid\fP of the current demwm instance. This resolves signaling while having multiple instances of \fBdemwm\fP.
+.SS "BLOCK\d\s-2BUTTON\s+2\u"
+.PP
+For clicking to do anything you have to make a dedicated script which handles
+the \fCBLOCK_BUTTON\fP \fIenviromental variable\fP. See EXAMPLES section.
+To define the value of \fCBLOCK_BUTTON\fP, you have to edit \fBconfig.h\fP mouse
+buttons bindings \fCsendstatusbar\fP.
+
 .SH "CONFIGURATION"
 .PP
 dwm is customized by creating a custom config.h and (re)compiling the source code. This keeps it simple, since reading a config file isn’t that hard (but adds unneeded complexity), and in many aspects more customizable. I try my best to comment about the variables in config.h, since they don’t do anything crazy, so it should be very straight foward what does what.
@@ -42,6 +54,35 @@ What do you need to know? User functions, described below.
 
 .PP
 \fINOTE\fP: Function that do take an argument, are bidirectional: this means that number signs define the behaviour of the function. ( \fC\-1\fP / \fC+1\fP )
+.SH "STATUS BAR TEXT BLOCKS"
+.TS
+ center,box;
+
+l |l |.
+\fBEntry\fP	\fBValue\fP
+_
+\fBcolor\fP	foreground (the text) color for the block
+_
+\fBcommand\fP	The block text, it’s just the output of any program.
+_
+\fBinterval\fP	How many seconds have to pass before updating (running/executing)
+	the command and update the output. Can be 0, which means never.
+_
+\fBsignal\fP	A number used to manually update the block.
+	Can be 0, which won’t allow you to update the block manually
+.TE
+.TB ""
+
+.SS "SIGNALING BLOCKS"
+.PP
+\fBThis is discouraged, use \fCxsetroot \-name\fP instead\fP
+
+
+.PP
+The signal is a number to update the command, requires you to add \fC34\fP. Say a
+signal number \fCY\fP  which, for example, I will define as \fCY = 11\fP. Then \fCY + 34\fP ->
+\fC11 + 34\fP -> \fC45\fP, and you will need this result in order to actually use the signal
+with \fCkill\fP, In this case: \fCkill \-45 $(pidof demwm)\fP
 .SH "FUNCTIONS"
 .SS "cyclelayout"
 .PP
@@ -421,10 +462,10 @@ For this you need to define a \fCRule\fP for that client (res name or class) and
 .nf
 \fCstatic const char *ncmpcpp[] = { "st", "-e", "ncmpcpp", NULL };
 static Key keys[] = {
-	/* modifier(s)      key         function        argument        */
-	{ MODKEY            XK_n,       spawn,      { .v = ncmpcpp }    },
-	{ MODKEY            XK_m,       SHCMD("st -e ncmpcpp")          },
-   ...
+  /* modifier(s)      key         function        argument        */
+  { MODKEY            XK_n,       spawn,      { .v = ncmpcpp }    },
+  { MODKEY            XK_m,       SHCMD("st -e ncmpcpp")          },
+  ...
 };
 \fP
 .fi
@@ -433,20 +474,51 @@ static Key keys[] = {
 .RS
 .nf
 \fCstatic const Rule rules[] = {
-  	RULE(.instance = "term", .tags = SPTAG(Sp1))
-    ...
+  RULE(.instance = "term", .tags = SPTAG(Sp1))
+  ...
 };
 static const char *scratchpads[][32] = {
 [Sp1] = { "st", "-n", "term", NULL }, /* terminal */
 ...
 };
 static const Key keys[] = {
-	SPKEYS(MOD,		XK_s,      Sp1)
-    ...
+  SPKEYS(MOD,    XK_s,    Sp1)
+  ...
 };
 \fP
 .fi
 .RE
+.SS "A script that handles clicking"
+.PP
+\fBNOTE\fP: Before calling \fCexit\fP it does \fCecho ''\fP; it is important to \fCecho\fP something
+(even \fC''\fP) to ’\fInotify’\fP demwm that the block has changed.
+
+
+.RS
+.nf
+\fC#!/bin/sh
+
+# handle demwm blocks
+case $BLOCK_BUTTON in
+  1) notify-send "You've clicked mouse button $BLOCK_BUTTON" ;;
+  2) notify-send "Right click" ;;
+  3) notify-send "Middle click" ;;
+  4) pamixer --allow-boost -i 1 ;; # volume up
+  5) pamixer --allow-boost -d 1 ;; # volume down
+  6) "$TERMINAL" -e "$EDITOR" "$0" ;; # edit the block
+  7) "$TERMINAL" -e "$EDITOR" "$0" & ;; # edit the block without locking it
+esac
+
+# If nothing is playing, don't output anything
+[ "$(mpc status '%state%')" = 'paused' ] && echo '' && exit
+
+# dislpay text
+echo "Playing: $(mpc current --format '[[%artist% - ]%title%]|[%file%]')"
+\fP
+.fi
+.RE
+
+
 .SH "ISSUES"
 .PP
 Java applications which use the XToolkit/XAWT backend may draw grey windows
