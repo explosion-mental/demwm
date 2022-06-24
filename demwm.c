@@ -95,6 +95,7 @@
 #define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
 #define SETVAL(X, flag, val)	X->f = ((val) ? X->f | flag : X->f & ~flag)
 #define WINMASK			(CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask)
+#define SELSET(X)		X->tagset[X->seltags]
 
 #ifdef SYSTRAY
 /* XEMBED messages */
@@ -570,7 +571,7 @@ applyrules(Client *c)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
-	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (c->mon->tagset[c->mon->seltags] & ~SPTAGMASK);
+	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (SELSET(c->mon) & ~SPTAGMASK);
 }
 
 int
@@ -771,7 +772,7 @@ buttonpress(XEvent *e)
 			occ |= c->tags == 255 ? 0 : c->tags;
 		do {
 			/* do not reserve space for vacant tags */
-			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i) && m->f & HideVacant)
+			if (!(occ & 1 << i || SELSET(m) & 1 << i) && m->f & HideVacant)
 				continue;
 			x += TEXTW(m->f & HideVacant ? tagsalt[i] : tags[i]);
 		} while (ev->x >= x && ++i < LENGTH(tags));
@@ -1133,7 +1134,7 @@ comboview(const Arg *arg)
 			focus(selected);
 
 		/* toggleview */
-		selmon->tagset[selmon->seltags] |= newtags;
+		SELSET(selmon) |= newtags;
 
 		#ifdef TAG_PREVIEW
 		getpreview();
@@ -1329,10 +1330,10 @@ drawbar(Monitor *m)
 
 	for (i = 0; i < LENGTH(tags); i++) {
 		/* apply 'hidevacant' only to the selected monitor */
-		if (m->f & HideVacant && (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i)))
+		if (m->f & HideVacant && (!(occ & 1 << i || SELSET(m) & 1 << i)))
 			continue;
 		w = TEXTW(m->f & HideVacant ? tagsalt[i] : tags[i]);
-		drw_setscheme(drw, scheme[urg & 1 << i ? SchemeUrgent : (m->tagset[m->seltags] & 1 << i && m == selmon ? SchemeSel : SchemeNorm)]);
+		drw_setscheme(drw, scheme[urg & 1 << i ? SchemeUrgent : (SELSET(m) & 1 << i && m == selmon ? SchemeSel : SchemeNorm)]);
 		drw_text(drw, x, 0, w, bh, lrpad / 2, m->f & HideVacant ? tagsalt[i] : tags[i], 0);
 		if (occ & 1 << i && !(m->f & HideVacant)) { /* don't draw these when hidevacant */
 			if (urg & 1 << i) {
@@ -1695,7 +1696,7 @@ getpreview(void)
 
 	for (i = 0; i < LENGTH(tags); i++) {
 		/* searching for tags that are occupied && selected */
-		if (!(occ & 1 << i) || !(selmon->tagset[selmon->seltags] & 1 << i))
+		if (!(occ & 1 << i) || !(SELSET(selmon) & 1 << i))
 			continue;
 
 		if (selmon->tagmap[i]) { /* tagmap exist, clean it */
