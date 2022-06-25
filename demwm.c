@@ -1118,7 +1118,8 @@ comboview(const Arg *arg)
 		/* tagallmaster: clients in the master area should be the same
 		 * after we add a new tag
 		 * Collect (from last to first) references to all clients in the master area */
-		Client *c, *selected = selmon->sel, *masters[selmon->nmaster];
+		Client **const masters = ecalloc(selmon->nmaster, sizeof(Client *));
+		Client *c, *selected = selmon->sel;
 		size_t i;
 
 		for (c = nexttiled(selmon->clients), i = 0; c && i < selmon->nmaster; c = nexttiled(c->next), ++i)
@@ -1129,6 +1130,7 @@ comboview(const Arg *arg)
 		for (i = 0; i < selmon->nmaster; i++)
 			if (masters[i])
 				pop(masters[i]);
+		free(masters);
 
 		if (selmon->sel != selected) /* don't mutate the focus */
 			focus(selected);
