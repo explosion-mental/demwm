@@ -3388,7 +3388,7 @@ setfullscreen(Client *c, int fullscreen)
 		}
 	}
 
-	if (fullscreen != (c->f & FS)) { /* only send property change if necessary */
+	if (fullscreen != (c->f & FS ? 1 : 0)) { /* only send property change if necessary */
 		XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32, PropModeReplace,
 			(unsigned char *) (fullscreen ? &netatom[NetWMFullscreen] : 0), fullscreen);
 		SETVAL(c, FS, fullscreen);
@@ -3933,7 +3933,7 @@ togglefullscreen(const Arg *arg)
 		c->fakefullscreen = 2;
 		setfullscreen(c, 1);
 	} else
-		setfullscreen(c, !(c->f & FS));
+		setfullscreen(c, !(c->f & FS ? 1 : 0));
 }
 
 void
