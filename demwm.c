@@ -144,6 +144,7 @@ enum {
 	UnCursor   = 1 << 11,
 	Urg        = 1 << 12, /* urgent */
 	WasFloat   = 1 << 13, /* oldstate: used in fullscreen operations */
+	LastFlag   = 1 << 14, /* placeholder for the last flag */
 }; /* client flags/state */
 enum { HideVacant = 1 << 0, ShowBar = 1 << 1, TopBar = 1 << 2 }; /* mon flags */
 
@@ -491,7 +492,7 @@ static void (*handler[LASTEvent])(XEvent *) = {
 static Atom xatom[XLast];
 static Systray *systray = NULL;
 #endif /* SYSTRAY */
-static Atom wmatom[WMLast], netatom[NetLast], demwmtags, demwmmon, demwmfloat;
+static Atom wmatom[WMLast], netatom[NetLast], demwmtags, demwmmon, demwmflags;
 static int running = 1, restart = 0;
 static int depth, screen;
 static Cur *cursor[CurLast];
@@ -706,6 +707,8 @@ swallow(Client *p, Client *c)
 #endif /* ICONS */
 	updatetitle(p);
 	setclientatoms(p);
+	XChangeProperty(dpy, c->win, demwmflags, XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *)&(c->f) , 1);
 
 	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
 
@@ -1633,7 +1636,7 @@ getatomprop(Client *c, Atom prop)
 		req = xatom[XembedInfo];
 #endif /* SYSTRAY */
 
-	if (prop == demwmtags || prop == demwmmon || prop == demwmfloat)
+	if (prop == demwmtags || prop == demwmmon || prop == demwmflags)
 		req = XA_CARDINAL;
 
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
@@ -2365,6 +2368,8 @@ manage(Window w, XWindowAttributes *wa)
 		c->mon = selmon;
 		applyrules(c);
 		term = termforwin(c);
+		if ((tmptom = getatomprop(c, demwmflags)) != None)
+			c->f = tmptom & (LastFlag - 1);
 		if ((tmptom = getatomprop(c, demwmtags)) != None)
 			c->tags = tmptom & TAGMASK;
 		if ((tmptom = getatomprop(c, demwmmon)) != None) {
@@ -2375,8 +2380,6 @@ manage(Window w, XWindowAttributes *wa)
 				}
 			}
 		}
-		if ((tmptom = getatomprop(c, demwmfloat)) != None)
-			c->f |= Float;
 	}
 	setclientatoms(c);
 
@@ -3428,6 +3431,8 @@ setfullscreen(Client *c, int fullscreen)
 	} else /* FIXME resizeclient seems to not take care of the gaps */
 		arrange(c->mon);
 		//resizeclient(c, c->x, c->y, c->w, c->h);
+	XChangeProperty(dpy, c->win, demwmflags, XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *)&(c->f) , 1);
 }
 
 void
@@ -3548,7 +3553,7 @@ setup(void)
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
 	demwmtags                      = XInternAtom(dpy, "_DEMWM_TAGS", False);
 	demwmmon                       = XInternAtom(dpy, "_DEMWM_MON", False);
-	demwmfloat                     = XInternAtom(dpy, "_DEMWM_FLOAT", False);
+	demwmflags                     = XInternAtom(dpy, "_DEMWM_FLAGS", False);
 	wmatom[WMProtocols]            = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	wmatom[WMDelete]               = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wmatom[WMState]                = XInternAtom(dpy, "WM_STATE", False);
@@ -3647,6 +3652,8 @@ seturgent(Client *c, int urg)
 		return;
 
 	wmh->flags = urg ? (wmh->flags | XUrgencyHint) : (wmh->flags & ~XUrgencyHint);
+	XChangeProperty(dpy, c->win, demwmflags, XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *)&(c->f) , 1);
 	XSetWMHints(dpy, c->win, wmh);
 	XFree(wmh);
 }
@@ -3654,13 +3661,10 @@ seturgent(Client *c, int urg)
 void
 setclientatoms(Client *c)
 {
-	unsigned int i = c->f & Float;
 	XChangeProperty(dpy, c->win, demwmtags, XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *)&(c->tags), 1);
 	XChangeProperty(dpy, c->win, demwmmon, XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *)&(c->mon->num), 1);
-	XChangeProperty(dpy, c->win, demwmfloat, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)&i , 1);
 }
 
 void
@@ -3898,6 +3902,8 @@ togglefloating(const Arg *arg)
 	/* if floating: toggle it, if fixed: true */
 	SETVAL(c, Float, ((c->f & Float) ^ Float) || (c->f & Fixed));
 
+	XChangeProperty(dpy, c->win, demwmflags, XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *)&(c->f) , 1);
 	if (selmon->sel->f & Float) {
 		selmon->sel->bw = fborderpx;
 		configure(selmon->sel);
@@ -4871,6 +4877,8 @@ togglealwaysontop(const Arg *arg)
 	if (!(selmon->sel->f & Float)) /* only floating clients can be always on top */
 		togglefloating(NULL);
 	selmon->sel->f ^= AlwOnTop;
+	XChangeProperty(dpy, selmon->sel->win, demwmflags, XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *)&(selmon->sel->f) , 1);
 	focus(NULL);
 }
 
@@ -4993,6 +5001,8 @@ togglesticky(const Arg *arg)
 	if (!selmon->sel)
 		return;
 	selmon->sel->f ^= Sticky;
+	XChangeProperty(dpy, selmon->sel->win, demwmflags, XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *)&(selmon->sel->f) , 1);
 	focus(NULL);
 	arrange(selmon);
 }
