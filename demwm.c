@@ -96,7 +96,8 @@
 #define SETVAL(X, flag, val)	X->f = ((val) ? X->f | flag : X->f & ~flag)
 #define WINMASK			(CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask)
 #define SELSET(X)		X->tagset[X->seltags]
-
+#define UPFLAGS(C)		XChangeProperty(dpy, C->win, demwmflags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->f), 1);
+#define UPTAGS(C)		XChangeProperty(dpy, C->win, demwmtags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1);
 #ifdef SYSTRAY
 /* XEMBED messages */
 #define VERSION_MAJOR		0
@@ -357,7 +358,6 @@ static void setmfact(const Arg *arg);
 static void setup(void);
 static void setsignal(int sig, void (*sahandler)(int sig));
 static void seturgent(Client *c, int urg);
-static void setclientatoms(Client *c);
 static void shift(unsigned int *tag, int i);
 static void shiftpreview(const Arg *arg);
 static void shifttag(const Arg *arg);
@@ -706,9 +706,8 @@ swallow(Client *p, Client *c)
 	updateicon(p);
 #endif /* ICONS */
 	updatetitle(p);
-	setclientatoms(p);
-	XChangeProperty(dpy, c->win, demwmflags, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)&(c->f) , 1);
+	UPTAGS(p);
+	UPFLAGS(p);
 
 	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
 
@@ -1105,7 +1104,7 @@ combotag(const Arg *arg)
 		selmon->sel->tags = newtags;
 	}
 
-	setclientatoms(selmon->sel);
+	UPTAGS(selmon->sel);
 	focus(NULL);
 	arrange(selmon);
 }
@@ -2381,7 +2380,9 @@ manage(Window w, XWindowAttributes *wa)
 			}
 		}
 	}
-	setclientatoms(c);
+	UPTAGS(c);
+	XChangeProperty(dpy, c->win, demwmmon, XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *)&(c->mon->num), 1);
 
 	if (c->x + WIDTH(c) > c->mon->mx + c->mon->mw)
 		c->x = c->mon->mx + c->mon->mw - WIDTH(c);
@@ -3105,6 +3106,8 @@ sendmon(Client *c, Monitor *m)
 	detachstack(c);
 	c->mon = m;
 	c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
+	XChangeProperty(dpy, c->win, demwmmon, XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *)&(c->mon->num), 1);
 	attach(c);
 	attachstack(c);
 	focus(NULL);
@@ -3431,8 +3434,7 @@ setfullscreen(Client *c, int fullscreen)
 	} else /* FIXME resizeclient seems to not take care of the gaps */
 		arrange(c->mon);
 		//resizeclient(c, c->x, c->y, c->w, c->h);
-	XChangeProperty(dpy, c->win, demwmflags, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)&(c->f) , 1);
+	UPFLAGS(c);
 }
 
 void
@@ -3652,19 +3654,9 @@ seturgent(Client *c, int urg)
 		return;
 
 	wmh->flags = urg ? (wmh->flags | XUrgencyHint) : (wmh->flags & ~XUrgencyHint);
-	XChangeProperty(dpy, c->win, demwmflags, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)&(c->f) , 1);
+	UPFLAGS(c);
 	XSetWMHints(dpy, c->win, wmh);
 	XFree(wmh);
-}
-
-void
-setclientatoms(Client *c)
-{
-	XChangeProperty(dpy, c->win, demwmtags, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)&(c->tags), 1);
-	XChangeProperty(dpy, c->win, demwmmon, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)&(c->mon->num), 1);
 }
 
 void
@@ -3821,7 +3813,7 @@ tag(const Arg *arg)
 {
 	if (selmon->sel && arg->ui & TAGMASK) {
 		selmon->sel->tags = arg->ui & TAGMASK;
-		setclientatoms(selmon->sel);
+		UPTAGS(selmon->sel);
 		focus(NULL);
 		arrange(selmon);
 	}
@@ -3902,8 +3894,8 @@ togglefloating(const Arg *arg)
 	/* if floating: toggle it, if fixed: true */
 	SETVAL(c, Float, ((c->f & Float) ^ Float) || (c->f & Fixed));
 
-	XChangeProperty(dpy, c->win, demwmflags, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)&(c->f) , 1);
+	UPFLAGS(c);
+
 	if (selmon->sel->f & Float) {
 		selmon->sel->bw = fborderpx;
 		configure(selmon->sel);
@@ -4051,7 +4043,7 @@ toggletag(const Arg *arg)
 	newtags = selmon->sel->tags ^ (arg->ui & TAGMASK);
 	if (newtags) {
 		selmon->sel->tags = newtags;
-		setclientatoms(selmon->sel);
+		UPTAGS(selmon->sel);
 		focus(NULL);
 		arrange(selmon);
 	}
@@ -4877,8 +4869,7 @@ togglealwaysontop(const Arg *arg)
 	if (!(selmon->sel->f & Float)) /* only floating clients can be always on top */
 		togglefloating(NULL);
 	selmon->sel->f ^= AlwOnTop;
-	XChangeProperty(dpy, selmon->sel->win, demwmflags, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)&(selmon->sel->f) , 1);
+	UPFLAGS(selmon->sel);
 	focus(NULL);
 }
 
@@ -5001,8 +4992,7 @@ togglesticky(const Arg *arg)
 	if (!selmon->sel)
 		return;
 	selmon->sel->f ^= Sticky;
-	XChangeProperty(dpy, selmon->sel->win, demwmflags, XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)&(selmon->sel->f) , 1);
+	UPFLAGS(selmon->sel);
 	focus(NULL);
 	arrange(selmon);
 }
