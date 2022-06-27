@@ -912,58 +912,58 @@ clientmessage(XEvent *e)
 	XWindowAttributes wa;
 	XSetWindowAttributes swa;
 
-	if (systray && cme->window == systray->win && cme->message_type == netatom[NetSystemTrayOP]) {
-		/* add systray icons */
-		if (cme->data.l[1] == 0 /* SYSTEM_TRAY_REQUEST_DOCK */) {
-			/* do our little manage() like special treatment for the systray window */
-			c = ecalloc(1, sizeof(Client));
-			if (!(c->win = cme->data.l[2])) {
-				free(c);
-				return;
-			}
-			c->mon = selmon;
-			c->next = systray->icons;
-			systray->icons = c;
-			XGetWindowAttributes(dpy, c->win, &wa);
+	if (systray && cme->window == systray->win
+	&& cme->message_type == netatom[NetSystemTrayOP]
+	&& cme->data.l[1] == 0 /* SYSTEM_TRAY_REQUEST_DOCK */) {
+		/* do our little manage() like special treatment for the systray window */
+		c = ecalloc(1, sizeof(Client));
 
-			c->x = c->oldx = c->y = c->oldy = 0;
-			c->w = c->oldw = wa.width;
-			c->h = c->oldh = wa.height;
-			c->oldbw = wa.border_width;
-			c->bw = 0;
-			c->f |= Float;
-			/* reuse tags field as mapped status */
-			c->tags = 1;
-			updatesizehints(c);
-			updatesystrayicongeom(c, wa.width, wa.height);
-			XAddToSaveSet(dpy, c->win);
-			XSelectInput(dpy, c->win, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
-			XClassHint ch = { systrayclass[0], systrayclass[1] };
-			XSetClassHint(dpy, c->win, &ch);
-			swa.background_pixel  = 0;
-			//swa.background_pixel  = scheme[SchemeNorm][ColBg].pixel;	/* use parents background color */
-			//swa.background_pixel  = 0;
-			//swa.border_pixel = 0;
-			//wa.background_pixel = 0;
-			//swa.colormap = cmap;
-			XChangeWindowAttributes(dpy, c->win, CWBackPixel, &swa);
-			XReparentWindow(dpy, c->win, systray->win, 0, 0);
-			sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
-					0 /* XEMBED_EMBEDDED_NOTIFY */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
-
-			/* FIXME are these events needed? */
-			sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
-					0 /* XEMBED_FOCUS_IN */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
-			sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
-					1 /* XEMBED_WINDOW_ACTIVATE */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
-			sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
-					10 /* XEMBED_MODALITY_ON */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
-
-			XSync(dpy, False);
-			updatesystray();
-			setclientstate(c, NormalState);
+		if (!(c->win = cme->data.l[2])) {
+			free(c);
+			return;
 		}
-		return;
+
+		c->mon = selmon;
+		c->next = systray->icons;
+		systray->icons = c;
+		XGetWindowAttributes(dpy, c->win, &wa);
+
+		c->x = c->oldx = c->y = c->oldy = 0;
+		c->w = c->oldw = wa.width;
+		c->h = c->oldh = wa.height;
+		c->oldbw = wa.border_width;
+		c->bw = 0;
+		c->f |= Float;
+		c->tags = 1; /* reuse tags field as mapped status */
+		updatesizehints(c);
+		updatesystrayicongeom(c, wa.width, wa.height);
+		XAddToSaveSet(dpy, c->win);
+		XSelectInput(dpy, c->win, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
+		XClassHint ch = { systrayclass[0], systrayclass[1] };
+		XSetClassHint(dpy, c->win, &ch);
+		swa.background_pixel  = 0;
+		//swa.background_pixel  = scheme[SchemeNorm][ColBg].pixel;	/* use parents background color */
+		//swa.background_pixel  = 0;
+		//swa.border_pixel = 0;
+		//wa.background_pixel = 0;
+		//swa.colormap = cmap;
+		XChangeWindowAttributes(dpy, c->win, CWBackPixel, &swa);
+		XReparentWindow(dpy, c->win, systray->win, 0, 0);
+		sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
+				0 /* XEMBED_EMBEDDED_NOTIFY */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+
+		/* FIXME are these events needed? */
+		sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
+				0 /* XEMBED_FOCUS_IN */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+		sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
+				1 /* XEMBED_WINDOW_ACTIVATE */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+		sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
+				10 /* XEMBED_MODALITY_ON */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+
+		XSync(dpy, False);
+		updatesystray();
+		setclientstate(c, NormalState);
+		return; /* ignore other atoms for systray */
 	}
 #endif /* SYSTRAY */
 	if (!c)
@@ -974,14 +974,13 @@ clientmessage(XEvent *e)
 			if (c->fakefullscreen == 2 && c->f & FS)
 				c->fakefullscreen = 3;
 			setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD */
-				|| (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */ && !(c->f & FS))));
+			|| (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */ && !(c->f & FS))));
 		} else if (cme->data.l[1] == netatom[NetWMStateAbove]
-		|| cme->data.l[2] == netatom[NetWMStateAbove])
+			|| cme->data.l[2] == netatom[NetWMStateAbove])
 			SETVAL(c, AlwOnTop, (cme->data.l[0] || cme->data.l[1]));
-	} else if (cme->message_type == netatom[NetActiveWindow]) {
+	} else if (cme->message_type == netatom[NetActiveWindow])
 		if (c != selmon->sel && !(c->f & Urg))
 			seturgent(c, 1);
-	}
 }
 
 void
