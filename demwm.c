@@ -1505,15 +1505,7 @@ focus(Client *c)
 
 			/* Move all visible floating windows that are not marked as on top, below the bar window */
 			wc.stack_mode = Below;
-			/* since most floating 'pop ups' get focus
-			 * automatically, there is no need to raise (or when
-			 * switching tags, re-raise) the floating windows if
-			 * the user has already changed the focus to the tiled
-			 * window (or another client in that case). */
-			//if (c->tags == SCRATCHPAD_MASK || (c->tags & SPTAGMASK))
-				wc.sibling = c->win;//c->win;
-			//else
-			//	wc.sibling = c->mon->barwin;//c->win;
+			wc.sibling = c->win;
 
 			for (f = c->mon->stack; f; f = f->snext)
 				if (f != c && (f->f & Float) && ISVISIBLE(f) && !(f->f & AlwOnTop)) {
