@@ -3979,7 +3979,7 @@ togglescratch(const Arg *arg)
 				else
 					last = monclients = c;
 			} else { /* the scratchpad it's on the same monitor */
-				XSetWindowBorder(dpy, c->win, scheme[BorderFloat][0].pixel);
+				XSetWindowBorder(dpy, c->win, scheme[c->f & Float ? BorderFloat : BorderSel][0].pixel);
 				c->mon->tagset[c->mon->seltags] ^= scratchtag;
 				if (c->f & Float)
 					XRaiseWindow(dpy, c->win);
