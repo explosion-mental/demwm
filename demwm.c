@@ -2430,6 +2430,7 @@ manage(Window w, XWindowAttributes *wa)
 	if (term)
 		swallow(term, c);
 	focus(NULL);
+	UPFLAGS(c);
 }
 
 void
