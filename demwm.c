@@ -96,8 +96,8 @@
 #define SETVAL(X, flag, val)	X->f = ((val) ? X->f | flag : X->f & ~flag)
 #define WINMASK			(CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask)
 #define SELSET(X)		X->tagset[X->seltags]
-#define UPFLAGS(C)		XChangeProperty(dpy, C->win, demwmflags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->f), 1);
-#define UPTAGS(C)		XChangeProperty(dpy, C->win, demwmtags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1);
+#define UPFLAGS(C)		XChangeProperty(dpy, C->win, demwmflags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->f), 1)
+#define UPTAGS(C)		XChangeProperty(dpy, C->win, demwmtags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1)
 #ifdef SYSTRAY
 /* XEMBED messages */
 #define VERSION_MAJOR		0
