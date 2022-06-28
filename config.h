@@ -274,7 +274,7 @@ static const Layout layouts[] = {
 #define SHCMD(cmd)	spawn, { .v = (const char *[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* helper for spawning shell commands directly (without calling /bin/sh) */
-#define CMD(cmd)	spawn, { .v = (const char *[]){ __VA_ARGS__, NULL } }
+#define CMD(...)	spawn, { .v = (const char *[]){ __VA_ARGS__, NULL } }
 
 /* helper for spawning shell commands in scratchpads */
 #define SH(cmd)		{ "/bin/sh", "-c", cmd, NULL }
@@ -430,10 +430,10 @@ static const Key keys[] = {
 
 			/* Custom bindings (may be better using shkd) */
 					/* Media */
-	{ MOD|Shift,		XK_minus,	SHCMD("mpc volume -3")	},
-	{ MOD|Shift,		XK_equal,	SHCMD("mpc volume +3")	},
-	{ MOD|Shift,		XK_bracketleft,	SHCMD("mpc seek -10")	},
-	{ MOD|Shift,		XK_bracketright,SHCMD("mpc seek +10")	},
+	{ MOD|Shift,		XK_minus,	CMD("mpc", "volume", "-3")	},
+	{ MOD|Shift,		XK_equal,	CMD("mpc", "volume", "+3")	},
+	{ MOD|Shift,		XK_bracketleft,	CMD("mpc", "seek", "-10")	},
+	{ MOD|Shift,		XK_bracketright,CMD("mpc", "seek", "+10")	},
 	{ MOD,			XK_minus,	SHCMD("pamixer -d 3; xsetroot -name 8")},
 	{ MOD,			XK_equal,	SHCMD("pamixer --allow-boost -i 3; xsetroot -name 8")},
 	{ MOD,			XK_BackSpace,	SHCMD("pamixer -t; xsetroot -name 8")},
@@ -443,7 +443,7 @@ static const Key keys[] = {
 			{ mpc play && mpdnoti 2000 ;} || mpc pause; xsetroot -name 11")	},
 	{ MOD,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 900; xsetroot -name 11")	},
 	{ MOD,	XK_bracketright,	SHCMD("mpc next && mpdnoti 900; xsetroot -name 11")	},
-	{ MOD|Ctrl,	XK_p,		SHCMD("mpdnoti")		},
+	{ MOD|Ctrl,	XK_p,		CMD("mpdnoti")		},
 	{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer -d 2; xsetroot -name 8")},
 	{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2; xsetroot -name 8")},
 	{ 0, XF86XK_AudioMute,		SHCMD("pamixer -t; xsetroot -name 8")	},
@@ -451,30 +451,30 @@ static const Key keys[] = {
 //	{ 0, XF86XK_ScreenSaver,	SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
 //	{ 0, XF86XK_AudioStop,		SHCMD("mpc toggle)		},
 //	{ 0, XF86XK_Sleep,		SHCMD("sudo zzz")		},
-	{ 0, XF86XK_ScreenSaver,	SHCMD("xset dpms force off")		},
+	{ 0, XF86XK_ScreenSaver,	CMD("xset", "dpms", "force", "off")	},
 	{ 0, XF86XK_MonBrightnessUp,	SHCMD("sudo brightnessctl -q set +1%")	},
 	{ 0, XF86XK_MonBrightnessDown,	SHCMD("sudo brightnessctl -q set 1%-")	},
 	{ 0, XF86XK_AudioPlay,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
 			{ mpc play && mpdnoti 2000 ;} || mpc pause; xsetroot -name 11")	},
 				/* one shooters */
 	{ MOD,		   XK_Return,	CMD("st")			},
-	{ MOD,			XK_m,	SHCMD("st -e vifmrun")		},
+	{ MOD,			XK_m,	CMD("st", "-e", "vifmrun")	},
 	{ MOD|Shift,		XK_m,	CMD("samedirvifm")		},
 	{ MOD,			XK_b,	CMD("Books001")		},
 	{ MOD|Shift,		XK_u,	CMD("bookmenu")		},
 	{ MOD|Shift,		XK_b,	CMD("Boletin001")		},
-	{ MOD,		        XK_c,	SHCMD("st -f 'Monofur Nerd Font:pixelsize=22:antialias=true:autohint=true' -e calcurse")},
-	{ MOD,	         	XK_z,	SHCMD("redyt -r")		},
+	{ MOD,		        XK_c,	CMD("st", "-f", FURFONT, "-e", "calcurse")},
+	{ MOD,	         	XK_z,	CMD("redyt", "-r")		},
 	{ MOD|Shift,	      	XK_z,	CMD("waldl")		},
 	{ MOD,		    XK_grave,	CMD("dmenuunicode")		},
-	{ MOD|Shift,	   XK_Return,	SHCMD("samedir &")		},
+	{ MOD|Shift,	   XK_Return,	CMD("samedir")		},
 //	{ MOD,	        XK_semicolon,	SHCMD("dmenu_mpc")		},
 //	{ MOD|Shift,	    XK_slash,	SHCMD("tuxi -q")		},
 	{ MOD,			XK_u,	CMD("clipmagick")		},
 	{ MOD|Shift,		XK_y,	SHCMD("termyt -r")		},
 	{ MOD|Shift,		XK_y,	CMD("dmenuhandler")		},
 	{ MOD,		    XK_slash,	CMD("dmenu_browser")		},
-	{ MOD|Shift,	        XK_n,	SHCMD("xdotool click 1")	},
+	{ MOD|Shift,	        XK_n,	CMD("xdotool", "click", "1")	},
 	{ MOD,			XK_t,	CMD("testi")			},
 	{ MOD,		   XK_Escape,	CMD("sysfunctions")	},
 //	{ MOD,			XK_e,	SHCMD("st -t New-e newsboat -q; pkill -RTMIN+6 dwmblocks") },
