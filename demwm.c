@@ -2421,7 +2421,7 @@ manage(Window w, XWindowAttributes *wa)
 	XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w, c->h); /* some windows require this */
 	setclientstate(c, NormalState);
 	if (c->mon == selmon) {
-		losefullscreen(c);
+		//losefullscreen(c); /* lose fullscreen when a new window is opened */
 		unfocus(selmon->sel, 0);
 	}
 	c->mon->sel = c;
