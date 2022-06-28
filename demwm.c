@@ -1495,12 +1495,13 @@ focus(Client *c)
 			wc.sibling = c->mon->barwin;
 			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 
-			/* Move all visible tiled and floating clients that are
-			 * not marked as on top, below the bar window */
+			/* Move all visible clients that are not marked as on top:
+			 ** tiled: below the bar window
+			 ** floating: below the selected window (avoids showing the bar) */
+			wc.stack_mode = Below;
 			for (f = c->mon->stack; f; f = f->snext) {
 				if (f != c && !(f->f & AlwOnTop) && ISVISIBLE(f)) {
-					wc.stack_mode = Below;
-					wc.sibling = c->f & Float ? c->mon->barwin : c->win;
+					wc.sibling = c->f & Float ? c->win : c->mon->barwin;
 					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
 					wc.sibling = f->win;
 				}
