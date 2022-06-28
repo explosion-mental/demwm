@@ -3181,7 +3181,7 @@ getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 	unsigned int n, oe, ie;
 	Client *c;
 
-	oe = ie = m->pertag->enablegaps & m->tagset[m->seltags] ? 1 : 0;
+	oe = ie = m->pertag->enablegaps & (m->tagset[m->seltags] & ~SPTAGMASK) ? 1 : 0;
 
 	if (!pertag)
 		oe = ie = enablegaps;
