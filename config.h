@@ -427,39 +427,36 @@ static const Key keys[] = {
 
 			/* Custom bindings (may be better using shkd) */
 					/* Media */
-	{ MOD|Shift,		XK_minus,		SHCMD("mpc volume -3")	},
-	{ MOD|Shift,		XK_equal,		SHCMD("mpc volume +3")	},
-	{ MOD|Shift,		XK_bracketleft,		SHCMD("mpc seek -10")	},
-	{ MOD|Shift,		XK_bracketright,	SHCMD("mpc seek +10")	},
+	{ MOD|Shift,		XK_minus,	SHCMD("mpc volume -3")	},
+	{ MOD|Shift,		XK_equal,	SHCMD("mpc volume +3")	},
+	{ MOD|Shift,		XK_bracketleft,	SHCMD("mpc seek -10")	},
+	{ MOD|Shift,		XK_bracketright,SHCMD("mpc seek +10")	},
 	{ MOD,			XK_minus,	SHCMD("pamixer -d 3; xsetroot -name 8")},
 	{ MOD,			XK_equal,	SHCMD("pamixer --allow-boost -i 3; xsetroot -name 8")},
 	{ MOD,			XK_BackSpace,	SHCMD("pamixer -t; xsetroot -name 8")},
 	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev && mpdnoti 900; xsetroot -name 11")	},
 	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next && mpdnoti 900; xsetroot -name 11")	},
-	{ MOD,		XK_p,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
+	{ MOD,			XK_p,	SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
 			{ mpc play && mpdnoti 2000 ;} || mpc pause; xsetroot -name 11")	},
 	{ MOD,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 900; xsetroot -name 11")	},
 	{ MOD,	XK_bracketright,	SHCMD("mpc next && mpdnoti 900; xsetroot -name 11")	},
 	{ MOD|Ctrl,	XK_p,		SHCMD("mpdnoti")		},
-	{ 0,	XF86XK_AudioLowerVolume,	SHCMD("pamixer -d 2; xsetroot -name 8")},
-	{ 0,	XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2; xsetroot -name 8")},
-	{ 0,	XF86XK_AudioMute,		SHCMD("pamixer -t; xsetroot -name 8")	},
-//{ 0,	XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
-//{ 0, XF86XK_ScreenSaver,		SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
-//	{ 0,	XF86XK_AudioStop,		SHCMD("mpc toggle)		},
-//	{ 0,	XF86XK_Sleep,			SHCMD("sudo zzz")		},
-	{ 0,	XF86XK_ScreenSaver,		SHCMD("xset dpms force off")		},
-	{ 0,	XF86XK_MonBrightnessUp,		SHCMD("sudo brightnessctl -q set +1%")	},
-	{ 0,	XF86XK_MonBrightnessDown,	SHCMD("sudo brightnessctl -q set 1%-")	},
-	{ 0,	XF86XK_AudioPlay,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
+	{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer -d 2; xsetroot -name 8")},
+	{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2; xsetroot -name 8")},
+	{ 0, XF86XK_AudioMute,		SHCMD("pamixer -t; xsetroot -name 8")	},
+//	{ 0, XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
+//	{ 0, XF86XK_ScreenSaver,	SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
+//	{ 0, XF86XK_AudioStop,		SHCMD("mpc toggle)		},
+//	{ 0, XF86XK_Sleep,		SHCMD("sudo zzz")		},
+	{ 0, XF86XK_ScreenSaver,	SHCMD("xset dpms force off")		},
+	{ 0, XF86XK_MonBrightnessUp,	SHCMD("sudo brightnessctl -q set +1%")	},
+	{ 0, XF86XK_MonBrightnessDown,	SHCMD("sudo brightnessctl -q set 1%-")	},
+	{ 0, XF86XK_AudioPlay,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
 			{ mpc play && mpdnoti 2000 ;} || mpc pause; xsetroot -name 11")	},
-			/* Custom bindings (may be better using shkd) */
+				/* one shooters */
 	{ MOD,		   XK_Return,	SHCMD("st")			},
 	{ MOD,			XK_m,	SHCMD("st -e vifmrun")		},
 	{ MOD|Shift,		XK_m,	SHCMD("samedirvifm")		},
-	{ MOD|Ctrl,		XK_m,	SHCMD("maim -usDq ${HOME}/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
-	{ MOD|Shift,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
-	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
 	{ MOD,			XK_b,	SHCMD("Books001")		},
 	{ MOD|Shift,		XK_u,	SHCMD("bookmenu")		},
 	{ MOD|Shift,		XK_b,	SHCMD("Boletin001")		},
@@ -487,10 +484,14 @@ static const Key keys[] = {
 //	{ MOD,	         	XK_F6,	SHCMD("dmenumount")	},
 //	{ MOD,		 	XK_F7,	SHCMD("dmenumountq")	},
 	{ MOD,		 	XK_F8,	SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
-	/* remove black bars on the screenshot, 90% percent accuracy */
+	/* remove black bars on the screenshot (90% percent accuracy) */
+	{ MOD,			XK_Print,SHCMD("dmenurecord")	},
+				/* miscelaneous */
+	{ MOD|Ctrl,		XK_m,	SHCMD("maim -usDq ${HOME}/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
+	{ MOD|Shift,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
+	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
 	{ Shift,	XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
 	magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
-	{ MOD,	XK_Print,	SHCMD("dmenurecord")	},
 	{ 0,	XK_Print,	SHCMD("maim ~/Downloads/$(date +'%d-%m_%H_%M_%S').png")	},
 /* panic key */ { MOD, XK_Delete, SHCMD("mpv '/home/faber/Media/Videos/Fight the Power!.mkv' --loop-file=inf --fs") },
 };
