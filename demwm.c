@@ -1123,14 +1123,13 @@ comboview(const Arg *arg)
 		Client *c, *selected = selmon->sel;
 		size_t i;
 
-		for (c = nexttiled(selmon->clients), i = 0; c && i < selmon->nmaster; c = nexttiled(c->next), ++i)
-			masters[selmon->nmaster - (i + 1)] = c;
-
 		/* put the master clients at the front of the list > go from
 		 * the 'last' master to the 'first' */
-		for (i = 0; i < selmon->nmaster; i++)
+		for (c = nexttiled(selmon->clients), i = 0; c && i < selmon->nmaster; c = nexttiled(c->next), i++) {
+			masters[selmon->nmaster - (i + 1)] = c;
 			if (masters[i])
 				pop(masters[i]);
+		}
 		free(masters);
 
 		if (selmon->sel != selected) /* don't mutate the focus */
@@ -1491,28 +1490,21 @@ focus(Client *c)
 		XSetWindowBorder(dpy, c->win, scheme[c->f & Float ? BorderFloat : BorderSel][ColFg].pixel);
 		setfocus(c);
 		if (c->mon->lt[c->mon->sellt]->arrange) {
-			/* Move all visible tiled clients that are not marked as on top below the bar window */
-			wc.stack_mode = Below;
-			wc.sibling = c->mon->barwin;
-			for (f = c->mon->stack; f; f = f->snext)
-				if (f != c && !(f->f & (Float | AlwOnTop)) && ISVISIBLE(f)) {
-					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
-					wc.sibling = f->win;
-				}
 			/* Move the currently focused client above the bar window */
 			wc.stack_mode = Above;
 			wc.sibling = c->mon->barwin;
 			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 
-			/* Move all visible floating windows that are not marked as on top, below the bar window */
-			wc.stack_mode = Below;
-			wc.sibling = c->win;
-
-			for (f = c->mon->stack; f; f = f->snext)
-				if (f != c && (f->f & Float) && ISVISIBLE(f) && !(f->f & AlwOnTop)) {
+			/* Move all visible tiled and floating clients that are
+			 * not marked as on top, below the bar window */
+			for (f = c->mon->stack; f; f = f->snext) {
+				if (f != c && !(f->f & AlwOnTop) && ISVISIBLE(f)) {
+					wc.stack_mode = Below;
+					wc.sibling = c->f & Float ? c->mon->barwin : c->win;
 					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
 					wc.sibling = f->win;
 				}
+			}
 		}
 
 		if (c->f & UnCursor) /* put the cursor in the bottom right */
