@@ -273,6 +273,9 @@ static const Layout layouts[] = {
 /* helper for spawning shell commands */
 #define SHCMD(cmd)	spawn, { .v = (const char *[]){ "/bin/sh", "-c", cmd, NULL } }
 
+/* helper for spawning shell commands directly (without calling /bin/sh) */
+#define CMD(cmd)	spawn, { .v = (const char *[]){ __VA_ARGS__, NULL } }
+
 /* helper for spawning shell commands in scratchpads */
 #define SH(cmd)		{ "/bin/sh", "-c", cmd, NULL }
 
