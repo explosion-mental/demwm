@@ -3170,7 +3170,7 @@ void
 togglegaps(const Arg *arg)
 {
 	if (pertag)
-		selmon->pertag->enablegaps ^= selmon->tagset[selmon->seltags];
+		selmon->pertag->enablegaps ^= selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 	else
 		enablegaps = !enablegaps;
 	arrange(selmon);
