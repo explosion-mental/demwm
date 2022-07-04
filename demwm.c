@@ -2076,10 +2076,10 @@ getcmd(int i, char *button)
 	execlock |= (1 << i);
 
 	if (fork() == 0) {
+		close(pipes[i][0]);
 		if (dpy)
 			close(ConnectionNumber(dpy));
 		dup2(pipes[i][1], STDOUT_FILENO);
-		close(pipes[i][0]);
 		close(pipes[i][1]);
 
 		if (button)
