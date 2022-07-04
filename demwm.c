@@ -1501,7 +1501,7 @@ focus(Client *c)
 			wc.stack_mode = Below;
 			for (f = c->mon->stack; f; f = f->snext) {
 				if (f != c && !(f->f & AlwOnTop) && ISVISIBLE(f)) {
-					wc.sibling = c->f & Float ? c->win : c->mon->barwin;
+					wc.sibling = f->f & Float ? c->win : c->mon->barwin;
 					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
 					wc.sibling = f->win;
 				}
