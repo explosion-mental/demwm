@@ -1430,7 +1430,7 @@ enternotify(XEvent *e)
 		unfocus(selmon->sel, 1);
 		selmon = m;
 		if (!hovertofocus)
-			focus(c);
+			focus(NULL);
 	} else if (!c || c == selmon->sel)
 		return;
 	if (hovertofocus)
