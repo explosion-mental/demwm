@@ -3907,6 +3907,8 @@ void
 togglefloating(const Arg *arg)
 {
 	Client *c = selmon->sel;
+	XWindowChanges wc;
+
 	if (!c)
 		return;
 	if (c->f & FS && c->fakefullscreen != 1) /* no support for fullscreen windows */
@@ -3917,9 +3919,8 @@ togglefloating(const Arg *arg)
 	UPFLAGS(c);
 
 	if (selmon->sel->f & Float) {
-		selmon->sel->bw = fborderpx;
-		configure(selmon->sel);
-		/* apply float color, since oldbw has the old color */
+		wc.border_width = c->bw = fborderpx;
+		XConfigureWindow(dpy, c->win, CWBorderWidth, &wc);
 		XSetWindowBorder(dpy, c->win, scheme[BorderFloat][ColFg].pixel);
 
 		if (selmon->sel->sfx == -9999) /* first time floating */
@@ -3929,14 +3930,15 @@ togglefloating(const Arg *arg)
 			resize(selmon->sel, selmon->sel->sfx, selmon->sel->sfy,
 			       selmon->sel->sfw, selmon->sel->sfh, 0);
 	} else {
-		selmon->sel->bw = borderpx;
-		configure(selmon->sel);
+		wc.border_width = c->bw = borderpx;
+		XConfigureWindow(dpy, c->win, CWBorderWidth, &wc);
+		XSetWindowBorder(dpy, c->win, scheme[BorderSel][ColFg].pixel);
+
 		/* save last known float dimensions */
 		selmon->sel->sfx = selmon->sel->x;
 		selmon->sel->sfy = selmon->sel->y;
 		selmon->sel->sfw = selmon->sel->w;
 		selmon->sel->sfh = selmon->sel->h;
-		XSetWindowBorder(dpy, c->win, scheme[BorderSel][ColFg].pixel);
 	}
 
 	arrange(c->mon);
