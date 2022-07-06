@@ -225,7 +225,6 @@ struct Monitor {
 	int gappov;           /* vertical outer gaps */
 	unsigned int f;       /* flags */
 	unsigned int seltags, oldtags;
-	unsigned int sellt;
 	Client *clients;
 	Client *sel;
 	Client *stack;
@@ -236,7 +235,7 @@ struct Monitor {
 	int previewshow;
 	Pixmap *tagmap;
 #endif /* TAG_PREVIEW */
-	const Layout *lt[2];
+	const Layout *lt, *oldlt;
 	Pertag *pertag;
 };
 
@@ -525,8 +524,7 @@ struct Pertag {
 	unsigned int enablegaps;		/* display gaps for the current tag */
 	int nmasters[LENGTH(tags) + 1];		/* number of windows in master area */
 	float mfacts[LENGTH(tags) + 1];		/* mfacts per tag */
-	unsigned int sellts[LENGTH(tags) + 1];	/* selected layouts */
-	const Layout *ltidxs[LENGTH(tags)+1][2];/* matrix of tags and layouts indexes */
+	const Layout *ltidxs[LENGTH(tags) + 1];	/* matrix of tags and layouts indexes */
 	Client *prevzooms[LENGTH(tags) + 1];	/* store zoom information */
 	unsigned int gaps[LENGTH(tags) + 1];	/* gaps per tag */
 };
@@ -605,7 +603,7 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 		*h = bh;
 	if (*w < bh)
 		*w = bh;
-	if (resizehints || ((c->f & Float) && floathints) || !c->mon->lt[c->mon->sellt]->arrange) {
+	if (resizehints || ((c->f & Float) && floathints) || !c->mon->lt->arrange) {
 		if (!(c->f & HintsValid))
 			updatesizehints(c);
 		/* see last two sentences in ICCCM 4.1.2.3 */
@@ -658,9 +656,9 @@ arrange(Monitor *m)
 void
 arrangemon(Monitor *m)
 {
-	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
-	if (m->lt[m->sellt]->arrange)
-		m->lt[m->sellt]->arrange(m);
+	strncpy(m->ltsymbol, m->lt->symbol, sizeof m->ltsymbol);
+	if (m->lt->arrange)
+		m->lt->arrange(m);
 }
 
 void
@@ -846,7 +844,7 @@ cleanup(void)
 	size_t i;
 
 	view(&a);
-	selmon->lt[selmon->sellt] = &foo;
+	selmon->lt = &foo;
 	for (m = mons; m; m = m->next)
 		while (m->stack)
 			unmanage(m->stack, 0);
@@ -1043,7 +1041,7 @@ configurerequest(XEvent *e)
 	if ((c = wintoclient(ev->window))) {
 		if (ev->value_mask & CWBorderWidth)
 			c->bw = ev->border_width;
-		else if (c->f & Float || !selmon->lt[selmon->sellt]->arrange) {
+		else if (c->f & Float || !selmon->lt->arrange) {
 			m = c->mon;
 			if (ev->value_mask & CWX) {
 				c->oldx = c->x;
@@ -1169,9 +1167,8 @@ createmon(void)
 	m->gappoh = gappoh;
 	m->gappov = gappov;
 
-	m->lt[0] = taglayouts[0] && taglayouts[0] < LENGTH(layouts) ? &layouts[taglayouts[0]] : &layouts[0];
-	m->lt[1] = &layouts[1 % LENGTH(layouts)];
-	strncpy(m->ltsymbol, taglayouts[1] && taglayouts[1] < LENGTH(layouts) ? layouts[taglayouts[1]].symbol : layouts[0].symbol, sizeof m->ltsymbol);
+	m->lt = &layouts[0];
+	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
 
 	if (pertag) {
 		m->pertag = ecalloc(1, sizeof(Pertag));
@@ -1179,10 +1176,9 @@ createmon(void)
 
 
 		/* init layouts */
-		m->pertag->ltidxs[0][0] = &layouts[0];
-
+		m->pertag->ltidxs[0] = &layouts[0];
 		for (i = 1; i <= LENGTH(tags); i++)
-			m->pertag->ltidxs[i][0] = &layouts[taglayouts[i - 1]];
+			m->pertag->ltidxs[i] = &layouts[taglayouts[i - 1]];
 
 		for (i = 0; i <= LENGTH(tags); i++) {
 
@@ -1198,9 +1194,6 @@ createmon(void)
 
 			/* init mfacts */
 			m->pertag->mfacts[i] = m->mfact;
-
-			m->pertag->sellts[i] = m->sellt;
-			m->pertag->ltidxs[i][1] = m->lt[0];
 
 			/* swap focus and zoomswap*/
 			m->pertag->prevzooms[i] = NULL;
@@ -1223,7 +1216,7 @@ cyclelayout(const Arg *arg)
 	Layout *l;
 	unsigned int idx = 0;
 
-	for (l = (Layout *)layouts; l != selmon->lt[selmon->sellt]; l++, idx++);
+	for (l = (Layout *)layouts; l != selmon->lt; l++, idx++);
 
 	if (arg->i > 0) {
 		if (idx < LENGTH(layouts) - 1)
@@ -1348,14 +1341,14 @@ drawbar(Monitor *m)
 		x += w;
 	}
 	/* monocle, count clients if there are more than one */
-	if ((m->lt[m->sellt]->arrange == &monocle || m->lt[m->sellt]->arrange == &alphamonocle) && m->sel) {
+	if ((m->lt->arrange == &monocle || m->lt->arrange == &alphamonocle) && m->sel) {
 		for (a = 0, s = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), a++)
 			if (c == m->stack)
 				s = a;
 		if (!s && a)
 			s = a;
 		if (a > 1) {
-			if (m->lt[m->sellt]->arrange == &monocle) /* monocle */
+			if (m->lt->arrange == &monocle) /* monocle */
 				snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d/%d]", s, a);
 			else	/* alphamonocle */
 				snprintf(m->ltsymbol, sizeof m->ltsymbol, "{%d/%d}", s, a);
@@ -1366,7 +1359,7 @@ drawbar(Monitor *m)
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
 	if ((w = bw - tw - x) > bh) {
-		if (m->lt[m->sellt]->arrange == &clear) { /* hide title in clear layout */
+		if (m->lt->arrange == &clear) { /* hide title in clear layout */
 			drw_setscheme(drw, scheme[SchemeNorm]);
 			drw_rect(drw, x, 0, w, bh, 1, 1);
 			drw_map(drw, m->barwin, 0, 0, bw, bh);
@@ -1487,7 +1480,7 @@ focus(Client *c)
 		grabbuttons(c, 1);
 		XSetWindowBorder(dpy, c->win, scheme[c->f & Float ? BorderFloat : BorderSel][ColFg].pixel);
 		setfocus(c);
-		if (c->mon->lt[c->mon->sellt]->arrange) {
+		if (c->mon->lt->arrange) {
 			/* Move the currently focused client above the bar window */
 			wc.stack_mode = Above;
 			wc.sibling = c->mon->barwin;
@@ -1514,7 +1507,7 @@ focus(Client *c)
 	}
 
 	selmon->sel = c;
-	if (selmon->lt[selmon->sellt]->arrange == alphamonocle)
+	if (selmon->lt->arrange == alphamonocle)
 		arrangemon(selmon);
 	drawbars();
 }
@@ -2590,10 +2583,10 @@ movemouse(const Arg *arg)
 				ny = selmon->wy + selmon->wh - HEIGHT(c);
 			else if (abs((selmon->my + selmon->wh) - (ny + HEIGHT(c))) < snap)
 				ny = selmon->my + selmon->wh - HEIGHT(c);
-			if (!(c->f & Float) && selmon->lt[selmon->sellt]->arrange
+			if (!(c->f & Float) && selmon->lt->arrange
 			&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
 				togglefloating(NULL);
-			if (!selmon->lt[selmon->sellt]->arrange || c->f & Float)
+			if (!selmon->lt->arrange || c->f & Float)
 				resize(c, nx, ny, c->w, c->h, 1);
 			break;
 		}
@@ -2815,11 +2808,11 @@ resizeclient(Client *c, int x, int y, int w, int h)
 
 	/* don't draw borders if monocle/alphamonocle/only 1 client */
 	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next))
-	|| (c->mon->lt[c->mon->sellt]->arrange == &monocle
-	||  c->mon->lt[c->mon->sellt]->arrange == &alphamonocle))
+	|| (c->mon->lt->arrange == &monocle
+	||  c->mon->lt->arrange == &alphamonocle))
 	&& (c->fakefullscreen == 1 || !(c->f & FS))
 	&& !(c->f & Float)
-	&& c->mon->lt[c->mon->sellt]->arrange != NULL) {
+	&& c->mon->lt->arrange != NULL) {
 		c->w = wc.width += c->bw * 2;
 		c->h = wc.height += c->bw * 2;
 		wc.border_width = 0;
@@ -2898,11 +2891,11 @@ resizemouse(const Arg *arg)
 			if (c->mon->wx + nw >= selmon->wx && c->mon->wx + nw <= selmon->wx + selmon->ww
 			&& c->mon->wy + nh >= selmon->wy && c->mon->wy + nh <= selmon->wy + selmon->wh)
 			{
-				if (!(c->f & Float) && selmon->lt[selmon->sellt]->arrange
+				if (!(c->f & Float) && selmon->lt->arrange
 				&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap))
 					togglefloating(NULL);
 			}
-			if (!selmon->lt[selmon->sellt]->arrange || c->f & Float)
+			if (!selmon->lt->arrange || c->f & Float)
 				resize(c, nx, ny, nw, nh, 1);
 			break;
 		}
@@ -2933,7 +2926,7 @@ resizemousescroll(const Arg *arg)
 		return;
 	if (c->f & FS && c->fakefullscreen != 1) /* no support resizing fullscreen windows by mouse */
 		return;
-	if (!(c->f & Float) && selmon->lt[selmon->sellt]->arrange)
+	if (!(c->f & Float) && selmon->lt->arrange)
 		togglefloating(NULL);
 	restack(selmon);
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
@@ -2948,7 +2941,7 @@ resizemousescroll(const Arg *arg)
 	//	&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap))
 	//		togglefloating(NULL);
 	//}
-	if (!selmon->lt[selmon->sellt]->arrange || c->f & Float)
+	if (!selmon->lt->arrange || c->f & Float)
 		resize(c, c->x, c->y, nw, nh, 1);
 	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1, c->h + c->bw - 1);
 	XUngrabPointer(dpy, CurrentTime);
@@ -2971,9 +2964,9 @@ restack(Monitor *m)
 	if (!m->sel)
 		return;
 	/* unfocus floating */
-	if (m->sel->f & Float || !m->lt[m->sellt]->arrange)
+	if (m->sel->f & Float || !m->lt->arrange)
 		XRaiseWindow(dpy, m->sel->win);
-	if (m->lt[m->sellt]->arrange) {
+	if (m->lt->arrange) {
 		wc.stack_mode = Below;
 		wc.sibling = m->barwin;
 		for (c = m->stack; c; c = c->snext)
@@ -3190,7 +3183,7 @@ getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
 
 	/* outer gaps disabled when only one client or is disabled in the layout */
-	if ((smartgaps && n == 1) || m->lt[m->sellt]->gaps)
+	if ((smartgaps && n == 1) || m->lt->gaps)
 		oe = 0;
 
 	*oh = m->gappoh * oe;	/* outer horizontal gap */
@@ -3458,23 +3451,15 @@ setfullscreen(Client *c, int fullscreen)
 void
 setlayout(const Arg *arg)
 {
-	if (!arg || !arg->v || arg->v != selmon->lt[selmon->sellt]) {
-		if (pertag) {
-			selmon->pertag->sellts[selmon->pertag->curtag] ^= 1;
-			selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
-		} else
-			selmon->sellt ^= 1;
-	}
-
 	if (arg && arg->v) {
 		if (pertag) {
-			selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt] = (Layout *)arg->v;
-			selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
+			selmon->pertag->ltidxs[selmon->pertag->curtag] = (Layout *)arg->v;
+			selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
 		} else
-			selmon->lt[selmon->sellt] = (Layout *)arg->v;
+			selmon->lt = (Layout *)arg->v;
 	}
 
-	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
+	strncpy(selmon->ltsymbol, selmon->lt->symbol, sizeof selmon->ltsymbol);
 	if (selmon->sel)
 		arrange(selmon);
 	else
@@ -3489,7 +3474,7 @@ setcfact(const Arg *arg)
 
 	c = selmon->sel;
 
-	if (!arg || !c || !selmon->lt[selmon->sellt]->arrange)
+	if (!arg || !c || !selmon->lt->arrange)
 		return;
 	if (!arg->f)
 		f = 1.0;
@@ -3511,7 +3496,7 @@ setmfact(const Arg *arg)
 {
 	float f;
 
-	if (!arg || !selmon->lt[selmon->sellt]->arrange)
+	if (!arg || !selmon->lt->arrange)
 		return;
 
 	f = arg->f < 1.0 ? arg->f + selmon->mfact : arg->f - 1.0;
@@ -3767,7 +3752,7 @@ showhide(Client *c)
 	if (ISVISIBLE(c)) {
 		/* show clients top down */
 		XMoveWindow(dpy, c->win, c->x, c->y);
-		if ((!c->mon->lt[c->mon->sellt]->arrange || c->f & Float) && !(c->f & FS))
+		if ((!c->mon->lt->arrange || c->f & Float) && !(c->f & FS))
 			resize(c, c->x, c->y, c->w, c->h, 0);
 		showhide(c->snext);
 	} else {
@@ -4096,9 +4081,7 @@ toggleview(const Arg *arg)
 			/* apply settings for this view */
 			selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
 			selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
-			selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
-			selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
-			selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
+			selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
 			if (pertagbar && (selmon->f & ShowBar) != (selmon->pertag->showbars & selmon->seltags))
 				togglebar(NULL);
 		}
@@ -4520,9 +4503,7 @@ view(const Arg *arg)
 		}
 		selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
 		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
-		selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
-		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
-		selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
+		selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
 
 		if (gapspertag) { /* store gaps in 2 bits */
 			selmon->gappoh = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff) >> 0;
@@ -4746,7 +4727,7 @@ zoom(const Arg *arg)
 {
 	Client *c = selmon->sel;
 
-	if (!selmon->lt[selmon->sellt]->arrange
+	if (!selmon->lt->arrange
 	|| (selmon->sel && selmon->sel->f & Float))
 		return;
 	if (c == nexttiled(selmon->clients))
@@ -4771,7 +4752,7 @@ zoomswap(const Arg *arg)
 	if (c && c->f & Float)
 		togglefloating(NULL);
 
-	if (!c->mon->lt[c->mon->sellt]->arrange
+	if (!c->mon->lt->arrange
 	|| (c && c->f & Float) || !c)
 		return;
 	if (c == nexttiled(c->mon->clients)) {
