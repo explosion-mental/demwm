@@ -502,7 +502,7 @@ static const Key keys[] = {
 /* button definitions
  * click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static const Button buttons[] = {
-	/* click                event mask      button          function        argument */
+	/* click                modifier(s)      button          function        argument */
 	{ ClkTagBar,            0,		Button1,        view,           {0} },
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
 	{ ClkTagBar,            MOD,		Button1,        tag,            {0} },
