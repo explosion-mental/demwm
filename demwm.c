@@ -79,7 +79,7 @@
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
                                * MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
-#define ISVISIBLE(C)            ((C->tags & C->mon->tagset[C->mon->seltags]) || C->f & Sticky)
+#define ISVISIBLE(C)            ((C->tags & C->mon->seltags) || C->f & Sticky)
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
 #define OPAQUE                  0xffU	/* borders */
@@ -95,7 +95,6 @@
 #define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
 #define SETVAL(X, flag, val)	X->f = ((val) ? X->f | flag : X->f & ~flag)
 #define WINMASK			(CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask)
-#define SELSET(X)		X->tagset[X->seltags]
 #define UPFLAGS(C)		XChangeProperty(dpy, C->win, demwmflags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->f), 1)
 #define UPTAGS(C)		XChangeProperty(dpy, C->win, demwmtags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1)
 #ifdef SYSTRAY
@@ -225,9 +224,8 @@ struct Monitor {
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
 	unsigned int f;       /* flags */
-	unsigned int seltags;
+	unsigned int seltags, oldtags;
 	unsigned int sellt;
-	unsigned int tagset[2];
 	Client *clients;
 	Client *sel;
 	Client *stack;
@@ -572,7 +570,7 @@ applyrules(Client *c)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
-	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (SELSET(c->mon) & ~SPTAGMASK);
+	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (c->mon->seltags & ~SPTAGMASK);
 }
 
 int
@@ -774,7 +772,7 @@ buttonpress(XEvent *e)
 			occ |= c->tags == 255 ? 0 : c->tags;
 		do {
 			/* do not reserve space for vacant tags */
-			if (!(occ & 1 << i || SELSET(m) & 1 << i) && m->f & HideVacant)
+			if (!(occ & 1 << i || m->seltags & 1 << i) && m->f & HideVacant)
 				continue;
 			x += TEXTW(m->f & HideVacant ? tagsalt[i] : tags[i]);
 		} while (ev->x >= x && ++i < LENGTH(tags));
@@ -1136,7 +1134,7 @@ comboview(const Arg *arg)
 			focus(selected);
 
 		/* toggleview */
-		SELSET(selmon) |= newtags;
+		selmon->seltags |= newtags;
 
 		#ifdef TAG_PREVIEW
 		getpreview();
@@ -1158,7 +1156,7 @@ createmon(void)
 	unsigned int i;
 
 	m = ecalloc(1, sizeof(Monitor));
-	m->tagset[0] = m->tagset[1] = lasttags != 0 ? lasttags : 1;
+	m->seltags = m->oldtags = lasttags != 0 ? lasttags : 1;
 	m->mfact = mfact;
 	m->nmaster = nmaster;
 	/* monitor flags */
@@ -1332,10 +1330,10 @@ drawbar(Monitor *m)
 
 	for (i = 0; i < LENGTH(tags); i++) {
 		/* apply 'hidevacant' only to the selected monitor */
-		if (m->f & HideVacant && (!(occ & 1 << i || SELSET(m) & 1 << i)))
+		if (m->f & HideVacant && (!(occ & 1 << i || m->seltags & 1 << i)))
 			continue;
 		w = TEXTW(m->f & HideVacant ? tagsalt[i] : tags[i]);
-		drw_setscheme(drw, scheme[urg & 1 << i ? SchemeUrgent : (SELSET(m) & 1 << i && m == selmon ? SchemeSel : SchemeNorm)]);
+		drw_setscheme(drw, scheme[urg & 1 << i ? SchemeUrgent : (m->seltags & 1 << i && m == selmon ? SchemeSel : SchemeNorm)]);
 		drw_text(drw, x, 0, w, bh, lrpad / 2, m->f & HideVacant ? tagsalt[i] : tags[i], 0);
 		if (occ & 1 << i && !(m->f & HideVacant)) { /* don't draw these when hidevacant */
 			if (urg & 1 << i) {
@@ -1684,7 +1682,7 @@ getpreview(void)
 
 	for (i = 0; i < LENGTH(tags); i++) {
 		/* searching for tags that are occupied && selected */
-		if (!(occ & 1 << i) || !(SELSET(selmon) & 1 << i))
+		if (!(occ & 1 << i) || !(selmon->seltags & 1 << i))
 			continue;
 
 		if (selmon->tagmap[i]) { /* tagmap exist, clean it */
@@ -2506,17 +2504,17 @@ motionnotify(XEvent *e)
 		for (c = selmon->clients; c; c = c->next)
 			occ |= c->tags == 255 ? 0 : c->tags;
 		do {
-			if (!(occ & 1 << i || selmon->tagset[selmon->seltags] & 1 << i) && selmon->f & HideVacant)
+			if (!(occ & 1 << i || selmon->seltags & 1 << i) && selmon->f & HideVacant)
 				continue;
 			x += TEXTW(selmon->f & HideVacant ? tagsalt[i] : tags[i]);
 		} while (ev->x >= x && ++i < LENGTH(tags));
 
 	     	if (i < LENGTH(tags)) {
 			if (selmon->previewshow != (i + 1)
-			&& !(selmon->tagset[selmon->seltags] & 1 << i)) {
+			&& !(selmon->seltags & 1 << i)) {
 				selmon->previewshow = i + 1;
 				showtagpreview(i);
-			} else if (selmon->tagset[selmon->seltags] & 1 << i) {
+			} else if (selmon->seltags & 1 << i) {
 				selmon->previewshow = 0;
 				XUnmapWindow(dpy, selmon->tagwin);
 			}
@@ -3125,7 +3123,7 @@ sendmon(Client *c, Monitor *m)
 	detach(c);
 	detachstack(c);
 	c->mon = m;
-	c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
+	c->tags = m->seltags; /* assign tags of target monitor */
 	XChangeProperty(dpy, c->win, demwmmon, XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *)&(c->mon->num), 1);
 	attach(c);
@@ -3172,7 +3170,7 @@ void
 togglegaps(const Arg *arg)
 {
 	if (pertag)
-		selmon->pertag->enablegaps ^= selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+		selmon->pertag->enablegaps ^= selmon->seltags & ~SPTAGMASK;
 	else
 		enablegaps = !enablegaps;
 	arrange(selmon);
@@ -3183,7 +3181,7 @@ getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 	unsigned int n, oe, ie;
 	Client *c;
 
-	oe = ie = m->pertag->enablegaps & (m->tagset[m->seltags] & ~SPTAGMASK) ? 1 : 0;
+	oe = ie = m->pertag->enablegaps & (m->seltags & ~SPTAGMASK) ? 1 : 0;
 
 	if (!pertag)
 		oe = ie = enablegaps;
@@ -3691,7 +3689,7 @@ shift(unsigned int *tag, int i)
 void
 shifttag(const Arg *arg)
 {
-	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
+	Arg shifted = { .ui = selmon->seltags & ~SPTAGMASK };
 
 	if (!selmon->clients)
 		return;
@@ -3704,7 +3702,7 @@ void
 shifttagclients(const Arg *arg)
 {
 
-	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
+	Arg shifted = { .ui = selmon->seltags & ~SPTAGMASK };
 	Client *c;
 	unsigned int tagmask = 0;
 
@@ -3722,7 +3720,7 @@ shifttagclients(const Arg *arg)
 void
 shiftview(const Arg *arg)
 {
-	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
+	Arg shifted = { .ui = selmon->seltags & ~SPTAGMASK };
 
 	shift(&shifted.ui, arg->i);
 	view(&shifted);
@@ -3731,7 +3729,7 @@ shiftview(const Arg *arg)
 void
 shiftviewclients(const Arg *arg)
 {
-	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
+	Arg shifted = { .ui = selmon->seltags & ~SPTAGMASK };
 	Client *c;
 	unsigned int tagmask = 0, filter = 0;
 
@@ -3753,7 +3751,7 @@ shiftviewclients(const Arg *arg)
 void
 shiftboth(const Arg *arg)
 {
-	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
+	Arg shifted = { .ui = selmon->seltags & ~SPTAGMASK };
 
 	shift(&shifted.ui, arg->i);
 	tag(&shifted);
@@ -4003,7 +4001,7 @@ togglescratch(const Arg *arg)
 					last = monclients = c;
 			} else { /* the scratchpad it's on the same monitor */
 				XSetWindowBorder(dpy, c->win, scheme[c->f & Float ? BorderFloat : BorderSel][0].pixel);
-				c->mon->tagset[c->mon->seltags] ^= scratchtag;
+				c->mon->seltags ^= scratchtag;
 				if (c->f & Float)
 					XRaiseWindow(dpy, c->win);
 			}
@@ -4042,15 +4040,15 @@ togglescratch(const Arg *arg)
 		}
 
 		/* if it isn't selected alrd, tag it */
-		if (!(selmon->tagset[selmon->seltags] & scratchtag))
-			selmon->tagset[selmon->seltags] ^= scratchtag;
+		if (!(selmon->seltags & scratchtag))
+			selmon->seltags ^= scratchtag;
 	}
 
 	if (found) {
 		focus(ISVISIBLE(found) ? found : NULL);
 		arrange(NULL);
 	} else {
-		selmon->tagset[selmon->seltags] |= scratchtag;
+		selmon->seltags |= scratchtag;
 		spawn(&((Arg) { .v = scratchpads[arg->ui] }));
 	}
 }
@@ -4074,14 +4072,14 @@ toggletag(const Arg *arg)
 void
 toggleview(const Arg *arg)
 {
-	unsigned int newtagset = selmon->tagset[selmon->seltags] ^ (arg->ui & TAGMASK);
+	unsigned int newtagset = selmon->seltags ^ (arg->ui & TAGMASK);
 	int i;
 
 	if (newtagset) {
 		#ifdef TAG_PREVIEW
 		getpreview();
 		#endif /* TAG_PREVIEW */
-		selmon->tagset[selmon->seltags] = newtagset;
+		selmon->seltags = newtagset;
 
 		if (pertag) {
 			if (newtagset == ~0) {
@@ -4101,7 +4099,7 @@ toggleview(const Arg *arg)
 			selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
 			selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 			selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
-			if (pertagbar && (selmon->f & ShowBar) != (selmon->pertag->showbars & selmon->tagset[selmon->seltags]))
+			if (pertagbar && (selmon->f & ShowBar) != (selmon->pertag->showbars & selmon->seltags))
 				togglebar(NULL);
 		}
 
@@ -4491,18 +4489,22 @@ void
 view(const Arg *arg)
 {
 	int i;
-	unsigned int tmptag;
+	unsigned int tmptag, tmp;
 
-	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
+	if ((arg->ui & TAGMASK) == selmon->seltags)
  		return;
 	#ifdef TAG_PREVIEW
 	getpreview();
 	#endif /* TAG_PREVIEW */
-	selmon->seltags ^= 1; /* toggle sel tagset */
+
+	/* toggle sel tagset */
+	tmp = selmon->oldtags;
+	selmon->oldtags = selmon->seltags;
+	selmon->seltags = tmp;
 
 	if (pertag) {
 		if (arg->ui & TAGMASK) {
-			selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
+			selmon->seltags = arg->ui & TAGMASK;
 			selmon->pertag->prevtag = selmon->pertag->curtag;
 
 			if (arg->ui == ~0)
@@ -4529,10 +4531,10 @@ view(const Arg *arg)
 			selmon->gappiv = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff000000) >> 24;
 		}
 
-		if (pertagbar && (selmon->f & ShowBar) != (selmon->pertag->showbars & selmon->tagset[selmon->seltags]))
+		if (pertagbar && (selmon->f & ShowBar) != (selmon->pertag->showbars & selmon->seltags))
 			togglebar(NULL);
 	} else if (arg->ui & TAGMASK) /* if pertag */
-		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
+		selmon->seltags = arg->ui & TAGMASK;
 	focus(NULL);
 	arrange(selmon);
 }
@@ -4866,7 +4868,7 @@ void
 scratchpad_show_client(Client *c)
 {
 	scratchpad_last_showed = c;
-	c->tags = selmon->tagset[selmon->seltags];
+	c->tags = selmon->seltags;
 	focus(c);
 	arrange(selmon);
 }
@@ -4955,7 +4957,7 @@ togglestatus(const Arg *arg)
 void
 shiftswaptags(const Arg *arg)
 {
-	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
+	Arg shifted = { .ui = selmon->seltags & ~SPTAGMASK };
 
 	shift(&shifted.ui, arg->i);
 	swaptags(&shifted);
@@ -4966,7 +4968,7 @@ swaptags(const Arg *arg)
 {
 	Client *c;
 	unsigned int newtag = arg->ui & TAGMASK;
-	unsigned int curtag = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+	unsigned int curtag = selmon->seltags & ~SPTAGMASK;
 
 	if (newtag == curtag || !curtag || (curtag & (curtag-1)))
 		return;
@@ -5036,7 +5038,7 @@ shiftpreview(const Arg *arg)
 {
 	//TODO needs an index, currenlty it only shows the adjacent tagpreviews
 	#ifdef TAG_PREVIEW
-	Arg shifted = { .ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK };
+	Arg shifted = { .ui = selmon->seltags & ~SPTAGMASK };
 	Client *c;
 	unsigned int tagmask = 0;
 
@@ -5078,7 +5080,7 @@ main(int argc, char *argv[])
 	scan();
 	run();
 	char t[12];
-	snprintf(t, sizeof(t), "%d", selmon->tagset[selmon->seltags]);
+	snprintf(t, sizeof(t), "%d", selmon->seltags);
 	if (restart) execlp(argv[0], argv[0], "--seltags", t, (char *) NULL);
 	cleanup();
 	XCloseDisplay(dpy);
