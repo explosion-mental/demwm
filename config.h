@@ -170,6 +170,7 @@ static const Rule rules[] = {
 	 ** Terminal: will make the window swallow child ones
 	 ** FakeFS: enable fakefullscreen
 	 ** NoSwallow: don't swallow this window
+	 ** Sticky: show this window across all tags
 	 ** UnCursor: puts the cursor in the bottom right whenever the window
 	 * is focused (useful when there are gaps)
 	 */
