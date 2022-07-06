@@ -130,17 +130,17 @@ enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms *
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 enum {
-	AlwOnTop   = 1 << 0, /* AlwaysOnTop */
-	Float      = 1 << 1, /* XWMhints InputHint */
-	Fixed      = 1 << 2, /* same height and width */
-	FS         = 1 << 3, /* FullScreen */
-	FSLock     = 1 << 4, /* FullScreen bit lock (prev on oldstate) */
-	FakeFS     = 1 << 5, /* FakeFullScreen */
-	HintsValid = 1 << 6, /* reduces calls to updatesizehints() */
-	NeverFocus = 1 << 7,
-	NoSwallow  = 1 << 8,
-	Sticky     = 1 << 9,
-	Terminal   = 1 << 10,
+	AlwOnTop   = 1 << 0,  /* AlwaysOnTop */
+	Float      = 1 << 1,
+	Fixed      = 1 << 2,  /* same height and width */
+	FS         = 1 << 3,  /* FullScreen */
+	FSLock     = 1 << 4,  /* FullScreen bit lock (prev on oldstate) */
+	FakeFS     = 1 << 5,  /* FakeFullScreen */
+	HintsValid = 1 << 6,  /* reduces calls to updatesizehints() */
+	NeverFocus = 1 << 7,  /* XWMhints InputHint */
+	NoSwallow  = 1 << 8,  /* don't 'swallow' this child */
+	Sticky     = 1 << 9,  /* window shown in all tags */
+	Terminal   = 1 << 10, /* 'swallow' child processes */
 	UnCursor   = 1 << 11,
 	Urg        = 1 << 12, /* urgent */
 	WasFloat   = 1 << 13, /* oldstate: used in fullscreen operations */
