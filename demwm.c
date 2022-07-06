@@ -2808,11 +2808,9 @@ resizeclient(Client *c, int x, int y, int w, int h)
 
 	/* don't draw borders if monocle/alphamonocle/only 1 client */
 	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next))
-	|| (c->mon->lt->arrange == &monocle
-	||  c->mon->lt->arrange == &alphamonocle))
+	|| (c->mon->lt->arrange == &monocle || c->mon->lt->arrange == &alphamonocle))
 	&& (c->fakefullscreen == 1 || !(c->f & FS))
-	&& !(c->f & Float)
-	&& c->mon->lt->arrange != NULL) {
+	&& c->mon->lt->arrange && !(c->f & Float)) {
 		c->w = wc.width += c->bw * 2;
 		c->h = wc.height += c->bw * 2;
 		wc.border_width = 0;
