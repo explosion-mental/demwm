@@ -263,8 +263,8 @@ static const Layout layouts[] = {
 #define TAGKEYS(KEY,TAG) /* keys from 1 to 9 */ \
 	{ MOD,			KEY,	comboview,      { .ui = 1 << TAG } },	\
 	{ MOD|Shift,		KEY,	combotag,       { .ui = 1 << TAG } },	\
-	/*{ MOD|Ctrl,           KEY,	toggleview,     { .ui = 1 << TAG } },*/	\
-	{ MOD|Ctrl,		KEY,	previewtag,	{ .ui = TAG }	   },	\
+	{ MOD|Ctrl,           KEY,	toggleview,     { .ui = 1 << TAG } },	\
+	/*{ MOD|Ctrl,		KEY,	previewtag,	{ .ui = TAG }	   },*/	\
 	/* { MOD|Ctrl|Shift, KEY,	toggletag,      { .ui = 1 << TAG } },*/	\
 	{ MOD|Shift|Ctrl,	KEY,	swaptags,	{ .ui = 1 << TAG } },
 
