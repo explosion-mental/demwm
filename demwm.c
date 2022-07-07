@@ -405,7 +405,7 @@ static int xerror(Display *dpy, XErrorEvent *ee);
 static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void xrdb(const Arg *arg);
-static void xinitvisual(void);
+static void xinitvisual(int screen);
 static void zoom(const Arg *arg);
 static void zoomswap(const Arg *arg);
 
@@ -491,7 +491,7 @@ static Systray *systray = NULL;
 #endif /* SYSTRAY */
 static Atom wmatom[WMLast], netatom[NetLast], demwmtags, demwmmon, demwmflags;
 static int running = 1, restart = 0;
-static int depth, screen;
+static int depth;
 static Cur *cursor[CurLast];
 static Display *dpy;
 static Drw *drw;
@@ -3519,6 +3519,7 @@ setup(void)
 	XSetWindowAttributes wa;
 	Atom utf8string;
 	char envpid[16];
+	int screen;
 
 	/* clean up any zombies immediately */
 	sigchld(0);
@@ -3545,7 +3546,7 @@ setup(void)
 	sw = DisplayWidth(dpy, screen);
 	sh = DisplayHeight(dpy, screen);
 	root = RootWindow(dpy, screen);
-	xinitvisual();
+	xinitvisual(screen);
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
 	if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
 		fprintf(stderr, "demwm: no fonts could be loaded, status bar hidden.\n");
@@ -4442,13 +4443,13 @@ updatewmhints(Client *c)
 }
 
 void
-xinitvisual(void)
+xinitvisual(int screen)
 {
-	int nitems, i;
-	long masks = VisualScreenMask | VisualDepthMask | VisualClassMask;
+	int i, nitems;
 	XRenderPictFormat *fmt;
-	XVisualInfo tpl = { .screen = screen, .depth = 32, .class = TrueColor },
-	*infos = XGetVisualInfo(dpy, masks, &tpl, &nitems);
+	XVisualInfo tpl = { .screen = screen, .depth = 32, .class = TrueColor }, *infos;
+
+	infos = XGetVisualInfo(dpy, VisualScreenMask|VisualDepthMask|VisualClassMask, &tpl, &nitems);
 
 	for (i = 0; i < nitems; i++) {
 		fmt = XRenderFindVisualFormat(dpy, infos[i].visual);
@@ -4462,6 +4463,7 @@ xinitvisual(void)
 	}
 
 	XFree(infos);
+
 	if (!visual) {
 		visual = DefaultVisual(dpy, screen);
 		depth = DefaultDepth(dpy, screen);
