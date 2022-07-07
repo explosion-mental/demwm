@@ -235,7 +235,7 @@ struct Monitor {
 	int previewshow;
 	Pixmap *tagmap;
 #endif /* TAG_PREVIEW */
-	const Layout *lt, *oldlt;
+	const Layout *lt;
 	Pertag *pertag;
 };
 
