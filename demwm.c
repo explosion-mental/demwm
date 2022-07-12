@@ -2402,12 +2402,6 @@ manage(Window w, XWindowAttributes *wa)
 		&& (c->x + (c->w / 2) < c->mon->wx + c->mon->ww)) ? bh : c->mon->my);
 	c->bw = (c->f & Float) ? fborderpx : borderpx;
 
-	/* center the window (floating) */
-	if (c->f & Float || !c->mon->lt->arrange) {
-		c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
-		c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
-	}
-
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	XSetWindowBorder(dpy, w, scheme[BorderNorm][ColFg].pixel);
@@ -2426,6 +2420,13 @@ manage(Window w, XWindowAttributes *wa)
 	}
 	if (c->f & Float)
 		XRaiseWindow(dpy, c->win);
+
+	/* center the window (floating) */
+	if (c->f & Float || !c->mon->lt->arrange) {
+		c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
+		c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
+	}
+
 	attach(c);
 	attachstack(c);
 	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
