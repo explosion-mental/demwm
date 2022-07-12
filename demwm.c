@@ -4793,7 +4793,7 @@ scratchpad_hide(const Arg *arg)
 {
 	if (selmon->sel) {
 		selmon->sel->tags = SCRATCHPAD_MASK;
-		selmon->sel->f |= Float;
+		togglefloating(NULL);
 		focus(NULL);
 		arrange(selmon);
 	}
