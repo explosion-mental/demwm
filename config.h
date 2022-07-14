@@ -148,7 +148,7 @@ static char *previewclass[] = { "demwm-preview", "demwm-preview" };
 /* tags */
 //static const char *tags[] = { "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉" };
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
-static const int taglayouts[] = {    0,   1,    0,   0,    1,    0,    0,    0,    0 };
+static const int taglayouts[] = {    0,   1,    0,   0,    2,    0,    0,    0,    0 };
 static const char *tagsalt[]  = { "I", "2", "III", "4", "V", "6", "VII", "8", "IX" };
 
 static const Rule rules[] = {
@@ -238,7 +238,7 @@ static const Layout layouts[] = {
 	/* symbol	arrange function   gaps (enabled if omitted)			*/
  	{ "[]=",	tile },			/* master on left, slaves on right */
  	{ "🧐",		monocle },		/* all windows on top of eachother */
- 	{ "{}",		alphamonocle, 1 },	/* monocle but windows aren't stacked */
+ 	{ "{}",		alphamonocle },	/* monocle but windows aren't stacked */
 	//{ "TTT",	bstack },		/* master on top, slaves on bottom */
 	//{ "🐚",		spiral },		/* fibonacci spiral */
 	//{ "[\\]",	dwindle },		/* decreasing in size right and leftward */
