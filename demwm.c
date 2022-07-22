@@ -2341,7 +2341,6 @@ manage(Window w, XWindowAttributes *wa)
 
 	c = ecalloc(1, sizeof(Client));
 	c->win = w;
-	c->pid = winpid(w);
 
 	/* do not manage (lower and skip) NET_WINDOW_TYPE_DESKTOP
 	 * (desktop implementation) windows (glava, xlivebg, etc) */
@@ -2351,6 +2350,8 @@ manage(Window w, XWindowAttributes *wa)
 		free(c);
 		return;
 	}
+
+	c->pid = winpid(w);
 
 	/* geometry */
 	c->x = c->oldx = wa->x;
