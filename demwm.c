@@ -2376,6 +2376,9 @@ manage(Window w, XWindowAttributes *wa)
 		c->mon = selmon;
 		applyrules(c);
 		term = termforwin(c);
+		/* read not empty X atoms, this will only happen whenever we
+		 * manage() an already 'managed' window again. This happens on
+		 * a restart by the call to scan() */
 		if ((tmptom = getatomprop(c, demwmflags)) != None)
 			c->f = tmptom & (LastFlag - 1);
 		if ((tmptom = getatomprop(c, demwmtags)) != None)
