@@ -59,27 +59,17 @@ _some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm.
 - Click to focus, removed the hover to focus functionality.
 - Focus tiled windows and C them on top of floating if they have focus.
 
-# Status text
-I've decided to integrate dwmblocks into dwm itself.
-Why? Some reasons:
-- One config file
-- Remove the 'extra' program (which was a bit annoying for me)
-- demwm handles the **displaying** of the text and the **clicking** interatcion,
-  no more signals for the buttons.
-- This way we could expand and play around with 'blocks' (different colors for
-  different blocks, for example)
-
 # Toggleable Features
 Here are the "too bloated" features which doesn't affect the workflow, but
-sometimes are nice.
+sometimes are nice. These features are avaliable and optional via CPP (won't be
+compiled in if you don't need it).
+
+Edit `config.mk` and uncomment the necesary lines to enable them.
 
 ## Icons
-Icons for the different programs that offers them.
+Window icons on the title bar, if the program has one to offer.
 
-
-edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk),
-uncomment the line with `#ICONS`
-
+Uncomment the line with `#ICONS`
 **requires imlib2**
 
 ## Systray
@@ -90,16 +80,13 @@ e.g
 - `pasystray` will display PulseAudio systemtray
 
 
-edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
-uncomment the line with `#SYSTRAY`
+Uncomment the line with `#SYSTRAY`
 
 ## Tag Previews
 Hover your mouse over a tag (you need to have it viewed first) and look the
 contents of it.
 
-edit [config.mk](https://github.com/explosion-mental/Dwm/blob/main/config.mk)
-uncomment the line with `#TAG_PREVIEW`
-
+Uncomment the line with `#TAG_PREVIEW`
 **requires imlib2**
 
 # demwm_random_wall
