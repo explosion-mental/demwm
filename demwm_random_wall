@@ -8,9 +8,9 @@ backend=wal		# colorz - schemer2 - wal - haishoku - colorthief
 
 # post run hooks, everything here runs in the background
 postrun() {
-	xwallpaper --zoom "$img_lock" &		# set wallpaper
-	killall --quiet glava && glava 1>/dev/null &
-	#killall --quiet -9 dunst && dunst &	# forcefully kill dunst
+	xwallpaper --zoom "$img_lock"
+	killall --quiet glava && glava 1>/dev/null
+	#killall --quiet -9 dunst && dunst
 	ln -sf "${HOME}/.cache/wal/dunstrc"		"${HOME}/.config/dunst/dunstrc"
 	ln -sf "${HOME}/.cache/wal/zathurarc"		"${HOME}/.config/zathura/zathurarc"
 	ln -sf "${HOME}/.cache/wal/glava_bars.glsl"	"${HOME}/.config/glava/bars.glsl"
