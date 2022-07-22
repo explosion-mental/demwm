@@ -153,7 +153,7 @@ are some ideas:
 
 ## Some wishing pains:
 - new logo (?)
-- Write a proper manpage
+- <s>Write a proper manpage</s>
 - <s>s/dwm/demwm/</s>
 - <s>Rename the proyect</s>
 - pertag cursor position. Save the state of the cursor position between tags.
