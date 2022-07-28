@@ -2086,7 +2086,8 @@ getcmd(int i, char *button)
 void
 getcmds(int time)
 {
-	int i;
+	unsigned int i;
+
 	for (i = 0; i < LENGTH(blocks); i++)
 		if ((blocks[i].interval != 0 && time % blocks[i].interval == 0) || time == -1)
 			getcmd(i, NULL);
@@ -2095,7 +2096,8 @@ getcmds(int time)
 void
 getsigcmds(unsigned int signal)
 {
-	int i;
+	unsigned int i;
+
 	for (i = 0; i < LENGTH(blocks); i++)
 		if (blocks[i].signal == signal)
 			getcmd(i, NULL);
@@ -2298,7 +2300,7 @@ readxresources(void)
 	XrmDatabase d;
 	XrmValue value;
 	char *type, *resm;
-	unsigned int i = 0;
+	unsigned int i;
 
 	if (!(display = XOpenDisplay(NULL)))
 		fprintf(stderr, "demwm: readxresources: could not open display.\n");
