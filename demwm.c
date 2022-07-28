@@ -3043,9 +3043,7 @@ run(void)
 			 * 'xsetroot -name' sutff */
 			if (errno == EINTR) /* signal caught */
 				continue;
-			fprintf(stderr, "demwm: poll ");
-			perror("failed");
-			exit(EXIT_FAILURE);
+			die("demwm: poll :");
 		}
 
 		/* handle X display fd */
@@ -3055,11 +3053,8 @@ run(void)
 				if (handler[ev.type])
 					handler[ev.type](&ev); /* call handler */
 			}
-		} else if (fds[XFD].revents & POLLHUP) {
-			fprintf(stderr, "demwm: X fd event loop, hang up");
-			perror(" failed");
-			exit(EXIT_FAILURE);
-		}
+		} else if (fds[XFD].revents & POLLHUP)
+			die("demwm: X fd event loop, hang up :");
 
 		/* handle blocks */
 		for (i = 0; i < LENGTH(blocks); i++) {
@@ -3081,11 +3076,8 @@ run(void)
 					blockoutput[i][bt++] = '\0';
 
 				drawbar(selmon);
-			} else if (fds[i].revents & POLLHUP) {
-				fprintf(stderr, "demwm: block '%d' hangup", i);
-				perror(" failed");
-				exit(EXIT_FAILURE);
-			}
+			} else if (fds[i].revents & POLLHUP)
+				die("demwm: block '%d' hangup :", i);
 		}
 	}
 
@@ -3652,11 +3644,8 @@ setsignal(int sig, void (*sahandler)(int unused))
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_NOCLDSTOP | SA_RESTART;
 
-	if (sigaction(sig, &sa, 0) == -1) {
-		fprintf(stderr, "signal %d ", sig);
-		perror("failed to setup");
-		exit(EXIT_FAILURE);
-	}
+	if (sigaction(sig, &sa, 0) == -1)
+		die("sigaction: signal %d :", sig);
 }
 
 
@@ -3819,9 +3808,7 @@ spawn(const Arg *arg)
 			close(ConnectionNumber(dpy));
 		setsid();
 		execvp(((char **)arg->v)[0], (char **)arg->v);
-		fprintf(stderr, "demwm: execvp %s", ((char **)arg->v)[0]);
-		perror(" failed");
-		exit(EXIT_SUCCESS);
+		die("demwm: execvp '%s' :", ((char **)arg->v)[0]);
 	}
 }
 
