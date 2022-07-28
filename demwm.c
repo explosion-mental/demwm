@@ -2989,12 +2989,13 @@ restack(Monitor *m)
 void
 run(void)
 {
-	int i;
+	int i, bt;
+	size_t XFD = LENGTH(blocks);
 	XEvent ev;
-	struct pollfd fds[LENGTH(blocks) + 1] = {0};
+	struct pollfd fds[LENGTH(blocks) + 1] = {0}; /* one fd for each block + X fd */
 
-	fds[0].fd = ConnectionNumber(dpy);
-	fds[0].events = POLLIN;
+	fds[XFD].fd = ConnectionNumber(dpy);
+	fds[XFD].events = POLLIN;
 
 	/* init blocks */
 	#if INVERSED
@@ -3004,8 +3005,8 @@ run(void)
 	#endif /* INVERSED */
 	{
 		pipe(pipes[i]);
-		fds[i + 1].fd = pipes[i][0];
-		fds[i + 1].events = POLLIN;
+		fds[i].fd = pipes[i][0];
+		fds[i].events = POLLIN;
 		getcmd(i, NULL);
 		if (blocks[i].interval) {
 			maxinterval = MAX(blocks[i].interval, maxinterval);
@@ -3019,15 +3020,14 @@ run(void)
 	/* main event loop */
 	while (running) {
 
-		/* bar hidden, then skip poll */
-		if (!(selmon->f & ShowBar) || !showstatus) {
+		if (!(selmon->f & ShowBar) || !showstatus) { /* bar/status hidden */
 			XNextEvent(dpy, &ev);
 			if (handler[ev.type])
 				handler[ev.type](&ev); /* call handler */
-			continue;
+			continue; /* skip poll() */
 		}
 
-		if ((poll(fds, LENGTH(blocks) + 1, -1)) == -1) {
+		if ((poll(fds, LENGTH(fds), -1)) == -1) {
 			/* FIXME other than SIGALRM and the real time signals,
 			 * there seems to be a signal being que if using
 			 * 'xsetroot -name' sutff */
@@ -3039,23 +3039,23 @@ run(void)
 		}
 
 		/* handle X display fd */
-		if (fds[0].revents & POLLIN) {
+		if (fds[XFD].revents & POLLIN) {
 			while (running && XPending(dpy)) {
 				XNextEvent(dpy, &ev);
 				if (handler[ev.type])
 					handler[ev.type](&ev); /* call handler */
 			}
-		} else if (fds[0].revents & POLLHUP) {
-			fprintf(stderr, "demwm: main event loop, hang up");
+		} else if (fds[XFD].revents & POLLHUP) {
+			fprintf(stderr, "demwm: X fd event loop, hang up");
 			perror(" failed");
 			exit(EXIT_FAILURE);
 		}
 
 		/* handle blocks */
 		for (i = 0; i < LENGTH(blocks); i++) {
-			if (fds[i + 1].revents & POLLIN) {
+			if (fds[i].revents & POLLIN) {
 				/* empty buffer with CMDLENGTH + 1 byte for the null terminator */
-				int bt = read(fds[i + 1].fd, blockoutput[i], CMDLENGTH);
+				bt = read(fds[i].fd, blockoutput[i], CMDLENGTH);
 				/* remove lock for the current block */
 				execlock &= ~(1 << i);
 
@@ -3071,8 +3071,8 @@ run(void)
 					blockoutput[i][bt++] = '\0';
 
 				drawbar(selmon);
-			} else if (fds[i + 1].revents & POLLHUP) {
-				fprintf(stderr, "demwm: block %d hangup", i);
+			} else if (fds[i].revents & POLLHUP) {
+				fprintf(stderr, "demwm: block '%d' hangup", i);
 				perror(" failed");
 				exit(EXIT_FAILURE);
 			}
