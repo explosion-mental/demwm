@@ -2330,7 +2330,7 @@ readxresources(void)
 		&& (strnlen(value.addr, 8) == 7 && value.addr[0] == '#')) /* is a hex color */
 			strncpy(xrescolors[i][0], value.addr, 8);
 		else {
-			LOG("demwm: could not read color '%s'.", xrescolors[i][1])
+			LOG("could not read color '%s'.", xrescolors[i][1])
 			strncpy(xrescolors[i][0], fallbackcolor, 8);
 		}
 		xrescolors[i][0][7] = '\0';
@@ -3553,7 +3553,7 @@ setup(void)
 	xinitvisual(screen);
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
 	if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
-		LOG("demwm: no fonts could be loaded, status bar hidden.");
+		LOG("no fonts could be loaded, status bar hidden.");
 		showbar = 0;
 	}
 	lrpad = drw->fonts->h;
@@ -4692,7 +4692,7 @@ xerror(Display *dpy, XErrorEvent *ee)
 	|| (ee->request_code == X_GrabKey && ee->error_code == BadAccess)
 	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
 		return 0;
-	LOG("demwm: fatal error: request code='%d', error code='%d'",
+	LOG("fatal error: request code='%d', error code='%d'",
 		ee->request_code, ee->error_code);
 	return xerrorxlib(dpy, ee); /* may call exit */
 }
