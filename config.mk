@@ -45,7 +45,7 @@ LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS} -lXrender ${XCBLIBS} ${
 # flags
 O_BASIC  = -march=native -Ofast -flto=auto
 CPPFLAGS = -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${ICONS} ${SYSTRAY} ${TAG_PREVIEW} ${TAGNUM}
-CFLAGS   = -std=c99 -pedantic -Wall -Wno-unused-function ${O_BASIC} ${INCS} ${CPPFLAGS}
+CFLAGS   = -std=c99 -pedantic -Wall -Wno-unused-function -Wno-unused-variable ${O_BASIC} ${INCS} ${CPPFLAGS}
 #CFLAGS  = -g -std=c99 -pedantic -Wall -Wextra -Wno-unused-function -O3 ${INCS} ${CPPFLAGS} -flto -fsanitize=address,undefined,leak
 LDFLAGS  = ${LIBS}
 #LDFLAGS = -g ${LIBS} ${CFLAGS}
