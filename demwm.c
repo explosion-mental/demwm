@@ -3642,7 +3642,7 @@ setsignal(int sig, void (*sahandler)(int unused))
 
 	sa.sa_handler = sahandler;
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+	sa.sa_flags = SA_RESTART | SA_NOCLDWAIT | SA_NOCLDSTOP;
 
 	if (sigaction(sig, &sa, 0) == -1)
 		die("sigaction: signal %d :", sig);
