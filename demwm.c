@@ -908,12 +908,11 @@ clientmessage(XEvent *e)
 	XWindowAttributes wa;
 	XSetWindowAttributes swa;
 
-	if (systray && cme->window == systray->win
+	if (systray
+	&& cme->window == systray->win
 	&& cme->message_type == netatom[NetSystemTrayOP]
-	&& cme->data.l[1] == 0 /* SYSTEM_TRAY_REQUEST_DOCK */) {
-		if (!(cme->data.l[2]))
-			return;
-
+	&& cme->data.l[1] == 0 /* SYSTEM_TRAY_REQUEST_DOCK */
+	&& cme->data.l[2]) {
 		/* do our little manage() like for the systray window */
 		c = ecalloc(1, sizeof(Client));
 
@@ -921,9 +920,9 @@ clientmessage(XEvent *e)
 		c->mon = selmon;
 		c->next = systray->icons;
 		systray->icons = c;
-		XGetWindowAttributes(dpy, c->win, &wa);
 
-		c->x = c->oldx = c->y = c->oldy = 0;
+		XGetWindowAttributes(dpy, c->win, &wa);
+		c->x = c->sfx = c->oldx = c->y = c->sfy = c->oldy = 0;
 		c->w = c->oldw = wa.width;
 		c->h = c->oldh = wa.height;
 		c->oldbw = wa.border_width;
@@ -942,6 +941,7 @@ clientmessage(XEvent *e)
 		//swa.border_pixel = 0;
 		//wa.background_pixel = 0;
 		//swa.colormap = cmap;
+
 		XChangeWindowAttributes(dpy, c->win, CWBackPixel, &swa);
 		XReparentWindow(dpy, c->win, systray->win, 0, 0);
 		sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
@@ -1825,6 +1825,7 @@ updatesystray(void)
 
 		XMapRaised(dpy, systray->win);
 		XSetSelectionOwner(dpy, netatom[NetSystemTray], systray->win, CurrentTime);
+
 		if (XGetSelectionOwner(dpy, netatom[NetSystemTray]) == systray->win) {
 			sendevent(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->win, 0, 0);
 			XSync(dpy, False);
@@ -1908,8 +1909,8 @@ updatesystrayiconstate(Client *i, XPropertyEvent *ev)
 	long flags;
 	int code = 0;
 
-	if (!systray || !i || ev->atom != xatom[XembedInfo] ||
-		!(flags = getatomprop(i, xatom[XembedInfo])))
+	if (!systray || !i || ev->atom != xatom[XembedInfo]
+	|| !(flags = getatomprop(i, xatom[XembedInfo])))
 		return;
 
 	if (flags & (1 << 0) /* XEMBED_MAPPED */ && !i->tags) {
@@ -1924,6 +1925,7 @@ updatesystrayiconstate(Client *i, XPropertyEvent *ev)
 		setclientstate(i, WithdrawnState);
 	} else
 		return;
+
 	sendevent(i->win, xatom[Xembed], StructureNotifyMask, CurrentTime, code, 0,
 			systray->win, XEMBED_EMBEDDED_VERSION);
 }
