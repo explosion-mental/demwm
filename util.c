@@ -31,5 +31,5 @@ die(const char *fmt, ...) {
 		fputc('\n', stderr);
 	}
 
-	exit(1);
+	exit(EXIT_FAILURE);
 }
