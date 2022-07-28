@@ -342,7 +342,7 @@ static void updatesystrayiconstate(Client *i, XPropertyEvent *ev);
 static Client *wintosystrayicon(Window w);
 static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
 #else
-static int sendevent(Client *c, Atom proto);
+static int sendevent(Window w, Atom proto);
 #endif /* SYSTRAY */
 static void sendmon(Client *c, Monitor *m);
 static void sendstatusbar(const Arg *arg);
@@ -2265,11 +2265,11 @@ killclient(const Arg *arg)
 {
 	if (!selmon->sel)
 		return;
-#ifdef SYSTRAY
-	if (!sendevent(selmon->sel->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
-#else
-	if (!sendevent(selmon->sel, wmatom[WMDelete])) {
-#endif /* SYSTRAY */
+	if (!sendevent(selmon->sel->win, wmatom[WMDelete]
+	#ifdef SYSTRAY
+		, NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0
+	#endif /* SYSTRAY */
+		)) {
 		XGrabServer(dpy);
 		XSetErrorHandler(xerrordummy);
 		XSetCloseDownMode(dpy, DestroyAll);
@@ -3301,11 +3301,11 @@ incrivgaps(const Arg *arg)
 /* vanitygaps */
 
 int
+sendevent(Window w, Atom proto
 #ifdef SYSTRAY
-sendevent(Window w, Atom proto, int mask, long d0, long d1, long d2, long d3, long d4)
-#else
-sendevent(Client *c, Atom proto)
+	, int mask, long d0, long d1, long d2, long d3, long d4
 #endif /* SYSTRAY */
+)
 {
 	int n;
 	Atom *protocols;
@@ -3313,45 +3313,42 @@ sendevent(Client *c, Atom proto)
 	XEvent ev;
 #ifdef SYSTRAY
 	Atom mt;
+
 	if (proto == wmatom[WMTakeFocus] || proto == wmatom[WMDelete]) {
 		mt = wmatom[WMProtocols];
+#endif /* SYSTRAY */
 		if (XGetWMProtocols(dpy, w, &protocols, &n)) {
 			while (!exists && n--)
 				exists = protocols[n] == proto;
 			XFree(protocols);
 		}
+#ifdef SYSTRAY
 	} else {
 		exists = True;
 		mt = proto;
 	}
-#else
-	if (XGetWMProtocols(dpy, c->win, &protocols, &n)) {
-		while (!exists && n--)
-			exists = protocols[n] == proto;
-		XFree(protocols);
-	}
 #endif /* SYSTRAY */
+
 	if (exists) {
 		ev.type = ClientMessage;
-#ifdef SYSTRAY
 		ev.xclient.window = w;
-		ev.xclient.message_type = mt;
 		ev.xclient.format = 32;
+	#ifdef SYSTRAY
+		ev.xclient.message_type = mt;
 		ev.xclient.data.l[0] = d0;
-		ev.xclient.data.l[1] = d1;
+		ev.xclient.data.l[1] = d1; /* this data seems to always be CurrentTime */
 		ev.xclient.data.l[2] = d2;
 		ev.xclient.data.l[3] = d3;
 		ev.xclient.data.l[4] = d4;
 		XSendEvent(dpy, w, False, mask, &ev);
-#else
-		ev.xclient.window = c->win;
+	#else
 		ev.xclient.message_type = wmatom[WMProtocols];
-		ev.xclient.format = 32;
 		ev.xclient.data.l[0] = proto;
 		ev.xclient.data.l[1] = CurrentTime;
-		XSendEvent(dpy, c->win, False, NoEventMask, &ev);
-#endif /* SYSTRAY */
+		XSendEvent(dpy, w, False, NoEventMask, &ev);
+	#endif /* SYSTRAY */
 	}
+
 	return exists;
 }
 
@@ -3370,11 +3367,11 @@ setfocus(Client *c)
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *) &(c->win), 1);
 	}
-#ifdef SYSTRAY
-	sendevent(c->win, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
-#else
-	sendevent(c, wmatom[WMTakeFocus]);
-#endif /* SYSTRAY */
+	sendevent(c->win, wmatom[WMTakeFocus]
+	#ifdef SYSTRAY
+		, NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0
+	#endif /* SYSTRAY */
+	);
 }
 
 void
