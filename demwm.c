@@ -3065,7 +3065,7 @@ run(void)
 				execlock &= ~(1 << i);
 
 				if (bt == -1) { /* if read failed */
-					fprintf(stderr, "demwm: read failed in block %s\n", blocks[i].command);
+					LOG("demwm: read failed in block '%s'.", blocks[i].command);
 					perror(" failed");
 					continue;
 				}
@@ -5049,11 +5049,11 @@ main(int argc, char *argv[])
 	else if (argc != 1)
 		die("usage: demwm [-v]");
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
-		fputs("warning: no locale support\n", stderr);
+		LOG("warning, no locale support.");
 	if (!(dpy = XOpenDisplay(NULL)))
-		die("demwm: cannot open display");
+		die("demwm: cannot open display.");
 	if (!(xcon = XGetXCBConnection(dpy)))
-		die("demwm: cannot get xcb connection");
+		die("demwm: cannot get xcb connection.");
 	checkotherwm();
 	XrmInitialize();
 	setup();
