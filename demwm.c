@@ -911,14 +911,13 @@ clientmessage(XEvent *e)
 	if (systray && cme->window == systray->win
 	&& cme->message_type == netatom[NetSystemTrayOP]
 	&& cme->data.l[1] == 0 /* SYSTEM_TRAY_REQUEST_DOCK */) {
-		/* do our little manage() like special treatment for the systray window */
+		if (!(cme->data.l[2]))
+			return;
+
+		/* do our little manage() like for the systray window */
 		c = ecalloc(1, sizeof(Client));
 
-		if (!(c->win = cme->data.l[2])) {
-			free(c);
-			return;
-		}
-
+		c->win = cme->data.l[2];
 		c->mon = selmon;
 		c->next = systray->icons;
 		systray->icons = c;
