@@ -97,6 +97,13 @@
 #define WINMASK			(CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask)
 #define UPFLAGS(C)		XChangeProperty(dpy, C->win, demwmflags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->f), 1)
 #define UPTAGS(C)		XChangeProperty(dpy, C->win, demwmtags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1)
+#define LOG(...)		fprintf(stderr, "demwm: " __VA_ARGS__); fputc('\n', stderr);
+#ifdef DEBUG
+#define DB(...)			fprintf(stderr, "demwm(debug): " __VA_ARGS__); fputc('\n', stderr);
+#else
+#define DB(...)
+#endif
+
 #ifdef SYSTRAY
 /* XEMBED messages */
 #define VERSION_MAJOR		0
@@ -1690,7 +1697,7 @@ getpreview(void)
 		//XFlush(dpy);
 
 		if (!(image = imlib_create_image(sw, sh))) {
-			fprintf(stderr, "demwm: imlib: failed to create image, skiping.\n");
+			LOG("imlib: failed to create image, skipping.")
 			continue;
 		}
 		imlib_context_set_image(image);
@@ -1830,7 +1837,7 @@ updatesystray(void)
 			sendevent(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->win, 0, 0);
 			XSync(dpy, False);
 		} else {
-			fprintf(stderr, "demwm: unable to obtain system tray\n");
+			LOG("unable to obtain system tray.")
 			free(systray);
 			systray = NULL;
 			return;
@@ -2060,7 +2067,7 @@ getcmd(int i, char *button)
 		return;
 
 	if (execlock & (1 << i)) { /* block is already running */
-		//fprintf(stderr, "demwm: ignoring block %d, command %s\n", i, blocks[i].command);
+		DB("block '%d' with command '%s' ignored.", i, blocks[i].command)
 		return;
 	}
 
@@ -2077,7 +2084,7 @@ getcmd(int i, char *button)
 		if (button)
 			setenv("BLOCK_BUTTON", button, 1);
 		execlp("/bin/sh", "sh", "-c", blocks[i].command, (char *) NULL);
-		fprintf(stderr, "demwm: block %d, execlp %s", i, blocks[i].command);
+		LOG("block '%d' with command '%s': failed execlp.", i, blocks[i].command);
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
@@ -2303,10 +2310,10 @@ readxresources(void)
 	unsigned int i;
 
 	if (!(display = XOpenDisplay(NULL)))
-		fprintf(stderr, "demwm: readxresources: could not open display.\n");
+		LOG("readxresources: could not open display.")
 
 	if (!(resm = XResourceManagerString(display)) || (d = XrmGetStringDatabase(resm)) == NULL) {
-		fprintf(stderr, "demwm: could not open Xrdb database, switching to fallback colors.\n");
+		LOG("could not open X resource database, switching to fallback colors.")
 
 		for (i = 0; i < LENGTH(xrescolors); i++) {
 			strncpy(xrescolors[i][0], fallbackcolor, 8);
@@ -2323,7 +2330,7 @@ readxresources(void)
 		&& (strnlen(value.addr, 8) == 7 && value.addr[0] == '#')) /* is a hex color */
 			strncpy(xrescolors[i][0], value.addr, 8);
 		else {
-			fprintf(stderr, "demwm: could not read color '%s'\n", xrescolors[i][1]);
+			LOG("demwm: could not read color '%s'.", xrescolors[i][1])
 			strncpy(xrescolors[i][0], fallbackcolor, 8);
 		}
 		xrescolors[i][0][7] = '\0';
@@ -3554,7 +3561,7 @@ setup(void)
 	xinitvisual(screen);
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
 	if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
-		fprintf(stderr, "demwm: no fonts could be loaded, status bar hidden.\n");
+		LOG("demwm: no fonts could be loaded, status bar hidden.");
 		showbar = 0;
 	}
 	lrpad = drw->fonts->h;
@@ -4698,7 +4705,7 @@ xerror(Display *dpy, XErrorEvent *ee)
 	|| (ee->request_code == X_GrabKey && ee->error_code == BadAccess)
 	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
 		return 0;
-	fprintf(stderr, "demwm: fatal error: request code=%d, error code=%d\n",
+	LOG("demwm: fatal error: request code='%d', error code='%d'",
 		ee->request_code, ee->error_code);
 	return xerrorxlib(dpy, ee); /* may call exit */
 }
