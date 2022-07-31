@@ -97,9 +97,9 @@
 #define WINMASK			(CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask)
 #define UPFLAGS(C)		XChangeProperty(dpy, C->win, demwmflags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->f), 1)
 #define UPTAGS(C)		XChangeProperty(dpy, C->win, demwmtags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1)
-#define LOG(...)		fprintf(stderr, "demwm: " __VA_ARGS__); fputc('\n', stderr);
+#define LOG(...)		do { fprintf(stderr, "demwm: " __VA_ARGS__); fputc('\n', stderr); } while (0)
 #ifdef DEBUG
-#define DB(...)			fprintf(stderr, "demwm(debug): " __VA_ARGS__); fputc('\n', stderr);
+#define DB(...)			do { fprintf(stderr, "demwm(debug): " __VA_ARGS__); fputc('\n', stderr); } while (0)
 #else
 #define DB(...)
 #endif
@@ -1697,7 +1697,7 @@ getpreview(void)
 		//XFlush(dpy);
 
 		if (!(image = imlib_create_image(sw, sh))) {
-			LOG("imlib: failed to create image, skipping.")
+			LOG("imlib: failed to create image, skipping.");
 			continue;
 		}
 		imlib_context_set_image(image);
@@ -1837,7 +1837,7 @@ updatesystray(void)
 			sendevent(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->win, 0, 0);
 			XSync(dpy, False);
 		} else {
-			LOG("unable to obtain system tray.")
+			LOG("unable to obtain system tray.");
 			free(systray);
 			systray = NULL;
 			return;
@@ -2310,10 +2310,10 @@ readxresources(void)
 	unsigned int i;
 
 	if (!(display = XOpenDisplay(NULL)))
-		LOG("readxresources: could not open display.")
+		LOG("readxresources: could not open display.");
 
 	if (!(resm = XResourceManagerString(display)) || (d = XrmGetStringDatabase(resm)) == NULL) {
-		LOG("could not open X resource database, switching to fallback colors.")
+		LOG("could not open X resource database, switching to fallback colors.");
 
 		for (i = 0; i < LENGTH(xrescolors); i++) {
 			strncpy(xrescolors[i][0], fallbackcolor, 8);
@@ -2330,7 +2330,7 @@ readxresources(void)
 		&& (strnlen(value.addr, 8) == 7 && value.addr[0] == '#')) /* is a hex color */
 			strncpy(xrescolors[i][0], value.addr, 8);
 		else {
-			LOG("could not read color '%s'.", xrescolors[i][1])
+			LOG("could not read color '%s'.", xrescolors[i][1]);
 			strncpy(xrescolors[i][0], fallbackcolor, 8);
 		}
 		xrescolors[i][0][7] = '\0';
