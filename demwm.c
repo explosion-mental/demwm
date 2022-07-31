@@ -3000,7 +3000,7 @@ run(void)
 	int i, bt;
 	XEvent ev;
 	enum { XFD = LENGTH(blocks) };
-	struct pollfd fds[LENGTH(blocks) + 1] = { /* one fd for each block + X fd */
+	struct pollfd fds[] = { /* one fd for each block + X fd */
 		[XFD] = { .fd = ConnectionNumber(dpy), .events = POLLIN }
 	};
 
