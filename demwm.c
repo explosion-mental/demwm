@@ -521,7 +521,7 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 #define SCRATCHPAD_MASK		(1 << (NUMTAGS + 1))
 
 static Clr *scheme[LENGTH(colors)] = {0};
-static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0};
+static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0}; /* +1 for '\0' */
 static int pipes[LENGTH(blocks)][2] = {0};
 static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
 
@@ -3056,21 +3056,22 @@ run(void)
 		/* handle blocks */
 		for (i = 0; i < LENGTH(blocks); i++) {
 			if (fds[i].revents & POLLIN) {
-				/* empty buffer with CMDLENGTH + 1 byte for the null terminator */
+				/* store the len of the string readed  */
 				bt = read(fds[i].fd, blockoutput[i], CMDLENGTH);
+
 				/* remove lock for the current block */
 				execlock &= ~(1 << i);
 
-				if (bt == -1) { /* read failed, log and ignore */
-					LOG("demwm: read failed in block '%s':", blocks[i].command);
+				if (bt == -1) {
+					LOG("read failed in block '%s':", blocks[i].command);
 					perror(" failed");
-					continue;
+					continue; /* keep reading */
 				}
 
-				if (blockoutput[i][bt - 1] == '\n') /* chop off ending new line, if one is present */
-					blockoutput[i][bt - 1] = '\0';
-				else /* NULL terminate the string */
-					blockoutput[i][bt++] = '\0';
+				if (blockoutput[i][bt - 1] == '\n') /* new ending line present */
+					blockoutput[i][bt - 1] = '\0'; /* chop it off */
+				else
+					blockoutput[i][bt++] = '\0'; /* manually null terminate */
 
 				drawbar(selmon);
 			} else if (fds[i].revents & POLLHUP)
