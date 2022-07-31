@@ -3000,12 +3000,11 @@ void
 run(void)
 {
 	int i, bt;
-	size_t XFD = LENGTH(blocks);
 	XEvent ev;
-	struct pollfd fds[LENGTH(blocks) + 1] = {0}; /* one fd for each block + X fd */
-
-	fds[XFD].fd = ConnectionNumber(dpy);
-	fds[XFD].events = POLLIN;
+	enum { XFD = LENGTH(blocks) };
+	struct pollfd fds[LENGTH(blocks) + 1] = { /* one fd for each block + X fd */
+		[XFD] = { .fd = ConnectionNumber(dpy), .events = POLLIN }
+	};
 
 	/* init blocks */
 	#if INVERSED
