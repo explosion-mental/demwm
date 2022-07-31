@@ -2084,9 +2084,7 @@ getcmd(int i, char *button)
 		if (button)
 			setenv("BLOCK_BUTTON", button, 1);
 		execlp("/bin/sh", "sh", "-c", blocks[i].command, (char *) NULL);
-		LOG("block '%d' with command '%s': failed execlp.", i, blocks[i].command);
-		perror(" failed");
-		exit(EXIT_SUCCESS);
+		die("demwm: block '%d', execlp '%s' failed:", i, blocks[i].command);
 	}
 }
 
@@ -3644,7 +3642,7 @@ setsignal(int sig, void (*sahandler)(int unused))
 	sa.sa_flags = SA_RESTART | SA_NOCLDWAIT | SA_NOCLDSTOP;
 
 	if (sigaction(sig, &sa, 0) == -1)
-		die("sigaction: signal '%d':", sig);
+		die("demwm: sigaction: signal '%d':", sig);
 }
 
 
