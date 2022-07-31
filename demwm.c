@@ -3024,7 +3024,7 @@ run(void)
 		}
 	}
 
-	alarm(sleepinterval); /* timer */
+	alarm(2); /* timer */
 	XSync(dpy, False);
 
 	/* main event loop */
