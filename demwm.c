@@ -3042,7 +3042,7 @@ run(void)
 			 * 'xsetroot -name' sutff */
 			if (errno == EINTR) /* signal caught */
 				continue;
-			die("demwm: poll :");
+			die("demwm: poll:");
 		}
 
 		/* handle X display fd */
@@ -3053,7 +3053,7 @@ run(void)
 					handler[ev.type](&ev); /* call handler */
 			}
 		} else if (fds[XFD].revents & POLLHUP)
-			die("demwm: X fd event loop, hang up :");
+			die("demwm: X fd event loop, hang up:");
 
 		/* handle blocks */
 		for (i = 0; i < LENGTH(blocks); i++) {
@@ -3063,8 +3063,8 @@ run(void)
 				/* remove lock for the current block */
 				execlock &= ~(1 << i);
 
-				if (bt == -1) { /* if read failed */
-					LOG("demwm: read failed in block '%s'.", blocks[i].command);
+				if (bt == -1) { /* read failed, log and ignore */
+					LOG("demwm: read failed in block '%s':", blocks[i].command);
 					perror(" failed");
 					continue;
 				}
@@ -3076,7 +3076,7 @@ run(void)
 
 				drawbar(selmon);
 			} else if (fds[i].revents & POLLHUP)
-				die("demwm: block '%d' hangup :", i);
+				die("demwm: block '%d' hangup:", i);
 		}
 	}
 
@@ -3644,7 +3644,7 @@ setsignal(int sig, void (*sahandler)(int unused))
 	sa.sa_flags = SA_RESTART | SA_NOCLDWAIT | SA_NOCLDSTOP;
 
 	if (sigaction(sig, &sa, 0) == -1)
-		die("sigaction: signal %d :", sig);
+		die("sigaction: signal '%d':", sig);
 }
 
 
@@ -3807,7 +3807,7 @@ spawn(const Arg *arg)
 			close(ConnectionNumber(dpy));
 		setsid();
 		execvp(((char **)arg->v)[0], (char **)arg->v);
-		die("demwm: execvp '%s' :", ((char **)arg->v)[0]);
+		die("demwm: execvp '%s':", ((char **)arg->v)[0]);
 	}
 }
 
