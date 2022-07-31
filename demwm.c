@@ -4870,8 +4870,6 @@ togglealwaysontop(const Arg *arg)
 {
 	if (!selmon->sel)
 		return;
-	if (!(selmon->sel->f & Float)) /* only floating clients can be always on top */
-		togglefloating(NULL);
 	selmon->sel->f ^= AlwOnTop;
 	UPFLAGS(selmon->sel);
 	focus(NULL);
