@@ -1173,18 +1173,17 @@ createmon(void)
 	m->gappoh = gappoh;
 	m->gappov = gappov;
 
-	m->lt = &layouts[0];
-	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
-
 	if (pertag) {
 		m->pertag = ecalloc(1, sizeof(Pertag));
-		m->pertag->curtag = m->pertag->prevtag = 1;
-
+		for (i = 0; !(m->seltags & 1 << i); i++);
+		m->pertag->curtag = m->pertag->prevtag = i + 1;
 
 		/* init layouts */
-		m->pertag->ltidxs[0] = &layouts[0];
+		m->pertag->ltidxs[0] = &layouts[0]; /* lt for ~0 tag */
 		for (i = 1; i <= LENGTH(tags); i++)
 			m->pertag->ltidxs[i] = &layouts[taglayouts[i - 1]];
+		m->lt = m->pertag->ltidxs[m->pertag->curtag];
+		strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
 
 		for (i = 0; i <= LENGTH(tags); i++) {
 
