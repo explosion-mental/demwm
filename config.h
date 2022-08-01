@@ -234,24 +234,24 @@ static const int floathints  = 0;	/* 1 means respect size hints if the window is
 static const int movefloat   = 22;
 
 static const Layout layouts[] = {
-	/* symbol	arrange function   gaps (enabled if omitted)			*/
+	/* symbol  arrange function  gaps */
  	{ "[]=",	tile },			/* master on left, slaves on right */
- 	{ "🧐",		monocle },		/* all windows on top of eachother */
- 	{ "{}",		alphamonocle },	/* monocle but windows aren't stacked */
-	//{ "TTT",	bstack },		/* master on top, slaves on bottom */
-	//{ "🐚",		spiral },		/* fibonacci spiral */
-	//{ "[\\]",	dwindle },		/* decreasing in size right and leftward */
+ 	{ "🧐" ,	monocle },		/* all windows on top of eachother */
+ 	{ "{}" ,	alphamonocle },	/* monocle but windows aren't stacked */
+//	{ "TTT",	bstack },		/* master on top, slaves on bottom */
+//	{ "🐚" ,	spiral },		/* fibonacci spiral */
+//	{ "[\\]",	dwindle },		/* decreasing in size right and leftward */
 	{ "[D]",	deck },			/* master on left, slaves in monocle mode on right */
-	//{ ">M>",	centeredfloatmaster},	/* centermaster but master floats */
-	//{ "|M|",	centeredmaster },	/* master in middle, slaves on sides */
-	//{ "===",      bstackhoriz },		/* bstack but slaves stacked "monocle"-like */
-	//{ "HHH",      grid },			/* windows in a grid */
+//	{ ">M>",	centeredfloatmaster},	/* centermaster but master floats */
+//	{ "|M|",	centeredmaster },	/* master in middle, slaves on sides */
+//	{ "===",      bstackhoriz },		/* bstack but slaves stacked "monocle"-like */
+//	{ "HHH",      grid },			/* windows in a grid */
 	{ "###",	nrowgrid },		/* gaplessgrid with no gaps, but not equal size */
-	//{ "#v#",	vsplitnrowgrid },	/* nrowgrid: force two clients to always split vertically */
-	//{ "---",      horizgrid },		/* gaplessgrid but with horizontal order */
-	//{ ":::",      gaplessgrid },		/* grid ajusted in such that there are no gaps */
-	//{ "🐷", 	pidgin },		/* basically grid? */
-	//{ ")M(",	ego },
+//	{ "#v#",	vsplitnrowgrid },	/* nrowgrid: force two clients to always split vertically */
+//	{ "---",      horizgrid },		/* gaplessgrid but with horizontal order */
+//	{ ":::",      gaplessgrid },		/* grid ajusted in such that there are no gaps */
+//	{ "🐷" , 	pidgin },		/* basically grid? */
+//	{ ")M(",	ego },
 	{ "🥏",		NULL },			/* no layout function means floating behavior */
 	{ "[ ]",	clear },		/* hides all visible clients, enjoy your nice wallpaper */
 };
