@@ -18,7 +18,6 @@ CUI hidevacant   = 1;      /* 1 means hide vacant tags */
 CUI hovertofocus = 0;      /* 0 means click to focus */
 CUI topbar       = 1;      /* 0 means bottom bar */
 CUI pertag       = 1;      /* 0 means global layout across all tags (default) */
-CUI pertagbar    = 0;      /* 0 means using pertag, but with the same barpos */
 CUI gapspertag   = 1;      /* 0 means global gaps across all tags (default) */
 CUI scalepreview = 4;      /* tag previews scaling (scalepreview / screensize) */
 CUI swallowfloat = 0;      /* 1 means swallow floating windows by default */

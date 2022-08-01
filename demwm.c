@@ -1192,7 +1192,7 @@ createmon(void)
 			m->pertag->enablegaps |= 1 << i;
 
 			/* init showbar */
-			if (pertagbar && m->f & ShowBar)
+			if (m->f & ShowBar)
 				m->pertag->showbars |= 1 << i;
 
 			/* init nmaster */
@@ -3868,7 +3868,7 @@ togglebar(const Arg *arg)
 
 	selmon->f ^= ShowBar;
 
-	if (pertag && pertagbar)
+	if (pertag)
 		for (i = 0; i < LENGTH(tags); i++)
 			if (selmon->f & ShowBar)
 				selmon->pertag->showbars |= 1 << i;
@@ -4117,7 +4117,7 @@ toggleview(const Arg *arg)
 			selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
 			selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
 			selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
-			if (pertagbar && (selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
+			if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
 				toggletagbar(NULL);
 		}
 
@@ -4548,8 +4548,7 @@ view(const Arg *arg)
 			selmon->gappiv = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff000000) >> 24;
 		}
 
-
-		if (pertagbar && (selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
+		if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
 			toggletagbar(NULL);
 	} else if (arg->ui & TAGMASK) /* if pertag */
 		selmon->seltags = arg->ui & TAGMASK;
