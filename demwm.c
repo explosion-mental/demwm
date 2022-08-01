@@ -344,6 +344,7 @@ static void removesystrayicon(Client *i);
 static void resizerequest(XEvent *e);
 static Monitor *systraytomon(Monitor *m);
 static void updatesystray(void);
+static void updatesystraypos(Monitor *m);
 static void updatesystrayicongeom(Client *i, int w, int h);
 static void updatesystrayiconstate(Client *i, XPropertyEvent *ev);
 static Client *wintosystrayicon(Window w);
@@ -384,6 +385,7 @@ static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
 static void togglebar(const Arg *arg);
+static void toggletagbar(const Arg *arg);
 static void togglefakefullscreen(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void togglefullscreen(const Arg *arg);
@@ -1024,11 +1026,9 @@ configurenotify(XEvent *e)
 				for (c = m->clients; c; c = c->next)
 					if (c->f & FS && c->fakefullscreen != 1)
 						resizeclient(c, m->mx, m->my, m->mw, m->mh);
-		#ifdef SYSTRAY
+			#ifdef SYSTRAY
 				resizebarwin(m);
-		#else
-				XMoveResizeWindow(dpy, m->barwin, m->wx, m->by, m->ww, bh);
-		#endif /* SYSTRAY */
+			#endif /* SYSTRAY */
 			}
 			focus(NULL);
 			arrange(NULL);
@@ -1735,16 +1735,19 @@ showtagpreview(unsigned int i)
 }
 #endif /* TAG_PREVIEW */
 
-/* Systray functions */
-#ifdef SYSTRAY
 void
 resizebarwin(Monitor *m)
 {
 	unsigned int w = m->ww;
+#ifdef SYSTRAY
 	if (m == systraytomon(m))
 		w -= getsystraywidth();
+#endif /* SYSTRAY */
 	XMoveResizeWindow(dpy, m->barwin, m->wx, m->by, w, bh);
 }
+
+/* Systray functions */
+#ifdef SYSTRAY
 unsigned int
 getsystraywidth(void)
 {
@@ -1884,6 +1887,23 @@ updatesystray(void)
 	//XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
 	resizebarwin(m);
 }
+void
+updatesystraypos(Monitor *m)
+{
+	XWindowChanges wc;
+
+	if (!(m->f & ShowBar))
+		wc.y = -bh;
+	else if (m->f & ShowBar) {
+		wc.y = 0;
+		if (!(m->f & TopBar))
+			wc.y = m->mh - bh;
+		getcmds(-1);
+	}
+
+	XConfigureWindow(dpy, systray->win, CWY, &wc);
+}
+
 void
 updatesystrayicongeom(Client *i, int w, int h)
 {
@@ -2695,6 +2715,8 @@ propertynotify(XEvent *e)
 				tag(&((Arg) { .ui = 1 << arg }));
 			else if (!strcmp(n, "togglebar"))
 				togglebar(NULL);
+			else if (!strcmp(n, "toggletagbar"))
+				toggletagbar(NULL);
 			else if (!strcmp(n, "togglefloating"))
 				togglefloating(NULL);
 			else if (!strcmp(n, "togglefullscreen"))
@@ -3842,28 +3864,39 @@ tagmon(const Arg *arg)
 void
 togglebar(const Arg *arg)
 {
+	unsigned int i;
+
 	selmon->f ^= ShowBar;
+
 	if (pertag && pertagbar)
-		if (selmon->f & ShowBar)
-			selmon->pertag->showbars |= selmon->seltags;
-		else
-			selmon->pertag->showbars &= ~selmon->seltags;
+		for (i = 0; i < LENGTH(tags); i++)
+			if (selmon->f & ShowBar)
+				selmon->pertag->showbars |= 1 << i;
+			else
+				selmon->pertag->showbars &= ~(1 << i);
 
 	updatebarpos(selmon);
-#ifdef SYSTRAY
 	resizebarwin(selmon);
-	XWindowChanges wc;
-	if (!(selmon->f & ShowBar))
-		wc.y = -bh;
-	else if (selmon->f & ShowBar) {
-		wc.y = 0;
-		if (!(selmon->f & TopBar))
-			wc.y = selmon->mh - bh;
-		getcmds(-1);
-	}
-	XConfigureWindow(dpy, systray->win, CWY, &wc);
-#else
-	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
+#ifdef SYSTRAY
+	updatesystraypos(selmon);
+#endif /* SYSTRAY */
+	arrange(selmon);
+}
+
+void
+toggletagbar(const Arg *arg)
+{
+	selmon->f ^= ShowBar;
+
+	if (selmon->f & ShowBar)
+		selmon->pertag->showbars |= selmon->seltags;
+	else
+		selmon->pertag->showbars &= ~selmon->seltags;
+
+	updatebarpos(selmon);
+	resizebarwin(selmon);
+#ifdef SYSTRAY
+	updatesystraypos(selmon);
 #endif /* SYSTRAY */
 	arrange(selmon);
 }
@@ -4085,7 +4118,7 @@ toggleview(const Arg *arg)
 			selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
 			selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
 			if (pertagbar && (selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
-				togglebar(NULL);
+				toggletagbar(NULL);
 		}
 
 		focus(NULL);
@@ -4515,8 +4548,9 @@ view(const Arg *arg)
 			selmon->gappiv = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff000000) >> 24;
 		}
 
+
 		if (pertagbar && (selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
-			togglebar(NULL);
+			toggletagbar(NULL);
 	} else if (arg->ui & TAGMASK) /* if pertag */
 		selmon->seltags = arg->ui & TAGMASK;
 	focus(NULL);
@@ -4973,20 +5007,11 @@ void
 toggletopbar(const Arg *arg)
 {
 	selmon->f ^= TopBar;
+
 	updatebarpos(selmon);
-#ifdef SYSTRAY
 	resizebarwin(selmon);
-	XWindowChanges wc;
-	if (!(selmon->f & ShowBar))
-		wc.y = -bh;
-	else if (selmon->f & ShowBar) {
-		wc.y = 0;
-		if (!(selmon->f & TopBar))
-			wc.y = selmon->mh - bh;
-	}
-	XConfigureWindow(dpy, systray->win, CWY, &wc);
-#else
-	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
+#ifdef SYSTRAY
+	updatesystraypos(selmon);
 #endif /* SYSTRAY */
 	arrange(selmon);
 	drawbar(selmon);
