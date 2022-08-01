@@ -3844,7 +3844,10 @@ togglebar(const Arg *arg)
 {
 	selmon->f ^= ShowBar;
 	if (pertag && pertagbar)
-		selmon->pertag->showbars = selmon->f & ShowBar;
+		if (selmon->f & ShowBar)
+			selmon->pertag->showbars |= selmon->seltags;
+		else
+			selmon->pertag->showbars &= ~selmon->seltags;
 
 	updatebarpos(selmon);
 #ifdef SYSTRAY
@@ -4081,7 +4084,7 @@ toggleview(const Arg *arg)
 			selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
 			selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
 			selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
-			if (pertagbar && (selmon->f & ShowBar) != (selmon->pertag->showbars & selmon->seltags))
+			if (pertagbar && (selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
 				togglebar(NULL);
 		}
 
@@ -4512,7 +4515,7 @@ view(const Arg *arg)
 			selmon->gappiv = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff000000) >> 24;
 		}
 
-		if (pertagbar && (selmon->f & ShowBar) != (selmon->pertag->showbars & selmon->seltags))
+		if (pertagbar && (selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
 			togglebar(NULL);
 	} else if (arg->ui & TAGMASK) /* if pertag */
 		selmon->seltags = arg->ui & TAGMASK;
