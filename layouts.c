@@ -701,7 +701,8 @@ centeredmaster(Monitor *m)
 
 /*
  * clear
- * - hides all visible windows, and title, to show you the nice wallpaper
+ * - hides all visible windows, to show you the nice wallpaper
+ * - drawbar() checks if it's clear() layout to hide the window title
  * (or to hide stuff)
  */
 static void
@@ -713,93 +714,3 @@ clear(Monitor *m)
 			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 	}
 }
-
-/* "EGO"
- *  https://github.com/sineemore/dotfiles/blob/bc316ca97ad339302b647acafeb9fdc8c02efdf3/patches/dwm-ego.patch
- * Weird monocle
- */
-
-//void
-//ego(Monitor *m)
-//{
-//	unsigned int n = 0;
-//	Client *c;
-//
-//	for (c = m->clients; c; c = c->next)
-//		if (ISVISIBLE(c))
-//			n++;
-//
-//	if (n > 0) /* override layout symbol */
-//		snprintf(m->ltsymbol, sizeof m->ltsymbol, ")%d(", n);
-//
-//	for (c = nexttiled(m->clients); c; c = nexttiled(c->next)) {
-//		int w = m->ww * 0.42;
-//		int h = m->wh * 0.9;
-//		resize(
-//			c,
-//			m->wx + (m->ww - w) / 2,
-//			m->wy + (m->wh - h) / 2,
-//			w,
-//			h,
-//			0
-//		);
-//	}
-//}
-
-/*
- * Pidgin
- * Basically grid?
- */
-//void
-//pidgin(Monitor *m)
-//{
-//	unsigned int i, n,
-//	int cols, rows, cn, rn, cx, cy, cw, ch, ww;
-//	int oh, ov, ih, iv;
-//	Client *c, *bl = NULL;
-//
-//	getgaps(m, &oh, &ov, &ih, &iv, &n);
-//	for(n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++)
-//		if(strstr(c->name, "Buddy List"))
-//			bl = c;
-//	if(n == 0)
-//		return;
-//
-//	/* buddy list */
-//	ww = (bl ? m->mfact * m->ww : m->ww);
-//	if(bl) {
-//		resize(bl, m->wx + ww, m->wy, m->ww - ww - 2 * bl->bw, m->wh - 2 * bl->bw, False);
-//		if(--n == 0)
-//			return;
-//	}
-//
-//	/* grid dimensions */
-//	for(cols = 0; cols <= n/2; cols++)
-//		if(cols*cols >= n)
-//			break;
-//	if(n == 5) /* set layout against the general calculation: not 1:2:2, but 2:3 */
-//		cols = 2;
-//	rows = n/cols;
-//
-//	/* window geometries */
-//	cw = cols ? ww / cols : ww;
-//	cn = 0; /* current column number */
-//	rn = 0; /* current row number */
-//	for(i = 0, c = nexttiled(m->clients); c; i++, c = nexttiled(c->next)) {
-//		if(c == bl) {
-//			--i;
-//			continue;
-//		}
-//		if(i/rows + 1 > cols - n%cols)
-//			rows = n/cols + 1;
-//		ch = rows ? m->wh / rows : m->wh;
-//		cx = m->wx + cn*cw;
-//		cy = m->wy + rn*ch;
-//		resize(c, cx, cy, cw - 2 * c->bw, ch - 2 * c->bw, False);
-//		rn++;
-//		if(rn >= rows) {
-//			rn = 0;
-//			cn++;
-//		}
-//	}
-//}
