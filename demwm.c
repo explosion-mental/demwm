@@ -5014,7 +5014,6 @@ toggletopbar(const Arg *arg)
 	updatesystraypos(selmon);
 #endif /* SYSTRAY */
 	arrange(selmon);
-	drawbar(selmon);
 }
 
 void
