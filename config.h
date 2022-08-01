@@ -165,6 +165,7 @@ static const Rule rules[] = {
 	 *
 	 * Avaliable flags:
 	 *
+	 ** AlwOnTop: be 'on top' even while unfocused
 	 ** Float: enable floating
 	 ** Terminal: will make the window swallow child ones
 	 ** FakeFS: enable fakefullscreen
