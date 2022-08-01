@@ -1173,40 +1173,40 @@ createmon(void)
 	m->gappoh = gappoh;
 	m->gappov = gappov;
 
-	if (pertag) {
-		m->pertag = ecalloc(1, sizeof(Pertag));
-		for (i = 0; !(m->seltags & 1 << i); i++);
-		m->pertag->curtag = m->pertag->prevtag = i + 1;
+	m->pertag = ecalloc(1, sizeof(Pertag));
+	for (i = 0; !(m->seltags & 1 << i); i++);
+	m->pertag->curtag = m->pertag->prevtag = i + 1;
 
-		/* init layouts */
-		m->pertag->ltidxs[0] = &layouts[0]; /* lt for ~0 tag */
-		for (i = 1; i <= LENGTH(tags); i++)
-			m->pertag->ltidxs[i] = &layouts[taglayouts[i - 1]];
-		m->lt = m->pertag->ltidxs[m->pertag->curtag];
-		strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
+	/* init layouts */
+	m->pertag->ltidxs[0] = &layouts[0]; /* lt for ~0 tag */
 
-		for (i = 0; i <= LENGTH(tags); i++) {
+	for (i = 1; i <= LENGTH(tags); i++)
+		m->pertag->ltidxs[i] = &layouts[taglayouts[i - 1]];
 
-			/* init gaps */
-			m->pertag->enablegaps |= 1 << i;
+	m->lt = m->pertag->ltidxs[m->pertag->curtag];
+	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
 
-			/* init showbar */
-			if (m->f & ShowBar)
-				m->pertag->showbars |= 1 << i;
+	for (i = 0; i <= LENGTH(tags); i++) {
 
-			/* init nmaster */
-			m->pertag->nmasters[i] = m->nmaster;
+		/* init gaps */
+		m->pertag->enablegaps |= 1 << i;
 
-			/* init mfacts */
-			m->pertag->mfacts[i] = m->mfact;
+		/* init showbar */
+		if (m->f & ShowBar)
+			m->pertag->showbars |= 1 << i;
 
-			/* swap focus and zoomswap*/
-			m->pertag->prevzooms[i] = NULL;
+		/* init nmaster */
+		m->pertag->nmasters[i] = m->nmaster;
 
-			if (gapspertag)
-				m->pertag->gaps[i] = ((gappoh & 0xFF) << 0) | ((gappov & 0xFF) << 8) | ((gappih & 0xFF) << 16) | ((gappiv & 0xFF) << 24);
-		}
-	}	/* if pertag */
+		/* init mfacts */
+		m->pertag->mfacts[i] = m->mfact;
+
+		/* swap focus and zoomswap*/
+		m->pertag->prevzooms[i] = NULL;
+
+		if (gapspertag)
+			m->pertag->gaps[i] = ((gappoh & 0xFF) << 0) | ((gappov & 0xFF) << 8) | ((gappih & 0xFF) << 16) | ((gappiv & 0xFF) << 24);
+	}
 
 	#ifdef TAG_PREVIEW
 	m->tagmap = ecalloc(LENGTH(tags), sizeof(Pixmap));
@@ -2245,10 +2245,7 @@ grabkeys(void)
 void
 incnmaster(const Arg *arg)
 {
-	if (pertag)
-		selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag] = MAX(selmon->nmaster + arg->i, 0);
-	else
-		selmon->nmaster = MAX(selmon->nmaster + arg->i, 0);
+	selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag] = MAX(selmon->nmaster + arg->i, 0);
 	arrange(selmon);
 }
 
@@ -3189,10 +3186,7 @@ togglesmartgaps(const Arg *arg)
 void
 togglegaps(const Arg *arg)
 {
-	if (pertag)
-		selmon->pertag->enablegaps ^= selmon->seltags & ~SPTAGMASK;
-	else
-		enablegaps = !enablegaps;
+	selmon->pertag->enablegaps ^= selmon->seltags & ~SPTAGMASK;
 	arrange(selmon);
 }
 void
@@ -3202,9 +3196,6 @@ getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 	Client *c;
 
 	oe = ie = m->pertag->enablegaps & (m->seltags & ~SPTAGMASK) ? 1 : 0;
-
-	if (!pertag)
-		oe = ie = enablegaps;
 
 	/* get the number of clients */
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
@@ -3476,14 +3467,10 @@ void
 setlayout(const Arg *arg)
 {
 	if (arg && arg->v) {
-		if (pertag) {
-			selmon->pertag->ltidxs[selmon->pertag->curtag] = (Layout *)arg->v;
-			selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
-		} else
-			selmon->lt = (Layout *)arg->v;
+		selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag] = (Layout *)arg->v;
+		strncpy(selmon->ltsymbol, selmon->lt->symbol, sizeof selmon->ltsymbol);
 	}
 
-	strncpy(selmon->ltsymbol, selmon->lt->symbol, sizeof selmon->ltsymbol);
 	if (selmon->sel)
 		arrange(selmon);
 	else
@@ -3528,10 +3515,7 @@ setmfact(const Arg *arg)
 	if (f < 0.05 || f > 0.95)
 		return;
 
-	selmon->mfact = f;
-
-	if (pertag)
-		selmon->pertag->mfacts[selmon->pertag->curtag] = f;
+	selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag] = f;
 
 	arrange(selmon);
 }
@@ -3867,12 +3851,11 @@ togglebar(const Arg *arg)
 
 	selmon->f ^= ShowBar;
 
-	if (pertag)
-		for (i = 0; i < LENGTH(tags); i++)
-			if (selmon->f & ShowBar)
-				selmon->pertag->showbars |= 1 << i;
-			else
-				selmon->pertag->showbars &= ~(1 << i);
+	for (i = 0; i < LENGTH(tags); i++)
+		if (selmon->f & ShowBar)
+			selmon->pertag->showbars |= 1 << i;
+		else
+			selmon->pertag->showbars &= ~(1 << i);
 
 	updatebarpos(selmon);
 	resizebarwin(selmon);
@@ -4100,25 +4083,23 @@ toggleview(const Arg *arg)
 		#endif /* TAG_PREVIEW */
 		selmon->seltags = newtagset;
 
-		if (pertag) {
-			if (newtagset == ~0) {
-				selmon->pertag->prevtag = selmon->pertag->curtag;
-				selmon->pertag->curtag = 0;
-			}
-			/* test if the user did not select the same tag */
-			if (!(newtagset & 1 << (selmon->pertag->curtag - 1))) {
-				selmon->pertag->prevtag = selmon->pertag->curtag;
-				for (i=0; !(newtagset & 1 << i); i++) ;
-				selmon->pertag->curtag = i + 1;
-			}
-
-			/* apply settings for this view */
-			selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
-			selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
-			selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
-			if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
-				toggletagbar(NULL);
+		if (newtagset == ~0) {
+			selmon->pertag->prevtag = selmon->pertag->curtag;
+			selmon->pertag->curtag = 0;
 		}
+		/* test if the user did not select the same tag */
+		if (!(newtagset & 1 << (selmon->pertag->curtag - 1))) {
+			selmon->pertag->prevtag = selmon->pertag->curtag;
+			for (i=0; !(newtagset & 1 << i); i++) ;
+			selmon->pertag->curtag = i + 1;
+		}
+
+		/* apply settings for this view */
+		selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
+		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
+		selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
+		if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
+			toggletagbar(NULL);
 
 		focus(NULL);
 		arrange(selmon);
@@ -4520,37 +4501,35 @@ view(const Arg *arg)
 	selmon->oldtags = selmon->seltags;
 	selmon->seltags = tmp;
 
-	if (pertag) {
-		if (arg->ui & TAGMASK) {
-			selmon->seltags = arg->ui & TAGMASK;
-			selmon->pertag->prevtag = selmon->pertag->curtag;
-
-			if (arg->ui == ~0)
-				selmon->pertag->curtag = 0;
-			else {
-				for (i = 0; !(arg->ui & 1 << i); i++);
-				selmon->pertag->curtag = i + 1;
-			}
-		} else {
-			tmptag = selmon->pertag->prevtag;
-			selmon->pertag->prevtag = selmon->pertag->curtag;
-			selmon->pertag->curtag = tmptag;
-		}
-		selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
-		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
-		selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
-
-		if (gapspertag) { /* store gaps in 2 bits */
-			selmon->gappoh = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff) >> 0;
-			selmon->gappov = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff00) >> 8;
-			selmon->gappih = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff0000) >> 16;
-			selmon->gappiv = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff000000) >> 24;
-		}
-
-		if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
-			toggletagbar(NULL);
-	} else if (arg->ui & TAGMASK) /* if pertag */
+	if (arg->ui & TAGMASK) {
 		selmon->seltags = arg->ui & TAGMASK;
+		selmon->pertag->prevtag = selmon->pertag->curtag;
+
+		if (arg->ui == ~0)
+			selmon->pertag->curtag = 0;
+		else {
+			for (i = 0; !(arg->ui & 1 << i); i++);
+			selmon->pertag->curtag = i + 1;
+		}
+	} else {
+		tmptag = selmon->pertag->prevtag;
+		selmon->pertag->prevtag = selmon->pertag->curtag;
+		selmon->pertag->curtag = tmptag;
+	}
+	selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
+	selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
+	selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
+
+	if (gapspertag) { /* store gaps in 2 bits */
+		selmon->gappoh = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff) >> 0;
+		selmon->gappov = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff00) >> 8;
+		selmon->gappih = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff0000) >> 16;
+		selmon->gappiv = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff000000) >> 24;
+	}
+
+	if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
+		toggletagbar(NULL);
+
 	focus(NULL);
 	arrange(selmon);
 }
