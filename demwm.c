@@ -688,7 +688,7 @@ void
 swallow(Client *p, Client *c)
 {
 	XWindowChanges wc;
-	Window w;
+	Window tmp;
 
 	if ((c->f & (Terminal | NoSwallow))
 	|| ((!swallowfloat && c->f & Float) && !(c->f & FS))
@@ -704,24 +704,20 @@ swallow(Client *p, Client *c)
 	p->swallowing = c;
 	c->mon = p->mon;
 
-	w = p->win;
+	tmp = p->win;
 	p->win = c->win;
-	c->win = w;
+	c->win = tmp;
 #ifdef ICONS
 	updateicon(p);
 #endif /* ICONS */
 	updatetitle(p);
-	UPTAGS(p);
-	UPFLAGS(p);
-
-	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
 
 	wc.border_width = p->bw;
 	XConfigureWindow(dpy, p->win, CWBorderWidth, &wc);
 	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
-	XSetWindowBorder(dpy, p->win, scheme[c->f & Float ? BorderFloat : BorderSel][ColFg].pixel);
-
+	XSetWindowBorder(dpy, p->win, scheme[p->f & Float ? BorderFloat : BorderSel][ColFg].pixel);
 	configure(p);
+
 	updateclientlist();
 }
 
@@ -741,15 +737,13 @@ unswallow(Client *c)
 	freeicon(c);
 #endif /* ICONS */
 	updatetitle(c);
-	arrange(c->mon);
 	XMapWindow(dpy, c->win);
-
-	XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, c->win, CWBorderWidth, &wc);
 	XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 	XSetWindowBorder(dpy, c->win, scheme[c->f & Float ? BorderFloat : BorderSel][ColFg].pixel);
+	configure(c);
 
 	setclientstate(c, NormalState);
 	focus(NULL);
@@ -2431,6 +2425,7 @@ manage(Window w, XWindowAttributes *wa)
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	XSetWindowBorder(dpy, w, scheme[BorderNorm][ColFg].pixel);
 	configure(c); /* propagates border_width, if size doesn't change */
+
 	SETVAL(c, AlwOnTop, getatomprop(c, netatom[NetWMState]) == netatom[NetWMStateAbove]);
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMFullscreen])
 		setfullscreen(c, 1);
