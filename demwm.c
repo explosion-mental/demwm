@@ -2363,18 +2363,16 @@ manage(Window w, XWindowAttributes *wa)
 	Atom tmptom = None;
 	//XEvent xev;
 
-	c = ecalloc(1, sizeof(Client));
-	c->win = w;
-
 	/* do not manage (lower and skip) NET_WINDOW_TYPE_DESKTOP
 	 * (desktop implementation) windows (glava, xlivebg, etc) */
-	if (getatomprop(c, netatom[NetWMWindowType]) == netatom[NetWMWindowTypeDesktop]) {
+	if (getatomprop(&((Client){ .win = w }), netatom[NetWMWindowType]) == netatom[NetWMWindowTypeDesktop]) {
 		XMapWindow(dpy, c->win);
 		XLowerWindow(dpy, c->win);
-		free(c);
 		return;
 	}
 
+	c = ecalloc(1, sizeof(Client));
+	c->win = w;
 	c->pid = winpid(w);
 
 	/* geometry */
