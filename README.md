@@ -2,7 +2,7 @@
 
 ![Image](https://explosion-mental.codeberg.page/img/screensus/rice.gif "demwm")
 
-_some nice screenshots [here](https://explosion-mental.codeberg.page/topics/dwm.html#Screenshots)_
+_some nice screenshots [here](https://explosion-mental.codeberg.page/topics/demwm.html#Screenshots)_
 
 # Requirements
 - In order to build demwm you need the Xlib header files.
