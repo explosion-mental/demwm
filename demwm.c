@@ -2361,8 +2361,8 @@ manage(Window w, XWindowAttributes *wa)
 	/* do not manage (lower and skip) NET_WINDOW_TYPE_DESKTOP
 	 * (desktop implementation) windows (glava, xlivebg, etc) */
 	if (getatomprop(&((Client){ .win = w }), netatom[NetWMWindowType]) == netatom[NetWMWindowTypeDesktop]) {
-		XMapWindow(dpy, c->win);
-		XLowerWindow(dpy, c->win);
+		XMapWindow(dpy, w);
+		XLowerWindow(dpy, w);
 		return;
 	}
 
