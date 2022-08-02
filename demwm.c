@@ -939,8 +939,7 @@ clientmessage(XEvent *e)
 		updatesystrayicongeom(c, wa.width, wa.height);
 		XAddToSaveSet(dpy, c->win);
 		XSelectInput(dpy, c->win, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
-		XClassHint ch = { systrayclass[0], systrayclass[1] };
-		XSetClassHint(dpy, c->win, &ch);
+		XSetClassHint(dpy, c->win, &systrayclass);
 		swa.background_pixel  = 0;
 		//swa.background_pixel  = scheme[SchemeNorm][ColBg].pixel;	/* use parents background color */
 		//swa.background_pixel  = 0;
@@ -4200,12 +4199,6 @@ updatebars(void)
 	#endif /* TAG_PREVIEW */
 	};
 
-	#ifdef TAG_PREVIEW
-	XClassHint chpre = { previewclass[0], previewclass[1] };
-	#endif /* TAG_PREVIEW */
-
-	XClassHint ch = { barclass[0], barclass[1] };
-
 	for (m = mons; m; m = m->next) {
 #ifdef TAG_PREVIEW
 		if (!m->tagwin) {
@@ -4214,7 +4207,7 @@ updatebars(void)
 			XDefineCursor(dpy, m->tagwin, cursor[CurNormal]->cursor);
 			//XMapRaised(dpy, m->tagwin);
 			XUnmapWindow(dpy, m->tagwin);
-			XSetClassHint(dpy, m->barwin, &chpre);
+			XSetClassHint(dpy, m->barwin, &previewclass);
 		}
 #endif /* TAG_PREVIEW */
 		if (m->barwin)
@@ -4233,7 +4226,7 @@ updatebars(void)
 			XMapRaised(dpy, systray->win);
 #endif /* SYSTRAY */
 		XMapRaised(dpy, m->barwin);
-		XSetClassHint(dpy, m->barwin, &ch);
+		XSetClassHint(dpy, m->barwin, &barclass);
 	}
 }
 

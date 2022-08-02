@@ -138,10 +138,10 @@ static const Block blocks[] = {
 /* delimeter between blocks commands. NULL character ('\0') means no delimeter. */
 static const char delimiter[] = " ";
 
-/* properties:			res_name  res_class */
-static char *systrayclass[] = { "demwm", "demwm" };
-static char *barclass[]     = { "demwm", "demwm" };
-static char *previewclass[] = { "demwm-preview", "demwm-preview" };
+/* properties:			  res_name  res_class */
+static XClassHint systrayclass = { "demwm", "demwm" };
+static XClassHint barclass     = { "demwm", "demwm" };
+static XClassHint previewclass = { "demwm-preview", "demwm-preview" };
 
 /* tags */
 //static const char *tags[] = { "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉" };
