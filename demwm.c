@@ -2464,10 +2464,10 @@ manage(Window w, XWindowAttributes *wa)
 		unfocus(selmon->sel, 0);
 	}
 	c->mon->sel = c;
-	arrange(c->mon);
 	XMapWindow(dpy, c->win);
 	if (term)
 		swallow(term, c);
+	arrange(c->mon);
 	focus(NULL);
 	UPFLAGS(c);
 }
