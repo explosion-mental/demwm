@@ -177,6 +177,7 @@ static const Rule rules[] = {
 	RULE(.class = "vlc",		.tags = 1 << 6)
 	RULE(.class = "qutebrowser",	.tags = 1 << 5)
 	RULE(.class = "Surf",		.tags = 1 << 7)
+	RULE(.class = "Element",	.tags = 1 << 7)
 	RULE(.title = "Music",		.tags = 1 << 6)
 	RULE(.title = "Sxiv - redyt",	.tags = 1 << 8)
 	RULE(.title = "Sxiv - walld",	.tags = 1 << 8)
