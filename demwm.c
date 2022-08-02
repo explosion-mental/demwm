@@ -711,6 +711,8 @@ swallow(Client *p, Client *c)
 	updateicon(p);
 #endif /* ICONS */
 	updatetitle(p);
+	UPTAGS(p);
+	UPFLAGS(p);
 
 	wc.border_width = p->bw;
 	XConfigureWindow(dpy, p->win, CWBorderWidth, &wc);
