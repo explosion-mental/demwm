@@ -4534,11 +4534,9 @@ winpid(Window w)
 	pid_t result = 0;
 
 #ifdef __linux__
-	xcb_res_client_id_spec_t spec = {0};
-	spec.client = w;
-	spec.mask = XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID;
-
+	enum { _XPID = XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID };
 	xcb_generic_error_t *e = NULL;
+	xcb_res_client_id_spec_t spec = { .client = w, .mask = _XPID };
 	xcb_res_query_client_ids_cookie_t c = xcb_res_query_client_ids(xcon, 1, &spec);
 	xcb_res_query_client_ids_reply_t *r = xcb_res_query_client_ids_reply(xcon, c, &e);
 
@@ -4546,11 +4544,11 @@ winpid(Window w)
 		return (pid_t)0;
 
 	xcb_res_client_id_value_iterator_t i = xcb_res_query_client_ids_ids_iterator(r);
+
 	for (; i.rem; xcb_res_client_id_value_next(&i)) {
 		spec = i.data->spec;
-		if (spec.mask & XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID) {
-			uint32_t *t = xcb_res_client_id_value_value(i.data);
-			result = *t;
+		if (spec.mask & _XPID) {
+			result = *xcb_res_client_id_value_value(i.data);
 			break;
 		}
 	}
