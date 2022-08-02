@@ -721,7 +721,6 @@ swallow(Client *p, Client *c)
 	XMoveResizeWindow(dpy, p->win, p->x, p->y, p->w, p->h);
 	XSetWindowBorder(dpy, p->win, scheme[c->f & Float ? BorderFloat : BorderSel][ColFg].pixel);
 
-	arrange(p->mon);
 	configure(p);
 	updateclientlist();
 }
