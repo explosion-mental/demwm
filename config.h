@@ -333,7 +333,7 @@ static const Key keys[] = {
 			/* dynamic scratchpads */
 	{ MOD|Ctrl,		XK_v,	scratchpad_remove,	{0} },
 	{ MOD,                  XK_v,	scratchpad_show,	{0} },
-	{ MOD|Shift,            XK_v,	scratchpad_hide,	{0} },
+	{ MOD|Shift,            XK_v,	tag,			{.ui = SCRATCHPAD_MASK } },
 //	{ MOD|Ctrl,          	XK_v,	scratchpad_remove,	{0} },
 
 				/* Navigation */

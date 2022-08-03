@@ -85,9 +85,9 @@
 #define OPAQUE                  0xffU	/* borders */
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
-/* scratchpad */
-#define NUMTAGS			(LENGTH(tags) + LENGTH(scratchpads))
+#define NUMTAGS			(LENGTH(tags) + LENGTH(scratchpads) + 1)
 //#define TAGMASK		((1 << LENGTH(tags)) - 1)
+#define SCRATCHPAD_MASK		(1 << (NUMTAGS - 1)) /* dynamic scratchpads */
 #define TAGMASK     		((1 << NUMTAGS) - 1)
 #define SPTAG(i) 		((1 << LENGTH(tags)) << (i))
 #define SPTAGMASK		(((1 << LENGTH(scratchpads)) - 1) << LENGTH(tags))
@@ -520,9 +520,6 @@ static char dmenumon[2] = "0"; /* dmenu default selected monitor */
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
-
-/* dynamic scratchpads (this selects an unused tag) */
-#define SCRATCHPAD_MASK		(1 << (NUMTAGS + 1))
 
 static Clr *scheme[LENGTH(colors)] = {0};
 static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0}; /* +1 for '\0' */
@@ -4786,16 +4783,6 @@ zoomswap(const Arg *arg)
 }
 
 /* dynamic scratchpads */
-void
-scratchpad_hide(const Arg *arg)
-{
-	if (selmon->sel) {
-		selmon->sel->tags = SCRATCHPAD_MASK;
-		togglefloating(NULL);
-		focus(NULL);
-		arrange(selmon);
-	}
-}
 int
 scratchpad_last_showed_is_killed(void)
 {
