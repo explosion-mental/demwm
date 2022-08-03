@@ -4794,18 +4794,17 @@ scratchpad_last_showed_is_killed(void)
 	Client *c;
 	int killed = 1;
 
-	for (c = selmon->clients; c; c = c->next)
-		if (c == scratchpad_last_showed) {
+	for (c = selmon->clients; c && killed; c = c->next)
+		if (c == scratchpad_last_showed)
 			killed = 0;
-			break;
-		}
 
 	return killed;
 }
 void
 scratchpad_remove(const Arg *arg)
 {
-	if (selmon->sel && scratchpad_last_showed && selmon->sel == scratchpad_last_showed)
+	if (selmon->sel && scratchpad_last_showed
+	&& selmon->sel == scratchpad_last_showed)
 		scratchpad_last_showed = NULL;
 }
 void
