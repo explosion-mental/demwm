@@ -4786,7 +4786,7 @@ zoomswap(const Arg *arg)
 void
 scratchpad_hide(const Arg *arg)
 {
-	tag(&((Arg){.v = SCRATCHPAD_MASK}));
+	tag(&((Arg){.ui = SCRATCHPAD_MASK}));
 }
 int
 scratchpad_last_showed_is_killed(void)
