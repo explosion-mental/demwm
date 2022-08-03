@@ -4786,35 +4786,39 @@ zoomswap(const Arg *arg)
 int
 scratchpad_last_showed_is_killed(void)
 {
+	Client *c;
 	int killed = 1;
-	for (Client *c = selmon->clients; c != NULL; c = c->next)
+
+	for (c = selmon->clients; c; c = c->next)
 		if (c == scratchpad_last_showed) {
 			killed = 0;
 			break;
 		}
+
 	return killed;
 }
 void
 scratchpad_remove(const Arg *arg)
 {
-	if (selmon->sel && scratchpad_last_showed != NULL && selmon->sel == scratchpad_last_showed)
+	if (selmon->sel && scratchpad_last_showed && selmon->sel == scratchpad_last_showed)
 		scratchpad_last_showed = NULL;
 }
 void
 scratchpad_show(const Arg *arg)
 {
 	Client *c;
+	int found_current = 0;
+	int found_next = 0;
+
 	if (scratchpad_last_showed == NULL || scratchpad_last_showed_is_killed())
 		scratchpad_show_first();
 	else {
 		if (scratchpad_last_showed->tags != SCRATCHPAD_MASK) {
-			scratchpad_last_showed -> tags = SCRATCHPAD_MASK;
+			scratchpad_last_showed->tags = SCRATCHPAD_MASK;
 			focus(NULL);
 			arrange(selmon);
 		} else {
-			int found_current = 0;
-			int found_next = 0;
-			for (c = selmon->clients; c != NULL; c = c->next) {
+			for (c = selmon->clients; c; c = c->next) {
 				if (found_current == 0) {
 					if (c == scratchpad_last_showed) {
 						found_current = 1;
@@ -4823,13 +4827,13 @@ scratchpad_show(const Arg *arg)
 				} else {
 					if (c->tags == SCRATCHPAD_MASK) {
 						found_next = 1;
-						scratchpad_show_client (c);
+						scratchpad_show_client(c);
 						break;
 					}
 				}
 			}
 			if (found_next == 0)
-				scratchpad_show_first ();
+				scratchpad_show_first();
 		}
 	}
 }
@@ -4844,9 +4848,10 @@ scratchpad_show_client(Client *c)
 void
 scratchpad_show_first(void)
 {
-	for (Client *c = selmon->clients; c != NULL; c = c->next) {
+	Client *c;
+	for (c = selmon->clients; c; c = c->next) {
 		if (c->tags == SCRATCHPAD_MASK) {
-			scratchpad_show_client (c);
+			scratchpad_show_client(c);
 			break;
 		}
 	}
