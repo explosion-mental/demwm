@@ -1177,7 +1177,7 @@ createmon(void)
 		m->pertag->ltidxs[i] = &layouts[taglayouts[i - 1]];
 
 	m->lt = m->pertag->ltidxs[m->pertag->curtag];
-	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
+	strncpy(m->ltsymbol, m->lt->symbol, sizeof m->ltsymbol);
 
 	for (i = 0; i <= LENGTH(tags); i++) {
 
