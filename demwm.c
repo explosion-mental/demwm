@@ -4783,6 +4783,11 @@ zoomswap(const Arg *arg)
 }
 
 /* dynamic scratchpads */
+void
+scratchpad_hide(const Arg *arg)
+{
+	tag(&((Arg){.v = SCRATCHPAD_MASK}));
+}
 int
 scratchpad_last_showed_is_killed(void)
 {
