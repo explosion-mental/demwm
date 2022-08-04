@@ -67,22 +67,12 @@
 #include "util.h"
 
 /* macros */
-#define Button6			6
-#define Button7			7
-#define Alt			Mod1Mask
-#define AltGr			Mod3Mask
-#define Ctrl			ControlMask
-#define Shift			ShiftMask
-#define ShiftGr			Mod5Mask
-#define Super			Mod4Mask
-#define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
+#define OPAQUE			0xffU /* borders */
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
                                * MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
 #define ISVISIBLE(C)            ((C->tags & C->mon->seltags) || C->f & Sticky)
 #define LENGTH(X)               (sizeof X / sizeof X[0])
-#define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
-#define OPAQUE                  0xffU	/* borders */
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
 #define NUMTAGS			(LENGTH(tags) + LENGTH(scratchpads) + 1)
@@ -94,7 +84,6 @@
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 #define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
 #define SETVAL(X, flag, val)	X->f = ((val) ? X->f | flag : X->f & ~flag)
-#define WINMASK			(CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask)
 #define UPFLAGS(C)		XChangeProperty(dpy, C->win, demwmflags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->f), 1)
 #define UPTAGS(C)		XChangeProperty(dpy, C->win, demwmtags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1)
 #define LOG(...)		do { fprintf(stderr, "demwm: " __VA_ARGS__); fputc('\n', stderr); } while (0)
@@ -136,8 +125,7 @@ enum { NetSupported, NetWMName,
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
-enum {
-	AlwOnTop   = 1 << 0,  /* AlwaysOnTop */
+enum {	AlwOnTop   = 1 << 0,  /* AlwaysOnTop */
 	Float      = 1 << 1,
 	Fixed      = 1 << 2,  /* same height and width */
 	FS         = 1 << 3,  /* FullScreen */
@@ -154,6 +142,21 @@ enum {
 	LastFlag   = 1 << 14, /* placeholder for the last flag */
 }; /* client flags/state */
 enum { HideVacant = 1 << 0, ShowBar = 1 << 1, TopBar = 1 << 2 }; /* mon flags */
+
+enum {	Alt     = Mod1Mask,
+	AltGr   = Mod3Mask,
+	Button6	= 6,
+	Button7	= 7,
+	Ctrl    = ControlMask,
+	Shift   = ShiftMask,
+	ShiftGr	= Mod5Mask,
+	Super   = Mod4Mask,
+}; /* modifiers */
+
+enum {	BUTTONMASK = (ButtonPressMask|ButtonReleaseMask),
+	MOUSEMASK  = (BUTTONMASK|PointerMotionMask),
+	WINMASK    = (CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask),
+}; /* masks */
 
 typedef union {
 	int i;
