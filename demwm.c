@@ -4562,22 +4562,20 @@ winpid(Window w)
 #endif /* __linux__ */
 
 #ifdef __OpenBSD__
-        Atom type;
-        int format;
-        unsigned long len, bytes;
-        unsigned char *prop;
-        pid_t ret;
+	Atom type;
+	int format;
+	unsigned long len, bytes;
+	unsigned char *prop;
 
 	if (XGetWindowProperty(dpy, w, XInternAtom(dpy, "_NET_WM_PID", 0), 0,
 				1, False, AnyPropertyType, &type, &format,
 				&len, &bytes, &prop) != Success || !prop)
-               return 0;
+		return 0;
 
-        ret = *(pid_t*)prop;
-        XFree(prop);
-        result = ret;
-
+	result = *(pid_t*)prop;
+	XFree(prop);
 #endif /* __OpenBSD__ */
+
 	return result;
 }
 
@@ -4595,7 +4593,7 @@ getparentprocess(pid_t p)
 		return 0;
 
 	if (fscanf(f, "%*u %*s %*c %u", (unsigned *)&v) != 1)
-		v = (pid_t)0;
+		v = 0;
 
 	fclose(f);
 #elif __FreeBSD__
