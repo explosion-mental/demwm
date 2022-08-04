@@ -92,6 +92,7 @@ alphamonocle(Monitor *m)
 /*
  * Center floating master
  * same as master on center but is floating
+ * https://dwm.suckless.org/patches/centeredmaster/
  */
 static void
 centeredfloatmaster(Monitor *m)
