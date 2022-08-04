@@ -154,7 +154,7 @@ enum {	Alt     = Mod1Mask,
 }; /* modifiers */
 
 enum {	BUTTONMASK = (ButtonPressMask|ButtonReleaseMask),
-	MOUSEMASK  = (BUTTONMASK|PointerMotionMask),
+	MOUSEMASK  = (ButtonPressMask|ButtonReleaseMask|PointerMotionMask),
 	WINMASK    = (CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask),
 }; /* masks */
 
