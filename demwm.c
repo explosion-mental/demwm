@@ -145,11 +145,11 @@ enum { HideVacant = 1 << 0, ShowBar = 1 << 1, TopBar = 1 << 2 }; /* mon flags */
 
 enum {	Alt     = Mod1Mask,
 	AltGr   = Mod3Mask,
-	Button6	= 6,
-	Button7	= 7,
+	Button6 = 6,
+	Button7 = 7,
 	Ctrl    = ControlMask,
 	Shift   = ShiftMask,
-	ShiftGr	= Mod5Mask,
+	ShiftGr = Mod5Mask,
 	Super   = Mod4Mask,
 }; /* modifiers */
 
