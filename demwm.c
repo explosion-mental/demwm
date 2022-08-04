@@ -2088,7 +2088,7 @@ getcmd(int i, char *button)
 		return;
 
 	if (execlock & (1 << i)) { /* block is already running */
-		DB("block '%d' with command '%s' ignored.", i, blocks[i].command)
+		DB("block '%d' with command '%s' ignored.", i, blocks[i].command);
 		return;
 	}
 
