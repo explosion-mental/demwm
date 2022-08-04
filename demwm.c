@@ -1170,19 +1170,19 @@ createmon(void)
 	m->gappov = gappov;
 
 	m->pertag = ecalloc(1, sizeof(Pertag));
+
 	for (i = 0; !(m->seltags & 1 << i); i++);
-	m->pertag->curtag = m->pertag->prevtag = i + 1;
+	m->pertag->curtag = m->pertag->prevtag = i;
 
-	/* init layouts */
-	m->pertag->ltidxs[0] = &layouts[0]; /* lt for ~0 tag */
+	/* the ~0 (all tags) tag */
+	m->pertag->ltidxs[LENGTH(tags)] = &layouts[alltagslayout];
+	m->pertag->nmasters[LENGTH(tags)] = m->nmaster;
+	m->pertag->mfacts[LENGTH(tags)] = m->mfact;
+	m->pertag->prevzooms[LENGTH(tags)] = NULL;
+	if (gapspertag)
+		m->pertag->gaps[LENGTH(tags)] = ((gappoh & 0xFF) << 0) | ((gappov & 0xFF) << 8) | ((gappih & 0xFF) << 16) | ((gappiv & 0xFF) << 24);
 
-	for (i = 1; i <= LENGTH(tags); i++)
-		m->pertag->ltidxs[i] = &layouts[taglayouts[i - 1]];
-
-	m->lt = m->pertag->ltidxs[m->pertag->curtag];
-	strncpy(m->ltsymbol, m->lt->symbol, sizeof m->ltsymbol);
-
-	for (i = 0; i <= LENGTH(tags); i++) {
+	for (i = 0; i < LENGTH(tags); i++) {
 
 		/* init gaps */
 		m->pertag->enablegaps |= 1 << i;
@@ -1190,6 +1190,9 @@ createmon(void)
 		/* init showbar */
 		if (m->f & ShowBar)
 			m->pertag->showbars |= 1 << i;
+
+		/* init layouts */
+		m->pertag->ltidxs[i] = &layouts[taglayouts[i]];
 
 		/* init nmaster */
 		m->pertag->nmasters[i] = m->nmaster;
@@ -1203,6 +1206,9 @@ createmon(void)
 		if (gapspertag)
 			m->pertag->gaps[i] = ((gappoh & 0xFF) << 0) | ((gappov & 0xFF) << 8) | ((gappih & 0xFF) << 16) | ((gappiv & 0xFF) << 24);
 	}
+
+	m->lt = m->pertag->ltidxs[m->pertag->curtag];
+	strncpy(m->ltsymbol, m->lt->symbol, sizeof m->ltsymbol);
 
 	#ifdef TAG_PREVIEW
 	m->tagmap = ecalloc(LENGTH(tags), sizeof(Pixmap));
@@ -4080,13 +4086,13 @@ toggleview(const Arg *arg)
 
 		if (newtagset == ~0) {
 			selmon->pertag->prevtag = selmon->pertag->curtag;
-			selmon->pertag->curtag = 0;
+			selmon->pertag->curtag = LENGTH(tags);
 		}
 		/* test if the user did not select the same tag */
-		if (!(newtagset & 1 << (selmon->pertag->curtag - 1))) {
+		if (!(newtagset & 1 << (selmon->pertag->curtag))) {
 			selmon->pertag->prevtag = selmon->pertag->curtag;
 			for (i=0; !(newtagset & 1 << i); i++) ;
-			selmon->pertag->curtag = i + 1;
+			selmon->pertag->curtag = i;
 		}
 
 		/* apply settings for this view */
@@ -4495,10 +4501,10 @@ view(const Arg *arg)
 		selmon->pertag->prevtag = selmon->pertag->curtag;
 
 		if (arg->ui == ~0)
-			selmon->pertag->curtag = 0;
+			selmon->pertag->curtag = LENGTH(tags);
 		else {
 			for (i = 0; !(arg->ui & 1 << i); i++);
-			selmon->pertag->curtag = i + 1;
+			selmon->pertag->curtag = i;
 		}
 	} else {
 		tmptag = selmon->pertag->prevtag;

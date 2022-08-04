@@ -148,6 +148,7 @@ static XClassHint previewclass = { "demwm-preview", "demwm-preview" };
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
 static const int taglayouts[] = {    0,   2,    0,   0,    2,    0,    0,    0,    0 };
 static const char *tagsalt[]  = { "I", "2", "III", "4", "V", "6", "VII", "8", "IX" };
+static const unsigned int alltagslayout = 0; /* the '~0' (all tags) tag */
 
 static const Rule rules[] = {
 	/*
