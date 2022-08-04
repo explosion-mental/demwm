@@ -405,7 +405,7 @@ static const Key keys[] = {
 	{ MOD,			XK_F1,	togglefullscreen,	{0}	},
 	{ MOD|Ctrl,        	XK_F1,	togglefakefullscreen,	{0}	},
 	{ MOD|Shift,		XK_F5,	quit,           	{0}	},
-	{ MOD,			XK_F5,	refresh,		{0}	},
+	{ MOD,			XK_F5,	restart,		{0}	},
 	{ MOD,			XK_F12,	xrdb,			{0}	},
 
 				/* monitor */

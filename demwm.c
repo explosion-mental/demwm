@@ -330,7 +330,7 @@ static Client *prevtiled(Client *c);
 static void propertynotify(XEvent *e);
 static void pushstack(const Arg *arg);
 static void quit(const Arg *arg);
-static void refresh(const Arg *arg);
+static void restart(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
 static void resize(Client *c, int x, int y, int w, int h, int interact);
 static void resizeclient(Client *c, int x, int y, int w, int h);
@@ -504,7 +504,7 @@ static Atom xatom[XLast];
 static Systray *systray = NULL;
 #endif /* SYSTRAY */
 static Atom wmatom[WMLast], netatom[NetLast], demwmtags, demwmmon, demwmflags;
-static int running = 1, restart = 0;
+static int running = 1, reload = 0;
 static int depth;
 static Cur *cursor[CurLast];
 static Display *dpy;
@@ -2704,8 +2704,8 @@ propertynotify(XEvent *e)
 				defaultgaps(NULL);
 			else if (!strcmp(n, "killclient"))
 				killclient(NULL);
-			else if (!strcmp(n, "refresh"))
-				refresh(NULL);
+			else if (!strcmp(n, "restart"))
+				restart(NULL);
 			else if (!strcmp(n, "setlayout"))
 				setlayout(&((Arg) { .v = &layouts[arg] }));
 			else if (!strcmp(n, "tag"))
@@ -2803,9 +2803,9 @@ quit(const Arg *arg)
 }
 
 void
-refresh(const Arg *arg)
+restart(const Arg *arg)
 {
-	restart = 1;
+	reload = 1;
 	running = 0;
 }
 
@@ -3792,7 +3792,7 @@ sighandler(int signum)
 void
 sighup(int unused)
 {
-	restart = 1;
+	reload = 1;
 	running = 0;
 }
 
@@ -5054,7 +5054,7 @@ main(int argc, char *argv[])
 	run();
 	char t[12];
 	snprintf(t, sizeof(t), "%d", selmon->seltags);
-	if (restart) execlp(argv[0], argv[0], "--seltags", t, (char *) NULL);
+	if (reload) execlp(argv[0], argv[0], "--seltags", t, (char *) NULL);
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
