@@ -251,7 +251,7 @@ static const Layout layouts[] = {
 	{ "###", nrowgrid },           /* gaplessgrid with no gaps, but not equal size */
 //	{ "#v#", vsplitnrowgrid },     /* nrowgrid: force two clients to always split vertically */
 //	{ "---", horizgrid },          /* gaplessgrid but with horizontal order */
-//	{ ":::", gaplessgrid },        /* grid ajusted in such that there are no gaps */
+//	{ ":::", gaplessgrid },        /* another grid like layout variant */
 	{ "🥏", NULL },                /* no layout function means floating behavior */
 	{ "[ ]", clear },              /* hides all visible clients, enjoy your nice wallpaper */
 };
