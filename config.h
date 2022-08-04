@@ -252,8 +252,6 @@ static const Layout layouts[] = {
 //	{ "#v#", vsplitnrowgrid },     /* nrowgrid: force two clients to always split vertically */
 //	{ "---", horizgrid },          /* gaplessgrid but with horizontal order */
 //	{ ":::", gaplessgrid },        /* grid ajusted in such that there are no gaps */
-//	{ "🐷" , pidgin },             /* basically grid? */
-//	{ ")M(", ego },
 	{ "🥏", NULL },                /* no layout function means floating behavior */
 	{ "[ ]", clear },              /* hides all visible clients, enjoy your nice wallpaper */
 };
