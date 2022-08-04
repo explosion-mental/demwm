@@ -4483,7 +4483,7 @@ void
 view(const Arg *arg)
 {
 	int i;
-	unsigned int tmptag, tmp;
+	unsigned int tmp;
 
 	if ((arg->ui & TAGMASK) == selmon->seltags)
  		return;
@@ -4507,9 +4507,9 @@ view(const Arg *arg)
 			selmon->pertag->curtag = i;
 		}
 	} else {
-		tmptag = selmon->pertag->prevtag;
+		tmp = selmon->pertag->prevtag;
 		selmon->pertag->prevtag = selmon->pertag->curtag;
-		selmon->pertag->curtag = tmptag;
+		selmon->pertag->curtag = tmp;
 	}
 	selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
 	selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
