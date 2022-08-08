@@ -379,6 +379,7 @@ static const Key keys[] = {
 	{ MOD,			XK_Tab,	view,			{0}	},
 	{ MOD,			XK_space,view,			{0}	},
 	{ MOD,			XK_w,	zoomswap,		{0}	},
+	{ MOD|Shift,		XK_w,	focusmaster,		{0}	},
 	  TAGKEYS(		XK_1,				0)
 	  TAGKEYS(		XK_2,				1)
 	  TAGKEYS(		XK_3,				2)

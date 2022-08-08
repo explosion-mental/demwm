@@ -295,6 +295,7 @@ static void expose(XEvent *e);
 static Client *findbefore(Client *c);
 static void focus(Client *c);
 static void focusin(XEvent *e);
+static void focusmaster(const Arg *arg);
 static void focusmon(const Arg *arg);
 static void focusstack(const Arg *arg);
 static int getrootptr(int *x, int *y);
@@ -1527,6 +1528,18 @@ focusin(XEvent *e)
 
 	if (selmon->sel && ev->window != selmon->sel->win)
 		setfocus(selmon->sel);
+}
+
+void
+focusmaster(const Arg *arg)
+{
+	Client *c;
+
+	if (selmon->nmaster < 1 || !selmon->sel)
+		return;
+
+	if ((c = nexttiled(selmon->clients)))
+		focus(c);
 }
 
 void
