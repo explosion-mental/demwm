@@ -336,7 +336,7 @@ static const Key keys[] = {
 //	{ MOD|Ctrl,          	XK_v,	scratchpad_remove,	{0} },
 
 				/* Navigation */
-	{ MOD,			XK_j,	focusstack,	{ .i = 1 }	},
+	{ MOD,			XK_j,	focusstack,	{ .i = -1 }	},
 //	{ MOD|Shift,		XK_j,	movefloatvert,	{ .i = 1 }	},
 //	{ MOD|Shift,		XK_j,	pushstack,	{ .i = 1 }	},
 	{ MOD|Shift,		XK_j,	movfv_pushstack,{ .i = 1 }	},
@@ -349,7 +349,7 @@ static const Key keys[] = {
 	{ MOD|Shift,		XK_k,	movfv_pushstack,{ .i = -1 }	},
 //	{ MOD|Shift,		XK_k,	movefloatvert,	{ .i = -1 }	},
 //	{ MOD|Shift,		XK_k,	pushstack,	{ .i = -1 }	},
-	{ MOD,                  XK_k,	focusstack,	{ .i = -1 }	},
+	{ MOD,                  XK_k,	focusstack,	{ .i = 1 }	},
 
 //	{ MOD,			XK_h,	setmfact,	{ .f = -0.02 }	},
 //	{ MOD,			XK_h,	movefloathorz,	{ .i = -1 }	},
