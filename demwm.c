@@ -2207,11 +2207,9 @@ gettextprop(Window w, Atom atom, char *text, unsigned int size)
 		return 0;
 	if (name.encoding == XA_STRING)
 		strncpy(text, (char *)name.value, size - 1);
-	else {
-		if (XmbTextPropertyToTextList(dpy, &name, &list, &n) >= Success && n > 0 && *list) {
+	else if (XmbTextPropertyToTextList(dpy, &name, &list, &n) >= Success && n > 0 && *list) {
 			strncpy(text, *list, size - 1);
 			XFreeStringList(list);
-		}
 	}
 	text[size - 1] = '\0';
 	XFree(name.value);
@@ -2512,12 +2510,7 @@ maprequest(XEvent *e)
 		updatesystray();
 	}
 #endif /* SYSTRAY */
-	if (!XGetWindowAttributes(dpy, ev->window, &wa))
-		return;
-/* github.com/bakkeby/patches/commit/67c8bcefafbed8d0f122bb91b6d253919727b60e */
-	if (!wa.depth)
-		return;
-	if (wa.override_redirect)
+	if (!XGetWindowAttributes(dpy, ev->window, &wa) || wa.override_redirect || !wa.depth)
 		return;
 	if (!wintoclient(ev->window))
 		manage(ev->window, &wa);
@@ -4436,7 +4429,7 @@ updatetitle(Client *c)
 	if (!gettextprop(c->win, netatom[NetWMName], c->name, sizeof c->name))
 		gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
 	if (c->name[0] == '\0') /* hack to mark broken clients */
-		strcpy(c->name, broken);
+		strncpy(c->name, broken, sizeof c->name);
 }
 
 void
@@ -4745,12 +4738,10 @@ zoom(const Arg *arg)
 {
 	Client *c = selmon->sel;
 
-	if (!selmon->lt->arrange
-	|| (selmon->sel && selmon->sel->f & Float))
+	if (!selmon->lt->arrange || !c || !(c->f & Float))
 		return;
-	if (c == nexttiled(selmon->clients))
-		if (!c || !(c = nexttiled(c->next)))
-			return;
+	if (c == nexttiled(selmon->clients) && !(c = nexttiled(c->next)))
+		return;
 	pop(c);
 }
 
