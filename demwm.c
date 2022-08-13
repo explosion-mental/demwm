@@ -505,7 +505,7 @@ static Atom xatom[XLast];
 static Systray *systray = NULL;
 #endif /* SYSTRAY */
 static Atom wmatom[WMLast], netatom[NetLast], demwmtags, demwmmon, demwmflags;
-static int running = 1, reload = 0;
+static volatile int running = 1; /* 0 quit, 1 running, -1 restart */
 static int depth;
 static Cur *cursor[CurLast];
 static Display *dpy;
@@ -2811,8 +2811,7 @@ quit(const Arg *arg)
 void
 restart(const Arg *arg)
 {
-	reload = 1;
-	running = 0;
+	running = -1;
 }
 
 Monitor *
@@ -3050,7 +3049,7 @@ run(void)
 	XSync(dpy, False);
 
 	/* main event loop */
-	while (running) {
+	while (running > 0) {
 
 		if (!(selmon->f & ShowBar) || !showstatus) { /* bar/status hidden */
 			XNextEvent(dpy, &ev);
@@ -3070,7 +3069,7 @@ run(void)
 
 		/* handle X display fd */
 		if (fds[XFD].revents & POLLIN) {
-			while (running && XPending(dpy)) {
+			while (running > 0 && XPending(dpy)) {
 				XNextEvent(dpy, &ev);
 				if (handler[ev.type])
 					handler[ev.type](&ev); /* call handler */
@@ -3798,14 +3797,13 @@ sighandler(int signum)
 void
 sighup(int unused)
 {
-	reload = 1;
-	running = 0;
+	restart(NULL);
 }
 
 void
 sigterm(int unused)
 {
-	running = 0;
+	quit(NULL);
 }
 
 void
@@ -5058,7 +5056,7 @@ main(int argc, char *argv[])
 	run();
 	char t[12];
 	snprintf(t, sizeof(t), "%d", selmon->seltags);
-	if (reload) execlp(argv[0], argv[0], "--seltags", t, (char *) NULL);
+	if (running == -1) execlp(argv[0], argv[0], "--seltags", t, (char *) NULL);
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
