@@ -4356,7 +4356,8 @@ updategeom(void)
 void
 updatenumlockmask(void)
 {
-	unsigned int i, j;
+	unsigned int i;
+	int j;
 	XModifierKeymap *modmap;
 
 	numlockmask = 0;
