@@ -134,10 +134,11 @@ are some ideas:
   re-setup) the pertag variables to default one and somehow maintain them the
   same while pertag is active.
 	* another idea. maybe just doing all the above but only for the layout..
-- Make a window 'transient' like with a keybinding. Usecase for this will be to
+- <s>Make a window 'transient' like with a keybinding. Usecase for this will be to
   have a video playing (any window) in a 'non-intrusive' position, say the
-  bottom right, and make it impossible to focus that window; initially thought only by keybinding (focusstack),
-  but I'm open for make a flag to also ignore mouse buttons.
+  bottom right, and make it impossible to focus that window; initially thought
+  only by keybinding (focusstack), but I'm open for make a flag to also ignore
+  mouse buttons.</s> - accomplished with _sticky_ + _alwaysontop_
 - <s>add `uncursor` to `Rules`: basically if window with `uncursor` enabled, will
   make the cursor go into one corner of the screen when focused (or maybe use
   any coordinates other than the window cordinates). I will find this useful
@@ -145,22 +146,29 @@ are some ideas:
   gaps. Could prevent accidental clicks or make it more 'safe' (don't touch
   anything).</s>
 - <s>use fork/exec/dup2 instead of popen in `getcmd` funcs (to remove delay).</s>
-- <s>Make _tag previews_ more solid</s> and prevent from being shown in the preview of the preview...
+- <s>Make _tag previews_ more solid</s> and prevent from being shown in the
+  preview of the preview...
 - <s>systray toggleable with _#ifdef_ and _#endif_</s>
 - <s>make [hide vacant patch](https://dwm.suckless.org/patches/hide_vacant_tags/)
   toggleable</s>
 - <s>a better way of handling layouts at startup</s>
 
 ## Some wishing pains:
-- new logo (?)
+- new logo?
+	* black and white
+	* notice about the logo not being MIT
+- wl-roots support.
 - <s>Write a proper manpage</s>
 - <s>s/dwm/demwm/</s>
 - <s>Rename the proyect</s>
 - pertag cursor position. Save the state of the cursor position between tags.
-- <s>change `dwm_random_wall` script to an actual function on C.</s> Why? being a script is much easier to tweak.
-- <s>Can `tcc` (tiny C Compiler) be used along side with the **alpha** patch? yes, with macros for `baralpha` and `boderalpha` compiles but if `tcc` is being used it crashes.</s>
-- <s>integrate dwmblocks into dwm with statuscmd patch.</s>
-- <s>Make gaps an option(?)</s>
+- <s>change `dwm_random_wall` script to an actual function on C.</s> Why? being
+  a script is much easier to tweak. just call it with spawn { .v = dwm\_random\_wall }
+- <s>Can `tcc` (tiny C Compiler) be used along side with the **alpha**
+  patch?</s> lit #define a value.
+- <s>integrate dwmblocks into dwm with statuscmd patch.</s> the statuscmd
+  wasn't that helpful.
+- <s>Make gaps an option</s> - per layouts yes. `{ "icon", layout, gaps }`
 - <s>getenv("TERMINAL")</s> Tbh the macro it's better option
 
 # Mayor improvements:
