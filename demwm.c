@@ -430,7 +430,6 @@ static int scratchpad_last_showed_is_killed (void);
 static void scratchpad_show_first(void);
 
 /* vanitygaps */
-static int enablegaps = 1;	/* if not gaps per tag */
 static void togglesmartgaps(const Arg *arg);
 static void togglegaps(const Arg *arg);
 static void defaultgaps(const Arg *arg);
