@@ -505,7 +505,7 @@ static Atom xatom[XLast];
 static Systray *systray = NULL;
 #endif /* SYSTRAY */
 static Atom wmatom[WMLast], netatom[NetLast], demwmtags, demwmmon, demwmflags;
-static volatile int running = 1; /* 0 quit, 1 running, -1 restart */
+static volatile int running = 1; /* -1 restart, 0 quit, 1 running */
 static int depth;
 static Cur *cursor[CurLast];
 static Display *dpy;
