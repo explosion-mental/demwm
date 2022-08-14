@@ -1751,12 +1751,11 @@ showtagpreview(unsigned int i)
 void
 resizebarwin(Monitor *m)
 {
-	unsigned int w = m->ww;
+	XMoveResizeWindow(dpy, m->barwin, m->wx, m->by, m->ww
 #ifdef SYSTRAY
-	if (m == systraytomon(m))
-		w -= getsystraywidth();
+		- (m == systraytomon(m) ? getsystraywidth() : 0)
 #endif /* SYSTRAY */
-	XMoveResizeWindow(dpy, m->barwin, m->wx, m->by, w, bh);
+		, bh);
 }
 
 /* Systray functions */
