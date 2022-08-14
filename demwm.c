@@ -470,7 +470,7 @@ static pid_t winpid(Window w);
 
 /* variables */
 static const char broken[] = "broken";
-static unsigned int sleepinterval = 0, maxinterval = 0, sleepcount = 0;
+static volatile unsigned int sleepinterval = 0, maxinterval = 0;
 static unsigned int lasttags; /* keep selected tags on restart */
 static unsigned int stsw = 0; /* status width */
 static unsigned int blocknum; /* blocks idx in mouse click */
@@ -3777,6 +3777,8 @@ showhide(Client *c)
 void
 sigalrm(int unused)
 {
+	static volatile unsigned int sleepcount = 0;
+
 	getcmds(sleepcount);
 	alarm(sleepinterval);
 	sleepcount = (sleepcount + sleepinterval - 1) % maxinterval + 1;
