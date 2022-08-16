@@ -3923,27 +3923,23 @@ togglefloating(const Arg *arg)
 
 	UPFLAGS(c);
 
-	if (selmon->sel->f & Float) {
+	if (c->f & Float) {
 		wc.border_width = c->bw = fborderpx;
 		XConfigureWindow(dpy, c->win, CWBorderWidth, &wc);
 		XSetWindowBorder(dpy, c->win, scheme[BorderFloat][ColFg].pixel);
 
-		if (selmon->sel->sfx == -9999) /* first time floating */
-			resize(selmon->sel, selmon->sel->x, selmon->sel->y,
-				selmon->sel->w, selmon->sel->h, 0);
+		if (c->sfx == -9999) /* first time floating */
+			resize(c, c->x, c->y, c->w, c->h, 0);
 		else	/* restore last known float dimensions */
-			resize(selmon->sel, selmon->sel->sfx, selmon->sel->sfy,
-			       selmon->sel->sfw, selmon->sel->sfh, 0);
+			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
 	} else {
 		wc.border_width = c->bw = borderpx;
 		XConfigureWindow(dpy, c->win, CWBorderWidth, &wc);
 		XSetWindowBorder(dpy, c->win, scheme[BorderSel][ColFg].pixel);
 
 		/* save last known float dimensions */
-		selmon->sel->sfx = selmon->sel->x;
-		selmon->sel->sfy = selmon->sel->y;
-		selmon->sel->sfw = selmon->sel->w;
-		selmon->sel->sfh = selmon->sel->h;
+		c->sfx = c->x; c->sfy = c->y;
+		c->sfw = c->w; c->sfh = c->h;
 	}
 
 	arrange(c->mon);
