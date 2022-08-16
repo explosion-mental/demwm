@@ -23,6 +23,9 @@ FREETYPEINC = /usr/include/freetype2
 #kvm to swallow on bsd
 #KVMLIB = -lkvm
 
+# debug
+#DEBUG = -DDEBUG
+
 # Icons, comment if you don't want it
 ICONS = -DICONS
 
@@ -44,7 +47,7 @@ LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS} -lXrender ${XCBLIBS} ${
 
 # flags
 O_BASIC  = -march=native -Ofast -flto=auto
-CPPFLAGS = -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${ICONS} ${SYSTRAY} ${TAG_PREVIEW} ${TAGNUM}
+CPPFLAGS = -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${ICONS} ${SYSTRAY} ${TAG_PREVIEW} ${TAGNUM} ${DEBUG}
 CFLAGS   = -std=c99 -pedantic -Wall -Wno-unused-function -Wno-unused-variable ${O_BASIC} ${INCS} ${CPPFLAGS}
 #CFLAGS  = -g -std=c99 -pedantic -Wall -Wextra -Wno-unused-function -Og ${INCS} ${CPPFLAGS} -flto -fsanitize=address,undefined,leak
 LDFLAGS  = ${LIBS}
