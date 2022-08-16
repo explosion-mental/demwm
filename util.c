@@ -37,7 +37,7 @@ debug(int prefix, const char *fmt, ...)
 	vfprintf(stderr, fmt, ap);
 	va_end(ap);
 
-	if (fmt[0] && fmt[strlen(fmt) - 1] == '.') {
+	if (fmt[0] && fmt[strlen(fmt) - 1] == '.')
 		fputc('\n', stderr);
 #else
 	return;
