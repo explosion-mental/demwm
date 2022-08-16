@@ -10,7 +10,7 @@ all: options demwm
 
 options:
 	@echo demwm build options:
-	@echo "FEATURES = ${ICONS} ${SYSTRAY} ${TAG_PREVIEWS} ${XINERAMAFLAGS}"
+	@echo "FEATURES = ${ICONS} ${SYSTRAY} ${TAG_PREVIEWS} ${XINERAMAFLAGS} ${DEBUG}"
 	@echo
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo
