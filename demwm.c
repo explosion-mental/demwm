@@ -87,11 +87,6 @@
 #define UPFLAGS(C)		XChangeProperty(dpy, C->win, demwmflags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->f), 1)
 #define UPTAGS(C)		XChangeProperty(dpy, C->win, demwmtags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1)
 #define LOG(...)		do { fprintf(stderr, "demwm: " __VA_ARGS__); fputc('\n', stderr); } while (0)
-#ifdef DEBUG
-#define DB(...)			do { fprintf(stderr, "demwm(debug): " __VA_ARGS__); fputc('\n', stderr); } while (0)
-#else
-#define DB(...)
-#endif
 
 #ifdef SYSTRAY
 /* XEMBED messages */
