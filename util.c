@@ -24,6 +24,26 @@ die(const char *fmt, ...)
 	exit(EXIT_FAILURE);
 }
 
+void
+debug(int prefix, const char *fmt, ...)
+{
+#ifdef DEBUG
+	va_list ap;
+
+	if (prefix)
+		fputs("demwm(debug): ", stderr);
+
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+
+	if (fmt[0] && fmt[strlen(fmt) - 1] == '.') {
+		fputc('\n', stderr);
+#else
+	return;
+#endif
+}
+
 void *
 ecalloc(size_t nmemb, size_t size)
 {
