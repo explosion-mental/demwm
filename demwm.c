@@ -525,6 +525,41 @@ static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0}; /* +1 for '\0' */
 static int pipes[LENGTH(blocks)][2] = {0};
 static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
 
+#define FUNCTABLE		\
+	X(cyclelayout, 1)	\
+	X(incrgaps, 1)		\
+	X(incrogaps, 1)		\
+	X(incrohgaps, 1)	\
+	X(incrovgaps, 1)	\
+	X(incrihgaps, 1)	\
+	X(incrivgaps, 1)	\
+	X(defaultgaps, 0)	\
+	X(killclient, 0)	\
+	X(restart, 0)		\
+	X(setlayout, 1)		\
+	X(tag, 1)		\
+	X(togglebar, 0)		\
+	X(togglefloating, 0)	\
+	X(togglefullscreen, 0)	\
+	X(togglefakefullscreen, 0)	\
+	X(togglegaps, 0)	\
+	X(togglesmartgaps, 0)	\
+	X(togglevacant, 0)	\
+	X(togglestatus, 0)	\
+	X(toggletopbar, 0)	\
+	X(toggletag, 1)		\
+	X(togglesticky, 0)	\
+	X(view, 1)		\
+	X(xrdb, 0)		\
+	X(zoom, 0)		\
+	X(zoomswap, 0)		\
+	X(updateblock, 1)
+
+#define X(a, b)		{ a, #a, b },
+static const struct { void (*func)(const Arg *arg); const char *name; const int hasarg; }
+parsetable[] = { FUNCTABLE };
+#undef X
+
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
 	unsigned int showbars;			/* display bar for the current tag */
@@ -2671,86 +2706,20 @@ propertynotify(XEvent *e)
 	XPropertyEvent *ev = &e->xproperty;
 
 	if ((ev->window == root) && (ev->atom == XA_WM_NAME)) { /* parse xsetroot -name */
-		const int cmdsize = 32;
-		char n[cmdsize], *buf;
+		enum { CMDSIZE = 64 };
+		char buf[CMDSIZE];
+		unsigned int func;
 		int arg = 0;
-		if (gettextprop(root, XA_WM_NAME, n, cmdsize)) {
-			/* divide into 2 args separated by the first space */
-			for (int i = 0; i < cmdsize; i++) {
-				if (n[i] == ' ') {
-					buf = n;
-					buf += i + 1; /* chop the first 'word' */
-					arg = atoi(buf); /* store as an int */
+		if (gettextprop(root, XA_WM_NAME, buf, CMDSIZE)) {
+			/* first two characters are the ID of the function */
+			buf[2] = '\0';
+			func = atoi(buf);
+			buf[2] = ' ';
+			arg = atoi(buf + 3);
 
-					n[i] = '\0'; /* chop every after the space */
-					break;
-				}
-			}
-
-			/* functions */
-			if (!strcmp(n, "cyclelayout"))
-				cyclelayout(&((Arg) { .i = arg }));
-			else if (!strcmp(n, "incrgaps"))
-				incrgaps(&((Arg) { .i = arg }));
-			else if (!strcmp(n, "incrogaps"))
-				incrogaps(&((Arg) { .i = arg }));
-			else if (!strcmp(n, "incrohgaps"))
-				incrohgaps(&((Arg) { .i = arg }));
-			else if (!strcmp(n, "incrovgaps"))
-				incrovgaps(&((Arg) { .i = arg }));
-			else if (!strcmp(n, "incrigaps"))
-				incrigaps(&((Arg) { .i = arg }));
-			else if (!strcmp(n, "incrihgaps"))
-				incrihgaps(&((Arg) { .i = arg }));
-			else if (!strcmp(n, "incrivgaps"))
-				incrivgaps(&((Arg) { .i = arg }));
-			else if (!strcmp(n, "defaultgaps"))
-				defaultgaps(NULL);
-			else if (!strcmp(n, "killclient"))
-				killclient(NULL);
-			else if (!strcmp(n, "restart"))
-				restart(NULL);
-			else if (!strcmp(n, "setlayout"))
-				setlayout(&((Arg) { .v = &layouts[arg] }));
-			else if (!strcmp(n, "tag"))
-				tag(&((Arg) { .ui = 1 << arg }));
-			else if (!strcmp(n, "togglebar"))
-				togglebar(NULL);
-			else if (!strcmp(n, "toggletagbar"))
-				toggletagbar(NULL);
-			else if (!strcmp(n, "togglefloating"))
-				togglefloating(NULL);
-			else if (!strcmp(n, "togglefullscreen"))
-				togglefullscreen(NULL);
-			else if (!strcmp(n, "togglefakefullscreen"))
-				togglefakefullscreen(NULL);
-			else if (!strcmp(n, "togglegaps"))
-				togglegaps(NULL);
-			else if (!strcmp(n, "togglesmartgaps"))
-				togglesmartgaps(NULL);
-			else if (!strcmp(n, "togglevacant"))
-				togglevacant(NULL);
-			else if (!strcmp(n, "togglestatus"))
-				togglestatus(NULL);
-			else if (!strcmp(n, "toggletopbar"))
-				toggletopbar(NULL);
-			else if (!strcmp(n, "toggletag"))
-				toggletag(&((Arg) { .ui = 1 << arg }));
-			else if (!strcmp(n, "togglesticky"))
-				togglesticky(NULL);
-			else if (!strcmp(n, "view"))
-				view(&((Arg) { .ui = 1 << arg }));
-			else if (!strcmp(n, "xrdb"))
-				xrdb(NULL);
-			else if (!strcmp(n, "zoom"))
-				zoom(NULL);
-			else if (!strcmp(n, "zoomswap"))
-				zoomswap(NULL);
-			else if (atoi(n) > 0) { /* more than 0 it's a signal */
-				getsigcmds(atoi(n));
-				updatestatus();
-			}
+			parsetable[func].func(&((Arg){ .i = arg }));
 		}
+		return;
 	}
 
 #ifdef SYSTRAY
@@ -5044,14 +5013,44 @@ shiftpreview(const Arg *arg)
 int
 main(int argc, char *argv[])
 {
-	if (argc == 3 && !strcmp("--seltags", argv[1])) {
-			lasttags = atoi(argv[2]);
-	} else if (argc == 2 && !strcmp("-v", argv[1]))
-		die("demwm-"VERSION);
-	else if (argc != 1)
-		die("usage: demwm [-v]");
+	char id[3], func[64];
+	unsigned int i;
+	int cmd = -1;
+	//enum { MAXSIZE = 5 }; //bin
 
 	setupx11();
+	if (argc == 2 || argc == 3) {
+		for (i = 0; i < LENGTH(parsetable); i++) {
+			if (!strcmp(argv[1], parsetable[i].name)) {
+				cmd = i;
+				//if (parsetable[i].hasarg && argc == 3)
+				//	/* TODO instead of using the window
+				//	 * root name use another atom and embed
+				//	 * the function id + arg */
+				//	//cmd = (cmd << MAXSIZE) | atoi(argv[2]);
+				//	strncpy(arg, argv[2], sizeof arg);
+				break;
+			}
+		}
+		if (cmd == -1)
+			die("'%s' is not a function.", argv[1]);
+		if (parsetable[cmd].hasarg && argc == 2)
+			die("Function '%s' requires an argument.", argv[1]);
+
+		if (cmd < 10)
+			snprintf(id, sizeof id, "0%d", cmd);
+		else
+			snprintf(id, sizeof id, "%d", cmd);
+
+		snprintf(func, sizeof func, "%s %s", id,
+			argc == 3 && argv[2] ? argv[2] : "");
+
+		XStoreName(dpy, root, func);
+		XFlush(dpy);
+		XCloseDisplay(dpy);
+		return EXIT_SUCCESS;
+	}
+
 	checkotherwm();
 	setup();
 	#ifdef __OpenBSD__
@@ -5059,9 +5058,7 @@ main(int argc, char *argv[])
 	#endif /* __OpenBSD__ */
 	scan();
 	run();
-	char t[12];
-	snprintf(t, sizeof(t), "%d", selmon->seltags);
-	if (running == -1) execlp(argv[0], argv[0], "--seltags", t, (char *) NULL);
+	if (running == -1) execlp(argv[0], argv[0], (char *) NULL);
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
