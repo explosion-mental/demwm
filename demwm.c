@@ -5047,7 +5047,7 @@ main(int argc, char *argv[])
 		snprintf(func, sizeof func, "%s %s", id, argv[2]);
 
 		XChangeProperty(dpy, root, demtom[EMIpc], XInternAtom(dpy, "UTF8_STRING", False), 8,
-		PropModeReplace, (unsigned char *) func, sizeof func);
+			PropModeReplace, (unsigned char *) func, sizeof func);
 		XCloseDisplay(dpy);
 		return EXIT_SUCCESS;
 	}
