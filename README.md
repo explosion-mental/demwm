@@ -55,9 +55,9 @@ _some nice screenshots [here](https://explosion-mental.codeberg.page/topics/demw
 - Status text handling, like dwmblocks, but asynchronous (see below)
 - Windows remember their tags, they all don't stack into the first tag when
   restarting
-- Remember the selected tags when restarting
 - Click to focus, removed the hover to focus functionality.
 - Focus tiled windows and C them on top of floating if they have focus.
+- Very simple yet efficient IPC system
 
 # Toggleable Features
 Here are the "too bloated" features which doesn't affect the workflow, but
