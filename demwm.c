@@ -526,40 +526,37 @@ static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0}; /* +1 for '\0' */
 static int pipes[LENGTH(blocks)][2] = {0};
 static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
 
-#define FUNCTABLE		\
-	X(cyclelayout, 1)	\
-	X(incrgaps, 1)		\
-	X(incrogaps, 1)		\
-	X(incrohgaps, 1)	\
-	X(incrovgaps, 1)	\
-	X(incrihgaps, 1)	\
-	X(incrivgaps, 1)	\
-	X(defaultgaps, 0)	\
-	X(killclient, 0)	\
-	X(restart, 0)		\
-	X(setlayout, 1)		\
-	X(tag, 1)		\
-	X(togglebar, 0)		\
-	X(togglefloating, 0)	\
-	X(togglefullscreen, 0)	\
-	X(togglefakefullscreen, 0)	\
-	X(togglegaps, 0)	\
-	X(togglesmartgaps, 0)	\
-	X(togglevacant, 0)	\
-	X(togglestatus, 0)	\
-	X(toggletopbar, 0)	\
-	X(toggletag, 1)		\
-	X(togglesticky, 0)	\
-	X(view, 1)		\
-	X(xrdb, 0)		\
-	X(zoom, 0)		\
-	X(zoomswap, 0)		\
-	X(updateblock, 1)
-
-#define X(a, b)		{ a, #a, b },
-static const struct { void (*func)(const Arg *arg); const char *name; const int hasarg; }
-parsetable[] = { FUNCTABLE };
-#undef X
+static const struct { const int hasarg; void (*func)(const Arg *arg); const char *name; }
+parsetable[] = {
+	{ 1, cyclelayout, "cyclelayout" },
+	{ 1, incrgaps, "incrgaps" },
+	{ 1, incrogaps, "incrogaps" },
+	{ 1, incrohgaps, "incrohgaps" },
+	{ 1, incrovgaps, "incrovgaps" },
+	{ 1, incrihgaps, "incrihgaps" },
+	{ 1, incrivgaps, "incrivgaps" },
+	{ 0, defaultgaps, "defaultgaps" },
+	{ 0, killclient, "killclient" },
+	{ 0, restart, "restart" },
+	{ 1, setlayout, "setlayout" },
+	{ 1, tag, "tag" },
+	{ 0, togglebar, "togglebar" },
+	{ 0, togglefloating, "togglefloating" },
+	{ 0, togglefullscreen, "togglefullscreen" },
+	{ 0, togglefakefullscreen, "togglefakefullscreen" },
+	{ 0, togglegaps, "togglegaps" },
+	{ 0, togglesmartgaps, "togglesmartgaps" },
+	{ 0, togglevacant, "togglevacant" },
+	{ 0, togglestatus, "togglestatus" },
+	{ 0, toggletopbar, "toggletopbar" },
+	{ 1, toggletag, "toggletag" },
+	{ 0, togglesticky, "togglesticky" },
+	{ 1, view, "view" },
+	{ 0, xrdb, "xrdb" },
+	{ 0, zoom, "zoom" },
+	{ 0, zoomswap, "zoomswap" },
+	{ 1, updateblock, "updateblock" },
+};
 
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
