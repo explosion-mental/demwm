@@ -360,6 +360,7 @@ static void setlayout(const Arg *arg);
 static void setcfact(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
+static void setupx11(void);
 static void setsignal(int sig, void (*sahandler)(int sig));
 static void seturgent(Client *c, int urg);
 static void shift(unsigned int *tag, int i);
@@ -500,7 +501,7 @@ static Systray *systray = NULL;
 #endif /* SYSTRAY */
 static Atom wmatom[WMLast], netatom[NetLast], demwmtags, demwmmon, demwmflags;
 static volatile int running = 1; /* -1 restart, 0 quit, 1 running */
-static int depth;
+static int depth, screen;
 static Cur *cursor[CurLast];
 static Display *dpy;
 static Drw *drw;
@@ -3524,12 +3525,28 @@ setmfact(const Arg *arg)
 }
 
 void
+setupx11(void)
+{
+	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
+		LOG("warning, no locale support.");
+	if (!(dpy = XOpenDisplay(NULL)))
+		die("demwm: cannot open display.");
+	if (!(xcon = XGetXCBConnection(dpy)))
+		die("demwm: cannot get xcb connection.");
+
+	/* init screen */
+	screen = DefaultScreen(dpy);
+	sw = DisplayWidth(dpy, screen);
+	sh = DisplayHeight(dpy, screen);
+	root = RootWindow(dpy, screen);
+}
+
+void
 setup(void)
 {
 	XSetWindowAttributes wa;
 	Atom utf8string;
 	char envpid[16];
-	int screen;
 
 	/* clean up any zombies immediately */
 	sigchld(0);
@@ -3551,12 +3568,9 @@ setup(void)
 	snprintf(envpid, LENGTH(envpid), "%d", getpid());
 	setenv("STATUSBAR", envpid, 1);
 
-	/* init screen */
-	screen = DefaultScreen(dpy);
-	sw = DisplayWidth(dpy, screen);
-	sh = DisplayHeight(dpy, screen);
-	root = RootWindow(dpy, screen);
+	XrmInitialize();
 	xinitvisual(screen);
+
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
 	if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
 		LOG("no fonts could be loaded, status bar hidden.");
@@ -5036,14 +5050,9 @@ main(int argc, char *argv[])
 		die("demwm-"VERSION);
 	else if (argc != 1)
 		die("usage: demwm [-v]");
-	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
-		LOG("warning, no locale support.");
-	if (!(dpy = XOpenDisplay(NULL)))
-		die("demwm: cannot open display.");
-	if (!(xcon = XGetXCBConnection(dpy)))
-		die("demwm: cannot get xcb connection.");
+
+	setupx11();
 	checkotherwm();
-	XrmInitialize();
 	setup();
 	#ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1) die("pledge");
