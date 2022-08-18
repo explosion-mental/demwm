@@ -3517,7 +3517,6 @@ setup(void)
 {
 	XSetWindowAttributes wa;
 	Atom utf8string;
-	char envpid[16];
 
 	/* clean up any zombies immediately */
 	sigchld(0);
@@ -3529,15 +3528,16 @@ setup(void)
 	setsignal(SIGTERM, sigterm); /* exit */
 
 	#ifdef __linux__
+	char envpid[16];
 	/* handle defined real time signals (linux only) */
 	for (int i = 0; i < LENGTH(blocks); i++)
 		if (blocks[i].signal)
 			setsignal(SIGRTMIN + blocks[i].signal, sighandler);
-	#endif /* __linux__ */
 
 	/* pid as an enviromental variable */
 	snprintf(envpid, LENGTH(envpid), "%d", getpid());
 	setenv("STATUSBAR", envpid, 1);
+	#endif /* __linux__ */
 
 	XrmInitialize();
 	xinitvisual(screen);
