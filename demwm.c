@@ -5021,19 +5021,12 @@ main(int argc, char *argv[])
 	char id[3], func[64];
 	unsigned int i;
 	int cmd = -1;
-	//enum { MAXSIZE = 5 }; //bin
 
 	setupx11();
 	if (argc == 2 || argc == 3) {
 		for (i = 0; i < LENGTH(parsetable); i++) {
 			if (!strcmp(argv[1], parsetable[i].name)) {
 				cmd = i;
-				//if (parsetable[i].hasarg && argc == 3)
-				//	/* TODO instead of using the window
-				//	 * root name use another atom and embed
-				//	 * the function id + arg */
-				//	//cmd = (cmd << MAXSIZE) | atoi(argv[2]);
-				//	strncpy(arg, argv[2], sizeof arg);
 				break;
 			}
 		}
