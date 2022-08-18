@@ -84,8 +84,8 @@
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 #define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
 #define SETVAL(X, flag, val)	X->f = ((val) ? X->f | flag : X->f & ~flag)
-#define UPFLAGS(C)		XChangeProperty(dpy, C->win, demwmflags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->f), 1)
-#define UPTAGS(C)		XChangeProperty(dpy, C->win, demwmtags, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1)
+#define UPFLAGS(C)		XChangeProperty(dpy, C->win, demtom[EMFlags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->f), 1)
+#define UPTAGS(C)		XChangeProperty(dpy, C->win, demtom[EMTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1)
 #define LOG(...)		do { fprintf(stderr, "demwm: " __VA_ARGS__); fputc('\n', stderr); } while (0)
 
 #ifdef SYSTRAY
@@ -118,6 +118,7 @@ enum { NetSupported, NetWMName,
 #endif /* SYSTRAY */
        NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
+enum { EMMons, EMFlags, EMTags, EMIpc, EMLast }; /* Explo atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 enum {	AlwOnTop   = 1 << 0,  /* AlwaysOnTop */
@@ -499,7 +500,7 @@ static void (*handler[LASTEvent])(XEvent *) = {
 static Atom xatom[XLast];
 static Systray *systray = NULL;
 #endif /* SYSTRAY */
-static Atom wmatom[WMLast], netatom[NetLast], demwmtags, demwmmon, demwmflags, demwmipc;
+static Atom wmatom[WMLast], netatom[NetLast], demtom[EMLast];
 static volatile int running = 1; /* -1 restart, 0 quit, 1 running */
 static int depth, screen;
 static Cur *cursor[CurLast];
@@ -1670,7 +1671,7 @@ getatomprop(Client *c, Atom prop)
 		req = xatom[XembedInfo];
 #endif /* SYSTRAY */
 
-	if (prop == demwmtags || prop == demwmmon || prop == demwmflags)
+	if (prop == demtom[EMTags] || prop == demtom[EMMons] || prop == demtom[EMFlags])
 		req = XA_CARDINAL;
 
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
@@ -2447,11 +2448,11 @@ manage(Window w, XWindowAttributes *wa)
 		/* read not empty X atoms, this will only happen whenever we
 		 * manage() an already 'managed' window again. This happens on
 		 * a restart by the call to scan() */
-		if ((tmptom = getatomprop(c, demwmflags)) != None)
+		if ((tmptom = getatomprop(c, demtom[EMFlags])) != None)
 			c->f = tmptom & (LastFlag - 1);
-		if ((tmptom = getatomprop(c, demwmtags)) != None)
+		if ((tmptom = getatomprop(c, demtom[EMTags])) != None)
 			c->tags = tmptom & TAGMASK;
-		if ((tmptom = getatomprop(c, demwmmon)) != None) {
+		if ((tmptom = getatomprop(c, demtom[EMMons])) != None) {
 			for (Monitor *m = mons; m; m = m->next) {
 				if (m->num == tmptom) {
 					c->mon = m;
@@ -2461,7 +2462,7 @@ manage(Window w, XWindowAttributes *wa)
 		}
 	}
 	UPTAGS(c);
-	XChangeProperty(dpy, c->win, demwmmon, XA_CARDINAL, 32,
+	XChangeProperty(dpy, c->win, demtom[EMMons], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *)&(c->mon->num), 1);
 
 	if (c->x + WIDTH(c) > c->mon->mx + c->mon->mw)
@@ -2705,12 +2706,12 @@ propertynotify(XEvent *e)
 	Window trans;
 	XPropertyEvent *ev = &e->xproperty;
 
-	if ((ev->window == root) && (ev->atom == demwmipc)) { /* cli functions */
+	if ((ev->window == root) && (ev->atom == demtom[EMIpc])) { /* cli functions */
 		enum { CMDSIZE = 64 };
 		char buf[CMDSIZE];
 		unsigned int func;
 		int arg = 0;
-		if (gettextprop(root, demwmipc, buf, CMDSIZE)) {
+		if (gettextprop(root, demtom[EMIpc], buf, CMDSIZE)) {
 			/* first two characters are the ID of the function */
 			buf[2] = '\0';
 			func = atoi(buf);
@@ -3114,7 +3115,7 @@ sendmon(Client *c, Monitor *m)
 	detachstack(c);
 	c->mon = m;
 	c->tags = m->seltags; /* assign tags of target monitor */
-	XChangeProperty(dpy, c->win, demwmmon, XA_CARDINAL, 32,
+	XChangeProperty(dpy, c->win, demtom[EMMons], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *)&(c->mon->num), 1);
 	attach(c);
 	attachstack(c);
@@ -3508,8 +3509,7 @@ setupx11(void)
 	sw = DisplayWidth(dpy, screen);
 	sh = DisplayHeight(dpy, screen);
 	root = RootWindow(dpy, screen);
-
-	demwmipc = XInternAtom(dpy, "_DEMWM_IPC", False);
+	demtom[EMIpc] = XInternAtom(dpy, "DEMWM_IPC", False);
 }
 
 void
@@ -3553,9 +3553,9 @@ setup(void)
 
 	/* init atoms */
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
-	demwmtags                      = XInternAtom(dpy, "_DEMWM_TAGS", False);
-	demwmmon                       = XInternAtom(dpy, "_DEMWM_MON", False);
-	demwmflags                     = XInternAtom(dpy, "_DEMWM_FLAGS", False);
+	demtom[EMTags]                 = XInternAtom(dpy, "DEMWM_TAGS", False);
+	demtom[EMMons]                 = XInternAtom(dpy, "DEMWM_MON", False);
+	demtom[EMFlags]                = XInternAtom(dpy, "DEMWM_FLAGS", False);
 	wmatom[WMProtocols]            = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	wmatom[WMDelete]               = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wmatom[WMState]                = XInternAtom(dpy, "WM_STATE", False);
@@ -5049,7 +5049,7 @@ main(int argc, char *argv[])
 
 		snprintf(func, sizeof func, "%s %s", id, argv[2]);
 
-		XChangeProperty(dpy, root, demwmipc, XInternAtom(dpy, "UTF8_STRING", False), 8,
+		XChangeProperty(dpy, root, demtom[EMIpc], XInternAtom(dpy, "UTF8_STRING", False), 8,
 		PropModeReplace, (unsigned char *) func, sizeof func);
 		XCloseDisplay(dpy);
 		return EXIT_SUCCESS;
