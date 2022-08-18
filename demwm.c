@@ -5032,8 +5032,13 @@ main(int argc, char *argv[])
 				break;
 			}
 		}
-		if (cmd == -1)
-			die("'%s' is not a function.", argv[1]);
+		if (cmd == -1) {
+			if (!strcmp(argv[1], "version"))
+				die("demwm-"VERSION);
+			else
+				die("'%s' is not a function.", argv[1]);
+		}
+
 		if (parsetable[cmd].hasarg && argc == 2)
 			die("Function '%s' requires an argument.", argv[1]);
 
