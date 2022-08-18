@@ -499,7 +499,7 @@ static void (*handler[LASTEvent])(XEvent *) = {
 static Atom xatom[XLast];
 static Systray *systray = NULL;
 #endif /* SYSTRAY */
-static Atom wmatom[WMLast], netatom[NetLast], demwmtags, demwmmon, demwmflags;
+static Atom wmatom[WMLast], netatom[NetLast], demwmtags, demwmmon, demwmflags, demwmipc;
 static volatile int running = 1; /* -1 restart, 0 quit, 1 running */
 static int depth, screen;
 static Cur *cursor[CurLast];
@@ -2705,12 +2705,12 @@ propertynotify(XEvent *e)
 	Window trans;
 	XPropertyEvent *ev = &e->xproperty;
 
-	if ((ev->window == root) && (ev->atom == XA_WM_NAME)) { /* parse xsetroot -name */
+	if ((ev->window == root) && (ev->atom == demwmipc)) { /* cli functions */
 		enum { CMDSIZE = 64 };
 		char buf[CMDSIZE];
 		unsigned int func;
 		int arg = 0;
-		if (gettextprop(root, XA_WM_NAME, buf, CMDSIZE)) {
+		if (gettextprop(root, demwmipc, buf, CMDSIZE)) {
 			/* first two characters are the ID of the function */
 			buf[2] = '\0';
 			func = atoi(buf);
@@ -3508,6 +3508,8 @@ setupx11(void)
 	sw = DisplayWidth(dpy, screen);
 	sh = DisplayHeight(dpy, screen);
 	root = RootWindow(dpy, screen);
+
+	demwmipc = XInternAtom(dpy, "_DEMWM_IPC", False);
 }
 
 void
@@ -3613,6 +3615,9 @@ setup(void)
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
 		PropModeReplace, (unsigned char *) netatom, NetLast);
 	XDeleteProperty(dpy, root, netatom[NetClientList]);
+	/* XStoreName */
+	XChangeProperty(dpy, root, XA_WM_NAME, utf8string, 8,
+		PropModeReplace, (unsigned char *) "demwm", 5);
 	/* select events */
 	wa.cursor = cursor[CurNormal]->cursor;
 	wa.event_mask = SubstructureRedirectMask|SubstructureNotifyMask
@@ -5049,11 +5054,10 @@ main(int argc, char *argv[])
 		else
 			snprintf(id, sizeof id, "%d", cmd);
 
-		snprintf(func, sizeof func, "%s %s", id,
-			argc == 3 && argv[2] ? argv[2] : "");
+		snprintf(func, sizeof func, "%s %s", id, argv[2]);
 
-		XStoreName(dpy, root, func);
-		XFlush(dpy);
+		XChangeProperty(dpy, root, demwmipc, XInternAtom(dpy, "UTF8_STRING", False), 8,
+		PropModeReplace, (unsigned char *) func, sizeof func);
 		XCloseDisplay(dpy);
 		return EXIT_SUCCESS;
 	}
