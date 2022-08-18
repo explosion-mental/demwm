@@ -5035,6 +5035,8 @@ main(int argc, char *argv[])
 		if (cmd == -1) {
 			if (!strcmp(argv[1], "version"))
 				die("demwm-"VERSION);
+			else if (!strcmp(argv[1], "help"))
+				die("demwm: [function] (arg)");
 			else
 				die("'%s' is not a function.", argv[1]);
 		}
