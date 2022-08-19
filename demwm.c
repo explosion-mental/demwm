@@ -610,7 +610,7 @@ applyrules(Client *c)
 		}
 	}
 	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (c->mon->seltags & ~SPTAGMASK);
-	debug(1, "aplyrules:\n\tclient title: '%s'\n\tX resource class: '%s'\n\tX resource name: '%s'\n\tflags: '%u'\n\tmonitor: '%d'\n\ttags: '%u'.", c->name, ch.res_class, ch.res_name, c->f, c->mon->num, c->tags);
+	debug("\tclient title: '%s'\n\tX resource class: '%s'\n\tX resource name: '%s'\n\tflags: '%u'\n\tmonitor: '%d'\n\ttags: '%u'\n", c->name, ch.res_class, ch.res_name, c->f, c->mon->num, c->tags);
 
 	if (ch.res_class)
 		XFree(ch.res_class);
@@ -2135,7 +2135,7 @@ getcmd(int i, char *button)
 		return;
 
 	if (execlock & (1 << i)) { /* block is already running */
-		debug(1, "block '%d' with command '%s' ignored.", i, blocks[i].command);
+		debug("block '%d' with command '%s' ignored\n", i, blocks[i].command);
 		return;
 	}
 
@@ -2187,7 +2187,7 @@ getstatus(int width)
 	if (!showstatus)
 		return stsw = 0;
 
-	debug(1, "getstatus:\n");
+	debug("getstatus:\n");
 	#if INVERSED
 	for (i = 0; i < LENGTH(blocks); i++)
 	#else
@@ -2203,7 +2203,7 @@ getstatus(int width)
 		len = TEXTW(blockoutput[i]) - lrpad;
 		all -= len;
 		drw_text(drw, all, 0, len, bh, 0, blockoutput[i], 0);
-		debug(0, "\tdrawing '%s', block '%d'.", blockoutput[i], i);
+		debug("\tdrawing '%s', block '%d'\n", blockoutput[i], i);
 		/* draw delimiter */
 		if (*delimiter == '\0') /* ignore no delimiter */
 			continue;
