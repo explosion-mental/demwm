@@ -3500,9 +3500,7 @@ setupx11(void)
 
 	/* init screen */
 	screen = DefaultScreen(dpy);
-	sw = DisplayWidth(dpy, screen);
-	sh = DisplayHeight(dpy, screen);
-	root = RootWindow(dpy, screen);
+	root   = RootWindow(dpy, screen);
 	demtom[EMIpc] = XInternAtom(dpy, "DEMWM_IPC", False);
 }
 
@@ -3533,6 +3531,8 @@ setup(void)
 	setenv("STATUSBAR", envpid, 1);
 	#endif /* __linux__ */
 
+	sw = DisplayWidth(dpy, screen);
+	sh = DisplayHeight(dpy, screen);
 	XrmInitialize();
 	xinitvisual(screen);
 
