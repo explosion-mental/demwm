@@ -508,7 +508,6 @@ static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
-static xcb_connection_t *xcon;
 static Visual *visual = NULL;
 static Colormap cmap;
 static Client *scratchpad_last_showed = NULL;
@@ -3498,8 +3497,6 @@ setupx11(void)
 		LOG("warning, no locale support.");
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("demwm: cannot open display.");
-	if (!(xcon = XGetXCBConnection(dpy)))
-		die("demwm: cannot get xcb connection.");
 
 	/* init screen */
 	screen = DefaultScreen(dpy);
@@ -4520,6 +4517,14 @@ winpid(Window w)
 	pid_t result = 0;
 
 #ifdef __linux__
+	static xcb_connection_t *xcon;
+
+
+	if (!xcon) {
+		if (!(xcon = XGetXCBConnection(dpy)))
+			die("demwm: cannot get xcb connection.");
+	}
+
 	enum { _XPID = XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID };
 	xcb_generic_error_t *e = NULL;
 	xcb_res_client_id_spec_t spec = { .client = w, .mask = _XPID };
