@@ -88,6 +88,12 @@
 #define UPTAGS(C)		XChangeProperty(dpy, C->win, demtom[EMTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1)
 #define LOG(...)		do { fprintf(stderr, "demwm: " __VA_ARGS__); fputc('\n', stderr); } while (0)
 
+#ifdef DEBUG
+#define debug(...)		do { fprintf(stderr, "demwm(debug): %s:\n", __func__); fprintf(stderr, __VA_ARGS__); } while (0)
+#else
+#define debug(...)
+#endif /* DEBUG */
+
 #ifdef SYSTRAY
 /* XEMBED messages */
 #define VERSION_MAJOR		0
