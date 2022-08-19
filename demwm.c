@@ -89,7 +89,7 @@
 #define LOG(...)		do { fprintf(stderr, "demwm: " __VA_ARGS__); fputc('\n', stderr); } while (0)
 
 #ifdef DEBUG
-#define debug(...)		do { fprintf(stderr, "demwm(debug): %s:\n", __func__); fprintf(stderr, __VA_ARGS__); } while (0)
+#define debug(...)		do { fprintf(stderr, "demwm(debug): %s:\n", __func__); fprintf(stderr, "\t" __VA_ARGS__); } while (0)
 #else
 #define debug(...)
 #endif /* DEBUG */
@@ -610,7 +610,7 @@ applyrules(Client *c)
 		}
 	}
 	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (c->mon->seltags & ~SPTAGMASK);
-	debug("\tclient title: '%s'\n\tX resource class: '%s'\n\tX resource name: '%s'\n\tflags: '%u'\n\tmonitor: '%d'\n\ttags: '%u'\n", c->name, ch.res_class, ch.res_name, c->f, c->mon->num, c->tags);
+	debug("client title: '%s'\n\tX resource class: '%s'\n\tX resource name: '%s'\n\tflags: '%u'\n\tmonitor: '%d'\n\ttags: '%u'\n", c->name, ch.res_class, ch.res_name, c->f, c->mon->num, c->tags);
 
 	if (ch.res_class)
 		XFree(ch.res_class);
@@ -1350,6 +1350,9 @@ drawbar(Monitor *m)
 	bw -= m == systraytomon(m) ? getsystraywidth() : 0;
 	#endif /* SYSTRAY */
 
+	/* TODO: reduce calls to getstatus(), gets triggered in every manage
+	 * call. No need to **re**-draw the status text just to update the
+	 * window title */
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) /* status is only drawn on selected monitor */
 		tw = getstatus(bw);
@@ -2187,7 +2190,6 @@ getstatus(int width)
 	if (!showstatus)
 		return stsw = 0;
 
-	debug("getstatus:\n");
 	#if INVERSED
 	for (i = 0; i < LENGTH(blocks); i++)
 	#else
@@ -2203,7 +2205,7 @@ getstatus(int width)
 		len = TEXTW(blockoutput[i]) - lrpad;
 		all -= len;
 		drw_text(drw, all, 0, len, bh, 0, blockoutput[i], 0);
-		debug("\tdrawing '%s', block '%d'\n", blockoutput[i], i);
+		debug("drawing block '%d': '%s'\n", i, blockoutput[i]);
 		/* draw delimiter */
 		if (*delimiter == '\0') /* ignore no delimiter */
 			continue;
