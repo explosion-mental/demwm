@@ -5039,13 +5039,8 @@ main(int argc, char *argv[])
 		if (parsetable[cmd].hasarg && argc == 2)
 			die("Function '%s' requires an argument.", argv[1]);
 
-		if (cmd < 10)
-			snprintf(id, sizeof id, "0%d", cmd);
-		else
-			snprintf(id, sizeof id, "%d", cmd);
-
+		snprintf(id, sizeof id, cmd < 10 ? "0%d" : "%d", cmd);
 		snprintf(func, sizeof func, "%s %s", id, argv[2]);
-
 		XChangeProperty(dpy, root, demtom[EMIpc], XInternAtom(dpy, "UTF8_STRING", False), 8,
 			PropModeReplace, (unsigned char *) func, sizeof func);
 		XCloseDisplay(dpy);
