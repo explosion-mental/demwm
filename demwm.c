@@ -2701,21 +2701,20 @@ propertynotify(XEvent *e)
 	Client *c;
 	Window trans;
 	XPropertyEvent *ev = &e->xproperty;
+	enum { CMDSIZE = 64 };
+	char buf[CMDSIZE];
+	unsigned int func;
+	int arg = 0;
 
-	if ((ev->window == root) && (ev->atom == demtom[EMIpc])) { /* cli functions */
-		enum { CMDSIZE = 64 };
-		char buf[CMDSIZE];
-		unsigned int func;
-		int arg = 0;
-		if (gettextprop(root, demtom[EMIpc], buf, CMDSIZE)) {
-			/* first two characters are the ID of the function */
-			buf[2] = '\0';
-			func = atoi(buf);
-			buf[2] = ' ';
-			arg = atoi(buf + 3);
+	if ((ev->window == root) && (ev->atom == demtom[EMIpc])
+	&& gettextprop(root, demtom[EMIpc], buf, CMDSIZE)) { /* cli functions */
+		/* first two characters are the ID of the function */
+		buf[2] = '\0';
+		func = atoi(buf);
+		buf[2] = ' ';
+		arg = atoi(buf + 3);
 
-			parsetable[func].func(&((Arg){ .i = arg }));
-		}
+		parsetable[func].func(&((Arg){ .i = arg }));
 		return;
 	}
 
