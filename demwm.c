@@ -94,17 +94,12 @@
 #define debug(...)
 #endif /* DEBUG */
 
+/* enums */
 #ifdef SYSTRAY
-/* XEMBED messages */
-#define VERSION_MAJOR		0
-#define VERSION_MINOR		0
-#define XEMBED_MAPPED		(1 << 0)
-#define XEMBED_EMBEDDED_VERSION	(VERSION_MAJOR << 16) | VERSION_MINOR
-
+enum { VERSION_MAJOR = 0, VERSION_MINOR = 0, XEMBED_MAPPED = (1 << 0),
+       XEMBED_EMBEDDED_VERSION = (VERSION_MAJOR << 16) | VERSION_MINOR, }; /* XEMBED messages */
 enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 #endif /* SYSTRAY */
-
-/* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
        SchemeStatus, SchemeDelim, SchemeSys, SchemeIndUrg, SchemeIndOff,
