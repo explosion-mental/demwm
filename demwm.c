@@ -464,69 +464,9 @@ static void swallow(Client *p, Client *c);
 static void unswallow(Client *c);
 static pid_t winpid(Window w);
 
-/* variables */
-static const char broken[] = "broken";
-static volatile unsigned int sleepinterval = 0, maxinterval = 0;
-static unsigned int lasttags; /* keep selected tags on restart */
-static unsigned int stsw = 0; /* status width */
-static unsigned int blocknum; /* blocks idx in mouse click */
-static int combo = 0;         /* combo flag */
-static int sw, sh;            /* X display screen geometry width, height */
-static int bh, blw = 0;       /* bar geometry */
-static int lrpad;             /* sum of left and right padding for text */
-static int (*xerrorxlib)(Display *, XErrorEvent *);
-static unsigned int numlockmask = 0;
-static void (*handler[LASTEvent])(XEvent *) = {
-	[ButtonPress] = buttonpress,
-	[ClientMessage] = clientmessage,
-	[ConfigureRequest] = configurerequest,
-	[ConfigureNotify] = configurenotify,
-	[DestroyNotify] = destroynotify,
-	[EnterNotify] = enternotify,
-	[Expose] = expose,
-	[FocusIn] = focusin,
-	[KeyRelease] = keyrelease,
-	[KeyPress] = keypress,
-	[MappingNotify] = mappingnotify,
-	[MapRequest] = maprequest,
-	[MotionNotify] = motionnotify,
-	[PropertyNotify] = propertynotify,
-	#ifdef SYSTRAY
-	[ResizeRequest] = resizerequest,
-	#endif /* SYSTRAY */
-	[UnmapNotify] = unmapnotify
-};
-#ifdef SYSTRAY
-static Atom xatom[XLast];
-static Systray *systray = NULL;
-#endif /* SYSTRAY */
-static Atom wmatom[WMLast], netatom[NetLast], demtom[EMLast];
-static volatile int running = 1; /* -1 restart, 0 quit, 1 running */
-static int depth, screen;
-static Cur *cursor[CurLast];
-static Display *dpy;
-static Drw *drw;
-static Monitor *mons, *selmon;
-static Window root, wmcheckwin;
-static Visual *visual = NULL;
-static Colormap cmap;
-static Client *scratchpad_last_showed = NULL;
-
-static char dmenumon[2] = "0"; /* dmenu default selected monitor */
-
-/* various layouts to use on the config */
-#include "layouts.c"
-
-/* configuration, allows nested code to access above variables */
-#include "config.h"
-
-static Clr *scheme[LENGTH(colors)] = {0};
-static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0}; /* +1 for '\0' */
-static int pipes[LENGTH(blocks)][2] = {0};
-static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
-
-static const struct { const unsigned int type; void (*func)(const Arg *arg); const char *name; }
-parsetable[] = {
+/* tables */
+static const struct { const unsigned int type;
+ void (*func)(const Arg *arg); const char *name; } parsetable[] = {
 	{ INTa, cyclelayout, "cyclelayout" },
 	{ INTa, incrgaps, "incrgaps" },
 	{ INTa, incrogaps, "incrogaps" },
@@ -555,9 +495,67 @@ parsetable[] = {
 	{ NOOa, xrdb, "xrdb" },
 	{ NOOa, zoom, "zoom" },
 	{ NOOa, zoomswap, "zoomswap" },
-	{ UNIa, updateblock, "updateblock" },
+};
+static void (*handler[LASTEvent])(XEvent *) = {
+	[ButtonPress] = buttonpress,
+	[ClientMessage] = clientmessage,
+	[ConfigureRequest] = configurerequest,
+	[ConfigureNotify] = configurenotify,
+	[DestroyNotify] = destroynotify,
+	[EnterNotify] = enternotify,
+	[Expose] = expose,
+	[FocusIn] = focusin,
+	[KeyRelease] = keyrelease,
+	[KeyPress] = keypress,
+	[MappingNotify] = mappingnotify,
+	[MapRequest] = maprequest,
+	[MotionNotify] = motionnotify,
+	[PropertyNotify] = propertynotify,
+	#ifdef SYSTRAY
+	[ResizeRequest] = resizerequest,
+	#endif /* SYSTRAY */
+	[UnmapNotify] = unmapnotify
 };
 
+/* variables */
+#ifdef SYSTRAY
+static Atom xatom[XLast];
+static Systray *systray = NULL;
+#endif /* SYSTRAY */
+static Atom wmatom[WMLast], netatom[NetLast], demtom[EMLast];
+static Cur *cursor[CurLast];
+static Colormap cmap;
+static Client *scratchpad_last_showed = NULL;
+static Display *dpy;
+static Drw *drw;
+static Monitor *mons, *selmon;
+static Window root, wmcheckwin;
+static Visual *visual = NULL;
+static const char broken[] = "broken";
+static char dmenumon[2] = "0";/* dmenu default selected monitor */
+static unsigned int lasttags; /* keep selected tags on restart */
+static unsigned int stsw = 0; /* status width */
+static unsigned int blocknum; /* blocks idx in mouse click */
+static int combo = 0;         /* combo flag */
+static int sw, sh;            /* X display screen geometry width, height */
+static int bh, blw = 0;       /* bar geometry */
+static int lrpad;             /* sum of left and right padding for text */
+static int depth, screen;
+static int (*xerrorxlib)(Display *, XErrorEvent *); /* x11 error func */
+static unsigned int numlockmask = 0;
+static volatile unsigned int sleepinterval = 0, maxinterval = 0;
+static volatile int running = 1; /* -1 restart, 0 quit, 1 running */
+
+/* various layouts to use on the config */
+#include "layouts.c"
+
+/* configuration, allows nested code to access above variables */
+#include "config.h"
+
+static Clr *scheme[LENGTH(colors)] = {0};
+static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0}; /* +1 for '\0' */
+static int pipes[LENGTH(blocks)][2] = {0};
+static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
 struct Pertag {
 	unsigned int curtag, prevtag;		/* current and previous tag */
 	unsigned int showbars;			/* display bar for the current tag */
