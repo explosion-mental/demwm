@@ -467,6 +467,7 @@ static pid_t winpid(Window w);
 /* tables */
 static const struct { const unsigned int type;
  void (*func)(const Arg *arg); const char *name; } parsetable[] = {
+	{ UNIa, updateblock, "updateblock" },
 	{ INTa, cyclelayout, "cyclelayout" },
 	{ INTa, incrgaps, "incrgaps" },
 	{ INTa, incrogaps, "incrogaps" },
@@ -475,8 +476,6 @@ static const struct { const unsigned int type;
 	{ INTa, incrihgaps, "incrihgaps" },
 	{ INTa, incrivgaps, "incrivgaps" },
 	{ NOOa, defaultgaps, "defaultgaps" },
-	{ NOOa, killclient, "killclient" },
-	{ NOOa, restart, "restart" },
 	{ INTa, setlayout, "setlayout" },
 	{ UNIa, tag, "tag" },
 	{ NOOa, togglebar, "togglebar" },
@@ -495,7 +494,8 @@ static const struct { const unsigned int type;
 	{ NOOa, xrdb, "xrdb" },
 	{ NOOa, zoom, "zoom" },
 	{ NOOa, zoomswap, "zoomswap" },
-	{ UNIa, updateblock, "updateblock" },
+	{ NOOa, killclient, "killclient" },
+	{ NOOa, restart, "restart" },
 };
 static void (*handler[LASTEvent])(XEvent *) = {
 	[ButtonPress] = buttonpress,
