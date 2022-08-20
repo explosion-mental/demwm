@@ -495,6 +495,7 @@ static const struct { const unsigned int type;
 	{ NOOa, xrdb, "xrdb" },
 	{ NOOa, zoom, "zoom" },
 	{ NOOa, zoomswap, "zoomswap" },
+	{ UNIa, updateblock, "updateblock" },
 };
 static void (*handler[LASTEvent])(XEvent *) = {
 	[ButtonPress] = buttonpress,
