@@ -144,7 +144,6 @@ enum {	AlwOnTop   = 1 << 0,  /* AlwaysOnTop */
 	LastFlag   = 1 << 14, /* placeholder for the last flag */
 }; /* client flags/state */
 enum { HideVacant = 1 << 0, ShowBar = 1 << 1, TopBar = 1 << 2 }; /* mon flags */
-
 enum {	Alt     = Mod1Mask,
 	AltGr   = Mod3Mask,
 	Button6 = 6,
@@ -154,11 +153,11 @@ enum {	Alt     = Mod1Mask,
 	ShiftGr = Mod5Mask,
 	Super   = Mod4Mask,
 }; /* modifiers */
-
 enum {	BUTTONMASK = (ButtonPressMask|ButtonReleaseMask),
 	MOUSEMASK  = (ButtonPressMask|ButtonReleaseMask|PointerMotionMask),
 	WINMASK    = (CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask),
 }; /* masks */
+enum { INTa, UNIa, FLTa, NOOa }; /* function table args */
 
 typedef union {
 	int i;
@@ -531,36 +530,37 @@ static char blockoutput[LENGTH(blocks)][CMDLENGTH + 1] = {0}; /* +1 for '\0' */
 static int pipes[LENGTH(blocks)][2] = {0};
 static unsigned int execlock = 0; /* ensure only one child process exists per block at an instance */
 
-static const struct { const int hasarg; void (*func)(const Arg *arg); const char *name; }
+static const struct { const unsigned int type; void (*func)(const Arg *arg); const char *name; }
 parsetable[] = {
-	{ 1, cyclelayout, "cyclelayout" },
-	{ 1, incrgaps, "incrgaps" },
-	{ 1, incrogaps, "incrogaps" },
-	{ 1, incrohgaps, "incrohgaps" },
-	{ 1, incrovgaps, "incrovgaps" },
-	{ 1, incrihgaps, "incrihgaps" },
-	{ 1, incrivgaps, "incrivgaps" },
-	{ 0, defaultgaps, "defaultgaps" },
-	{ 0, killclient, "killclient" },
-	{ 0, restart, "restart" },
-	{ 1, setlayout, "setlayout" },
-	{ 1, tag, "tag" },
-	{ 0, togglebar, "togglebar" },
-	{ 0, togglefloating, "togglefloating" },
-	{ 0, togglefullscreen, "togglefullscreen" },
-	{ 0, togglefakefullscreen, "togglefakefullscreen" },
-	{ 0, togglegaps, "togglegaps" },
-	{ 0, togglesmartgaps, "togglesmartgaps" },
-	{ 0, togglevacant, "togglevacant" },
-	{ 0, togglestatus, "togglestatus" },
-	{ 0, toggletopbar, "toggletopbar" },
-	{ 1, toggletag, "toggletag" },
-	{ 0, togglesticky, "togglesticky" },
-	{ 1, view, "view" },
-	{ 0, xrdb, "xrdb" },
-	{ 0, zoom, "zoom" },
-	{ 0, zoomswap, "zoomswap" },
-	{ 1, updateblock, "updateblock" },
+	{ INTa, cyclelayout, "cyclelayout" },
+	{ INTa, incrgaps, "incrgaps" },
+	{ INTa, incrogaps, "incrogaps" },
+	{ INTa, incrohgaps, "incrohgaps" },
+	{ INTa, incrovgaps, "incrovgaps" },
+	{ INTa, incrihgaps, "incrihgaps" },
+	{ INTa, incrivgaps, "incrivgaps" },
+	{ NOOa, defaultgaps, "defaultgaps" },
+	{ NOOa, killclient, "killclient" },
+	{ NOOa, restart, "restart" },
+	{ INTa, setlayout, "setlayout" },
+	{ UNIa, tag, "tag" },
+	{ NOOa, togglebar, "togglebar" },
+	{ NOOa, togglefloating, "togglefloating" },
+	{ NOOa, togglefullscreen, "togglefullscreen" },
+	{ NOOa, togglefakefullscreen, "togglefakefullscreen" },
+	{ NOOa, togglegaps, "togglegaps" },
+	{ NOOa, togglesmartgaps, "togglesmartgaps" },
+	{ NOOa, togglevacant, "togglevacant" },
+	{ NOOa, togglestatus, "togglestatus" },
+	{ NOOa, toggletopbar, "toggletopbar" },
+	{ UNIa, toggletag, "toggletag" },
+	{ UNIa, toggleview, "toggleview" },
+	{ NOOa, togglesticky, "togglesticky" },
+	{ UNIa, view, "view" },
+	{ NOOa, xrdb, "xrdb" },
+	{ NOOa, zoom, "zoom" },
+	{ NOOa, zoomswap, "zoomswap" },
+	{ UNIa, updateblock, "updateblock" },
 };
 
 struct Pertag {
@@ -2711,18 +2711,30 @@ propertynotify(XEvent *e)
 	XPropertyEvent *ev = &e->xproperty;
 	enum { CMDSIZE = 64 };
 	char buf[CMDSIZE];
-	unsigned int func;
-	int arg = 0;
+	unsigned int i = 0;
+	Arg arg = {0};
 
 	if ((ev->window == root) && (ev->atom == demtom[EMIpc])
 	&& gettextprop(root, demtom[EMIpc], buf, CMDSIZE)) { /* cli functions */
 		/* first two characters are the ID of the function */
 		buf[2] = '\0';
-		func = atoi(buf);
+		i = atoi(buf);
 		buf[2] = ' ';
-		arg = atoi(buf + 3);
+		debug("index = '%d' | buf = '%s' | func = '%s'\n", i, buf, parsetable[i].name);
 
-		parsetable[func].func(&((Arg){ .i = arg }));
+		switch (parsetable[i].type) {
+		case INTa:
+			arg.i = atoi(buf + 3);
+			break;
+		case UNIa:
+			arg.ui = abs(atoi(buf + 3));
+			break;
+		case FLTa:
+			arg.f = atof(buf + 3);
+			break;
+		}
+
+		parsetable[i].func(&arg);
 		return;
 	}
 
@@ -5048,7 +5060,7 @@ main(int argc, char *argv[])
 				die("'%s' is not a function.", argv[1]);
 		}
 
-		if (parsetable[cmd].hasarg && argc == 2)
+		if (parsetable[cmd].type != NOOa && argc == 2)
 			die("Function '%s' requires an argument.", argv[1]);
 
 		snprintf(id, sizeof id, cmd < 10 ? "0%d" : "%d", cmd);
