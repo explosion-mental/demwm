@@ -2729,6 +2729,10 @@ propertynotify(XEvent *e)
 			break;
 		}
 
+		if (parsetable[i].func == view || parsetable[i].func == tag
+		|| parsetable[i].func == toggleview || parsetable[i].func == toggletag)
+			arg.ui = 1 << arg.ui;
+
 		parsetable[i].func(&arg);
 		return;
 	}
