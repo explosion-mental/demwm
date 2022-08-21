@@ -67,8 +67,6 @@
 #include "util.h"
 
 /* macros */
-#define IPCSIZE			64
-#define OPAQUE			0xffU /* borders */
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
                                * MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
@@ -154,6 +152,7 @@ enum {	BUTTONMASK = (ButtonPressMask|ButtonReleaseMask),
 	WINMASK    = (CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask),
 }; /* masks */
 enum { INTa, UNIa, FLTa, NOOa }; /* function table args */
+enum { IPCSIZE = 64, OPAQUE = 0xffU }; /* magick numbers */
 
 typedef union {
 	int i;
