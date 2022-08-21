@@ -67,6 +67,7 @@
 #include "util.h"
 
 /* macros */
+#define IPCSIZE			64
 #define OPAQUE			0xffU /* borders */
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
@@ -2704,13 +2705,12 @@ propertynotify(XEvent *e)
 	Client *c;
 	Window trans;
 	XPropertyEvent *ev = &e->xproperty;
-	enum { CMDSIZE = 64 };
-	char buf[CMDSIZE];
+	char buf[IPCSIZE];
 	unsigned int i = 0;
 	Arg arg = {0};
 
 	if ((ev->window == root) && (ev->atom == demtom[EMIpc])
-	&& gettextprop(root, demtom[EMIpc], buf, CMDSIZE)) { /* cli functions */
+	&& gettextprop(root, demtom[EMIpc], buf, sizeof buf)) { /* cli functions */
 		/* first two characters are the ID of the function */
 		buf[2] = '\0';
 		i = atoi(buf);
@@ -5037,7 +5037,7 @@ shiftpreview(const Arg *arg)
 int
 main(int argc, char *argv[])
 {
-	char func[64];
+	char func[IPCSIZE];
 	unsigned int i;
 	int cmd = -1;
 
