@@ -3512,8 +3512,7 @@ void
 setupx11(void)
 {
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
-		LOG("warning, no locale support.");
-	if (!(dpy = XOpenDisplay(NULL)))
+		LOG("warning, no locale support."); if (!(dpy = XOpenDisplay(NULL)))
 		die("demwm: cannot open display.");
 
 	/* init screen */
@@ -5038,7 +5037,7 @@ shiftpreview(const Arg *arg)
 int
 main(int argc, char *argv[])
 {
-	char id[3], func[64];
+	char func[64];
 	unsigned int i;
 	int cmd = -1;
 
@@ -5062,8 +5061,7 @@ main(int argc, char *argv[])
 		if (parsetable[cmd].type != NOOa && argc == 2)
 			die("Function '%s' requires an argument.", argv[1]);
 
-		snprintf(id, sizeof id, cmd < 10 ? "0%d" : "%d", cmd);
-		snprintf(func, sizeof func, "%s %s", id, argv[2]);
+		snprintf(func, sizeof func, cmd < 10 ? "0%d %s" : "%d %s", cmd, argv[2]);
 		XChangeProperty(dpy, root, demtom[EMIpc], XInternAtom(dpy, "UTF8_STRING", False), 8,
 			PropModeReplace, (unsigned char *) func, sizeof func);
 		XCloseDisplay(dpy);
