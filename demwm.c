@@ -96,7 +96,7 @@
 /* enums */
 #ifdef SYSTRAY
 enum { VERSION_MAJOR = 0, VERSION_MINOR = 0, XEMBED_MAPPED = (1 << 0),
-       XEMBED_EMBEDDED_VERSION = (VERSION_MAJOR << 16) | VERSION_MINOR, }; /* XEMBED messages */
+       XEMBED_EMBEDDED_VERSION = (VERSION_MAJOR << 16) | VERSION_MINOR, }; /* Xembed messages */
 enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 #endif /* SYSTRAY */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
