@@ -3232,72 +3232,58 @@ defaultgaps(const Arg *arg)
 void
 incrgaps(const Arg *arg)
 {
-	setgaps(
-		selmon->gappoh + arg->i,
+	setgaps(selmon->gappoh + arg->i,
 		selmon->gappov + arg->i,
 		selmon->gappih + arg->i,
-		selmon->gappiv + arg->i
-	);
+		selmon->gappiv + arg->i);
 }
 void
 incrigaps(const Arg *arg)
 {
-	setgaps(
-		selmon->gappoh,
+	setgaps(selmon->gappoh,
 		selmon->gappov,
 		selmon->gappih + arg->i,
-		selmon->gappiv + arg->i
-	);
+		selmon->gappiv + arg->i);
 }
 void
 incrogaps(const Arg *arg)
 {
-	setgaps(
-		selmon->gappoh + arg->i,
+	setgaps(selmon->gappoh + arg->i,
 		selmon->gappov + arg->i,
 		selmon->gappih,
-		selmon->gappiv
-	);
+		selmon->gappiv);
 }
 void
 incrohgaps(const Arg *arg)
 {
-	setgaps(
-		selmon->gappoh + arg->i,
+	setgaps(selmon->gappoh + arg->i,
 		selmon->gappov,
 		selmon->gappih,
-		selmon->gappiv
-	);
+		selmon->gappiv);
 }
 void
 incrovgaps(const Arg *arg)
 {
-	setgaps(
-		selmon->gappoh,
+	setgaps(selmon->gappoh,
 		selmon->gappov + arg->i,
 		selmon->gappih,
-		selmon->gappiv
-	);
+		selmon->gappiv);
 }
 void
 incrihgaps(const Arg *arg)
 {
-	setgaps(
-		selmon->gappoh,
+	setgaps(selmon->gappoh,
 		selmon->gappov,
 		selmon->gappih + arg->i,
-		selmon->gappiv
-	);
+		selmon->gappiv);
 }
 void
 incrivgaps(const Arg *arg)
 {
-	setgaps(
-		selmon->gappoh,
+	setgaps(selmon->gappoh,
 		selmon->gappov,
 		selmon->gappih,
-		selmon->gappiv + arg->i
-	);
+		selmon->gappiv + arg->i);
 }
 /* vanitygaps */
 
