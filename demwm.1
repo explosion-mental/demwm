@@ -1,10 +1,10 @@
-.TH "DEMWM" "1" 
+.TH DEMWM 1 demwm-VERSION
 .SH "NAME"
 .PP
 demwm - Dynamic Explosion-Mental’s Window Manager
 .SH "SYNOPSIS"
 .PP
-\fBdemwm\fP [ \fB-v\fP ]
+\fBdemwm\fP [ \fBfunction\fP ] (argument)
 .SH "DESCRIPTION"
 .PP
 A custom fork of dwm(1), a (tiling) window manager for X. You have customs \fBrules\fP and \fBlayouts\fP to use and set that handles clients in different ways.
@@ -30,11 +30,14 @@ If the bar or the statustext it’s hidden, there would be \fBno\fP need to call
 
 
 .PP
-\fBdemwm\fP reacts to the \fCX root window name\fP (\fCWM_NAME\fP) property of the \fIroot\fP window to make custom actions. No IPC bloat! See PSEUDO-IPC section.
+\fBdemwm\fP also acts as an “\fIclient\fP” program, which calls the window manager to do
+ certain actions. See PSEUDO-IPC section.
 .SH "OPTIONS"
-.TP
-\fB-v\fP
-Print the version number and exit.
+.PP
+Without any arguments, the program will try to initialize the window manager.
+For information about the kind of arguments check out FUNCTIONS section.
+\fINOTE\fP: Functions that do take an argument, are (\fImostly\fP) \fBbidirectional\fP: this means
+that number signs define the behaviour of the function. ( \fC\-1\fP / \fC+1\fP )
 .SH "SIGNALS"
 .SS "SIGHUP - 1"
 .PP
@@ -53,18 +56,10 @@ For clicking to do anything you have to make a dedicated script which handles
 the \fCBLOCK_BUTTON\fP \fIenviromental variable\fP. See EXAMPLES section.
 To define the value of \fCBLOCK_BUTTON\fP, you have to edit \fBconfig.h\fP mouse
 buttons bindings \fCsendstatusbar\fP.
-
 .SH "CONFIGURATION"
 .PP
 dwm is customized by creating a custom config.h and (re)compiling the source code. This keeps it simple, since reading a config file isn’t that hard (but adds unneeded complexity), and in many aspects more customizable. I try my best to comment about the variables in config.h, since they don’t do anything crazy, so it should be very straight foward what does what.
-
-
-.PP
-What do you need to know? User functions, described below.
-
-
-.PP
-\fINOTE\fP: Function that do take an argument, are bidirectional: this means that number signs define the behaviour of the function. ( \fC\-1\fP / \fC+1\fP )
+.br
 .SH "STATUS BAR TEXT BLOCKS"
 .TS
  center,box;
@@ -86,7 +81,7 @@ _
 
 .SS "SIGNALING BLOCKS"
 .PP
-\fBThis is discouraged, use \fCxsetroot \-name\fP instead\fP
+\fBThis is discouraged, use \fCdemwm updateblock /signal/\fP instead\fP
 
 
 .PP
@@ -97,105 +92,105 @@ with \fCkill\fP, In this case: \fCkill \-45 $(pidof demwm)\fP
 .SH "FUNCTIONS"
 .SS "cyclelayout"
 .PP
-Moves the layouts index depending on the argument. 
+Moves the layouts index depending on the argument.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "combotag"
 .PP
-Select multiple tags to \fCtag\fP by pressing all the right keys as a combo: you can press multiple tags by holding the modifier(s) keys (MOD by default). 
+Select multiple tags to \fCtag\fP by pressing all the right keys as a combo: you can press multiple tags by holding the modifier(s) keys (MOD by default).
 .br
 
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .SS "comboview"
 .PP
-Select multiple tags to \fCview\fP by pressing all the right keys as a combo: you can press multiple tags by holding the modifier(s) keys (MOD by default). 
+Select multiple tags to \fCview\fP by pressing all the right keys as a combo: you can press multiple tags by holding the modifier(s) keys (MOD by default).
 .br
 
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .SS "defaultgaps"
 .PP
-Set the gaps to the values defined in config.h. 
+Set the gaps to the values defined in config.h.
 .br
 
 .PP
 No arguments.
 .SS "focusmon"
 .PP
-Focus monitor 
+Focus monitor
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "focusstack"
 .PP
-More like, ’focus client’. Focuses the next/prev client (window). 
+More like, ’focus client’. Focuses the next/prev client (window).
 .br
 
 .PP
 Takes an \fIinteger\fP as an argument.
 .SS "incnmaster"
 .PP
-Increase master, sutracts/adds the first stack (slave) window to the master stack (left side on default tile layout). 
+Increase master, sutracts/adds the first stack (slave) window to the master stack (left side on default tile layout).
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "incrgaps"
 .PP
-Increases or decreses \fBinner\fP, \fBouter\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given. 
+Increases or decreses \fBinner\fP, \fBouter\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "incrigaps"
 .PP
-Increases or decreses the \fBinner\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given. 
+Increases or decreses the \fBinner\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "incrihgaps"
 .PP
-Increases or decreses the \fBinner\fP, and \fBhorizontal\fP gaps by the argument given. 
+Increases or decreses the \fBinner\fP, and \fBhorizontal\fP gaps by the argument given.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "incrivgaps"
 .PP
-Increases or decreses the \fBinner\fP and \fBvertical\fP gaps by the argument given. 
+Increases or decreses the \fBinner\fP and \fBvertical\fP gaps by the argument given.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "incrogaps"
 .PP
-Increases or decreses the \fBouter\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given. 
+Increases or decreses the \fBouter\fP, \fBvertical\fP and \fBhorizontal\fP gaps by the argument given.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "incrohgaps"
 .PP
-Increases or decreses the \fBouter\fP, and \fBhorizontal\fP gaps by the argument given. 
+Increases or decreses the \fBouter\fP, and \fBhorizontal\fP gaps by the argument given.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "incrovgaps"
 .PP
-Increases or decreses the \fBouter\fP and \fBvertical\fP gaps by the argument given. 
+Increases or decreses the \fBouter\fP and \fBvertical\fP gaps by the argument given.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "killclient"
 .PP
-The name describe it, kills a window client. 
+The name describe it, kills a window client.
 .br
 
 .PP
@@ -203,21 +198,21 @@ No arguments.
 .SS "movefh\d\s-2setmfact\s+2\u"
 .PP
 A custom fuction of mine which reuses two functions: \fBmovefloathoriz\fP and \fBsetmfact\fP
-This is just because setmfact has no effect if I have a floating window. 
+This is just because setmfact has no effect if I have a floating window.
 .br
 
 .PP
 It takes an \fIfloat\fP argument and passes it to \fCsetmfact\fP. The argument for the \fCmovefloathoriz\fP is defined in config.h as the variable \fCmovefloat\fP.
 .SS "movefloathorz"
 .PP
-Moves the current \fBfloating\fP windows horizontaly by the argument given. 
+Moves the current \fBfloating\fP windows horizontaly by the argument given.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "movefloatvert"
 .PP
-Moves the current \fBfloating\fP windows verticaly by the argument given. 
+Moves the current \fBfloating\fP windows verticaly by the argument given.
 .br
 
 .PP
@@ -225,23 +220,23 @@ It takes an \fIinteger\fP argument.
 .SS "movefv\d\s-2pushstack\s+2\u"
 .PP
 A custom fuction of mine which reuses two functions: \fBmovefloatvert\fP and \fBpushstack\fP
-This is just because \fBpushstack\fP has no effect if I have a floating window. 
+This is just because \fBpushstack\fP has no effect if I have a floating window.
 .br
 
 .PP
 It takes an \fIinteger\fP argument and passes it to \fCpushstack\fP. The argument for the \fCmovefloatvert\fP is defined in config.h as the variable \fCmovefloat\fP.
 .SS "pushstack"
 .PP
-\fIPushes\fP the current client to be the next/previous client in the stack. 
+\fIPushes\fP the current client to be the next/previous client in the stack.
 .br
-Note: Currently with this function the client can become the master, this is not intended since for this we have \fBzoom\fP. 
+Note: Currently with this function the client can become the master, this is not intended since for this we have \fBzoom\fP.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "quit"
 .PP
-Quits demwm. 
+Quits demwm.
 .br
 
 .PP
@@ -250,77 +245,77 @@ No arguments.
 .PP
 Restarts or refreshes the current \fBdemwm\fP instance.
 This keeps all clients into their tags and corresponding monitors, as well as leaves the clients in a floating state and fullscreened, in case they have that property.
-This won’t keep the layouts of the tags, the state of gaps (enabled/disabled), master/slaves relations, etc. If you wish these \fIworkspace\fP like feature, checkout dusk(1). 
+This won’t keep the layouts of the tags, the state of gaps (enabled/disabled), master/slaves relations, etc. If you wish these \fIworkspace\fP like feature, checkout dusk(1).
 .br
 
 .PP
 No arguments.
 .SS "scratchpad\d\s-2hide\s+2\u"
 .PP
-Adds the current client to the \fBdynamic\fP scratchpads list, hiding it. See SCRATCHPADS section. 
+Adds the current client to the \fBdynamic\fP scratchpads list, hiding it. See SCRATCHPADS section.
 .br
 
 .PP
 No arguments.
 .SS "scratchpad\d\s-2remove\s+2\u"
 .PP
-Removes the current client to the \fBdynamic\fP scratchpads list. See SCRATCHPADS section. 
+Removes the current client to the \fBdynamic\fP scratchpads list. See SCRATCHPADS section.
 .br
 
 .PP
 No arguments.
 .SS "scratchpad\d\s-2show\s+2\u"
 .PP
-Show a dynamic scratchpad from the list. If more than one window exist in the list, this functions cycles between them from first to last added. See SCRATCHPADS section. 
+Show a dynamic scratchpad from the list. If more than one window exist in the list, this functions cycles between them from first to last added. See SCRATCHPADS section.
 .br
 
 .PP
 No arguments.
 .SS "setmfact"
 .PP
-\fBSets\fP the \fBmaster\fP \fBfactor\fP area, modifies the \fCmfact\fP (master factor area) value at runtime. 
+\fBSets\fP the \fBmaster\fP \fBfactor\fP area, modifies the \fCmfact\fP (master factor area) value at runtime.
 .br
 
 .PP
 It takes an \fIfloat\fP argument, usually less than \fC1\fP.
 .SS "shiftboth"
 .PP
-\fCshiftview\fP + \fCshifttag\fP 
+\fCshiftview\fP + \fCshifttag\fP
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "shifttag"
 .PP
-\fCtag\fP the current window to the next/previous \fIN\fP tag. \fIN\fP being defined by the argument. 
+\fCtag\fP the current window to the next/previous \fIN\fP tag. \fIN\fP being defined by the argument.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "shifttagclients"
 .PP
-\fCtag\fP the current window to the next/previous \fIN\fP \fBoccupied\fP tag, a tag with at least one client. \fIN\fP being defined by the argument. 
+\fCtag\fP the current window to the next/previous \fIN\fP \fBoccupied\fP tag, a tag with at least one client. \fIN\fP being defined by the argument.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "shiftview"
 .PP
-\fCview\fP the current window to the next/previous \fIN\fP tag. \fIN\fP being defined by the argument. 
+\fCview\fP the current window to the next/previous \fIN\fP tag. \fIN\fP being defined by the argument.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "shiftviewclients"
 .PP
-\fCview\fP the current window to the next/previous \fIN\fP \fBoccupied\fP tag, a tag with at least one client. \fIN\fP being defined by the argument. 
+\fCview\fP the current window to the next/previous \fIN\fP \fBoccupied\fP tag, a tag with at least one client. \fIN\fP being defined by the argument.
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "spawn"
 .PP
-A wrapper for \fIexec\fP function. This executes shell commands. 
+A wrapper for \fIexec\fP function. This executes shell commands.
 .br
 
 .PP
@@ -333,123 +328,123 @@ It takes a \fIvoid\fP argument: an array of chars with a last element of \fBNULL
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .SS "tagmon"
 .PP
-Like \fCtag\fP but to the other monitor. Sends the window to the next monitor (display 0, 1, etc..). 
+Like \fCtag\fP but to the other monitor. Sends the window to the next monitor (display 0, 1, etc..).
 .br
 
 .PP
 It takes an \fIinteger\fP argument.
 .SS "togglealwaysontop"
 .PP
-Add or remove the \fIalwaysontop\fP state of a client. \fBAlwaysontop\fP means to be on top of all windows (including the bar), useful when combined with the sticky flag. 
+Add or remove the \fIalwaysontop\fP state of a client. \fBAlwaysontop\fP means to be on top of all windows (including the bar), useful when combined with the sticky flag.
 .br
 
 .PP
 No arguments.
 .SS "togglebar"
 .PP
-(Un)hides the bar. 
+(Un)hides the bar.
 .br
 
 .PP
 No arguments.
 .SS "togglefakefullscreen"
 .PP
-Add or remove the \fIfakefullscreen\fP state property of the client. \fBFakeFullScreen\fP means to have the window in a fullscreen state, in a window basis, but treat it as a normal window, in a window manager basis. This results in having fullscreened windows that can be tiled, floating, etc. and the window doesn’t necessarily occupies the hole screen. 
+Add or remove the \fIfakefullscreen\fP state property of the client. \fBFakeFullScreen\fP means to have the window in a fullscreen state, in a window basis, but treat it as a normal window, in a window manager basis. This results in having fullscreened windows that can be tiled, floating, etc. and the window doesn’t necessarily occupies the hole screen.
 .br
 
 .PP
 No arguments.
 .SS "togglefloating"
 .PP
-Toggles floating behaviour on windows. This depends on the current state of the window. 
+Toggles floating behaviour on windows. This depends on the current state of the window.
 .br
 
 .PP
 No arguments.
 .SS "togglefullscreen"
 .PP
-Add or remove the \fIfullscreen\fP state property of the client. 
+Add or remove the \fIfullscreen\fP state property of the client.
 .br
 
 .PP
 No arguments.
 .SS "togglestatus"
 .PP
-(Un)hides the status text blocks, keeping the bar up if active. 
+(Un)hides the status text blocks, keeping the bar up if active.
 .br
 
 .PP
 No arguments.
 .SS "togglesticky"
 .PP
-Add or remove the \fIsticky\fP state of a client. \fBSticky\fP means that the window will be visible in all tags. 
+Add or remove the \fIsticky\fP state of a client. \fBSticky\fP means that the window will be visible in all tags.
 .br
 
 .PP
 No arguments.
 .SS "toggletag"
 .PP
-Like tag but it can stack, meaning you can ’tag’ multiple tags. This is toggleable. 
+Like tag but it can stack, meaning you can ’tag’ multiple tags. This is toggleable.
 .br
 
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .SS "toggletopbar"
 .PP
-Inverse the position of the bar. If the bar is on the top, puts it on the bottom; if the bar is on the bottom, puts it on the top. 
+Inverse the position of the bar. If the bar is on the top, puts it on the bottom; if the bar is on the bottom, puts it on the top.
 .br
 
 .PP
 No arguments.
 .SS "togglevacant"
 .PP
-(Un)hides the vacant (empty) tags. 
+(Un)hides the vacant (empty) tags.
 .br
 
 .PP
 No arguments.
 .SS "toggleview"
 .PP
-Like view but it can stack, meaning you can ’view’ multiple tags. This is toggleable. 
+Like view but it can stack, meaning you can ’view’ multiple tags. This is toggleable.
 .br
 
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .SS "updateblock"
 .PP
-updates a status bar block text. 
+updates a status bar block text.
 .br
 
 .PP
-It takes an (unsigned) \fIinteger\fP argument, which correspond to the signal number of the block you wish to update. 
+It takes an (unsigned) \fIinteger\fP argument, which correspond to the signal number of the block you wish to update.
 .br
 
 .PP
-\fINote\fP: Since the blocks updates are asynchronous (in the background), the signaling is ’instantaneous’. Say you have a same keybinding that executes some command related to the status block, and you also define the same keybinding to update the block using this function; most likely updating the block will be faster and thus the block will not be affected by the other command.
+\fINote for usage in config.h\fP: Since the blocks updates are asynchronous (in the background), the signaling is ’instantaneous’. Say you have a same keybinding that executes some command related to the status block, and you also define the same keybinding to update the block using this function; most likely updating the block will be faster and thus the block will not be affected by the other command (doesn’t matter as a demwm argument).
 .SS "view"
 .PP
-View the contents of a tag, you can think of it like moving to a tag. 
+View the contents of a tag, you can think of it like moving to a tag.
 .br
 
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .SS "xrdb"
 .PP
-Refreshes or reloads the colors, reads their Xresource value and arranges all the monitors (which actually displays the new colors, if any). 
+Refreshes or reloads the colors, reads their Xresource value and arranges all the monitors (which actually displays the new colors, if any).
 .br
 
 .PP
 No arguments.
 .SS "zoom"
 .PP
-Swaps between the first window on the master stack to the current window. If you are already on the first master window, it uses the second master window. 
+Swaps between the first window on the master stack to the current window. If you are already on the first master window, it uses the second master window.
 .br
 
 .PP
 No arguments.
 .SS "zoomswap"
 .PP
-Variation of the \fCzoom\fP function that maintains the positions of the windows. 
+Variation of the \fCzoom\fP function that maintains the positions of the windows.
 .br
 
 .PP
@@ -462,22 +457,11 @@ I have two patches: \fIscratchpads\fP and \fIdynamic scratchpads\fP. Both of the
 Any window can be added or removed as a scratchpad. You can add multiple clients to this “\fIlist\fP” of dynamic scratchpads but the catch is that to get to a certain client the binding will cycle through them (meaning more key presses).
 .SS "static scratchpads"
 .PP
-Allows you  to \fIstore\fP a client on a tag that isn’t visible. When you call that client by pressing a keybinding you basically \fCtoggleview\fP that tag and you will see the client store. This scratchpad can be maintained (called) between multiple monitors. 
+Allows you  to \fIstore\fP a client on a tag that isn’t visible. When you call that client by pressing a keybinding you basically \fCtoggleview\fP that tag and you will see the client store. This scratchpad can be maintained (called) between multiple monitors.
 .br
 
 .PP
 For this you need to define a \fCRule\fP for that client (res name or class) and add it to the tag \fCSP(X)\fP, which X represents the same index in the array of the \fCscratchpads\fP array. For simpler understanding just use the sample variables I defined which are \fCSp1\fP to \fCSp9\fP and make sure these match in between the \fCRule\fP tags, the binding and the definition of the command inside the array \fCscratchpads\fP.
-.SH "PSEUDO-IPC"
-.PP
-Since demwm handles the text itself, it can use the name of the root window for other purposes, like managing demwm (similar to the \fCfakesignal\fP patch).
-
-
-.PP
-How does this work? You set the X root window name property with a function, see FUNCTIONS section, and an argument, if it needs one. You can also directly input a status text block \fBsignal\fP number and this will manually trigger that block, without the need of signals (\fCkill\fP).
-
-
-.PP
-You can use any program that sets the property mentioned above, common programs are xsetroot(1) and xprop(1).
 .SH "EXAMPLES"
 .SS "Usage of \fCspawn\fP and \fCSHCMD\fP"
 .RS
@@ -542,9 +526,10 @@ echo "Playing: $(mpc current --format '[[%artist% - ]%title%]|[%file%]')"
 .SS "IPC like comunication"
 .RS
 .nf
-\fCxsetroot -name 'incrgaps +10'
-#or with xprop
-xprop -root -set WM_NAME 'incrgaps +10'
+\fCdemwm incrgaps +10
+demwm incrgaps -10
+demwm restart
+demwm updateblock 8
 \fP
 .fi
 .RE
@@ -562,9 +547,9 @@ manager is running that the XToolkit/XAWT backend can recognize) or when using
 OpenJDK setting the environment variable \fC_JAVA_AWT_WM_NONREPARENTING=1\fP
 .SH "SEE ALSO"
 .PP
-dwm(1), poll(3), exec(3), xsetroot(1), xprop(1)
+dwm(1), poll(3), exec(3)
 .SH "BUGS"
 .PP
-\fIhttps://github.com/explosion-mental/demwm\fP 
+\fIhttps://github.com/explosion-mental/demwm\fP
 .br
 \fIhttps://codeberg.org/explosion-mental/demwm\fP
