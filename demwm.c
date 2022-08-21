@@ -3512,7 +3512,8 @@ void
 setupx11(void)
 {
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
-		LOG("warning, no locale support."); if (!(dpy = XOpenDisplay(NULL)))
+		LOG("warning, no locale support.");
+	if (!(dpy = XOpenDisplay(NULL)))
 		die("demwm: cannot open display.");
 
 	/* init screen */
