@@ -2755,10 +2755,11 @@ propertynotify(XEvent *e)
 		default: break;
 		case XA_WM_TRANSIENT_FOR:
 			if (!(c->f & Float) && (XGetTransientForHint(dpy, c->win, &trans))) {
-				Client *t = wintoclient(trans);
-				SETVAL(c, Float, t);
-				if (t != NULL)
+				if (wintoclient(trans)) {
+					c->f |= Float;
 					arrange(c->mon);
+				} else
+					c->f &= ~Float;
 			}
 			break;
 		case XA_WM_NORMAL_HINTS:
