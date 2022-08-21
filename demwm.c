@@ -2717,6 +2717,7 @@ propertynotify(XEvent *e)
 		debug("index = '%d' | buf = '%s' | func = '%s'\n", i, buf, parsetable[i].name);
 
 		switch (parsetable[i].type) {
+		default: break;
 		case INTa:
 			arg.i = atoi(buf + 3);
 			break;
