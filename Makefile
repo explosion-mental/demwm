@@ -10,12 +10,10 @@ all: options demwm
 
 options:
 	@echo demwm build options:
+	@echo "VERSION  = ${VERSION}"
 	@echo "FEATURES = ${ICONS} ${SYSTRAY} ${TAG_PREVIEWS} ${XINERAMAFLAGS} ${DEBUG}"
-	@echo
 	@echo "CFLAGS   = ${CFLAGS}"
-	@echo
 	@echo "LDFLAGS  = ${LDFLAGS}"
-	@echo
 	@echo "CC       = ${CC}"
 	@echo
 
