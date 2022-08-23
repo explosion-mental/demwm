@@ -2,7 +2,7 @@
 VERSION = 1.7
 
 # demwm git exact commit version
-SRCVERSION = $$(git describe --tags --dirty=[modified])
+SRCVERSION = $$(git describe --tags --dirty=[modified] 2>/dev/null || echo ${VERSION}-nogit)
 
 # Customize below to fit your system
 
