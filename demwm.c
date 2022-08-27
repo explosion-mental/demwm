@@ -3505,8 +3505,9 @@ setup(void)
 {
 	XSetWindowAttributes wa;
 	Atom utf8string;
-	unsigned int i;
 	sigset_t sm, oldsm;
+	const char wm[] = "demwm";
+	unsigned int i;
 
 	sigfillset(&sm);
 	sigprocmask(SIG_SETMASK, &sm, &oldsm); /* prevent EINTR by blocking */
@@ -3589,7 +3590,7 @@ setup(void)
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8,
-		PropModeReplace, (unsigned char *) "demwm", 5);
+		PropModeReplace, (unsigned char *) wm, sizeof wm);
 	XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 	/* EWMH support per view */
@@ -3598,7 +3599,7 @@ setup(void)
 	XDeleteProperty(dpy, root, netatom[NetClientList]);
 	/* XStoreName */
 	XChangeProperty(dpy, root, XA_WM_NAME, utf8string, 8,
-		PropModeReplace, (unsigned char *) "demwm", 5);
+		PropModeReplace, (unsigned char *) wm, sizeof wm);
 	/* select events */
 	wa.cursor = cursor[CurNormal]->cursor;
 	wa.event_mask = SubstructureRedirectMask|SubstructureNotifyMask
