@@ -412,21 +412,22 @@ drw_pic(Drw *drw, int x, int y, unsigned int w, unsigned int h, Picture pic)
 Picture
 drw_picture_create_resized(Drw *drw, char *src, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth)
 {
-	Pixmap pm;
+	Pixmap pm = XCreatePixmap(drw->dpy, drw->root, srcw, srch, 32);
 	Picture pic;
-	GC gc;
+	GC gc = XCreateGC(drw->dpy, pm, 0, NULL);
+	XImage img = {
+		.format = ZPixmap,
+		.byte_order = ImageByteOrder(drw->dpy),
+		.bitmap_unit = BitmapUnit(drw->dpy),
+		.bitmap_bit_order = BitmapBitOrder(drw->dpy),
+		.bitmap_pad = 32, .depth = 32, .bits_per_pixel = 32,
+	};
 
 	if (srcw <= (dstw << 1u) && srch <= (dsth << 1u)) {
-		XImage img = {
-			srcw, srch, 0, ZPixmap, src,
-			ImageByteOrder(drw->dpy), BitmapUnit(drw->dpy), BitmapBitOrder(drw->dpy), 32,
-			32, 0, 32,
-			0, 0, 0, 0, {0},
-		};
+		img.width = srcw;
+		img.height = srch;
+		img.data = src;
 		XInitImage(&img);
-
-		pm = XCreatePixmap(drw->dpy, drw->root, srcw, srch, 32);
-		gc = XCreateGC(drw->dpy, pm, 0, NULL);
 		XPutImage(drw->dpy, pm, gc, &img, 0, 0, 0, 0, srcw, srch);
 		XFreeGC(drw->dpy, gc);
 
@@ -434,10 +435,10 @@ drw_picture_create_resized(Drw *drw, char *src, unsigned int srcw, unsigned int 
 		XFreePixmap(drw->dpy, pm);
 
 		XRenderSetPictureFilter(drw->dpy, pic, FilterBilinear, NULL, 0);
-		XTransform xf;
-		xf.matrix[0][0] = (srcw << 16u) / dstw; xf.matrix[0][1] = 0; xf.matrix[0][2] = 0;
-		xf.matrix[1][0] = 0; xf.matrix[1][1] = (srch << 16u) / dsth; xf.matrix[1][2] = 0;
-		xf.matrix[2][0] = 0; xf.matrix[2][1] = 0; xf.matrix[2][2] = 65536;
+		XTransform xf = {0};
+		xf.matrix[0][0] = (srcw << 16u) / dstw,
+		xf.matrix[1][1] = (srch << 16u) / dsth,
+		xf.matrix[2][2] = 65536,
 		XRenderSetPictureTransform(drw->dpy, pic, &xf);
 	} else {
 		Imlib_Image origin = imlib_create_image_using_data(srcw, srch, (DATA32 *)src);
@@ -450,19 +451,13 @@ drw_picture_create_resized(Drw *drw, char *src, unsigned int srcw, unsigned int 
 		imlib_context_set_image(scaled);
 		imlib_image_set_has_alpha(1);
 
-		XImage img = {
-		    dstw, dsth, 0, ZPixmap, (char *)imlib_image_get_data_for_reading_only(),
-		    ImageByteOrder(drw->dpy), BitmapUnit(drw->dpy), BitmapBitOrder(drw->dpy), 32,
-		    32, 0, 32,
-		    0, 0, 0, 0, {0},
-		};
+		img.width = dstw;
+		img.height = dsth;
+		img.data = (char *)imlib_image_get_data_for_reading_only();
 		XInitImage(&img);
-
-		pm = XCreatePixmap(drw->dpy, drw->root, dstw, dsth, 32);
-		gc = XCreateGC(drw->dpy, pm, 0, NULL);
 		XPutImage(drw->dpy, pm, gc, &img, 0, 0, 0, 0, dstw, dsth);
-		imlib_free_image_and_decache();
 		XFreeGC(drw->dpy, gc);
+		imlib_free_image_and_decache();
 
 		pic = XRenderCreatePicture(drw->dpy, pm, XRenderFindStandardFormat(drw->dpy, PictStandardARGB32), 0, NULL);
 		XFreePixmap(drw->dpy, pm);
