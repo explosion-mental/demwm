@@ -280,7 +280,7 @@ static const Layout layouts[] = {
 #define SH(cmd)		{ "/bin/sh", "-c", cmd, NULL }
 
 /* macros of common comand line arguments */
-#define DMENUARGS	"-m", dmenumon, "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
+#define DMENUARGS	"-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
 #define NOTES		"-e", "nvim", "+$", "+startinsert!" /* last line in insert mode */
 #define FURSIZE		"90x25"
 #define FURFONT		"Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true"

@@ -532,7 +532,6 @@ static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
 static Visual *visual = NULL;
 static const char broken[] = "broken";
-static char dmenumon[2] = "0";/* dmenu default selected monitor */
 static unsigned int lasttags; /* keep selected tags on restart */
 static unsigned int stsw = 0; /* status width */
 static unsigned int blocknum; /* blocks idx in mouse click */
@@ -3764,8 +3763,6 @@ sigchld(int unused)
 void
 spawn(const Arg *arg)
 {
-	dmenumon[0] = '0' + selmon->num;
-
 	if (fork() == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
