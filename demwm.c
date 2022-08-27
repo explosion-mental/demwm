@@ -537,7 +537,7 @@ static unsigned int stsw = 0; /* status width */
 static unsigned int blocknum; /* blocks idx in mouse click */
 static int combo = 0;         /* combo flag */
 static int sw, sh;            /* X display screen geometry width, height */
-static int bh, blw = 0;       /* bar geometry */
+static int bh;                /* bar height */
 static int lrpad;             /* sum of left and right padding for text */
 static int depth, screen;
 static int (*xerrorxlib)(Display *, XErrorEvent *); /* x11 error func */
@@ -818,7 +818,7 @@ buttonpress(XEvent *e)
 				XUnmapWindow(dpy, selmon->tagwin);
 			}
 #endif /* TAG_PREVIEW */
-		} else if (ev->x < x + blw)
+		} else if (ev->x < x + TEXTW(selmon->ltsymbol))
 			click = ClkLtSymbol;
 		else if (ev->x > (x = selmon->ww - stsw
 			#ifdef SYSTRAY
@@ -1392,7 +1392,7 @@ drawbar(Monitor *m)
 				snprintf(m->ltsymbol, sizeof m->ltsymbol, "{%d/%d}", s, a);
 		}
 	}
-	w = blw = TEXTW(m->ltsymbol);
+	w = TEXTW(m->ltsymbol);
 	drw_setscheme(drw, scheme[SchemeLt]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
