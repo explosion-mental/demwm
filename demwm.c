@@ -3523,20 +3523,6 @@ setup(void)
 	/* init signals handlers */
 	setsignal(SIGCHLD, sigchld); /* zombies */
 	setsignal(SIGALRM, sigalrm); /* timer */
-	setsignal(SIGHUP, sighup);   /* restart */
-	setsignal(SIGTERM, sigterm); /* exit */
-
-	#ifdef __linux__
-	char envpid[16];
-	/* handle defined real time signals (linux only) */
-	for (i = 0; i < LENGTH(blocks); i++)
-		if (blocks[i].signal)
-			setsignal(SIGRTMIN + blocks[i].signal, sighandler);
-
-	/* pid as an enviromental variable */
-	snprintf(envpid, LENGTH(envpid), "%d", getpid());
-	setenv("STATUSBAR", envpid, 1);
-	#endif /* __linux__ */
 
 	sw = DisplayWidth(dpy, screen);
 	sh = DisplayHeight(dpy, screen);
@@ -3782,18 +3768,6 @@ void
 sighandler(int signum)
 {
 	getsigcmds(signum - SIGRTMIN);
-}
-
-void
-sighup(int unused)
-{
-	restart(NULL);
-}
-
-void
-sigterm(int unused)
-{
-	quit(NULL);
 }
 
 void
