@@ -379,9 +379,6 @@ static void getpreview(void);
 #endif /* TAG_PREVIEW */
 static void sigalrm(int unused);
 static void sigchld(int unused);
-static void sighandler(int signum);
-static void sighup(int unused);
-static void sigterm(int unused);
 static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
@@ -3762,12 +3759,6 @@ void
 sigchld(int unused)
 {
 	while (0 < waitpid(-1, NULL, WNOHANG));
-}
-
-void
-sighandler(int signum)
-{
-	getsigcmds(signum - SIGRTMIN);
 }
 
 void
