@@ -3439,7 +3439,7 @@ void
 setlayout(const Arg *arg)
 {
 	if (arg && arg->v) {
-		selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag] = (Layout *)arg->v;
+		selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag] = (const Layout *)arg->v;
 		strncpy(selmon->ltsymbol, selmon->lt->symbol, sizeof selmon->ltsymbol);
 	}
 
@@ -3767,8 +3767,8 @@ spawn(const Arg *arg)
 		if (dpy)
 			close(ConnectionNumber(dpy));
 		setsid();
-		execvp(((char **)arg->v)[0], (char **)arg->v);
-		die("demwm: execvp '%s':", ((char **)arg->v)[0]);
+		execvp(((const char **)arg->v)[0], (char *const *)arg->v);
+		die("demwm: execvp '%s':", ((const char **)arg->v)[0]);
 	}
 }
 

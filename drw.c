@@ -138,7 +138,7 @@ xfont_create(Drw *drw, const char *fontname, FcPattern *fontpattern)
 			fprintf(stderr, "error, cannot load font from name: '%s'\n", fontname);
 			return NULL;
 		}
-		if (!(pattern = FcNameParse((FcChar8 *) fontname))) {
+		if (!(pattern = FcNameParse((const FcChar8 *) fontname))) {
 			fprintf(stderr, "error, cannot parse font name to pattern: '%s'\n", fontname);
 			XftFontClose(drw->dpy, xfont);
 			return NULL;
@@ -336,7 +336,7 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 			if (render) {
 				ty = y + (h - usedfont->h) / 2 + usedfont->xfont->ascent;
 				XftDrawStringUtf8(d, &drw->scheme[invert ? ColBg : ColFg],
-				                  usedfont->xfont, x, ty, (XftChar8 *)utf8str, utf8strlen);
+				                  usedfont->xfont, x, ty, (const XftChar8 *)utf8str, utf8strlen);
 			}
 			x += ew;
 			w -= ew;
