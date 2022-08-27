@@ -479,6 +479,7 @@ static const struct { const unsigned int type;
 	{ INTa, setlayout, "setlayout" },
 	{ UNIa, tag, "tag" },
 	{ NOOa, togglebar, "togglebar" },
+	{ NOOa, toggletagbar, "toggletagbar" },
 	{ NOOa, togglefloating, "togglefloating" },
 	{ NOOa, togglefullscreen, "togglefullscreen" },
 	{ NOOa, togglefakefullscreen, "togglefakefullscreen" },
