@@ -289,7 +289,7 @@ static const Layout layouts[] = {
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
 static const char *dmenuipc[]  = { "dmenu_dwmc", DMENUARGS, NULL };
 static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
-static const char *clip[]      = { "clipmenu", "-i", "-l", "25", "-mon", "-1", "-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0, NULL };
+static const char *clip[]      = { "clipmenu", "-i", "-l", "25", "-mon", "-1", DMENUARGS, NULL };
 static const char *random_wall[] = { "demwm_random_wall", NULL };
 
 /* scratchpads */
