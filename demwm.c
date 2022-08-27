@@ -378,7 +378,6 @@ static void showtagpreview(unsigned int i);
 static void getpreview(void);
 #endif /* TAG_PREVIEW */
 static void sigalrm(int unused);
-static void sigchld(int unused);
 static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
@@ -3507,13 +3506,15 @@ setup(void)
 	XSetWindowAttributes wa;
 	Atom utf8string;
 	unsigned int i;
+	sigset_t sm, oldsm;
 
-	/* clean up any zombies immediately */
-	sigchld(0);
-
-	/* init signals handlers */
-	setsignal(SIGCHLD, sigchld); /* zombies */
+	sigfillset(&sm);
+	sigprocmask(SIG_SETMASK, &sm, &oldsm); /* prevent EINTR by blocking */
+	setsignal(SIGCHLD, SIG_DFL); /* zombies */
 	setsignal(SIGALRM, sigalrm); /* timer */
+	/* for zombies inherited before SA_NOCLDWAIT from .xinitrc, etc */
+	while (waitpid(-1, NULL, WNOHANG) > 0);
+	sigprocmask(SIG_SETMASK, &oldsm, NULL);
 
 	sw = DisplayWidth(dpy, screen);
 	sh = DisplayHeight(dpy, screen);
@@ -3612,13 +3613,12 @@ setup(void)
 void
 setsignal(int sig, void (*sahandler)(int unused))
 {
-	struct sigaction sa;
+	const struct sigaction sa = {
+		.sa_handler = sahandler,
+		.sa_flags = SA_RESTART | SA_NOCLDWAIT | SA_NOCLDSTOP,
+	};
 
-	sa.sa_handler = sahandler;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART | SA_NOCLDWAIT | SA_NOCLDSTOP;
-
-	if (sigaction(sig, &sa, 0) == -1)
+	if (sigaction(sig, &sa, NULL) == -1)
 		die("demwm: sigaction: signal '%d':", sig);
 }
 
@@ -3747,12 +3747,6 @@ sigalrm(int unused)
 	getcmds(sleepcount);
 	alarm(sleepinterval);
 	sleepcount = (sleepcount + sleepinterval - 1) % maxinterval + 1;
-}
-
-void
-sigchld(int unused)
-{
-	while (0 < waitpid(-1, NULL, WNOHANG));
 }
 
 void
