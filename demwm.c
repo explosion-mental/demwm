@@ -2373,7 +2373,7 @@ readxresources(void)
 	if (!(display = XOpenDisplay(NULL)))
 		LOG("readxresources: could not open display.");
 
-	if (!(resm = XResourceManagerString(display)) || (d = XrmGetStringDatabase(resm)) == NULL) {
+	if (!(resm = XResourceManagerString(display)) || !(d = XrmGetStringDatabase(resm))) {
 		LOG("could not open X resource database, switching to fallback colors.");
 
 		for (i = 0; i < LENGTH(xrescolors); i++) {
