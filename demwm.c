@@ -3515,6 +3515,7 @@ setup(void)
 {
 	XSetWindowAttributes wa;
 	Atom utf8string;
+	unsigned int i;
 
 	/* clean up any zombies immediately */
 	sigchld(0);
@@ -3528,7 +3529,7 @@ setup(void)
 	#ifdef __linux__
 	char envpid[16];
 	/* handle defined real time signals (linux only) */
-	for (int i = 0; i < LENGTH(blocks); i++)
+	for (i = 0; i < LENGTH(blocks); i++)
 		if (blocks[i].signal)
 			setsignal(SIGRTMIN + blocks[i].signal, sighandler);
 
@@ -3539,7 +3540,6 @@ setup(void)
 
 	sw = DisplayWidth(dpy, screen);
 	sh = DisplayHeight(dpy, screen);
-	XrmInitialize();
 	xinitvisual(screen);
 
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
@@ -3592,7 +3592,10 @@ setup(void)
 	cursor[CurMove]   = drw_cur_create(drw, XC_fleur);
 
 	/* init appearance */
-	xrdb(NULL);
+	XrmInitialize();
+	readxresources();
+	for (i = 0; i < LENGTH(colors); i++)
+		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
 
 	/* init system tray */
 	#ifdef SYSTRAY
