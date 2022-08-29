@@ -3054,7 +3054,7 @@ run(void)
 		for (i = 0; i < LENGTH(blocks); i++) {
 			if (fds[i].revents & POLLIN) {
 				/* store the len of the string readed  */
-				bt = read(fds[i].fd, blockoutput[i], sizeof blockoutput[i]);
+				bt = read(fds[i].fd, blockoutput[i], CMDLENGTH);
 
 				/* remove lock for the current block */
 				execlock &= ~(1 << i);
