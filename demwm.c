@@ -1939,7 +1939,6 @@ updatesystraypos(Monitor *m)
 		wc.y = 0;
 		if (!(m->f & TopBar))
 			wc.y = m->mh - bh;
-		getcmds(-1);
 	}
 
 	XConfigureWindow(dpy, systray->win, CWY, &wc);
