@@ -344,7 +344,6 @@ static void removesystrayicon(Client *i);
 static void resizerequest(XEvent *e);
 static Monitor *systraytomon(Monitor *m);
 static void updatesystray(void);
-static void updatesystraypos(Monitor *m);
 static void updatesystrayicongeom(Client *i, int w, int h);
 static void updatesystrayiconstate(Client *i, XPropertyEvent *ev);
 static Client *wintosystrayicon(Window w);
@@ -1927,21 +1926,6 @@ updatesystray(void)
 	//XSetForeground(drw->dpy, drw->gc, scheme[bar->borderscheme][ColBorder].pixel);
 	//XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
 	resizebarwin(m);
-}
-void
-updatesystraypos(Monitor *m)
-{
-	XWindowChanges wc;
-
-	if (!(m->f & ShowBar))
-		wc.y = -bh;
-	else if (m->f & ShowBar) {
-		wc.y = 0;
-		if (!(m->f & TopBar))
-			wc.y = m->mh - bh;
-	}
-
-	XConfigureWindow(dpy, systray->win, CWY, &wc);
 }
 
 void
@@ -3805,7 +3789,7 @@ togglebar(const Arg *arg)
 	updatebarpos(selmon);
 	resizebarwin(selmon);
 #ifdef SYSTRAY
-	updatesystraypos(selmon);
+	XConfigureWindow(dpy, systray->win, CWY, &((XWindowChanges){.y = m->by}));
 #endif /* SYSTRAY */
 	arrange(selmon);
 }
@@ -3823,7 +3807,7 @@ toggletagbar(const Arg *arg)
 	updatebarpos(selmon);
 	resizebarwin(selmon);
 #ifdef SYSTRAY
-	updatesystraypos(selmon);
+	XConfigureWindow(dpy, systray->win, CWY, &((XWindowChanges){.y = m->by}));
 #endif /* SYSTRAY */
 	arrange(selmon);
 }
@@ -4925,7 +4909,7 @@ toggletopbar(const Arg *arg)
 	updatebarpos(selmon);
 	resizebarwin(selmon);
 #ifdef SYSTRAY
-	updatesystraypos(selmon);
+	XConfigureWindow(dpy, systray->win, CWY, &((XWindowChanges){.y = m->by}));
 #endif /* SYSTRAY */
 	arrange(selmon);
 }
