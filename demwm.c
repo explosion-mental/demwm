@@ -3048,7 +3048,7 @@ run(void)
 					handler[ev.type](&ev); /* call handler */
 			}
 		} else if (fds[XFD].revents & POLLHUP)
-			die("demwm: X fd event loop, hang up:");
+			die("demwm: poll: X fd event loop, hang up:");
 
 		/* handle blocks */
 		for (i = 0; i < LENGTH(blocks); i++) {
@@ -3072,7 +3072,7 @@ run(void)
 
 				drawbar(selmon);
 			} else if (fds[i].revents & POLLHUP)
-				die("demwm: block '%d' hangup:", i);
+				die("demwm: poll: block '%d' hangup:", i);
 		}
 	}
 
