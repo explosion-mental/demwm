@@ -1182,7 +1182,7 @@ createmon(void)
 	unsigned int i;
 
 	m = ecalloc(1, sizeof(Monitor));
-	m->seltags = m->oldtags = 0;
+	m->seltags = m->oldtags = 1;
 	m->mfact = mfact;
 	m->nmaster = nmaster;
 	/* monitor flags */
