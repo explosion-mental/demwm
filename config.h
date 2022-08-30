@@ -459,23 +459,22 @@ static const Key keys[] = {
 			{ mpc play && mpdnoti 2000 ;} || mpc pause; demwm updateblock 11")	},
 				/* one shooters */
 	{ MOD,		   XK_Return,	CMD("st")			},
+	{ MOD|Shift,	   XK_Return,	CMD("samedir")			},
 	{ MOD,			XK_m,	CMD("st", "-e", "vifmrun")	},
 	{ MOD|Shift,		XK_m,	CMD("samedirvifm")		},
+	{ MOD|Ctrl,		XK_m,	SHCMD("maim -usDq ${HOME}/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
 	{ MOD,			XK_b,	CMD("Books001")		},
 	{ MOD|Shift,		XK_u,	CMD("bookmenu")		},
-	{ MOD|Shift,		XK_b,	CMD("Boletin001")		},
 	{ MOD,		        XK_c,	CMD("st", "-f", FURFONT, "-e", "calcurse")},
 	{ MOD,	         	XK_z,	CMD("redyt", "-r")		},
 	{ MOD|Shift,	      	XK_z,	CMD("waldl")		},
 	{ MOD,		    XK_grave,	CMD("dmenuunicode")		},
-	{ MOD|Shift,	   XK_Return,	CMD("samedir")		},
 //	{ MOD,	        XK_semicolon,	SHCMD("dmenu_mpc")		},
 //	{ MOD|Shift,	    XK_slash,	SHCMD("tuxi -q")		},
 	{ MOD,			XK_u,	CMD("clipmagick")		},
 	{ MOD|Shift,		XK_y,	SHCMD("termyt -r")		},
-	{ MOD|Shift,		XK_y,	CMD("dmenuhandler")		},
 	{ MOD,		    XK_slash,	CMD("dmenu_browser")		},
-	{ MOD|Shift,	        XK_n,	CMD("xdotool", "click", "1")	},
+	{ MOD|Ctrl,	        XK_n,	CMD("xdotool", "click", "1")	},
 	{ MOD,			XK_t,	CMD("testi")			},
 	{ MOD,		   XK_Escape,	CMD("sysfunctions")	},
 //	{ MOD,			XK_e,	SHCMD("st -t New-e newsboat -q; pkill -RTMIN+6 dwmblocks") },
@@ -491,7 +490,6 @@ static const Key keys[] = {
 	/* remove black bars on the screenshot (90% percent accuracy) */
 	{ MOD,			XK_Print,CMD("dmenurecord")	},
 				/* miscelaneous */
-	{ MOD|Ctrl,		XK_m,	SHCMD("maim -usDq ${HOME}/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
 	{ MOD|Shift,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
 	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
 	{ Shift,	XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
