@@ -4186,7 +4186,8 @@ updatebarpos(Monitor *m)
 	} else
 		m->by = -bh;
 #ifdef SYSTRAY
-	XConfigureWindow(dpy, systray->win, CWY, &((XWindowChanges){.y = selmon->by}));
+	if (systray)
+		XConfigureWindow(dpy, systray->win, CWY, &((XWindowChanges){.y = selmon->by}));
 #endif /* SYSTRAY */
 }
 
