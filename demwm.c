@@ -522,13 +522,11 @@ static Systray *systray = NULL;
 #endif /* SYSTRAY */
 static Atom wmatom[WMLast], netatom[NetLast], demtom[EMLast];
 static Cur *cursor[CurLast];
-static Colormap cmap;
 static Client *scratchpad_last_showed = NULL;
 static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
-static Visual *visual = NULL;
 static const char broken[] = "broken";
 static unsigned int stsw = 0; /* status width */
 static unsigned int blocknum; /* blocks idx in mouse click */
@@ -536,7 +534,6 @@ static int combo = 0;         /* combo flag */
 static int sw, sh;            /* X display screen geometry width, height */
 static int bh;                /* bar height */
 static int lrpad;             /* sum of left and right padding for text */
-static int depth, screen;
 static int (*xerrorxlib)(Display *, XErrorEvent *); /* x11 error func */
 static unsigned int numlockmask = 0;
 static volatile unsigned int sleepinterval = 0, maxinterval = 0;
@@ -968,7 +965,7 @@ clientmessage(XEvent *e)
 		//swa.background_pixel  = 0;
 		//swa.border_pixel = 0;
 		//wa.background_pixel = 0;
-		//swa.colormap = cmap;
+		//swa.colormap = drw->cmap;
 
 		XChangeWindowAttributes(dpy, c->win, CWBackPixel, &swa);
 		XReparentWindow(dpy, c->win, systray->win, 0, 0);
@@ -1743,13 +1740,12 @@ getpreview(void)
 		imlib_context_set_display(dpy);
 		imlib_image_set_has_alpha(1);
 		imlib_context_set_blend(0);
-		imlib_context_set_visual(visual);
-		//imlib_context_set_visual(drw->visual);
+		imlib_context_set_visual(drw->visual);
 		imlib_context_set_drawable(root);
 
 		// screen size (m{x,y,w,h}) -> window areas, without the bar (w{x,y,w,h})
 		imlib_copy_drawable_to_image(0, selmon->wx, selmon->wy, selmon->ww ,selmon->wh, 0, 0, 1);
-		selmon->tagmap[i] = XCreatePixmap(dpy, selmon->tagwin, selmon->mw / scalepreview, selmon->mh / scalepreview, depth);
+		selmon->tagmap[i] = XCreatePixmap(dpy, selmon->tagwin, selmon->mw / scalepreview, selmon->mh / scalepreview, drw->depth);
 		imlib_context_set_drawable(selmon->tagmap[i]);
 		imlib_render_image_part_on_drawable_at_size(0, 0, selmon->mw, selmon->mh, 0, 0, selmon->mw / scalepreview, selmon->mh / scalepreview);
 		imlib_free_image();
@@ -1857,9 +1853,9 @@ updatesystray(void)
 		wa.event_mask = ButtonPressMask|ExposureMask;
 		wa.border_pixel = 0;
 		wa.background_pixel = 0;
-		wa.colormap = cmap;
+		wa.colormap = drw->cmap;
 		systray->win = XCreateWindow(dpy, root, x - xpad + lrpad / 2, m->by + ypad,
-				    w, bh, 0, depth, InputOutput, visual, WINMASK, &wa); // CWBackPixmap
+				    w, bh, 0, drw->depth, InputOutput, drw->visual, WINMASK, &wa); // CWBackPixmap
 		//systray->win = XCreateSimpleWindow(dpy, root, x, m->by, w, bh, 0, 0, scheme[SchemeNorm][ColBg].pixel);
 
 		XSelectInput(dpy, systray->win, SubstructureNotifyMask);
@@ -1867,7 +1863,7 @@ updatesystray(void)
 		XChangeProperty(dpy, systray->win, netatom[NetSystemTrayOrientation], XA_CARDINAL, 32,
 				PropModeReplace, (unsigned char *) &systrayorientation, 1);
 		XChangeProperty(dpy, systray->win, netatom[NetSystemTrayVisual], XA_VISUALID, 32,
-				PropModeReplace, (unsigned char *) &visual->visualid, 1);
+				PropModeReplace, (unsigned char *) &drw->visual->visualid, 1);
 		XChangeProperty(dpy, systray->win, netatom[NetWMWindowType], XA_ATOM, 32,
 				PropModeReplace, (unsigned char *) &netatom[NetWMWindowTypeDock], 1);
 
@@ -3475,20 +3471,25 @@ setupx11(void)
 		die("demwm: cannot open display.");
 
 	/* init screen */
-	screen = DefaultScreen(dpy);
-	root   = RootWindow(dpy, screen);
+	root = RootWindow(dpy, DefaultScreen(dpy));
 	demtom[EMIpc] = XInternAtom(dpy, "DEMWM_IPC", False);
 }
 
 void
 setup(void)
 {
-	XSetWindowAttributes wa;
 	Atom utf8string;
+	Colormap cmap;
 	sigset_t sm, oldsm;
+	Visual *visual = NULL;
+	XRenderPictFormat *fmt;
+	XSetWindowAttributes wa;
+	XVisualInfo tpl = { .depth = 32, .class = TrueColor }, *infos;
 	const char wm[] = "demwm";
+	int nitems, depth, screen;
 	unsigned int i;
 
+	/* init signals */
 	sigfillset(&sm);
 	sigprocmask(SIG_SETMASK, &sm, &oldsm); /* prevent EINTR by blocking */
 	setsignal(SIGCHLD, SIG_DFL); /* zombies */
@@ -3497,9 +3498,30 @@ setup(void)
 	while (waitpid(-1, NULL, WNOHANG) > 0);
 	sigprocmask(SIG_SETMASK, &oldsm, NULL);
 
+	/* init X and visual */
+	screen = tpl.screen = DefaultScreen(dpy);
 	sw = DisplayWidth(dpy, screen);
 	sh = DisplayHeight(dpy, screen);
-	xinitvisual(screen);
+	infos = XGetVisualInfo(dpy, VisualScreenMask|VisualDepthMask|VisualClassMask, &tpl, &nitems);
+
+	for (i = 0; i < nitems; i++) {
+		fmt = XRenderFindVisualFormat(dpy, infos[i].visual);
+		if (fmt->type == PictTypeDirect && fmt->direct.alphaMask) {
+			visual = infos[i].visual;
+			depth = infos[i].depth;
+			cmap = XCreateColormap(dpy, root, visual, AllocNone);
+			/* using ARGB */
+			break;
+		}
+	}
+
+	XFree(infos);
+
+	if (!visual) {
+		visual = DefaultVisual(dpy, screen);
+		depth = DefaultDepth(dpy, screen);
+		cmap = DefaultColormap(dpy, screen);
+	}
 
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
 	if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
@@ -4120,7 +4142,7 @@ updatebars(void)
 		.override_redirect = True,
 		.background_pixel = 0,
 		.border_pixel = 0,
-		.colormap = cmap,
+		.colormap = drw->cmap,
 		.event_mask = ButtonPressMask | ExposureMask
 	#ifdef TAG_PREVIEW
 		| PointerMotionMask
@@ -4131,7 +4153,7 @@ updatebars(void)
 #ifdef TAG_PREVIEW
 		if (!m->tagwin) {
 			m->tagwin = XCreateWindow(dpy, root, m->wx, m->by + bh,
-			    m->ww / 4, m->mh / 4, 0, depth, InputOutput, visual, WINMASK, &wa);
+			    m->ww / 4, m->mh / 4, 0, drw->depth, InputOutput, drw->visual, WINMASK, &wa);
 			XDefineCursor(dpy, m->tagwin, cursor[CurNormal]->cursor);
 			//XMapRaised(dpy, m->tagwin);
 			XUnmapWindow(dpy, m->tagwin);
@@ -4147,7 +4169,7 @@ updatebars(void)
 			w -= getsystraywidth();
 #endif /* SYSTRAY */
 		m->barwin = XCreateWindow(dpy, root, m->wx, m->by,
-		    w, bh, 0, depth, InputOutput, visual, WINMASK, &wa);
+		    w, bh, 0, drw->depth, InputOutput, drw->visual, WINMASK, &wa);
 		XDefineCursor(dpy, m->barwin, cursor[CurNormal]->cursor);
 #ifdef SYSTRAY
 		if (m == systraytomon(m))
@@ -4370,35 +4392,6 @@ updatewmhints(Client *c)
 		else
 			c->f &= ~NeverFocus;
 		XFree(wmh);
-	}
-}
-
-void
-xinitvisual(int screen)
-{
-	int i, nitems;
-	XRenderPictFormat *fmt;
-	XVisualInfo tpl = { .screen = screen, .depth = 32, .class = TrueColor }, *infos;
-
-	infos = XGetVisualInfo(dpy, VisualScreenMask|VisualDepthMask|VisualClassMask, &tpl, &nitems);
-
-	for (i = 0; i < nitems; i++) {
-		fmt = XRenderFindVisualFormat(dpy, infos[i].visual);
-		if (fmt->type == PictTypeDirect && fmt->direct.alphaMask) {
-			visual = infos[i].visual;
-			depth = infos[i].depth;
-			cmap = XCreateColormap(dpy, root, visual, AllocNone);
-			/* using ARGB */
-			break;
-		}
-	}
-
-	XFree(infos);
-
-	if (!visual) {
-		visual = DefaultVisual(dpy, screen);
-		depth = DefaultDepth(dpy, screen);
-		cmap = DefaultColormap(dpy, screen);
 	}
 }
 
