@@ -3808,9 +3808,6 @@ togglebar(const Arg *arg)
 
 	updatebarpos(selmon);
 	resizebarwin(selmon);
-#ifdef SYSTRAY
-	XConfigureWindow(dpy, systray->win, CWY, &((XWindowChanges){.y = selmon->by}));
-#endif /* SYSTRAY */
 	arrange(selmon);
 }
 
@@ -3826,9 +3823,6 @@ toggletagbar(const Arg *arg)
 
 	updatebarpos(selmon);
 	resizebarwin(selmon);
-#ifdef SYSTRAY
-	XConfigureWindow(dpy, systray->win, CWY, &((XWindowChanges){.y = selmon->by}));
-#endif /* SYSTRAY */
 	arrange(selmon);
 }
 
@@ -4191,6 +4185,9 @@ updatebarpos(Monitor *m)
 		m->wy = m->f & TopBar ? m->wy + bh : m->wy;
 	} else
 		m->by = -bh;
+#ifdef SYSTRAY
+	XConfigureWindow(dpy, systray->win, CWY, &((XWindowChanges){.y = selmon->by}));
+#endif /* SYSTRAY */
 }
 
 void
@@ -4899,9 +4896,6 @@ toggletopbar(const Arg *arg)
 
 	updatebarpos(selmon);
 	resizebarwin(selmon);
-#ifdef SYSTRAY
-	XConfigureWindow(dpy, systray->win, CWY, &((XWindowChanges){.y = selmon->by}));
-#endif /* SYSTRAY */
 	arrange(selmon);
 }
 
