@@ -982,8 +982,8 @@ clientmessage(XEvent *e)
 				10 /* XEMBED_MODALITY_ON */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
 
 		XSync(dpy, False);
-		updatesystray();
 		setclientstate(c, NormalState);
+		updatestatus();
 		return; /* ignore other atoms for systray */
 	}
 #endif /* SYSTRAY */
@@ -1274,7 +1274,7 @@ destroynotify(XEvent *e)
 #ifdef SYSTRAY
 	else if ((c = wintosystrayicon(ev->window))) {
 		removesystrayicon(c);
-		updatesystray();
+		updatestatus();
 	}
 #endif /* SYSTRAY */
 }
@@ -1803,7 +1803,7 @@ resizerequest(XEvent *e)
 
 	if ((i = wintosystrayicon(ev->window))) {
 		updatesystrayicongeom(i, ev->width, ev->height);
-		updatesystray();
+		updatestatus();
 	}
 }
 Monitor *
@@ -2495,7 +2495,7 @@ maprequest(XEvent *e)
 		sendevent(i->win, netatom[Xembed], StructureNotifyMask,
 			CurrentTime, 1 /* XEMBED_WINDOW_ACTIVATE */, 0,
 			systray->win, XEMBED_EMBEDDED_VERSION);
-		updatesystray();
+		updatestatus();
 	}
 #endif /* SYSTRAY */
 	if (!XGetWindowAttributes(dpy, ev->window, &wa) || wa.override_redirect || !wa.depth)
@@ -3568,14 +3568,9 @@ setup(void)
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
 
-	/* init system tray */
-	#ifdef SYSTRAY
-	updatesystray();
-	#endif /* SYSTRAY */
-
 	/* init bars */
 	updatebars();
-	drawbar(selmon);
+	updatestatus();
 
 	/* supporting window for NetWMCheck */
 	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
@@ -4118,7 +4113,7 @@ unmapnotify(XEvent *e)
 		 * but do _not_ destroy them, we map those windows back */
 		XMapRaised(dpy, c->win);
 		removesystrayicon(c);
-		updatesystray();
+		updatestatus();
 #endif /* SYSTRAY */
 	}
 }
