@@ -2672,14 +2672,11 @@ propertynotify(XEvent *e)
 		switch (parsetable[i].type) {
 		default: break;
 		case INTa:
-			arg.i = atoi(buf + 3);
-			break;
+			arg.i = atoi(buf + 3); break;
 		case UNIa:
-			arg.ui = abs(atoi(buf + 3));
-			break;
+			arg.ui = abs(atoi(buf + 3)); break;
 		case FLTa:
-			arg.f = atof(buf + 3);
-			break;
+			arg.f = atof(buf + 3); break;
 		}
 
 		if (parsetable[i].func == view || parsetable[i].func == tag
@@ -3103,14 +3100,11 @@ setdemtom(Client *c, unsigned int atom)
 
 	switch (atom) {
 	case EMMons:
-		data = c->mon->num;
-		break;
+		data = c->mon->num; break;
 	case EMTags:
-		data = c->tags;
-		break;
+		data = c->tags; break;
 	case EMFlags:
-		data = c->f;
-		break;
+		data = c->f; break;
 	}
 
 	XChangeProperty(dpy, c->win, demtom[atom], XA_CARDINAL, 32,
