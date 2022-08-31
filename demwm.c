@@ -2133,13 +2133,13 @@ getsigcmds(unsigned int signal)
 int
 getstatus(int width)
 {
-	int i, len, all = width, delimlen = TTEXTW(delimiter);
+	int i, all = width;
 	int barpad = ((bh - drw->fonts->h) / 2) - 1; //-1 so emojis render properly
+	unsigned int j, len, total = 0, delimlen = TTEXTW(delimiter);
 
 	if (!showstatus)
 		return stsw = 0;
 
-	unsigned int j, total = 0;
 	for (j = 0; j < LENGTH(blocks); total += TTEXTW(blockoutput[j]) + delimlen, j++);
 
 	drw_setscheme(drw, scheme[SchemeStatus]);
@@ -2154,7 +2154,7 @@ getstatus(int width)
 		if (*blockoutput[i] == '\0') /* ignore command that output NULL or '\0' */
 			continue;
 		drw_setscheme(drw, scheme[blocks[i].scheme]); /* set scheme */
-		len = TTEXTW(blockoutput[i]);
+		len  = TTEXTW(blockoutput[i]);
 		all -= len;
 		drw_text(drw, all, barpad, len, bh - barpad * 2, 0, blockoutput[i], 0);
 		debug("drawing block '%d': '%s'\n", i, blockoutput[i]);
