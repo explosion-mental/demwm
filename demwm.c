@@ -339,7 +339,6 @@ static void scan(void);
 #ifdef SYSTRAY
 static void resizebarwin(Monitor *m);
 static Atom getatomprop(Client *c, Atom prop);
-static unsigned int getsystraywidth(void);
 static void removesystrayicon(Client *i);
 static void resizerequest(XEvent *e);
 static Monitor *systraytomon(Monitor *m);
@@ -519,6 +518,7 @@ static void (*handler[LASTEvent])(XEvent *) = {
 #ifdef SYSTRAY
 static Atom xatom[XLast];
 static Systray *systray = NULL;
+static unsigned int sysw = 0; /* systray width */
 #endif /* SYSTRAY */
 static Atom wmatom[WMLast], netatom[NetLast], demtom[EMLast];
 static Cur *cursor[CurLast];
@@ -814,7 +814,7 @@ buttonpress(XEvent *e)
 			click = ClkLtSymbol;
 		else if (ev->x > (x = selmon->ww - stsw
 			#ifdef SYSTRAY
-			- getsystraywidth()
+			- sysw
 			#endif /* SYSTRAY */
 			)) {
 			click = ClkStatusText;
@@ -1332,7 +1332,7 @@ drawbar(Monitor *m)
 		return;
 
 	#ifdef SYSTRAY
-	bw -= m == systraytomon(m) ? getsystraywidth() : 0;
+	bw -= m == systraytomon(m) ? sysw : 0;
 	#endif /* SYSTRAY */
 
 	/* TODO: reduce calls to getstatus(), gets triggered in every manage
@@ -1776,23 +1776,13 @@ resizebarwin(Monitor *m)
 {
 	XMoveResizeWindow(dpy, m->barwin, m->wx, m->by, m->ww
 #ifdef SYSTRAY
-		- (m == systraytomon(m) ? getsystraywidth() : 0)
+		- (m == systraytomon(m) ? sysw : 0)
 #endif /* SYSTRAY */
 		, bh);
 }
 
 /* Systray functions */
 #ifdef SYSTRAY
-unsigned int
-getsystraywidth(void)
-{
-	unsigned int w = 0;
-	Client *i;
-	if (!systray)
-		return 0;
-	for (i = systray->icons; i; w += i->w + lrpad / 2, i = i->next);
-	return w ? w - lrpad / 2 : 0;
-}
 void
 removesystrayicon(Client *i)
 {
@@ -1902,7 +1892,9 @@ updatesystray(void)
 			i->mon = m;
 	}
 	x -= w;
-	XMoveResizeWindow(dpy, systray->win, x - xpad, m->by + ypad, MAX(w, 1), bh);
+	sysw = w;
+	if (w != 0)
+		XMoveResizeWindow(dpy, systray->win, x - xpad, m->by + ypad, w, bh);
 
 	//wc.stack_mode = Above;
 	//wc.sibling = m->barwin;
@@ -1913,14 +1905,7 @@ updatesystray(void)
 	//XConfigureWindow(dpy, systray->win, CWX|CWY|CWWidth|CWHeight|CWSibling|CWStackMode, &wc);
 	//XMapWindow(dpy, systray->win);
 	//XMapSubwindows(dpy, systray->win);
-	//drawbar(m);
-	// this doesn't seem to work
-	XSetForeground(dpy, drw->gc, scheme[SchemeNorm][ColBg].pixel);
-	XFillRectangle(dpy, systray->win, drw->gc, 0, 0, w, bh);
 	XSync(dpy, False);
-	//XSetForeground(drw->dpy, drw->gc, scheme[bar->borderscheme][ColBorder].pixel);
-	//XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
-	resizebarwin(m);
 }
 
 void
@@ -4170,9 +4155,8 @@ updatebars(void)
 			continue;
 		w = m->ww;
 #ifdef SYSTRAY
-		//unsigned int w = m == systraytomon(m) ? w - getsystraywidth() : m->ww;
 		if (m == systraytomon(m))
-			w -= getsystraywidth();
+			w -= sysw;
 #endif /* SYSTRAY */
 		m->barwin = XCreateWindow(dpy, root, m->wx, m->by,
 		    w, bh, 0, drw->depth, InputOutput, drw->visual, WINMASK, &wa);
