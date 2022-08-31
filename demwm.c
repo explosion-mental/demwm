@@ -2670,7 +2670,7 @@ propertynotify(XEvent *e)
 		debug("index = '%d' | buf = '%s' | func = '%s'\n", i, buf, parsetable[i].name);
 
 		switch (parsetable[i].type) {
-		default: break;
+		default: return;
 		case INTa:
 			arg.i = atoi(buf + 3); break;
 		case UNIa:
@@ -3099,6 +3099,7 @@ setdemtom(Client *c, unsigned int atom)
 	long data;
 
 	switch (atom) {
+	default: return;
 	case EMMons:
 		data = c->mon->num; break;
 	case EMTags:
