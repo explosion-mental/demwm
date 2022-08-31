@@ -3812,6 +3812,9 @@ togglebar(const Arg *arg)
 		else
 			selmon->pertag->showbars &= ~(1 << i);
 
+	if (selmon->f & ShowBar)
+		getcmds(-1);
+
 	updatebarpos(selmon);
 	resizebarwin(selmon);
 	arrange(selmon);
@@ -3826,6 +3829,9 @@ toggletagbar(const Arg *arg)
 		selmon->pertag->showbars |= selmon->seltags;
 	else
 		selmon->pertag->showbars &= ~selmon->seltags;
+
+	if (selmon->f & ShowBar)
+		getcmds(-1);
 
 	updatebarpos(selmon);
 	resizebarwin(selmon);
