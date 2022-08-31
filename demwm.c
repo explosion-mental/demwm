@@ -4334,10 +4334,10 @@ updatesizehints(Client *c)
 void
 updatestatus(void)
 {
-	drawbar(selmon);
 #ifdef SYSTRAY
 	updatesystray();
 #endif /* SYSTRAY */
+	drawbar(selmon);
 }
 
 void
