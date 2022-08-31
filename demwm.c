@@ -81,6 +81,7 @@
 #define SPTAG(i) 		((1 << LENGTH(tags)) << (i))
 #define SPTAGMASK		(((1 << LENGTH(scratchpads)) - 1) << LENGTH(tags))
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
+#define TTEXTW(X)               (drw_fontset_getwidth(drw, (X)))
 #define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
 #define SETVAL(X, flag, val)	X->f = ((val) ? X->f | flag : X->f & ~flag)
 #define LOG(...)		do { fprintf(stderr, "demwm: " __VA_ARGS__); fputc('\n', stderr); } while (0)
@@ -825,7 +826,7 @@ buttonpress(XEvent *e)
 			{
 				if (*blockoutput[i] == '\0') /* empty string, ignore */
 					continue;
-				len = TEXTW(blockoutput[i]) - lrpad + TEXTW(delimiter) - lrpad;
+				len = TTEXTW(blockoutput[i]) + TTEXTW(delimiter);
 				x += len;
 				if (ev->x <= x && ev->x >= x - len) { /* if the mouse is between the block area */
 					blocknum = i; /* store what block the mouse is clicking */
@@ -2132,14 +2133,14 @@ getsigcmds(unsigned int signal)
 int
 getstatus(int width)
 {
-	int i, len, all = width, delimlen = TEXTW(delimiter) - lrpad;
+	int i, len, all = width, delimlen = TTEXTW(delimiter);
 	int barpad = ((bh - drw->fonts->h) / 2) - 1; //-1 so emojis render properly
 
 	if (!showstatus)
 		return stsw = 0;
 
 	unsigned int j, total = 0;
-	for (j = 0; j < LENGTH(blocks); total += (TEXTW(blockoutput[j]) - lrpad) + delimlen, j++);
+	for (j = 0; j < LENGTH(blocks); total += TTEXTW(blockoutput[j]) + delimlen, j++);
 
 	drw_setscheme(drw, scheme[SchemeStatus]);
 	drw_text(drw, width - total, 0, total, bh, 0, "", 0);
@@ -2153,7 +2154,7 @@ getstatus(int width)
 		if (*blockoutput[i] == '\0') /* ignore command that output NULL or '\0' */
 			continue;
 		drw_setscheme(drw, scheme[blocks[i].scheme]); /* set scheme */
-		len = TEXTW(blockoutput[i]) - lrpad;
+		len = TTEXTW(blockoutput[i]);
 		all -= len;
 		drw_text(drw, all, barpad, len, bh - barpad * 2, 0, blockoutput[i], 0);
 		debug("drawing block '%d': '%s'\n", i, blockoutput[i]);
