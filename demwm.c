@@ -898,6 +898,7 @@ cleanup(void)
 	XSync(dpy, False);
 	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
+	XCloseDisplay(dpy);
 }
 
 void
@@ -3489,6 +3490,11 @@ setup(void)
 	int nitems, depth, screen;
 	unsigned int i;
 
+	#ifdef __OpenBSD__
+	if (pledge("stdio rpath proc exec ps", NULL) == -1)
+		die("pledge");
+	#endif /* __OpenBSD__ */
+
 	/* init signals */
 	sigfillset(&sm);
 	sigprocmask(SIG_SETMASK, &sm, &oldsm); /* prevent EINTR by blocking */
@@ -4982,13 +4988,9 @@ main(int argc, char *argv[])
 
 	checkotherwm();
 	setup();
-	#ifdef __OpenBSD__
-	if (pledge("stdio rpath proc exec ps", NULL) == -1) die("pledge");
-	#endif /* __OpenBSD__ */
 	scan();
 	run();
 	if (running == -1) execlp(argv[0], argv[0], (char *) NULL);
 	cleanup();
-	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
 }
