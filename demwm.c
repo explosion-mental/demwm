@@ -83,8 +83,6 @@
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 #define RULE(...)		{ .monitor = -1, __VA_ARGS__ },
 #define SETVAL(X, flag, val)	X->f = ((val) ? X->f | flag : X->f & ~flag)
-#define UPFLAGS(C)		XChangeProperty(dpy, C->win, demtom[EMFlags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->f), 1)
-#define UPTAGS(C)		XChangeProperty(dpy, C->win, demtom[EMTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&(C->tags), 1)
 #define LOG(...)		do { fprintf(stderr, "demwm: " __VA_ARGS__); fputc('\n', stderr); } while (0)
 
 #ifdef DEBUG
@@ -353,6 +351,7 @@ static int sendevent(Window w, Atom proto);
 static void sendmon(Client *c, Monitor *m);
 static void sendstatusbar(const Arg *arg);
 static void setclientstate(Client *c, long state);
+static void setdemtom(Client *c, unsigned int atom);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setlayout(const Arg *arg);
@@ -733,8 +732,8 @@ swallow(Client *p, Client *c)
 	updateicon(p);
 #endif /* ICONS */
 	updatetitle(p);
-	UPTAGS(p);
-	UPFLAGS(p);
+	setdemtom(p, EMTags);
+	setdemtom(p, EMFlags);
 
 	wc.border_width = p->bw;
 	XConfigureWindow(dpy, p->win, CWBorderWidth, &wc);
@@ -1122,7 +1121,7 @@ combotag(const Arg *arg)
 		selmon->sel->tags = newtags;
 	}
 
-	UPTAGS(selmon->sel);
+	setdemtom(selmon->sel, EMTags);
 	focus(NULL);
 	arrange(selmon);
 }
@@ -2417,9 +2416,8 @@ manage(Window w, XWindowAttributes *wa)
 			}
 		}
 	}
-	UPTAGS(c);
-	XChangeProperty(dpy, c->win, demtom[EMMons], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *)&(c->mon->num), 1);
+	setdemtom(c, EMTags);
+	setdemtom(c, EMMons);
 
 	if (c->x + WIDTH(c) > c->mon->wx + c->mon->ww)
 		c->x = c->mon->wx + c->mon->ww - WIDTH(c);
@@ -2471,7 +2469,7 @@ manage(Window w, XWindowAttributes *wa)
 		swallow(term, c);
 	arrange(c->mon);
 	focus(NULL);
-	UPFLAGS(c);
+	setdemtom(c, EMFlags);
 }
 
 void
@@ -3082,8 +3080,7 @@ sendmon(Client *c, Monitor *m)
 	detachstack(c);
 	c->mon = m;
 	c->tags = m->seltags; /* assign tags of target monitor */
-	XChangeProperty(dpy, c->win, demtom[EMMons], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *)&(c->mon->num), 1);
+	setdemtom(c, EMMons);
 	attach(c);
 	attachstack(c);
 	focus(NULL);
@@ -3097,6 +3094,27 @@ setclientstate(Client *c, long state)
 
 	XChangeProperty(dpy, c->win, wmatom[WMState], wmatom[WMState], 32,
 		PropModeReplace, (unsigned char *) data, 2);
+}
+
+void
+setdemtom(Client *c, unsigned int atom)
+{	/* sets X properties for 'seamless' restart */
+	long data;
+
+	switch (atom) {
+	case EMMons:
+		data = c->mon->num;
+		break;
+	case EMTags:
+		data = c->tags;
+		break;
+	case EMFlags:
+		data = c->f;
+		break;
+	}
+
+	XChangeProperty(dpy, c->win, demtom[atom], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) &data, 1);
 }
 
 /* vanitygaps */
@@ -3387,7 +3405,7 @@ setfullscreen(Client *c, int fullscreen)
 	} else /* FIXME resizeclient seems to not take care of the gaps */
 		arrange(c->mon);
 		//resizeclient(c, c->x, c->y, c->w, c->h);
-	UPFLAGS(c);
+	setdemtom(c, EMFlags);
 }
 
 void
@@ -3622,7 +3640,7 @@ seturgent(Client *c, int urg)
 		return;
 
 	wmh->flags = urg ? (wmh->flags | XUrgencyHint) : (wmh->flags & ~XUrgencyHint);
-	UPFLAGS(c);
+	setdemtom(c, EMFlags);
 	XSetWMHints(dpy, c->win, wmh);
 	XFree(wmh);
 }
@@ -3754,7 +3772,7 @@ tag(const Arg *arg)
 {
 	if (selmon->sel && arg->ui & TAGMASK) {
 		selmon->sel->tags = arg->ui & TAGMASK;
-		UPTAGS(selmon->sel);
+		setdemtom(selmon->sel, EMTags);
 		focus(NULL);
 		arrange(selmon);
 	}
@@ -3850,7 +3868,7 @@ togglefloating(const Arg *arg)
 	/* if floating: toggle it, if fixed: true */
 	SETVAL(c, Float, ((c->f & Float) ^ Float) || (c->f & Fixed));
 
-	UPFLAGS(c);
+	setdemtom(c, EMFlags);
 
 	if (c->f & Float) {
 		wc.border_width = c->bw = fborderpx;
@@ -3995,7 +4013,7 @@ toggletag(const Arg *arg)
 	newtags = selmon->sel->tags ^ (arg->ui & TAGMASK);
 	if (newtags) {
 		selmon->sel->tags = newtags;
-		UPTAGS(selmon->sel);
+		setdemtom(selmon->sel, EMTags);
 		focus(NULL);
 		arrange(selmon);
 	}
@@ -4776,7 +4794,7 @@ togglealwaysontop(const Arg *arg)
 	if (!selmon->sel)
 		return;
 	selmon->sel->f ^= AlwOnTop;
-	UPFLAGS(selmon->sel);
+	setdemtom(selmon->sel, EMFlags);
 	focus(NULL);
 }
 
@@ -4886,7 +4904,7 @@ togglesticky(const Arg *arg)
 	if (!selmon->sel)
 		return;
 	selmon->sel->f ^= Sticky;
-	UPFLAGS(selmon->sel);
+	setdemtom(selmon->sel, EMFlags);
 	focus(NULL);
 	arrange(selmon);
 }
