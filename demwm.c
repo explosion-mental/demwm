@@ -2133,9 +2133,16 @@ int
 getstatus(int width)
 {
 	int i, len, all = width, delimlen = TEXTW(delimiter) - lrpad;
+	int barpad = ((bh - drw->fonts->h) / 2) - 1; //-1 so emojis render properly
 
 	if (!showstatus)
 		return stsw = 0;
+
+	unsigned int j, total = 0;
+	for (j = 0; j < LENGTH(blocks); total += (TEXTW(blockoutput[j]) - lrpad) + delimlen, j++);
+
+	drw_setscheme(drw, scheme[SchemeStatus]);
+	drw_text(drw, width - total, 0, total, bh, 0, "", 0);
 
 	#if INVERSED
 	for (i = 0; i < LENGTH(blocks); i++)
@@ -2148,14 +2155,14 @@ getstatus(int width)
 		drw_setscheme(drw, scheme[blocks[i].scheme]); /* set scheme */
 		len = TEXTW(blockoutput[i]) - lrpad;
 		all -= len;
-		drw_text(drw, all, 0, len, bh, 0, blockoutput[i], 0);
+		drw_text(drw, all, barpad, len, bh - barpad * 2, 0, blockoutput[i], 0);
 		debug("drawing block '%d': '%s'\n", i, blockoutput[i]);
 		/* draw delimiter */
 		if (*delimiter == '\0') /* ignore no delimiter */
 			continue;
 		drw_setscheme(drw, scheme[SchemeDelim]);
 		all -= delimlen;
-		drw_text(drw, all, 0, delimlen, bh, 0, delimiter, 0);
+		drw_text(drw, all, barpad, delimlen, bh - barpad * 2, 0, delimiter, 0);
 	}
 
 	return stsw = width - all;
