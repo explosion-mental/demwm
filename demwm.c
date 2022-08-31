@@ -100,7 +100,7 @@ enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
        SchemeStatus, SchemeDelim, SchemeSys, SchemeIndUrg, SchemeIndOff,
-       SchemeIndOn, BorderNorm, BorderSel, BorderFloat, BorderUrg }; /* color schemes */
+       SchemeIndOn, BorderNorm, BorderSel, BorderFloat, BorderUrg, SchemeLast }; /* color schemes */
 enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8, Sp9, Sp10 }; /* scratchpads */
 enum { NetSupported, NetWMName,
 #ifdef ICONS
@@ -160,7 +160,7 @@ typedef union {
 } Arg;
 
 typedef struct {
-	const char *color;
+	const unsigned int scheme;
 	const char *command;
 	const unsigned int interval;
 	const unsigned int signal;
@@ -2134,9 +2134,6 @@ int
 getstatus(int width)
 {
 	int i, len, all = width, delimlen = TEXTW(delimiter) - lrpad;
-	char fgcol[8];
-				/* fg		bg */
-	const char *cols[8] = 	{ fgcol, colors[SchemeStatus][ColBg] };
 
 	if (!showstatus)
 		return stsw = 0;
@@ -2149,10 +2146,7 @@ getstatus(int width)
 	{
 		if (*blockoutput[i] == '\0') /* ignore command that output NULL or '\0' */
 			continue;
-		strncpy(fgcol, blocks[i].color, 8);
-		/* re-load the scheme with the new colors */
-		scheme[SchemeStatus] = drw_scm_create(drw, cols, alphas[SchemeStatus], 2);
-		drw_setscheme(drw, scheme[SchemeStatus]); /* 're-set' the scheme */
+		drw_setscheme(drw, scheme[blocks[i].scheme]); /* set scheme */
 		len = TEXTW(blockoutput[i]) - lrpad;
 		all -= len;
 		drw_text(drw, all, 0, len, bh, 0, blockoutput[i], 0);
