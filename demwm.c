@@ -108,8 +108,7 @@ enum { NetSupported, NetWMName,
 #endif /* ICONS */
        NetWMState, NetWMCheck, NetWMFullscreen, NetActiveWindow,
        NetWMWindowTypeDesktop, NetWMWindowType, NetWMStateAbove,
-       //NetWMWindowTypeDialog,
-       NetClientList,
+       NetClientList, //NetWMWindowTypeDialog,
 #ifdef SYSTRAY
        NetSystemTray, NetSystemTrayOP, NetSystemTrayOrientation,
        NetSystemTrayVisual, NetWMWindowTypeDock, NetSystemTrayOrientationHorz,
@@ -150,7 +149,7 @@ enum {	BUTTONMASK = (ButtonPressMask|ButtonReleaseMask),
 	WINMASK    = (CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask),
 }; /* masks */
 enum { INTa, UNIa, FLTa, NOOa }; /* function table args */
-enum { IPCSIZE = 64, OPAQUE = 0xffU }; /* magick numbers */
+enum { IPCSIZE = 64, Solid = 0xffU }; /* magick numbers */
 
 typedef union {
 	int i;
