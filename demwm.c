@@ -1893,8 +1893,7 @@ updatesystray(void)
 	}
 	x -= w;
 	sysw = w;
-	if (w != 0)
-		XMoveResizeWindow(dpy, systray->win, x - xpad, m->by + ypad, w, bh);
+	XMoveResizeWindow(dpy, systray->win, x - xpad + 1, m->by + ypad, MAX(w, 1), bh);
 
 	//wc.stack_mode = Above;
 	//wc.sibling = m->barwin;
@@ -4127,7 +4126,6 @@ unmapnotify(XEvent *e)
 void
 updatebars(void)
 {
-	unsigned int w;
 	Monitor *m;
 	XSetWindowAttributes wa = {
 		.override_redirect = True,
@@ -4153,18 +4151,9 @@ updatebars(void)
 #endif /* TAG_PREVIEW */
 		if (m->barwin)
 			continue;
-		w = m->ww;
-#ifdef SYSTRAY
-		if (m == systraytomon(m))
-			w -= sysw;
-#endif /* SYSTRAY */
 		m->barwin = XCreateWindow(dpy, root, m->wx, m->by,
-		    w, bh, 0, drw->depth, InputOutput, drw->visual, WINMASK, &wa);
+		    m->ww, bh, 0, drw->depth, InputOutput, drw->visual, WINMASK, &wa);
 		XDefineCursor(dpy, m->barwin, cursor[CurNormal]->cursor);
-#ifdef SYSTRAY
-		if (m == systraytomon(m))
-			XMapRaised(dpy, systray->win);
-#endif /* SYSTRAY */
 		XMapRaised(dpy, m->barwin);
 		XSetClassHint(dpy, m->barwin, &barclass);
 	}
