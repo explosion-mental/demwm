@@ -2671,6 +2671,7 @@ propertynotify(XEvent *e)
 
 		switch (parsetable[i].type) {
 		default: return;
+		case NOOa: break;
 		case INTa:
 			arg.i = atoi(buf + 3); break;
 		case UNIa:
