@@ -78,9 +78,10 @@ static const char *colors[][2] = {
 	/* custom blocks schemes */
 	[SchemeLast+0] = { color7,	"#222222" },
 	[SchemeLast+1] = { color2,	color0 },
-	[SchemeLast+2] = { color3,	color6 },
-	[SchemeLast+3] = { color4,	color6 },
-	[SchemeLast+4] = { color4,	color0 },
+	[SchemeLast+2] = { color0,	color6 },
+	[SchemeLast+3] = { color0,	color6 },
+	[SchemeLast+4] = { bg_wal,	color3 },
+	[SchemeLast+5] = { color4,	color0 },
 };
 static const unsigned int alphas[][2] = {
 			/* fg		bg	 */
@@ -100,16 +101,17 @@ static const unsigned int alphas[][2] = {
 	[BorderFloat]  = { baralpha },
 	[BorderUrg]    = { Solid },
 	/* custom blocks schemes */
-	[SchemeLast+0] = { Solid,	baralpha + 40 },
+	[SchemeLast+0] = { Solid,	Solid },
 	[SchemeLast+1] = { Solid,	baralpha + 40 },
 	[SchemeLast+2] = { Solid,	baralpha + 40 },
 	[SchemeLast+3] = { Solid,	baralpha + 40 },
 	[SchemeLast+4] = { Solid,	baralpha + 40 },
+	[SchemeLast+5] = { Solid,	baralpha + 40 },
 };
 
 /* status bar */
 static const Block blocks[] = {
-	/*   scheme         command                interval  signal */
+	/*   scheme         command                  interval  signal */
 	{ SchemeLast+0, "sb-clock",			20,	1},
 	{ SchemeLast+1, "sb-disk",			9000,	2},
 	{ SchemeLast+2, "sb-battery",			10,	3},
@@ -118,6 +120,14 @@ static const Block blocks[] = {
 	{ SchemeStatus, "sb-moonphase",			0,	6},
 	{ SchemeStatus, "sb-forecast",			0,	7},
 	{ SchemeStatus, "sb-volume",			0,	8},
+	{ SchemeStatus, "sb-pacpackages",		0,	9},
+	{ SchemeStatus, "sb-sync",			0,	10},
+//	{ SchemeStatus, "sb-mpc",			0,	26},
+	{ SchemeLast+4, "sb-music",			0,	11},
+//	{ SchemeStatus, "sb-tasks",			10,	12},
+	{ SchemeLast+5,  "sb-notes",			0,	13},
+	{ SchemeStatus, "echo '';cat /tmp/recordingicon",0,	14},
+//	{ SchemeStatus, "sb-count",			0,	21},
 //	{ SchemeStatus, "sb-price btc Bitcoin💰",	9000,	21},
 //	{ SchemeStatus, "sb-price eth Ethereum🍸",	9000,	23},
 //	{ SchemeStatus, "sb-price xmr Monero🔒",	9000,	24},
@@ -133,14 +143,6 @@ static const Block blocks[] = {
 //	{ SchemeStatus, "sb-nettraf",			1,	16},
 //	{ SchemeStatus, "sb-news",			0,	6},
 //	{ SchemeStatus, "sb-xbpsup",			18000,	8},
-	{ SchemeStatus, "sb-pacpackages",		0,	9},
-	{ SchemeStatus, "sb-sync",			0,	10},
-//	{ SchemeStatus, "sb-mpc",			0,	26},
-	{ SchemeStatus, "sb-music",			0,	11},
-//	{ SchemeStatus, "sb-tasks",			10,	12},
-	{ SchemeLast+4,  "sb-notes",			0,	13},
-	{ SchemeStatus, "echo '';cat /tmp/recordingicon",0,	14},
-//	{ SchemeStatus, "sb-count",			0,	21},
 };
 
 /* 1 means inverse the order of the blocks, 0 means normal order */
