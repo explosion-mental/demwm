@@ -2980,7 +2980,6 @@ run(void)
 		}
 	}
 
-	alarm(2); /* timer */
 	XSync(dpy, False);
 
 	/* main event loop */
@@ -3502,6 +3501,7 @@ setup(void)
 	/* for zombies inherited before SA_NOCLDWAIT from .xinitrc, etc */
 	while (waitpid(-1, NULL, WNOHANG) > 0);
 	sigprocmask(SIG_SETMASK, &oldsm, NULL);
+	alarm(1); /* timer */
 
 	/* init X and visual */
 	screen = tpl.screen = DefaultScreen(dpy);
@@ -3515,8 +3515,7 @@ setup(void)
 			visual = infos[i].visual;
 			depth = infos[i].depth;
 			cmap = XCreateColormap(dpy, root, visual, AllocNone);
-			/* using ARGB */
-			break;
+			break; /* using ARGB */
 		}
 	}
 
