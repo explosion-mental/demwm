@@ -2106,7 +2106,7 @@ getcmd(int i, char *button)
 		if (button)
 			setenv("BLOCK_BUTTON", button, 1);
 		execl("/bin/sh", "/bin/sh", "-c", blocks[i].command, (char *) NULL);
-		die("demwm: block '%d', execlp '%s' failed:", i, blocks[i].command);
+		die("demwm: block '%d', execl '%s' failed:", i, blocks[i].command);
 	}
 }
 
