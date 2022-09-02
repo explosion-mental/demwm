@@ -25,7 +25,7 @@ CUI underlntitle = 1;      /* 1 means an underline on the title */
 static int smartgaps  = 0; /* 1 means no outer gap when there is only one window */
 static int showbar    = 1; /* 0 means no bar */
 static int showstatus = 1; /* 0 means no status text */
-#define baralpha     120   /* bar opacity from 0 to 255/OPAQUE */
+#define baralpha     120   /* bar opacity from 0 to 255 (Solid) */
 
 static const char *fonts[] = {
 	"Monofur Nerd Font:size=10:antialias=true:autohint=true", /* Mono */
@@ -83,7 +83,7 @@ static const char *colors[][2] = {
 	[SchemeLast+4] = { bg_wal,	color3 },
 	[SchemeLast+5] = { color4,	color0 },
 };
-static const unsigned int alphas[][2] = {
+static const unsigned int alphas[][2] = { /* Schemes opacity */
 			/* fg		bg	 */
 	[SchemeNorm]   = { Solid,	baralpha },
 	[SchemeSel]    = { Solid,	baralpha },
@@ -109,7 +109,10 @@ static const unsigned int alphas[][2] = {
 	[SchemeLast+5] = { Solid,	baralpha + 40 },
 };
 
-/* status bar */
+/* Status Text:
+ * foreground and background colors of a block are defined in a scheme, see
+ * colors[]. To add one you will need to use SchemeLast + X, where X is 0 and
+ * it increments every time and make sure to also add the alphas[] value. */
 static const Block blocks[] = {
 	/*   scheme         command                  interval  signal */
 	{ SchemeLast+0, "sb-clock",			20,	1},
@@ -145,11 +148,11 @@ static const Block blocks[] = {
 //	{ SchemeStatus, "sb-xbpsup",			18000,	8},
 };
 
-/* 1 means inverse the order of the blocks, 0 means normal order */
+/* 0 means render blocks left to right, the default, 1 to start from right to left */
 #define INVERSED		1
-/* max number of character that one block command can output */
+/* max number of characters that one block command output can contain */
 #define CMDLENGTH		65
-/* delimeter between blocks commands. NULL character ('\0') means no delimeter. */
+/* delimeter between block comand outputs */
 static const char delimiter[] = " ";
 
 /* properties:			  res_name  res_class */
@@ -157,8 +160,9 @@ static XClassHint systrayclass = { "demwm", "demwm" };
 static XClassHint barclass     = { "demwm", "demwm" };
 static XClassHint previewclass = { "demwm-preview", "demwm-preview" };
 
-/* tags */
-//static const char *tags[] = { "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉" };
+/* tags: Usual text for the tags
+ * tagsalt: Used if hidevacants is enabled
+ * taglayouts: Index that indicates which layouts[] use */
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
 static const int taglayouts[] = {    0,   2,    0,   0,    2,    0,    0,    0,    2 };
 static const char *tagsalt[]  = { "I", "2", "III", "4", "V", "6", "VII", "8", "IX" };
@@ -247,7 +251,7 @@ static const float mfact = 0.55; /* factor of master area size [0.05..0.95] */
 CUI nmaster     = 1;             /* number of clients in master area */
 CUI resizehints = 0;             /* 1 means respect size hints in tiled resizals */
 CUI floathints  = 0;             /* 1 means respect size hints if the window is floating */
-CUI movefloat   = 22;
+CUI movefloat   = 22;            /* used in movfh_setmfact and movfv_pushstack */
 
 static const Layout layouts[] = {
       /* symbol  arrange  gaps */
@@ -293,7 +297,7 @@ static const Layout layouts[] = {
 /* helper for spawning shell commands in scratchpads */
 #define SH(cmd)		{ "/bin/sh", "-c", cmd, NULL }
 
-/* macros of common comand line arguments */
+/* personal macros for common comand line arguments */
 #define DMENUARGS	"-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
 #define NOTES		"-e", "nvim", "+$", "+startinsert!" /* last line in insert mode */
 #define FURSIZE		"90x25"
@@ -320,7 +324,7 @@ static const char *scratchpads[][32] = {
 };
 
 /* modifier(s) can be: Alt, AltGr, Ctrl, Shift, ShiftGr, Super (or MOD)
- * To understand the function/argument parameter, please refer to the man page demwm(1) */
+ * See the man page for a description of every function and it's argument */
 static const Key keys[] = {
 	/* modifier(s)		key	function	argument */
 
