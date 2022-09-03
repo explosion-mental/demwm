@@ -2079,9 +2079,12 @@ getcmds(int time)
 {
 	unsigned int i;
 
-	for (i = 0; i < LENGTH(blocks); i++)
+	for (i = 0; i < LENGTH(blocks); i++) {
+		if (time == -1) /* forcefully re-run all blocks */
+			execlock &= ~(1 << i);
 		if ((blocks[i].interval != 0 && time % blocks[i].interval == 0) || time == -1)
 			getcmd(i, NULL);
+	}
 }
 
 void
