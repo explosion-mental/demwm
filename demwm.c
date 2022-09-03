@@ -341,6 +341,7 @@ static void removesystrayicon(Client *i);
 static void resizerequest(XEvent *e);
 static Monitor *systraytomon(Monitor *m);
 static void updatesystray(void);
+static void sendsystrayev(Client *c, int code);
 static void updatesystrayicongeom(Client *i, int w, int h);
 static void updatesystrayiconstate(Client *i, XPropertyEvent *ev);
 static Client *wintosystrayicon(Window w);
@@ -969,16 +970,12 @@ clientmessage(XEvent *e)
 
 		XChangeWindowAttributes(dpy, c->win, CWBackPixel, &swa);
 		XReparentWindow(dpy, c->win, systray->win, 0, 0);
-		sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
-				0 /* XEMBED_EMBEDDED_NOTIFY */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
 
+		sendsystrayev(c, 0 /* XEMBED_EMBEDDED_NOTIFY */);
 		/* FIXME are these events needed? */
-		sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
-				0 /* XEMBED_FOCUS_IN */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
-		sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
-				1 /* XEMBED_WINDOW_ACTIVATE */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
-		sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
-				10 /* XEMBED_MODALITY_ON */, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+		sendsystrayev(c, 0 /* XEMBED_FOCUS_IN */);
+		sendsystrayev(c, 1 /* XEMBED_WINDOW_ACTIVATE */);
+		sendsystrayev(c, 10 /* XEMBED_MODALITY_ON */);
 
 		XSync(dpy, False);
 		setclientstate(c, NormalState);
@@ -1805,6 +1802,12 @@ resizerequest(XEvent *e)
 		updatestatus();
 	}
 }
+void
+sendsystrayev(Client *c, int code)
+{
+	sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
+		code, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+}
 Monitor *
 systraytomon(Monitor *m)
 {
@@ -1901,8 +1904,7 @@ updatesystrayiconstate(Client *i, XPropertyEvent *ev)
 	} else
 		return;
 
-	sendevent(i->win, xatom[Xembed], StructureNotifyMask, CurrentTime, code, 0,
-			systray->win, XEMBED_EMBEDDED_VERSION);
+	sendsystrayev(i, code);
 }
 Client *
 wintosystrayicon(Window w) {
@@ -2437,9 +2439,7 @@ maprequest(XEvent *e)
 #ifdef SYSTRAY
 	Client *i;
 	if (systray && (i = wintosystrayicon(ev->window))) {
-		sendevent(i->win, netatom[Xembed], StructureNotifyMask,
-			CurrentTime, 1 /* XEMBED_WINDOW_ACTIVATE */, 0,
-			systray->win, XEMBED_EMBEDDED_VERSION);
+		sendsystrayev(i, 1 /* XEMBED_WINDOW_ACTIVATE */);
 		updatestatus();
 	}
 #endif /* SYSTRAY */
