@@ -341,14 +341,12 @@ static void removesystrayicon(Client *i);
 static void resizerequest(XEvent *e);
 static Monitor *systraytomon(Monitor *m);
 static void updatesystray(void);
-static void sendsystrayev(Client *c, int code);
+static void sendsystrayev(Window w, long code);
 static void updatesystrayicongeom(Client *i, int w, int h);
 static void updatesystrayiconstate(Client *i, XPropertyEvent *ev);
 static Client *wintosystrayicon(Window w);
-static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
-#else
-static int sendevent(Window w, Atom proto);
 #endif /* SYSTRAY */
+static int sendevent(Client *c, Atom proto);
 static void sendmon(Client *c, Monitor *m);
 static void sendstatusbar(const Arg *arg);
 static void setclientstate(Client *c, long state);
@@ -971,11 +969,11 @@ clientmessage(XEvent *e)
 		XChangeWindowAttributes(dpy, c->win, CWBackPixel, &swa);
 		XReparentWindow(dpy, c->win, systray->win, 0, 0);
 
-		sendsystrayev(c, 0 /* XEMBED_EMBEDDED_NOTIFY */);
+		sendsystrayev(c->win, 0 /* XEMBED_EMBEDDED_NOTIFY */);
 		/* FIXME are these events needed? */
-		sendsystrayev(c, 0 /* XEMBED_FOCUS_IN */);
-		sendsystrayev(c, 1 /* XEMBED_WINDOW_ACTIVATE */);
-		sendsystrayev(c, 10 /* XEMBED_MODALITY_ON */);
+		sendsystrayev(c->win, 0 /* XEMBED_FOCUS_IN */);
+		sendsystrayev(c->win, 1 /* XEMBED_WINDOW_ACTIVATE */);
+		sendsystrayev(c->win, 10 /* XEMBED_MODALITY_ON */);
 
 		XSync(dpy, False);
 		setclientstate(c, NormalState);
@@ -1803,10 +1801,28 @@ resizerequest(XEvent *e)
 	}
 }
 void
-sendsystrayev(Client *c, int code)
+sendsystrayev(Window w, long code)
 {
-	sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime,
-		code, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+	Atom mt = netatom[Xembed];
+	XEvent ev;
+	long d2 = 0, d3 = systray->win, d4 = XEMBED_EMBEDDED_VERSION;
+
+	if (w == root) {
+		mt   = xatom[Manager];
+		d2   = systray->win;
+		d3 = d4 = 0;
+	}
+
+	ev.type = ClientMessage;
+	ev.xclient.window = w;
+	ev.xclient.format = 32;
+	ev.xclient.message_type = mt;
+	ev.xclient.data.l[0] = CurrentTime;
+	ev.xclient.data.l[1] = code;
+	ev.xclient.data.l[2] = d2;
+	ev.xclient.data.l[3] = d3;
+	ev.xclient.data.l[4] = d4;
+	XSendEvent(dpy, w, False, StructureNotifyMask, &ev);
 }
 Monitor *
 systraytomon(Monitor *m)
@@ -1904,7 +1920,7 @@ updatesystrayiconstate(Client *i, XPropertyEvent *ev)
 	} else
 		return;
 
-	sendsystrayev(i, code);
+	sendsystrayev(i->win, code);
 }
 Client *
 wintosystrayicon(Window w) {
@@ -2240,11 +2256,7 @@ killclient(const Arg *arg)
 {
 	if (!selmon->sel)
 		return;
-	if (!sendevent(selmon->sel->win, wmatom[WMDelete]
-	#ifdef SYSTRAY
-		, NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0
-	#endif /* SYSTRAY */
-		)) {
+	if (!sendevent(selmon->sel, wmatom[WMDelete])) {
 		XGrabServer(dpy);
 		XSetErrorHandler(xerrordummy);
 		XSetCloseDownMode(dpy, DestroyAll);
@@ -2439,7 +2451,7 @@ maprequest(XEvent *e)
 #ifdef SYSTRAY
 	Client *i;
 	if (systray && (i = wintosystrayicon(ev->window))) {
-		sendsystrayev(i, 1 /* XEMBED_WINDOW_ACTIVATE */);
+		sendsystrayev(i->win, 1 /* XEMBED_WINDOW_ACTIVATE */);
 		updatestatus();
 	}
 #endif /* SYSTRAY */
@@ -3200,54 +3212,27 @@ incrivgaps(const Arg *arg)
 /* vanitygaps */
 
 int
-sendevent(Window w, Atom proto
-#ifdef SYSTRAY
-	, int mask, long d0, long d1, long d2, long d3, long d4
-#endif /* SYSTRAY */
-)
+sendevent(Client *c, Atom proto)
 {
 	int n;
 	Atom *protocols;
 	int exists = 0;
 	XEvent ev;
-#ifdef SYSTRAY
-	Atom mt;
 
-	if (proto == wmatom[WMTakeFocus] || proto == wmatom[WMDelete]) {
-		mt = wmatom[WMProtocols];
-#endif /* SYSTRAY */
-		if (XGetWMProtocols(dpy, w, &protocols, &n)) {
-			while (!exists && n--)
-				exists = protocols[n] == proto;
-			XFree(protocols);
-		}
-#ifdef SYSTRAY
-	} else {
-		exists = True;
-		mt = proto;
+	if (XGetWMProtocols(dpy, c->win, &protocols, &n)) {
+		while (!exists && n--)
+			exists = protocols[n] == proto;
+		XFree(protocols);
 	}
-#endif /* SYSTRAY */
-
 	if (exists) {
 		ev.type = ClientMessage;
-		ev.xclient.window = w;
-		ev.xclient.format = 32;
-	#ifdef SYSTRAY
-		ev.xclient.message_type = mt;
-		ev.xclient.data.l[0] = d0;
-		ev.xclient.data.l[1] = d1; /* this data seems to always be CurrentTime */
-		ev.xclient.data.l[2] = d2;
-		ev.xclient.data.l[3] = d3;
-		ev.xclient.data.l[4] = d4;
-		XSendEvent(dpy, w, False, mask, &ev);
-	#else
+		ev.xclient.window = c->win;
 		ev.xclient.message_type = wmatom[WMProtocols];
+		ev.xclient.format = 32;
 		ev.xclient.data.l[0] = proto;
 		ev.xclient.data.l[1] = CurrentTime;
-		XSendEvent(dpy, w, False, NoEventMask, &ev);
-	#endif /* SYSTRAY */
+		XSendEvent(dpy, c->win, False, NoEventMask, &ev);
 	}
-
 	return exists;
 }
 
@@ -3266,11 +3251,7 @@ setfocus(Client *c)
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *) &(c->win), 1);
 	}
-	sendevent(c->win, wmatom[WMTakeFocus]
-	#ifdef SYSTRAY
-		, NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0
-	#endif /* SYSTRAY */
-	);
+	sendevent(c, wmatom[WMTakeFocus]);
 }
 
 void
@@ -4111,8 +4092,7 @@ updatebars(void)
 		XUnmapWindow(dpy, systray->win);
 		XSetSelectionOwner(dpy, netatom[NetSystemTray], systray->win, CurrentTime);
 		if (XGetSelectionOwner(dpy, netatom[NetSystemTray]) == systray->win) {
-			sendevent(root, xatom[Manager], StructureNotifyMask,
-				CurrentTime, netatom[NetSystemTray], systray->win, 0, 0);
+			sendsystrayev(root, netatom[NetSystemTray]);
 			XSync(dpy, False);
 		}
 	}
