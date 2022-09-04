@@ -867,6 +867,12 @@ cleanup(void)
 	Monitor *m;
 	size_t i;
 
+	/* close the pipes after running */
+	for (i = 0; i < LENGTH(blocks); i++) {
+		close(pipes[i][0]);
+		close(pipes[i][1]);
+	}
+
 	view(&a);
 	selmon->lt = &foo;
 	for (m = mons; m; m = m->next)
@@ -2994,12 +3000,6 @@ run(void)
 				die("demwm: poll: block '%d' hangup:", i);
 		}
 	}
-
-	/* close the pipes after running */
-	for (i = 0; i < LENGTH(blocks); i++) {
-		close(pipes[i][0]);
-		close(pipes[i][1]);
-	}
 }
 
 void
@@ -4932,7 +4932,8 @@ main(int argc, char *argv[])
 	setup();
 	scan();
 	run();
-	if (running == -1) execlp(argv[0], argv[0], (char *) NULL);
 	cleanup();
+	if (running == -1)
+		execlp(argv[0], argv[0], (char *) NULL);
 	return EXIT_SUCCESS;
 }
