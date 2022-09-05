@@ -484,6 +484,7 @@ static const struct { const unsigned int type;
 	{ INTa, shifttagclients, "shifttagclients" },
 	{ INTa, shiftview, "shiftview" },
 	{ INTa, shiftviewclients, "shiftviewclients" },
+	{ UNIa, swaptags, "swaptags" },
 	{ UNIa, tag, "tag" },
 	{ INTa, tagmon, "tagmon" },
 	{ NOOa, togglealwaysontop, "togglealwaysontop" },
