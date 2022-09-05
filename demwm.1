@@ -557,24 +557,24 @@ $ demwm restart
 \fCstatic const char *colors[][2] = {
     ...
     /* custom block schemes */
-    [SchemeLast+0] = { color7,	"#222222" }, /* sb-clock */
-    [SchemeLast+1] = { "ffffff",	"#525252" }, /* sb-disk  */
-    [SchemeLast+2] = { fg_wal,	bg_wal, }, /* sb-volume */
+    [SchemeLast+0] = { color7,   "#222222" }, /* sb-clock */
+    [SchemeLast+1] = { "ffffff", "#525252" }, /* sb-disk  */
+    [SchemeLast+2] = { fg_wal,   bg_wal, }, /* sb-volume */
 };
 
 static const unsigned int alphas[][2] = {
     ...
     /* custom blocks schemes */
-    [SchemeLast+0] = { Solid,	baralpha }, /* sb-clock */
-    [SchemeLast+1] = { Solid,	baralpha }, /* sb-disk */
-    [SchemeLast+1] = { Solid,	baralpha }, /* sb-volume */
+    [SchemeLast+0] = { Solid,  baralpha }, /* sb-clock */
+    [SchemeLast+1] = { Solid,  baralpha }, /* sb-disk */
+    [SchemeLast+1] = { Solid,  baralpha }, /* sb-volume */
 };
 
 static const Block blocks[] = {
     ...
-    { SchemeLast+0, "sb-clock",			20,     1},
-    { SchemeLast+1, "sb-disk",			9000,	2},
-    { SchemeStatus, "sb-volume",			0,	8},
+    { SchemeLast+0, "sb-clock",  20,   1},
+    { SchemeLast+1, "sb-disk",   9000, 2},
+    { SchemeStatus, "sb-volume", 0,    8},
 };
 \fP
 .fi
