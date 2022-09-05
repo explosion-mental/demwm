@@ -2663,8 +2663,9 @@ propertynotify(XEvent *e)
 			arg.f = atof(buf + 3); break;
 		}
 
-		if (parsetable[i].func == view || parsetable[i].func == tag
-		|| parsetable[i].func == toggleview || parsetable[i].func == toggletag)
+		if (parsetable[i].func == tag || parsetable[i].func == toggletag
+		|| parsetable[i].func == view || parsetable[i].func == toggleview
+		|| parsetable[i].func == swaptags)
 			arg.ui = 1 << arg.ui;
 
 		parsetable[i].func(&arg);
