@@ -880,22 +880,18 @@ checkotherwm(void)
 void
 cleanup(void)
 {
-	Arg a = {.ui = ~0};
-	Layout foo = { "", NULL };
 	Monitor *m;
 	size_t i;
 
-	/* close the pipes after running */
-	for (i = 0; i < LENGTH(blocks); i++) {
+	for (i = 0; i < LENGTH(blocks); i++) { /* close the pipes */
 		close(pipes[i][0]);
 		close(pipes[i][1]);
 	}
 
-	view(&a);
-	selmon->lt = &foo;
 	for (m = mons; m; m = m->next)
 		while (m->stack)
 			unmanage(m->stack, 0);
+
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 	while (mons)
 		cleanupmon(mons);
