@@ -2647,9 +2647,7 @@ propertynotify(XEvent *e)
 	if ((ev->window == root) && (ev->atom == demtom[EMIpc])
 	&& gettextprop(root, demtom[EMIpc], buf, sizeof buf)) { /* cli functions */
 		/* first two characters are the ID of the function */
-		buf[2] = '\0';
-		i = atoi(buf);
-		buf[2] = ' ';
+		i = atoi((const char []){ buf[0], buf[1], '\0' });
 		debug("index = '%d' | buf = '%s' | func = '%s'\n", i, buf, parsetable[i].name);
 
 		switch (parsetable[i].type) {
