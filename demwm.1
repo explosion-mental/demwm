@@ -30,32 +30,29 @@ If the bar or the statustext it’s hidden, there would be \fBno\fP need to call
 
 
 .PP
-\fBdemwm\fP also acts as an “\fIclient\fP” program, which calls the window manager to do
- certain actions. See PSEUDO-IPC section.
+\fBdemwm\fP also acts as an “\fIclient\fP” program, which calls the window manager to do certain actions. See IPC section.
 .SH "OPTIONS"
 .PP
 Without any arguments, the program will try to initialize the window manager.
-For information about the kind of arguments check out FUNCTIONS section.
+For information about the kind of arguments check out FUNCTIONS and IPC sections
+.br
+
+.PP
 \fINOTE\fP: Functions that do take an argument, are (\fImostly\fP) \fBbidirectional\fP: this means
 that number signs define the behaviour of the function. ( \fC\-1\fP / \fC+1\fP )
 .SH "SIGNALS"
-.SS "SIGHUP - 1"
 .PP
-Restart the dwm process.
-.SS "SIGTERM - 15"
-.PP
-Cleanly terminate the dwm process.
+Earlier versions of demwm used SIGHUP and SIGTERM for restarting and quitting the window manager respectively. This is now handled by the argument \fBrestart\fP and \fBquit\fP. See IPC section.
 .SH "ENVIROMENT"
-.SS "STATUSBAR"
-.PP
-demwm sets an \fIenviromental variable\fP called \fCSTATUSBAR\fP which value is set to the
-\fIpid\fP of the current demwm instance. This resolves signaling while having multiple instances of \fBdemwm\fP.
 .SS "BLOCK\d\s-2BUTTON\s+2\u"
 .PP
 For clicking to do anything you have to make a dedicated script which handles
 the \fCBLOCK_BUTTON\fP \fIenviromental variable\fP. See EXAMPLES section.
+.br
 To define the value of \fCBLOCK_BUTTON\fP, you have to edit \fBconfig.h\fP mouse
 buttons bindings \fCsendstatusbar\fP.
+.br
+This \fIenviromental variable\fP is only set to the script session being called.
 .SH "CONFIGURATION"
 .PP
 dwm is customized by creating a custom config.h and (re)compiling the source code. This keeps it simple, since reading a config file isn’t that hard (but adds unneeded complexity), and in many aspects more customizable. I try my best to comment about the variables in config.h, since they don’t do anything crazy, so it should be very straight foward what does what.
@@ -67,9 +64,13 @@ dwm is customized by creating a custom config.h and (re)compiling the source cod
 l |l |.
 \fBEntry\fP	\fBValue\fP
 _
-\fBcolor\fP	foreground (the text) color for the block
+\fBscheme\fP	Select a scheme to use for the block, can be a default one
+	(e.g. SchemeTitle) or you can create one by using \fCSchemeLast+X\fP
+	where \fCX\fP is a number starting from 0, this number increases
+	depending on how many schemes you make.
 _
-\fBcommand\fP	The block text, it’s just the output of any program.
+\fBcommand\fP	A command (e.g. \fCecho 'Hello World'\fP) which output will become
+	this block text.
 _
 \fBinterval\fP	How many seconds have to pass before updating (running/executing)
 	the command and update the output. Can be 0, which means never.
@@ -79,16 +80,14 @@ _
 .TE
 .TB ""
 
-.SS "SIGNALING BLOCKS"
+.SH "IPC"
 .PP
-\fBThis is discouraged, use \fCdemwm updateblock /signal/\fP instead\fP
-
+Mostly for scripting or to do certain things without a need of a keybinding,
+freeing the keyboard with functions that you might use once in a while.
 
 .PP
-The signal is a number to update the command, requires you to add \fC34\fP. Say a
-signal number \fCY\fP  which, for example, I will define as \fCY = 11\fP. Then \fCY + 34\fP ->
-\fC11 + 34\fP -> \fC45\fP, and you will need this result in order to actually use the signal
-with \fCkill\fP, In this case: \fCkill \-45 $(pidof demwm)\fP
+To use this you only need to call \fBdemwm\fP with a function and it’s respective
+argument if any. See FUNCTIONS section for avaliable functions.
 .SH "FUNCTIONS"
 .SS "cyclelayout"
 .PP
@@ -103,14 +102,18 @@ Select multiple tags to \fCtag\fP by pressing all the right keys as a combo: you
 .br
 
 .PP
-Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+ Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+.br
+\fINOTE\fP: This is not avaliable as an IPC function.
 .SS "comboview"
 .PP
 Select multiple tags to \fCview\fP by pressing all the right keys as a combo: you can press multiple tags by holding the modifier(s) keys (MOD by default).
 .br
 
 .PP
-Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+ Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+.br
+\fINOTE\fP: This is not avaliable as an IPC function.
 .SS "defaultgaps"
 .PP
 Set the gaps to the values defined in config.h.
@@ -277,7 +280,7 @@ No arguments.
 .br
 
 .PP
-It takes an \fIfloat\fP argument, usually less than \fC1\fP.
+It takes a \fIfloat\fP argument, between \fC0.05\fP and \fC0.95\fP.
 .SS "shiftboth"
 .PP
 \fCshiftview\fP + \fCshifttag\fP
@@ -320,12 +323,15 @@ A wrapper for \fIexec\fP function. This executes shell commands.
 
 .PP
 It takes a \fIvoid\fP argument: an array of chars with a last element of \fBNULL\fP. The wrapper macro \fBSHCMD\fP sets \fC/bin/sh \-c\fP as the command, which allows you to do shell tricks (\fC&&\fP, \fC||\fP, \fC&\fP, etc)
+.br
+\fINOTE\fP: This is not avaliable as an IPC function.
 .SS "tag"
 .PP
 “\fItag\fP” the current window to a tag. Basically like moving the windows to a ’workspace’ or a “\fIdifferent desktop\fP”, which is only a way of thinking since dwm doesn’t implements those.
 
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+\fINOTE\fP: If used in IPC, the above will be done automatically, e.g.: \fCdemwm tag 0\fP will put the current selected window to tag 0 (first tag) without the need of manually shifting (\fC1 << 0\fP).
 .SS "tagmon"
 .PP
 Like \fCtag\fP but to the other monitor. Sends the window to the next monitor (display 0, 1, etc..).
@@ -389,6 +395,8 @@ Like tag but it can stack, meaning you can ’tag’ multiple tags. This is togg
 
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+.br
+\fINOTE\fP: If used in IPC, the above will be done automatically, e.g.: \fCdemwm toggletag 1\fP will add the current selected window to tag 1 (second tag) without the need of manually shifting (\fC1 << 1\fP).
 .SS "toggletopbar"
 .PP
 Inverse the position of the bar. If the bar is on the top, puts it on the bottom; if the bar is on the bottom, puts it on the top.
@@ -410,6 +418,8 @@ Like view but it can stack, meaning you can ’view’ multiple tags. This is to
 
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+.br
+\fINOTE\fP: If used in IPC, the above will be done automatically, e.g.: \fCdemwm tag 8\fP will put the current selected window to tag 8 (ninth tag) without the need of manually shifting (\fC1 << 8\fP).
 .SS "updateblock"
 .PP
 updates a status bar block text.
@@ -428,6 +438,8 @@ View the contents of a tag, you can think of it like moving to a tag.
 
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+.br
+\fINOTE\fP: If used in IPC, the above will be done automatically, e.g.: \fCdemwm tag 0\fP will put the current selected window to tag 0 (first tag) without the need of manually shifting (\fC1 << 0\fP).
 .SS "xrdb"
 .PP
 Refreshes or reloads the colors, reads their Xresource value and arranges all the monitors (which actually displays the new colors, if any).
@@ -523,17 +535,50 @@ echo "Playing: $(mpc current --format '[[%artist% - ]%title%]|[%file%]')"
 \fP
 .fi
 .RE
-.SS "IPC like comunication"
+.SS "IPC examples"
 .RS
 .nf
-\fCdemwm incrgaps +10
-demwm incrgaps -10
-demwm restart
-demwm updateblock 8
+\fC$ demwm incrgaps +10
+$ demwm incrgaps -10
+$ demwm restart
 \fP
 .fi
 .RE
+.SS "Signaling blocks"
+.RS
+.nf
+\fC$ demwm updateblock 8
+\fP
+.fi
+.RE
+.SS "Creating a custom scheme for a block"
+.RS
+.nf
+\fCstatic const char *colors[][2] = {
+    ...
+    /* custom block schemes */
+    [SchemeLast+0] = { color7,	"#222222" }, /* sb-clock */
+    [SchemeLast+1] = { "ffffff",	"#525252" }, /* sb-disk  */
+    [SchemeLast+2] = { fg_wal,	bg_wal, }, /* sb-volume */
+};
 
+static const unsigned int alphas[][2] = {
+    ...
+    /* custom blocks schemes */
+    [SchemeLast+0] = { Solid,	baralpha }, /* sb-clock */
+    [SchemeLast+1] = { Solid,	baralpha }, /* sb-disk */
+    [SchemeLast+1] = { Solid,	baralpha }, /* sb-volume */
+};
+
+static const Block blocks[] = {
+    ...
+    { SchemeLast+0, "sb-clock",			20,     1},
+    { SchemeLast+1, "sb-disk",			9000,	2},
+    { SchemeStatus, "sb-volume",			0,	8},
+};
+\fP
+.fi
+.RE
 .SH "ISSUES"
 .PP
 Java applications which use the XToolkit/XAWT backend may draw grey windows
