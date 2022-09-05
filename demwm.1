@@ -38,13 +38,12 @@ For information about the kind of arguments check out FUNCTIONS and IPC sections
 .br
 
 .PP
-\fINOTE\fP: Functions that do take an argument, are (\fImostly\fP) \fBbidirectional\fP: this means
-that number signs define the behaviour of the function. ( \fC\-1\fP / \fC+1\fP )
+\fINOTE\fP: Functions that do take an argument, are (\fImostly\fP) \fBbidirectional\fP: this means that number signs define the behaviour of the function. ( \fC\-1\fP / \fC+1\fP )
 .SH "SIGNALS"
 .PP
 Earlier versions of demwm used SIGHUP and SIGTERM for restarting and quitting the window manager respectively. This is now handled by the argument \fBrestart\fP and \fBquit\fP. See IPC section.
 .SH "ENVIROMENT"
-.SS "BLOCK\d\s-2BUTTON\s+2\u"
+.SS "BLOCK_\d\s-2BUTTON\s+2\u"
 .PP
 For clicking to do anything you have to make a dedicated script which handles
 the \fCBLOCK_BUTTON\fP \fIenviromental variable\fP. See EXAMPLES section.
@@ -87,7 +86,7 @@ freeing the keyboard with functions that you might use once in a while.
 
 .PP
 To use this you only need to call \fBdemwm\fP with a function and it’s respective
-argument if any. See FUNCTIONS section for avaliable functions.
+argument if any. See FUNCTIONS section for avaliable functions. Some of which aren’t avaliable/intendent to use as an ipc command and thus it’s noted, otherwise the function is included and avaliable to use.
 .SH "FUNCTIONS"
 .SS "cyclelayout"
 .PP
@@ -102,8 +101,10 @@ Select multiple tags to \fCtag\fP by pressing all the right keys as a combo: you
 .br
 
 .PP
- Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .br
+
+.PP
 \fINOTE\fP: This is not avaliable as an IPC function.
 .SS "comboview"
 .PP
@@ -111,8 +112,10 @@ Select multiple tags to \fCview\fP by pressing all the right keys as a combo: yo
 .br
 
 .PP
- Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .br
+
+.PP
 \fINOTE\fP: This is not avaliable as an IPC function.
 .SS "defaultgaps"
 .PP
@@ -206,6 +209,10 @@ This is just because setmfact has no effect if I have a floating window.
 
 .PP
 It takes an \fIfloat\fP argument and passes it to \fCsetmfact\fP. The argument for the \fCmovefloathoriz\fP is defined in config.h as the variable \fCmovefloat\fP.
+.br
+
+.PP
+\fINOTE\fP: This is not avaliable as an IPC function. Since this function is for personal use to be able to \fBreuse\fP the same keybinding.
 .SS "movefloathorz"
 .PP
 Moves the current \fBfloating\fP windows horizontaly by the argument given.
@@ -228,6 +235,10 @@ This is just because \fBpushstack\fP has no effect if I have a floating window.
 
 .PP
 It takes an \fIinteger\fP argument and passes it to \fCpushstack\fP. The argument for the \fCmovefloatvert\fP is defined in config.h as the variable \fCmovefloat\fP.
+.br
+
+.PP
+\fINOTE\fP: This is not avaliable as an IPC function. Since this function is for personal use to be able to \fBreuse\fP the same keybinding.
 .SS "pushstack"
 .PP
 \fIPushes\fP the current client to be the next/previous client in the stack.
@@ -324,13 +335,30 @@ A wrapper for \fIexec\fP function. This executes shell commands.
 .PP
 It takes a \fIvoid\fP argument: an array of chars with a last element of \fBNULL\fP. The wrapper macro \fBSHCMD\fP sets \fC/bin/sh \-c\fP as the command, which allows you to do shell tricks (\fC&&\fP, \fC||\fP, \fC&\fP, etc)
 .br
-\fINOTE\fP: This is not avaliable as an IPC function.
-.SS "tag"
+
 .PP
-“\fItag\fP” the current window to a tag. Basically like moving the windows to a ’workspace’ or a “\fIdifferent desktop\fP”, which is only a way of thinking since dwm doesn’t implements those.
+\fINOTE\fP: This is not avaliable as an IPC function.
+.SS "swaptags"
+.PP
+Changes, \fIswaps,\fP the contents (windows) of the current tag with the tag defined in the argument.
+.br
 
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+.br
+
+.PP
+\fINOTE\fP: If used in IPC, the above will be done automatically, e.g.: \fCdemwm tag 0\fP will \fIswap\fP windows with tag 0 (first tag) without the need of manually shifting (\fC1 << 0\fP).
+.SS "tag"
+.PP
+“\fItag\fP” the current window to a tag. Basically like moving the windows to a ’workspace’ or a “\fIdifferent desktop\fP”, which is only a way of thinking since dwm doesn’t implements those.
+.br
+
+.PP
+Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
+.br
+
+.PP
 \fINOTE\fP: If used in IPC, the above will be done automatically, e.g.: \fCdemwm tag 0\fP will put the current selected window to tag 0 (first tag) without the need of manually shifting (\fC1 << 0\fP).
 .SS "tagmon"
 .PP
@@ -349,6 +377,13 @@ No arguments.
 .SS "togglebar"
 .PP
 (Un)hides the bar.
+.br
+
+.PP
+No arguments.
+.SS "toggletagbar"
+.PP
+(Un)hides the bar only for the current tag.
 .br
 
 .PP
@@ -396,6 +431,8 @@ Like tag but it can stack, meaning you can ’tag’ multiple tags. This is togg
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .br
+
+.PP
 \fINOTE\fP: If used in IPC, the above will be done automatically, e.g.: \fCdemwm toggletag 1\fP will add the current selected window to tag 1 (second tag) without the need of manually shifting (\fC1 << 1\fP).
 .SS "toggletopbar"
 .PP
@@ -419,6 +456,8 @@ Like view but it can stack, meaning you can ’view’ multiple tags. This is to
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .br
+
+.PP
 \fINOTE\fP: If used in IPC, the above will be done automatically, e.g.: \fCdemwm tag 8\fP will put the current selected window to tag 8 (ninth tag) without the need of manually shifting (\fC1 << 8\fP).
 .SS "updateblock"
 .PP
@@ -439,6 +478,8 @@ View the contents of a tag, you can think of it like moving to a tag.
 .PP
 Takes an (unsigned) int which indicates the tag as an exponent of \fC2\fP. Just define it as \fC1 << TAG\fP where TAG is the tag you wish (starting from 0).
 .br
+
+.PP
 \fINOTE\fP: If used in IPC, the above will be done automatically, e.g.: \fCdemwm tag 0\fP will put the current selected window to tag 0 (first tag) without the need of manually shifting (\fC1 << 0\fP).
 .SS "xrdb"
 .PP
