@@ -34,14 +34,10 @@ If the bar or the statustext it’s hidden, there would be \fBno\fP need to call
 .SH "OPTIONS"
 .PP
 Without any arguments, the program will try to initialize the window manager.
-For information about the kind of arguments check out FUNCTIONS and IPC sections
-.br
-
-.PP
-\fINOTE\fP: Functions that do take an argument, are (\fImostly\fP) \fBbidirectional\fP: this means that number signs define the behaviour of the function. ( \fC\-1\fP / \fC+1\fP )
+For information about the kind of arguments check out IPC section.
 .SH "SIGNALS"
 .PP
-Earlier versions of demwm used SIGHUP and SIGTERM for restarting and quitting the window manager respectively. This is now handled by the argument \fBrestart\fP and \fBquit\fP. See IPC section.
+Earlier versions of demwm used \fCSIGHUP\fP and \fCSIGTERM\fP for restarting and quitting the window manager respectively. This is now handled by the argument \fBrestart\fP and \fBquit\fP. See IPC section.
 .SH "ENVIROMENT"
 .SS "BLOCK_\d\s-2BUTTON\s+2\u"
 .PP
@@ -83,10 +79,18 @@ _
 .PP
 Mostly for scripting or to do certain things without a need of a keybinding,
 freeing the keyboard with functions that you might use once in a while.
+.br
 
 .PP
 To use this you only need to call \fBdemwm\fP with a function and it’s respective
-argument if any. See FUNCTIONS section for avaliable functions. Some of which aren’t avaliable/intendent to use as an ipc command and thus it’s noted, otherwise the function is included and avaliable to use.
+argument if any. See FUNCTIONS section for avaliable functions. Some of which
+aren’t avaliable/intendent to use as an ipc command and thus it’s noted,
+otherwise the function is included and avaliable to use.
+.br
+
+.PP
+\fIFunctions that do take an argument, are (/mostly\fP) \fBbidirectional\fP: this means that
+number signs define the behaviour of the function. ( \fC\-1\fP / \fC+1\fP )
 .SH "FUNCTIONS"
 .SS "cyclelayout"
 .PP
