@@ -1,5 +1,5 @@
 # demwm version
-VERSION = 1.7
+VERSION = 1.8
 
 # demwm git exact commit version
 SRCVERSION = $$(git describe --tags --dirty=[modified] 2>/dev/null || echo ${VERSION}-nogit)
