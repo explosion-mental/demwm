@@ -3981,9 +3981,10 @@ toggleview(const Arg *arg)
 		selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
 		if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
 			toggletagbar(NULL);
-
-		focus(NULL);
-		arrange(selmon);
+		else {
+			focus(NULL);
+			arrange(selmon);
+		}
 	}
 }
 
@@ -4393,9 +4394,10 @@ view(const Arg *arg)
 
 	if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
 		toggletagbar(NULL);
-
-	focus(NULL);
-	arrange(selmon);
+	else {
+		focus(NULL);
+		arrange(selmon);
+	}
 }
 
 pid_t
