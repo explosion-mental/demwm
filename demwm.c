@@ -1943,13 +1943,13 @@ updatesystrayiconstate(Client *i)
 	sendsystrayev(i->win, code);
 }
 Client *
-wintosystrayicon(Window w) {
-	Client *i = NULL;
+wintosystrayicon(Window w)
+{
+	Client *i;
 
-	if (!systray)
+	if (!systray || !w)
 		return NULL;
-	if (!w)
-		return i;
+
 	for (i = systray->icons; i && i->win != w; i = i->next);
 	return i;
 }
