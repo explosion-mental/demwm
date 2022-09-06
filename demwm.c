@@ -343,7 +343,7 @@ static Monitor *systraytomon(Monitor *m);
 static void updatesystray(void);
 static void sendsystrayev(Window w, long code);
 static void updatesystrayicongeom(Client *i, int w, int h);
-static void updatesystrayiconstate(Client *i, XPropertyEvent *ev);
+static void updatesystrayiconstate(Client *i);
 static Client *wintosystrayicon(Window w);
 #endif /* SYSTRAY */
 static int sendevent(Client *c, Atom proto);
@@ -1919,13 +1919,12 @@ updatesystrayicongeom(Client *i, int w, int h)
 	}
 }
 void
-updatesystrayiconstate(Client *i, XPropertyEvent *ev)
+updatesystrayiconstate(Client *i)
 {
 	long flags;
 	int code = 0;
 
-	if (!systray || !i || ev->atom != xatom[XembedInfo]
-	|| !(flags = getatomprop(i, xatom[XembedInfo])))
+	if (!systray || !i || !(flags = getatomprop(i, xatom[XembedInfo])))
 		return;
 
 	if (flags & (1 << 0) /* XEMBED_MAPPED */ && !i->tags) {
@@ -2675,8 +2674,8 @@ propertynotify(XEvent *e)
 		if (ev->atom == XA_WM_NORMAL_HINTS) {
 			c->f &= ~HintsValid;
 			updatesystrayicongeom(c, c->w, c->h);
-		} else
-			updatesystrayiconstate(c, ev);
+		} else if (ev->atom == xatom[XembedInfo])
+			updatesystrayiconstate(c);
 		updatesystray();
 	}
 #endif /* SYSTRAY */
