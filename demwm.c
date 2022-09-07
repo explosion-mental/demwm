@@ -3757,9 +3757,9 @@ toggletagbar(const Arg *arg)
 	selmon->f ^= ShowBar;
 
 	if (selmon->f & ShowBar)
-		selmon->pertag->showbars |= selmon->seltags;
+		selmon->pertag->showbars |= selmon->seltags & ~SPTAGMASK;
 	else
-		selmon->pertag->showbars &= ~selmon->seltags;
+		selmon->pertag->showbars &= ~selmon->seltags & ~SPTAGMASK;
 
 	updatebarpos(selmon);
 	resizebarwin(selmon);
@@ -3977,7 +3977,7 @@ toggleview(const Arg *arg)
 		selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
 		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
 		selmon->lt = selmon->pertag->ltidxs[selmon->pertag->curtag];
-		if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
+		if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & (selmon->seltags & ~SPTAGMASK) ? 1 : 0))
 			toggletagbar(NULL);
 		else {
 			focus(NULL);
@@ -4390,7 +4390,7 @@ view(const Arg *arg)
 		selmon->gappiv = (selmon->pertag->gaps[selmon->pertag->curtag] & 0xff000000) >> 24;
 	}
 
-	if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & selmon->seltags ? 1 : 0))
+	if ((selmon->f & ShowBar ? 1 : 0) != (selmon->pertag->showbars & (selmon->seltags & ~SPTAGMASK) ? 1 : 0))
 		toggletagbar(NULL);
 	else {
 		focus(NULL);
