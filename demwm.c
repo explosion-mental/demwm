@@ -2069,8 +2069,6 @@ updateicon(Client *c)
 void
 getcmd(int i, char *button)
 {
-	if (!(selmon->f & ShowBar) || !showstatus)
-		return;
 
 	if (execlock & (1 << i)) { /* block is already running */
 		debug("block '%d' with command '%s' ignored\n", i, blocks[i].command);
