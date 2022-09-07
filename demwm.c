@@ -350,7 +350,7 @@ static int sendevent(Client *c, Atom proto);
 static void sendmon(Client *c, Monitor *m);
 static void sendstatusbar(const Arg *arg);
 static void setclientstate(Client *c, long state);
-static void setdemtom(Client *c, unsigned int atom);
+static void saveclientstate(Client *c);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setlayout(const Arg *arg);
@@ -888,11 +888,8 @@ cleanup(void)
 
 	for (m = mons; m; m = m->next)
 		while (m->stack) {
-			if (running == -1) {
-				setdemtom(m->stack, EMTags);
-				setdemtom(m->stack, EMFlags);
-				setdemtom(m->stack, EMMons);
-			}
+			if (running == -1)
+				saveclientstate(m->stack);
 			unmanage(m->stack, 0);
 		}
 
@@ -3066,22 +3063,14 @@ setclientstate(Client *c, long state)
 }
 
 void
-setdemtom(Client *c, unsigned int atom)
+saveclientstate(Client *c)
 {	/* sets X properties for 'seamless' restart */
-	long data;
-
-	switch (atom) {
-	default: return;
-	case EMMons:
-		data = c->mon->num; break;
-	case EMTags:
-		data = c->tags; break;
-	case EMFlags:
-		data = c->f; break;
-	}
-
-	XChangeProperty(dpy, c->win, demtom[atom], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) &data, 1);
+	XChangeProperty(dpy, c->win, demtom[EMFlags], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) &c->f, 1);
+	XChangeProperty(dpy, c->win, demtom[EMTags], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) &c->tags, 1);
+	XChangeProperty(dpy, c->win, demtom[EMMons], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) &c->mon->num, 1);
 }
 
 /* vanitygaps */
