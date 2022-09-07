@@ -3761,6 +3761,7 @@ toggletagbar(const Arg *arg)
 	else
 		selmon->pertag->showbars &= ~selmon->seltags & ~SPTAGMASK;
 
+	focus(NULL);
 	updatebarpos(selmon);
 	resizebarwin(selmon);
 	arrange(selmon);
