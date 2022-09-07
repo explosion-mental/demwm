@@ -350,7 +350,8 @@ static int sendevent(Client *c, Atom proto);
 static void sendmon(Client *c, Monitor *m);
 static void sendstatusbar(const Arg *arg);
 static void setclientstate(Client *c, long state);
-static void saveclientstate(Client *c);
+static void saveclientprop(Client *c);
+static void setclientprop(Client *c);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setlayout(const Arg *arg);
@@ -889,7 +890,7 @@ cleanup(void)
 	for (m = mons; m; m = m->next)
 		while (m->stack) {
 			if (running == -1)
-				saveclientstate(m->stack);
+				saveclientprop(m->stack);
 			unmanage(m->stack, 0);
 		}
 
@@ -2344,7 +2345,6 @@ manage(Window w, XWindowAttributes *wa)
 	Client *c, *t = NULL, *term = NULL;
 	Window trans = None;
 	XWindowChanges wc;
-	Atom tmptom = None;
 	//XEvent xev;
 
 	/* do not manage (lower and skip) NET_WINDOW_TYPE_DESKTOP
@@ -2382,21 +2382,6 @@ manage(Window w, XWindowAttributes *wa)
 		c->mon = selmon;
 		applyrules(c);
 		term = termforwin(c);
-		/* read not empty X atoms, this will only happen whenever we
-		 * manage() an already 'managed' window again. This happens on
-		 * a restart by the call to scan() */
-		if ((tmptom = getatomprop(c, demtom[EMFlags])) != None)
-			c->f = tmptom & (LastFlag - 1);
-		if ((tmptom = getatomprop(c, demtom[EMTags])) != None)
-			c->tags = tmptom & TAGMASK;
-		if ((tmptom = getatomprop(c, demtom[EMMons])) != None) {
-			for (Monitor *m = mons; m; m = m->next) {
-				if (m->num == tmptom) {
-					c->mon = m;
-					break;
-				}
-			}
-		}
 	}
 
 	if (c->x + WIDTH(c) > c->mon->wx + c->mon->ww)
@@ -3022,8 +3007,10 @@ scan(void)
 			if (!XGetWindowAttributes(dpy, wins[i], &wa)
 			|| wa.override_redirect || XGetTransientForHint(dpy, wins[i], &d1))
 				continue;
-			if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState)
+			if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState) {
 				manage(wins[i], &wa);
+				setclientprop(selmon->stack);
+			}
 		}
 		for (i = 0; i < num; i++) { /* now the transients */
 			if (!XGetWindowAttributes(dpy, wins[i], &wa))
@@ -3063,7 +3050,7 @@ setclientstate(Client *c, long state)
 }
 
 void
-saveclientstate(Client *c)
+saveclientprop(Client *c)
 {	/* sets X properties for 'seamless' restart */
 	XChangeProperty(dpy, c->win, demtom[EMFlags], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) &c->f, 1);
@@ -3071,6 +3058,28 @@ saveclientstate(Client *c)
 		PropModeReplace, (unsigned char *) &c->tags, 1);
 	XChangeProperty(dpy, c->win, demtom[EMMons], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) &c->mon->num, 1);
+}
+
+void
+setclientprop(Client *c)
+{
+	Monitor *m;
+	Atom tmptom = None;
+	/* read not empty X atoms, this will only happen whenever we
+	 * manage() an already 'managed' window again. This happens on
+	 * a restart by the call to scan() */
+	if ((tmptom = getatomprop(c, demtom[EMFlags])) != None)
+		c->f = tmptom & (LastFlag - 1);
+	if ((tmptom = getatomprop(c, demtom[EMTags])) != None)
+		c->tags = tmptom & TAGMASK;
+	if ((tmptom = getatomprop(c, demtom[EMMons])) != None) {
+		for (m = mons; m; m = m->next) {
+			if (m->num == tmptom) {
+				c->mon = m;
+				break;
+			}
+		}
+	}
 }
 
 /* vanitygaps */
