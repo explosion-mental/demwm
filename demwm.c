@@ -3080,16 +3080,16 @@ setclientprop(Client *c)
 		return;
 	}
 
-	c->f = *(p + EMFlags) & (LastFlag - 1);
-	c->tags = *(p + EMTags) & TAGMASK;
+	c->f = p[EMFlags] & (LastFlag - 1);
+	c->tags = p[EMTags] & TAGMASK;
 	for (m = mons; m; m = m->next) {
-		if (m->num == *(p + EMMons)) {
+		if (m->num == p[EMMons]) {
 			c->mon = m;
 			break;
 		}
 	}
-	c->x = *(p + EMPosx);
-	c->y = *(p + EMPosy);
+	c->x = p[EMPosx];
+	c->y = p[EMPosy];
 
 	if (p)
 		XFree(p);
