@@ -554,7 +554,7 @@ static int lrpad;             /* sum of left and right padding for text */
 static int (*xerrorxlib)(Display *, XErrorEvent *); /* x11 error func */
 static unsigned int numlockmask = 0;
 static volatile unsigned int sleepinterval = 0, maxinterval = 0;
-static volatile int running = 1; /* -1 restart, 0 quit, 1 running */
+static volatile int running = 0; /* -1 restart, 0 quit, 1 running */
 
 /* various layouts to use on the config */
 #include "layouts.c"
@@ -2433,8 +2433,10 @@ manage(Window w, XWindowAttributes *wa)
 	XMapWindow(dpy, c->win);
 	if (term)
 		swallow(term, c);
-	arrange(c->mon);
-	focus(NULL);
+	if (running == 1) {
+		arrange(c->mon);
+		focus(NULL);
+	}
 }
 
 void
@@ -3023,6 +3025,9 @@ scan(void)
 		if (wins)
 			XFree(wins);
 	}
+	running = 1;
+	focus(NULL);
+	arrange(NULL);
 }
 
 void
