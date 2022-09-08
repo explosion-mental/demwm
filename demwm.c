@@ -2360,14 +2360,15 @@ manage(Window w, XWindowAttributes *wa)
 	c->pid = winpid(w);
 
 	/* geometry */
-	c->x = c->oldx = wa->x;
-	c->y = c->oldy = wa->y;
+	c->sfx = c->x = c->oldx = wa->x;
+	c->sfy = c->y = c->oldy = wa->y;
 	c->sfw = c->w = c->oldw = wa->width;
 	c->sfh = c->h = c->oldh = wa->height;
-	c->sfx = c->sfy = -9999; /* placeholder */
 	c->oldbw = wa->border_width;
 	c->cfact = 1.0;
 
+	if (c->sfx == 0 || c->sfy == 0)
+		c->sfx = c->sfy = -9999; /* placeholder */
 #ifdef ICONS
 	updateicon(c);
 #endif /* ICONS */
