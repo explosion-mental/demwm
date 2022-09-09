@@ -103,11 +103,11 @@ enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
        SchemeStatus, SchemeDelim, SchemeSys, SchemeIndUrg, SchemeIndOff,
        SchemeIndOn, BorderNorm, BorderSel, BorderFloat, BorderUrg, SchemeLast }; /* color schemes */
 enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8, Sp9, Sp10 }; /* scratchpads */
-enum { NetSupported, NetWMName,
+enum { NetWMName,
 #ifdef ICONS
        NetWMIcon,
 #endif /* ICONS */
-       NetWMState, NetWMCheck, NetWMFullscreen, NetActiveWindow,
+       NetWMState, NetWMFullscreen, NetActiveWindow,
        NetWMWindowTypeDesktop, NetWMWindowType, NetWMStateAbove,
        NetClientList, //NetWMWindowTypeDialog,
 #ifdef SYSTRAY
@@ -3427,7 +3427,7 @@ setupx11(void)
 void
 setup(void)
 {
-	Atom utf8string;
+	Atom utf8string, netsupported, netwmcheck;
 	Colormap cmap;
 	sigset_t sm, oldsm;
 	Visual *visual = NULL;
@@ -3487,6 +3487,8 @@ setup(void)
 	updategeom();
 
 	/* init atoms */
+	netsupported                   = XInternAtom(dpy, "_NET_SUPPORTED", False);
+	netwmcheck                     = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
 	demtom                         = XInternAtom(dpy, "DEMWM_HINTS", False);
 	wmatom[WMProtocols]            = XInternAtom(dpy, "WM_PROTOCOLS", False);
@@ -3495,13 +3497,11 @@ setup(void)
 	wmatom[WMTakeFocus]            = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
 	netatom[NetWMStateAbove]       = XInternAtom(dpy, "_NET_WM_STATE_ABOVE", False);
 	netatom[NetActiveWindow]       = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
-	netatom[NetSupported]          = XInternAtom(dpy, "_NET_SUPPORTED", False);
 	netatom[NetWMName]             = XInternAtom(dpy, "_NET_WM_NAME", False);
 	#ifdef ICONS
 	netatom[NetWMIcon]             = XInternAtom(dpy, "_NET_WM_ICON", False);
 	#endif /* ICONS */
 	netatom[NetWMState]            = XInternAtom(dpy, "_NET_WM_STATE", False);
-	netatom[NetWMCheck]            = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	netatom[NetWMFullscreen]       = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
 	netatom[NetWMWindowTypeDesktop] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
 	netatom[NetWMWindowType]       = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
@@ -3536,14 +3536,14 @@ setup(void)
 
 	/* supporting window for NetWMCheck */
 	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
-	XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32,
+	XChangeProperty(dpy, wmcheckwin, netwmcheck, XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8,
 		PropModeReplace, (unsigned char *) wm, sizeof wm);
-	XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32,
+	XChangeProperty(dpy, root, netwmcheck, XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 	/* EWMH support per view */
-	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
+	XChangeProperty(dpy, root, netsupported, XA_ATOM, 32,
 		PropModeReplace, (unsigned char *) netatom, NetLast);
 	XDeleteProperty(dpy, root, netatom[NetClientList]);
 	/* XStoreName */
