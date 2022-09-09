@@ -103,13 +103,11 @@ enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
        SchemeStatus, SchemeDelim, SchemeSys, SchemeIndUrg, SchemeIndOff,
        SchemeIndOn, BorderNorm, BorderSel, BorderFloat, BorderUrg, SchemeLast }; /* color schemes */
 enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8, Sp9, Sp10 }; /* scratchpads */
-enum { NetWMName,
+enum { NetWMName, NetClientList, NetWMState, NetWMFullscreen, NetActiveWindow,
+       NetWMWindowTypeDesktop, NetWMWindowType, NetWMStateAbove,
 #ifdef ICONS
        NetWMIcon,
 #endif /* ICONS */
-       NetWMState, NetWMFullscreen, NetActiveWindow,
-       NetWMWindowTypeDesktop, NetWMWindowType, NetWMStateAbove,
-       NetClientList, //NetWMWindowTypeDialog,
 #ifdef SYSTRAY
        NetSystemTray, NetSystemTrayOP, NetSystemTrayOrientation,
        NetSystemTrayVisual, NetWMWindowTypeDock, NetSystemTrayOrientationHorz,
