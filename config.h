@@ -552,6 +552,7 @@ static const Button buttons[] = {
 	{ ClkStatusText,        Shift,		Button1,        sendstatusbar,   {.i = 6 } },
 
 	{ ClkClientWin,         MOD,         Button1,        movemouse,      {0} },
+	{ ClkClientWin,         MOD|Shift,   Button1,        resizemouse,    {0} },
 	{ ClkClientWin,         MOD,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MOD,         Button3,        resizemouse,    {0} },
 	{ ClkClientWin,         MOD,         Button4,        resizemousescroll, {.v = &scrollargs[0]} },
