@@ -9,16 +9,17 @@ OBJ = ${SRC:.c=.o}
 all: options demwm
 
 options:
-	@echo demwm build options:
 	@echo "VERSION  = ${VERSION}"
 	@echo "FEATURES = ${ICONS} ${SYSTRAY} ${TAG_PREVIEWS} ${XINERAMAFLAGS} ${DEBUG}"
+	@echo demwm build options:
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo "CC       = ${CC}"
 	@echo
 
 .c.o:
-	${CC} -c ${CFLAGS} $<
+	@${CC} -c ${CFLAGS} $<
+	@echo "${CC} -c $ CFLAGS $<"
 
 ${OBJ}: config.h config.mk
 
@@ -26,7 +27,8 @@ config.h:
 	cp config.def.h $@
 
 demwm: ${OBJ}
-	${CC} -o $@ ${OBJ} ${LDFLAGS}
+	@${CC} -o $@ ${OBJ} ${LDFLAGS}
+	@echo "${CC} -o $@ ${OBJ} LDFLAGS"
 
 clean:
 	rm -f demwm ${OBJ} demwm-${VERSION}.tar.gz
