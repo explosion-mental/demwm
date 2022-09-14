@@ -4420,7 +4420,19 @@ view(const Arg *arg)
 pid_t
 winpid(Window w)
 {
+	Atom type;
 	pid_t result = 0;
+	int format;
+	unsigned long len, bytes;
+	unsigned char *prop;
+
+	if (XGetWindowProperty(dpy, w, XInternAtom(dpy, "_NET_WM_PID", False), 0L, 1L,
+	    False, AnyPropertyType, &type, &format, &len, &bytes, &prop) == Success) {
+		result = *(pid_t *)prop;
+		XFree(prop);
+		if (result != 0)
+			return result;
+	}
 
 #ifdef __linux__
 	static xcb_connection_t *xcon;
@@ -4456,21 +4468,6 @@ winpid(Window w)
 		result = 0;
 
 #endif /* __linux__ */
-
-#ifdef __OpenBSD__
-	Atom type;
-	int format;
-	unsigned long len, bytes;
-	unsigned char *prop;
-
-	if (XGetWindowProperty(dpy, w, XInternAtom(dpy, "_NET_WM_PID", 0), 0,
-				1, False, AnyPropertyType, &type, &format,
-				&len, &bytes, &prop) != Success || !prop)
-		return 0;
-
-	result = *(pid_t*)prop;
-	XFree(prop);
-#endif /* __OpenBSD__ */
 
 	return result;
 }
