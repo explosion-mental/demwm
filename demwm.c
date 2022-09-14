@@ -551,8 +551,8 @@ static int bh;                /* bar height */
 static int lrpad;             /* sum of left and right padding for text */
 static int (*xerrorxlib)(Display *, XErrorEvent *); /* x11 error func */
 static unsigned int numlockmask = 0;
-static volatile unsigned int sleepinterval = 0, maxinterval = 0;
-static volatile int running = 0; /* -1 restart, 0 quit, 1 running */
+static unsigned int sleepinterval = 0, maxinterval = 0;
+static int running = 0; /* -1 restart, 0 quit, 1 running */
 
 /* various layouts to use on the config */
 #include "layouts.c"
