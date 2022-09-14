@@ -1896,26 +1896,29 @@ updatesystrayicongeom(Client *i, int w, int h)
 {
 	int icon_height = bh - 2;
 
-	if (i) {
-		i->h = icon_height;
-		if (w == h)
+	if (!i)
+		return;
+
+	if (w == h)
+		i->w = icon_height;
+	else if (h == icon_height)
+		i->w = w;
+	else
+		i->w = (int) ((float)icon_height * ((float)w / (float)h));
+
+	applysizehints(i, &(i->x), &(i->y), &(i->w), &(i->h), False);
+
+	/* force icons into the systray dimensions if they don't want to */
+	if (i->h > icon_height) {
+		if (i->w == i->h)
 			i->w = icon_height;
-		else if (h == icon_height)
-			i->w = w;
 		else
-			i->w = (int) ((float)(icon_height) * ((float)w / (float)h));
-		applysizehints(i, &(i->x), &(i->y), &(i->w), &(i->h), False);
-		/* force icons into the systray dimensions if they don't want to */
-		if (i->h > icon_height) {
-			if (i->w == i->h)
-				i->w = icon_height;
-			else
-				i->w = (int) ((float)(icon_height) * ((float)i->w / (float)i->h));
-			i->h = icon_height;
-		}
-		if (i->w > 2 * icon_height)
-			i->w = icon_height;
+			i->w = (int) ((float)icon_height * ((float)i->w / (float)i->h));
+		i->h = icon_height;
 	}
+
+	if (i->w > 2 * icon_height)
+		i->w = icon_height;
 }
 void
 updatesystrayiconstate(Client *i)
