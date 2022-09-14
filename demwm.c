@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <X11/cursorfont.h>
@@ -2075,12 +2076,7 @@ getcmd(int i, char *button)
 	execlock |= (1 << i);
 
 	if (fork() == 0) {
-		close(pipes[i][0]);
-		if (dpy)
-			close(ConnectionNumber(dpy));
 		dup2(pipes[i][1], STDOUT_FILENO);
-		close(pipes[i][1]);
-
 		if (button)
 			setenv("BLOCK_BUTTON", button, 1);
 		execl("/bin/sh", "/bin/sh", "-c", blocks[i].command, (char *) NULL);
@@ -2914,13 +2910,17 @@ restack(Monitor *m)
 void
 run(void)
 {
-	int i, bt;
+	int i, bt, flags;
 	XEvent ev;
 	enum { XFD = LENGTH(blocks) };
 	struct pollfd fds[] = { /* one fd for each block + X fd */
 		[XFD] = { .fd = ConnectionNumber(dpy), .events = POLLIN }
 	};
-
+	if (flags = fcntl(ConnectionNumber(dpy), F_GETFD) == -1)
+		die("fcntl:");
+	flags |= FD_CLOEXEC;
+	if (fcntl(ConnectionNumber(dpy), F_SETFD, flags) == -1)
+		die("fcntl:");
 	/* init blocks */
 	#if INVERSED
 	for (i = LENGTH(blocks) - 1; i >= 0; i--)
@@ -2929,6 +2929,18 @@ run(void)
 	#endif /* INVERSED */
 	{
 		pipe(pipes[i]);
+		/* read end */
+		if (flags = fcntl(pipes[i][0], F_GETFD) == -1)
+			die("fcntl F_GETFD failed:");
+		flags |= FD_CLOEXEC;
+		if (fcntl(pipes[i][0], F_SETFD, flags) == -1)
+			die("fcntl F_SETFD failed:");
+		/* write end */
+		if (flags = fcntl(pipes[i][1], F_GETFD) == -1)
+			die("fcntl F_GETFD failed:");
+		flags |= FD_CLOEXEC;
+		if (fcntl(pipes[i][1], F_SETFD, flags) == -1)
+			die("fcntl F_SETFD failed:");
 		fds[i].fd = pipes[i][0];
 		fds[i].events = POLLIN;
 		getcmd(i, NULL);
@@ -3699,8 +3711,6 @@ void
 spawn(const Arg *arg)
 {
 	if (fork() == 0) {
-		if (dpy)
-			close(ConnectionNumber(dpy));
 		setsid();
 		execvp(((const char **)arg->v)[0], (char *const *)arg->v);
 		die("demwm: execvp '%s':", ((const char **)arg->v)[0]);
