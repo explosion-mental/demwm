@@ -2915,16 +2915,15 @@ restack(Monitor *m)
 void
 run(void)
 {
-	int i, bt, flags;
+	int i, bt, oldflags;
 	XEvent ev;
 	enum { XFD = LENGTH(blocks) };
 	struct pollfd fds[] = { /* one fd for each block + X fd */
 		[XFD] = { .fd = ConnectionNumber(dpy), .events = POLLIN }
 	};
-	if (flags = fcntl(ConnectionNumber(dpy), F_GETFD) == -1)
+	if (oldflags = fcntl(ConnectionNumber(dpy), F_GETFD) == -1)
 		die("fcntl:");
-	flags |= FD_CLOEXEC;
-	if (fcntl(ConnectionNumber(dpy), F_SETFD, flags) == -1)
+	if (fcntl(ConnectionNumber(dpy), F_SETFD, oldflags | FD_CLOEXEC) == -1)
 		die("fcntl:");
 	/* init blocks */
 	#if INVERSED
@@ -2935,16 +2934,14 @@ run(void)
 	{
 		pipe(pipes[i]);
 		/* read end */
-		if (flags = fcntl(pipes[i][0], F_GETFD) == -1)
+		if (oldflags = fcntl(pipes[i][0], F_GETFD) == -1)
 			die("fcntl F_GETFD failed:");
-		flags |= FD_CLOEXEC;
-		if (fcntl(pipes[i][0], F_SETFD, flags) == -1)
+		if (fcntl(pipes[i][0], F_SETFD, oldflags | FD_CLOEXEC) == -1)
 			die("fcntl F_SETFD failed:");
 		/* write end */
-		if (flags = fcntl(pipes[i][1], F_GETFD) == -1)
+		if (oldflags = fcntl(pipes[i][1], F_GETFD) == -1)
 			die("fcntl F_GETFD failed:");
-		flags |= FD_CLOEXEC;
-		if (fcntl(pipes[i][1], F_SETFD, flags) == -1)
+		if (fcntl(pipes[i][1], F_SETFD, oldflags | FD_CLOEXEC) == -1)
 			die("fcntl F_SETFD failed:");
 		fds[i].fd = pipes[i][0];
 		fds[i].events = POLLIN;
