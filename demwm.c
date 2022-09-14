@@ -105,7 +105,7 @@ enum { SchemeNorm, SchemeSel, SchemeUrgent, SchemeLt, SchemeTitle,
        SchemeIndOn, BorderNorm, BorderSel, BorderFloat, BorderUrg, SchemeLast }; /* color schemes */
 enum { Sp1, Sp2, Sp3, Sp4, Sp5, Sp6, Sp7, Sp8, Sp9, Sp10 }; /* scratchpads */
 enum { NetWMName, NetClientList, NetWMState, NetWMFullscreen, NetActiveWindow,
-       NetWMWindowTypeDesktop, NetWMWindowType, NetWMStateAbove,
+       NetWMWindowTypeDesktop, NetWMWindowType, NetWMStateAbove, NetWMPid,
 #ifdef ICONS
        NetWMIcon,
 #endif /* ICONS */
@@ -3519,6 +3519,7 @@ setup(void)
 	netatom[NetWMWindowType]       = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
 	//netatom[NetWMWindowTypeDialog] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
 	netatom[NetClientList]         = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
+	netatom[NetWMPid]              = XInternAtom(dpy, "_NET_WM_PID", False);
 	#ifdef SYSTRAY
 	netatom[NetSystemTray]         = XInternAtom(dpy, "_NET_SYSTEM_TRAY_S0", False);
 	netatom[NetSystemTrayOP]       = XInternAtom(dpy, "_NET_SYSTEM_TRAY_OPCODE", False);
@@ -4426,8 +4427,8 @@ winpid(Window w)
 	unsigned long len, bytes;
 	unsigned char *prop;
 
-	if (XGetWindowProperty(dpy, w, XInternAtom(dpy, "_NET_WM_PID", False), 0L, 1L,
-	    False, AnyPropertyType, &type, &format, &len, &bytes, &prop) == Success) {
+	if (XGetWindowProperty(dpy, w, netatom[NetWMPid], 0L, 1L, False,
+	    AnyPropertyType, &type, &format, &len, &bytes, &prop) == Success) {
 		result = *(pid_t *)prop;
 		XFree(prop);
 		if (result != 0)
@@ -4437,11 +4438,8 @@ winpid(Window w)
 #ifdef __linux__
 	static xcb_connection_t *xcon;
 
-
-	if (!xcon) {
-		if (!(xcon = XGetXCBConnection(dpy)))
-			die("demwm: cannot get xcb connection.");
-	}
+	if (!xcon || !(xcon = XGetXCBConnection(dpy)))
+		die("demwm: cannot get xcb connection.");
 
 	enum { _XPID = XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID };
 	xcb_generic_error_t *e = NULL;
