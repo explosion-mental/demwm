@@ -393,6 +393,7 @@ static void unmapnotify(XEvent *e);
 static void updatebarpos(Monitor *m);
 static void updatebars(void);
 static void updateblock(const Arg *arg);
+static void updateallblocks(const Arg *arg);
 static void updateclientlist(void);
 static int updategeom(void);
 static void updatenumlockmask(void);
@@ -460,6 +461,7 @@ static pid_t winpid(Window w);
 static const struct { const unsigned int type;
  void (*func)(const Arg *arg); const char *name; } parsetable[] = {
 	{ UNIa, updateblock, "updateblock" },
+	{ UNIa, updateallblocks, "updateallblocks" },
 	{ INTa, cyclelayout, "cyclelayout" },
 	{ INTa, focusmon, "focusmon" },
 	{ INTa, focusstack, "focusstack" },
@@ -4159,6 +4161,13 @@ void
 updateblock(const Arg *arg)
 {
 	getsigcmds(arg->ui);
+	updatestatus();
+}
+
+void
+updateallblocks(const Arg *arg)
+{
+	getcmds(-1);
 	updatestatus();
 }
 
