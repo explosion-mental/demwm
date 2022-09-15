@@ -461,7 +461,7 @@ static pid_t winpid(Window w);
 static const struct { const unsigned int type;
  void (*func)(const Arg *arg); const char *name; } parsetable[] = {
 	{ UNIa, updateblock, "updateblock" },
-	{ UNIa, updateallblocks, "updateallblocks" },
+	{ NOOa, updateallblocks, "updateallblocks" },
 	{ INTa, cyclelayout, "cyclelayout" },
 	{ INTa, focusmon, "focusmon" },
 	{ INTa, focusstack, "focusstack" },
