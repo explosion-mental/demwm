@@ -78,7 +78,7 @@ static const char *colors[][2] = {
 	/* custom blocks schemes */
 	[SchemeLast+0] = { color7,	"#222222" },
 	[SchemeLast+1] = { color2,	color0 },
-	[SchemeLast+2] = { fg_wal,	color2, },
+	[SchemeLast+2] = { color0,	color2, },
 	[SchemeLast+3] = { color0,	color6 },
 	[SchemeLast+4] = { bg_wal,	color3 },
 	[SchemeLast+5] = { color4,	color0 },
