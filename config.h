@@ -256,6 +256,7 @@ CUI movefloat   = 22;            /* used in movfh_setmfact and movfv_pushstack *
 static const Layout layouts[] = {
       /* symbol  arrange  gaps */
  	{ "[]=", tile },               /* master on left, slaves on right */
+ //	{ "||=", tilewide },               /* master on left, slaves on right */
  	{ "🧐" , monocle },            /* all windows on top of eachother */
  	{ "{}" , alphamonocle },       /* monocle but windows aren't stacked */
 //	{ "TTT", bstack },             /* master on top, slaves on bottom */
@@ -280,7 +281,7 @@ static const Layout layouts[] = {
 #define TAGKEYS(KEY,TAG) /* keys from 1 to 9 */ \
 	{ MOD,			KEY,	comboview,      { .ui = 1 << TAG } },	\
 	{ MOD|Shift,		KEY,	combotag,       { .ui = 1 << TAG } },	\
-	{ MOD|Ctrl,           KEY,	toggleview,     { .ui = 1 << TAG } },	\
+	{ MOD|Ctrl,		KEY,	toggleview,     { .ui = 1 << TAG } },	\
 	/*{ MOD|Ctrl,		KEY,	previewtag,	{ .ui = TAG }	   },*/	\
 	/* { MOD|Ctrl|Shift, KEY,	toggletag,      { .ui = 1 << TAG } },*/	\
 	{ MOD|Shift|Ctrl,	KEY,	swaptags,	{ .ui = 1 << TAG } },
