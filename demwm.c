@@ -2524,7 +2524,7 @@ run(void)
 	struct pollfd fds[] = { /* one fd for each block + X fd */
 		[XFD] = { .fd = ConnectionNumber(dpy), .events = POLLIN }
 	};
-	if (oldflags = fcntl(ConnectionNumber(dpy), F_GETFD) == -1)
+	if ((oldflags = fcntl(ConnectionNumber(dpy), F_GETFD)) == -1)
 		die("fcntl:");
 	if (fcntl(ConnectionNumber(dpy), F_SETFD, oldflags | FD_CLOEXEC) == -1)
 		die("fcntl:");
@@ -2537,12 +2537,12 @@ run(void)
 	{
 		pipe(pipes[i]);
 		/* read end */
-		if (oldflags = fcntl(pipes[i][0], F_GETFD) == -1)
+		if ((oldflags = fcntl(pipes[i][0], F_GETFD)) == -1)
 			die("fcntl F_GETFD failed:");
 		if (fcntl(pipes[i][0], F_SETFD, oldflags | FD_CLOEXEC) == -1)
 			die("fcntl F_SETFD failed:");
 		/* write end */
-		if (oldflags = fcntl(pipes[i][1], F_GETFD) == -1)
+		if ((oldflags = fcntl(pipes[i][1], F_GETFD)) == -1)
 			die("fcntl F_GETFD failed:");
 		if (fcntl(pipes[i][1], F_SETFD, oldflags | FD_CLOEXEC) == -1)
 			die("fcntl F_SETFD failed:");
