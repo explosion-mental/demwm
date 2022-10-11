@@ -1357,6 +1357,51 @@ drawbars(void)
 		drawbar(m);
 }
 
+int
+drawstatus(void)
+{
+
+	int width = selmon->ww; /* bar width */
+	#ifdef SYSTRAY
+	width -= selmon == systraytomon(selmon) ? sysw : 0;
+	#endif /* SYSTRAY */
+
+	int i, all = width;
+	int barpad = ((bh - drw->fonts->h) / 2) - 1; //-1 so emojis render properly
+	unsigned int j, len, total = 0, delimlen = TTEXTW(delimiter);
+
+	if (!showstatus)
+		return stsw = 0;
+
+	for (j = 0; j < LENGTH(blocks); total += TTEXTW(blockoutput[j]) + delimlen, j++);
+
+	drw_setscheme(drw, scheme[SchemeStatus]);
+	drw_text(drw, width - total, 0, total, bh, 0, "", 0);
+
+	#if INVERSED
+	for (i = 0; i < LENGTH(blocks); i++)
+	#else
+	for (i = LENGTH(blocks) - 1; i >= 0; i--)
+	#endif /* INVERSED */
+	{
+		if (*blockoutput[i] == '\0') /* ignore command that output NULL or '\0' */
+			continue;
+		drw_setscheme(drw, scheme[blocks[i].scheme]); /* set scheme */
+		len  = TTEXTW(blockoutput[i]);
+		all -= len;
+		drw_text(drw, all, barpad, len, bh - barpad * 2, 0, blockoutput[i], 0);
+		debug("drawing block '%d': '%s'\n", i, blockoutput[i]);
+		/* draw delimiter */
+		if (*delimiter == '\0') /* ignore no delimiter */
+			continue;
+		drw_setscheme(drw, scheme[SchemeDelim]);
+		all -= delimlen;
+		drw_text(drw, all, barpad, delimlen, bh - barpad * 2, 0, delimiter, 0);
+	}
+
+	return stsw = width - all;
+}
+
 void
 enternotify(XEvent *e)
 {
@@ -1923,51 +1968,6 @@ getsigcmds(unsigned int signal)
 	for (i = 0; i < LENGTH(blocks); i++)
 		if (blocks[i].signal == signal)
 			getcmd(i, NULL);
-}
-
-int
-drawstatus(void)
-{
-
-	int width = selmon->ww; /* bar width */
-	#ifdef SYSTRAY
-	width -= selmon == systraytomon(selmon) ? sysw : 0;
-	#endif /* SYSTRAY */
-
-	int i, all = width;
-	int barpad = ((bh - drw->fonts->h) / 2) - 1; //-1 so emojis render properly
-	unsigned int j, len, total = 0, delimlen = TTEXTW(delimiter);
-
-	if (!showstatus)
-		return stsw = 0;
-
-	for (j = 0; j < LENGTH(blocks); total += TTEXTW(blockoutput[j]) + delimlen, j++);
-
-	drw_setscheme(drw, scheme[SchemeStatus]);
-	drw_text(drw, width - total, 0, total, bh, 0, "", 0);
-
-	#if INVERSED
-	for (i = 0; i < LENGTH(blocks); i++)
-	#else
-	for (i = LENGTH(blocks) - 1; i >= 0; i--)
-	#endif /* INVERSED */
-	{
-		if (*blockoutput[i] == '\0') /* ignore command that output NULL or '\0' */
-			continue;
-		drw_setscheme(drw, scheme[blocks[i].scheme]); /* set scheme */
-		len  = TTEXTW(blockoutput[i]);
-		all -= len;
-		drw_text(drw, all, barpad, len, bh - barpad * 2, 0, blockoutput[i], 0);
-		debug("drawing block '%d': '%s'\n", i, blockoutput[i]);
-		/* draw delimiter */
-		if (*delimiter == '\0') /* ignore no delimiter */
-			continue;
-		drw_setscheme(drw, scheme[SchemeDelim]);
-		all -= delimlen;
-		drw_text(drw, all, barpad, delimlen, bh - barpad * 2, 0, delimiter, 0);
-	}
-
-	return stsw = width - all;
 }
 
 int
