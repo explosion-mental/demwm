@@ -297,7 +297,7 @@ static void getcmd(int i, char *button);
 static void getcmds(int time);
 static void getsigcmds(unsigned int signal);
 static int gcd(int a, int b);
-static int getstatus(int width);
+static int getstatus(void);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
@@ -1262,20 +1262,9 @@ drawbar(Monitor *m)
 	if (!(m->f & ShowBar) || running < 1)
 		return;
 
-	#ifdef SYSTRAY
-	bw -= m == systraytomon(m) ? sysw : 0;
-	#endif /* SYSTRAY */
-
-	/* TODO: reduce calls to getstatus(), gets triggered in every manage
-	 * call. No need to **re**-draw the status text just to update the
-	 * window title */
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) /* status is only drawn on selected monitor */
-		tw = getstatus(bw);
-
-	#ifdef SYSTRAY
-	resizebarwin(m);
-	#endif /* SYSTRAY */
+		tw = stsw;
 
 	for (c = m->clients; c; c = c->next) {
 		occ |= c->tags == 255 || c->f & Sticky ? 0 : c->tags;
@@ -1934,8 +1923,14 @@ getsigcmds(unsigned int signal)
 }
 
 int
-getstatus(int width)
+getstatus(void)
 {
+
+	int width = selmon->ww; /* bar width */
+	#ifdef SYSTRAY
+	width -= selmon == systraytomon(selmon) ? sysw : 0;
+	#endif /* SYSTRAY */
+
 	int i, all = width;
 	int barpad = ((bh - drw->fonts->h) / 2) - 1; //-1 so emojis render properly
 	unsigned int j, len, total = 0, delimlen = TTEXTW(delimiter);
@@ -2603,7 +2598,7 @@ run(void)
 				else
 					blockoutput[i][bt++] = '\0'; /* manually null terminate */
 
-				drawbar(selmon);
+				getstatus();
 			} else if (fds[i].revents & POLLHUP)
 				die("demwm: poll: block '%d' hangup:", i);
 		}
