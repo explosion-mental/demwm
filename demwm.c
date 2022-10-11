@@ -1262,6 +1262,10 @@ drawbar(Monitor *m)
 	if (!(m->f & ShowBar) || running < 1)
 		return;
 
+	#ifdef SYSTRAY
+	bw -= m == systraytomon(m) ? sysw : 0;
+	#endif /* SYSTRAY */
+
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) /* status is only drawn on selected monitor */
 		tw = stsw;
@@ -1741,6 +1745,8 @@ updatesystray(void)
 	x -= w;
 	sysw = w;
 	XMoveResizeWindow(dpy, systray->win, x - xpad + 1, m->by + ypad, MAX(w, 1), bh);
+	resizebarwin(selmon);
+	drawstatus();
 	XMapWindow(dpy, systray->win);
 	XMapSubwindows(dpy, systray->win);
 	XSync(dpy, False);
