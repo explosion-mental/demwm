@@ -280,6 +280,7 @@ static void detachstack(Client *c);
 static Monitor *dirtomon(int dir);
 static void drawbar(Monitor *m);
 static void drawbars(void);
+static int drawstatus(void);
 static void enternotify(XEvent *e);
 static void expose(XEvent *e);
 static Client *findbefore(Client *c);
@@ -297,7 +298,6 @@ static void getcmd(int i, char *button);
 static void getcmds(int time);
 static void getsigcmds(unsigned int signal);
 static int gcd(int a, int b);
-static int getstatus(void);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
@@ -1923,7 +1923,7 @@ getsigcmds(unsigned int signal)
 }
 
 int
-getstatus(void)
+drawstatus(void)
 {
 
 	int width = selmon->ww; /* bar width */
@@ -2598,7 +2598,7 @@ run(void)
 				else
 					blockoutput[i][bt++] = '\0'; /* manually null terminate */
 
-				getstatus();
+				drawstatus();
 			} else if (fds[i].revents & POLLHUP)
 				die("demwm: poll: block '%d' hangup:", i);
 		}
