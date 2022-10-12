@@ -2608,6 +2608,7 @@ run(void)
 					blockoutput[i][bt++] = '\0'; /* manually null terminate */
 
 				drawstatus();
+				drawbar(selmon);
 			} else if (fds[i].revents & POLLHUP)
 				die("demwm: poll: block '%d' hangup:", i);
 		}
