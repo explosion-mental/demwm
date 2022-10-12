@@ -973,6 +973,7 @@ xrdb(const Arg *arg)
 
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 2);
+	drawstatus();
 	focus(NULL);
 	arrange(NULL);
 }
