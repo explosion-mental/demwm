@@ -1,6 +1,12 @@
 # demwm - dynamic explostion-mental's window manager
 # See LICENSE file for copyright and license details.
 
+# demwm version
+VERSION = 1.8
+
+# demwm git exact commit version
+SRCVERSION = $$(git describe --tags --dirty=[modified] 2>/dev/null || echo ${VERSION}-nogit)
+
 include config.mk
 
 SRC = drw.c demwm.c util.c

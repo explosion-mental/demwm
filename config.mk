@@ -1,9 +1,3 @@
-# demwm version
-VERSION = 1.8
-
-# demwm git exact commit version
-SRCVERSION = $$(git describe --tags --dirty=[modified] 2>/dev/null || echo ${VERSION}-nogit)
-
 # Customize below to fit your system
 
 # paths
@@ -61,4 +55,4 @@ LDFLAGS  = ${LIBS}
 #LDFLAGS = ${LIBS}
 
 # compiler and linker
-CC = tcc
+CC = zig cc
