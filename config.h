@@ -204,6 +204,7 @@ static const Rule rules[] = {
 //	RULE(.title = "LibreOffice",	.isfloating = 1, .noswallow = 1)
 //	RULE(.class = "libreoffice",	.noswallow = 1)
 	RULE(.class = "firefox",	.tags = 1 << 1, .flags = FakeFS)
+	RULE(.class = "LibreWolf",	.tags = 1 << 1, .flags = FakeFS)
 	RULE(.class = "Brave-browser",	.tags = 1 << 4, .flags = FakeFS)
 	RULE(.class = "St",		.flags = Terminal)
 	RULE(.title = "Event Tester",	.flags = NoSwallow) /* xev */
