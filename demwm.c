@@ -467,6 +467,7 @@ static const struct { const unsigned int type;
 	{ INTa, incrogaps, "incrogaps" },
 	{ INTa, incrohgaps, "incrohgaps" },
 	{ INTa, incrovgaps, "incrovgaps" },
+	{ INTa, incrigaps, "incrigaps" },
 	{ INTa, incrihgaps, "incrihgaps" },
 	{ INTa, incrivgaps, "incrivgaps" },
 	{ NOOa, defaultgaps, "defaultgaps" },
