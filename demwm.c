@@ -1375,7 +1375,7 @@ drawstatus(void)
 	int barpad = ((bh - drw->fonts->h) / 2) - 1; //-1 so emojis render properly
 	unsigned int j, len, total = 0, delimlen = TTEXTW(delimiter);
 
-	if (!showstatus)
+	if (!showstatus || !(selmon->f & ShowBar) || running < 1)
 		return stsw = 0;
 
 	for (j = 0; j < LENGTH(blocks); total += TTEXTW(blockoutput[j]) + delimlen, j++);
