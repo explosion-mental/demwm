@@ -55,4 +55,4 @@ LDFLAGS  = ${LIBS}
 #LDFLAGS = ${LIBS}
 
 # compiler and linker
-CC = zig cc
+CC = cc
