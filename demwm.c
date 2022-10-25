@@ -2898,18 +2898,6 @@ setfullscreen(Client *c, int fullscreen)
 }
 
 void
-setupx11(void)
-{
-	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
-		LOG("warning, no locale support.");
-	if (!(dpy = XOpenDisplay(NULL)))
-		die("demwm: cannot open display.");
-
-	/* init screen */
-	root = RootWindow(dpy, DefaultScreen(dpy));
-}
-
-void
 setup(void)
 {
 	Atom utf8string, netsupported, netwmcheck;
@@ -3688,12 +3676,17 @@ scratchpad_show_first(void)
 int
 main(int argc, char *argv[])
 {
-	char func[IPCSIZE];
-	unsigned int i;
-	int cmd = -1;
+	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
+		LOG("warning, no locale support.");
+	if (!(dpy = XOpenDisplay(NULL)))
+		die("demwm: cannot open display.");
+	root = RootWindow(dpy, DefaultScreen(dpy));
 
-	setupx11();
 	if (argc == 2 || argc == 3) {
+		char func[IPCSIZE];
+		unsigned int i;
+		int cmd = -1;
+
 		for (i = 0; i < LENGTH(parsetable); i++) {
 			if (!strcmp(argv[1], parsetable[i].name)) {
 				cmd = i;
