@@ -537,7 +537,7 @@ static Atom xatom[XLast];
 static Systray *systray = NULL;
 static unsigned int sysw = 1; /* systray width */
 #endif /* SYSTRAY */
-static Atom wmatom[WMLast], netatom[NetLast], ipctom;
+static Atom wmatom[WMLast], netatom[NetLast];
 static Cur *cursor[CurLast];
 static Client *scratchpad_last_showed = NULL;
 static Display *dpy;
@@ -2361,6 +2361,7 @@ propertynotify(XEvent *e)
 	char buf[IPCSIZE];
 	unsigned int i = 0;
 	Arg arg = {0};
+	Atom ipctom = XInternAtom(dpy, "DEMWM_IPC", False);
 
 	if ((ev->window == root) && (ev->atom == ipctom)
 	&& gettextprop(root, ipctom, buf, sizeof buf)) { /* cli functions */
@@ -2906,7 +2907,6 @@ setupx11(void)
 
 	/* init screen */
 	root = RootWindow(dpy, DefaultScreen(dpy));
-	ipctom = XInternAtom(dpy, "DEMWM_IPC", False);
 }
 
 void
@@ -3713,8 +3713,9 @@ main(int argc, char *argv[])
 			die("Function '%s' requires an argument.", argv[1]);
 
 		snprintf(func, sizeof func, cmd < 10 ? "0%d %s" : "%d %s", cmd, argv[2]);
-		XChangeProperty(dpy, root, ipctom, XInternAtom(dpy, "UTF8_STRING", False), 8,
-			PropModeReplace, (unsigned char *) func, sizeof func);
+		XChangeProperty(dpy, root, XInternAtom(dpy, "DEMWM_IPC", False),
+		    XInternAtom(dpy, "UTF8_STRING", False), 8, PropModeReplace,
+		    (unsigned char *) func, sizeof func);
 		XCloseDisplay(dpy);
 		return EXIT_SUCCESS;
 	}
