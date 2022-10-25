@@ -537,7 +537,7 @@ static Atom xatom[XLast];
 static Systray *systray = NULL;
 static unsigned int sysw = 1; /* systray width */
 #endif /* SYSTRAY */
-static Atom wmatom[WMLast], netatom[NetLast], demtom, ipctom;
+static Atom wmatom[WMLast], netatom[NetLast], ipctom;
 static Cur *cursor[CurLast];
 static Client *scratchpad_last_showed = NULL;
 static Display *dpy;
@@ -2685,8 +2685,8 @@ saveclientprop(Client *c)
 		[EMPosy]  = c->y,
 	};
 
-	XChangeProperty(dpy, c->win, demtom, XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) data, EMLast);
+	XChangeProperty(dpy, c->win, XInternAtom(dpy, "DEMWM_HINTS", False),
+		XA_CARDINAL, 32, PropModeReplace, (unsigned char *) data, EMLast);
 }
 
 void
@@ -2697,10 +2697,9 @@ setclientprop(Client *c)
 	int format;
 	unsigned long n, extra, *p = NULL;
 
-	if (XGetWindowProperty(dpy, c->win, demtom, 0L, EMLast, False, XA_CARDINAL,
-		&atom, &format, &n, &extra, (unsigned char **) &p) != Success) {
+	if (XGetWindowProperty(dpy, c->win, XInternAtom(dpy, "DEMWM_HINTS", False), 0L, EMLast,
+	    False, XA_CARDINAL, &atom, &format, &n, &extra, (unsigned char **) &p) != Success)
 		return;
-	}
 
 	c->f = p[EMFlags] & (LastFlag - 1);
 	c->tags = p[EMTags] & TAGMASK;
@@ -2977,7 +2976,6 @@ setup(void)
 	netsupported                   = XInternAtom(dpy, "_NET_SUPPORTED", False);
 	netwmcheck                     = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	utf8string                     = XInternAtom(dpy, "UTF8_STRING", False);
-	demtom                         = XInternAtom(dpy, "DEMWM_HINTS", False);
 	wmatom[WMProtocols]            = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	wmatom[WMDelete]               = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wmatom[WMState]                = XInternAtom(dpy, "WM_STATE", False);
