@@ -3463,7 +3463,7 @@ winpid(Window w)
 	unsigned char *prop;
 
 	if (XGetWindowProperty(dpy, w, netatom[NetWMPid], 0L, 1L, False,
-	    AnyPropertyType, &type, &format, &len, &bytes, &prop) == Success) {
+	    AnyPropertyType, &type, &format, &len, &bytes, &prop) == Success && prop) {
 		result = *(pid_t *)prop;
 		XFree(prop);
 		if (result != 0)
