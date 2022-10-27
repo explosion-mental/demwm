@@ -3472,7 +3472,9 @@ winpid(Window w)
 #ifdef __linux__
 	static xcb_connection_t *xcon;
 
-	if (!xcon || !(xcon = XGetXCBConnection(dpy)))
+	if (!xcon)
+		xcon = XGetXCBConnection(dpy);
+	if (!xcon)
 		die("demwm: cannot get xcb connection.");
 
 	enum { _XPID = XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID };
