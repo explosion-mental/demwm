@@ -2152,6 +2152,7 @@ manage(Window w, XWindowAttributes *wa)
 	if (getatomprop(&((Client){ .win = w }), netatom[NetWMWindowType]) == netatom[NetWMWindowTypeDesktop]) {
 		XMapWindow(dpy, w);
 		XLowerWindow(dpy, w);
+		debug("Window (%ld) has the _NET_WM_WINDOW_TYPE_DESKTOP property, ignoring.\n", w);
 		return;
 	}
 
