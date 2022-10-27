@@ -3470,7 +3470,7 @@ winpid(Window w)
 	}
 
 #ifdef __linux__
-	static xcb_connection_t *xcon;
+	static xcb_connection_t *xcon = NULL;
 
 	if (!xcon)
 		xcon = XGetXCBConnection(dpy);
