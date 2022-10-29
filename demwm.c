@@ -322,6 +322,7 @@ static void scan(void);
 #ifdef SYSTRAY
 static void resizebarwin(Monitor *m);
 static Atom getatomprop(Client *c, Atom prop);
+static unsigned long getatom(Window w, Atom prop, long size, Atom req, unsigned char **p);
 static void removesystrayicon(Client *i);
 static void resizerequest(XEvent *e);
 static Monitor *systraytomon(Monitor *m);
@@ -1550,6 +1551,20 @@ getatomprop(Client *c, Atom prop)
 	return atom;
 }
 
+unsigned long
+getatom(Window w, Atom prop, long size, Atom req, unsigned char **p)
+{	/* With this setup you need to manually XFree(p) */
+	int format;
+	unsigned long n, extra;
+	Atom real;
+
+	if (XGetWindowProperty(dpy, w, prop, 0L, size, False, req,
+	    &real, &format, &n, &extra, p) != Success)
+		return 0;
+
+	return n;
+}
+
 int
 getrootptr(int *x, int *y)
 {
@@ -1563,16 +1578,11 @@ getrootptr(int *x, int *y)
 long
 getstate(Window w)
 {
-	int format;
 	long result = -1;
 	unsigned char *p = NULL;
-	unsigned long n, extra;
-	Atom real;
+	unsigned long n;
 
-	if (XGetWindowProperty(dpy, w, wmatom[WMState], 0L, 2L, False, wmatom[WMState],
-		&real, &format, &n, &extra, (unsigned char **)&p) != Success)
-		return -1;
-	if (n != 0)
+	if ((n = getatom(w, wmatom[WMState], 2L, wmatom[WMState], &p)) != 0)
 		result = *p;
 	XFree(p);
 	return result;
@@ -2694,13 +2704,10 @@ saveclientprop(Client *c)
 void
 setclientprop(Client *c)
 {
-	Atom atom;
 	Monitor *m;
-	int format;
-	unsigned long n, extra, *p = NULL;
+	unsigned long *p = NULL;
 
-	if (XGetWindowProperty(dpy, c->win, XInternAtom(dpy, "DEMWM_HINTS", False), 0L, EMLast,
-	    False, XA_CARDINAL, &atom, &format, &n, &extra, (unsigned char **) &p) != Success)
+	if (!getatom(c->win, XInternAtom(dpy, "DEMWM_HINTS", False), EMLast, XA_CARDINAL, (unsigned char **)&p))
 		return;
 
 	c->f = p[EMFlags] & (LastFlag - 1);
@@ -3456,18 +3463,13 @@ updatewmhints(Client *c)
 pid_t
 winpid(Window w)
 {
-	Atom type;
 	pid_t result = 0;
-	int format;
-	unsigned long len, bytes;
-	unsigned char *prop;
+	unsigned char *p = NULL;
 
-	if (XGetWindowProperty(dpy, w, netatom[NetWMPid], 0L, 1L, False,
-	    AnyPropertyType, &type, &format, &len, &bytes, &prop) == Success && prop) {
-		result = *(pid_t *)prop;
-		XFree(prop);
-		if (result != 0)
-			return result;
+	if (getatom(w, netatom[NetWMPid], 1L, AnyPropertyType, &p)) {
+		result = *(pid_t *)p;
+		XFree(p);
+		return result;
 	}
 
 #ifdef __linux__
