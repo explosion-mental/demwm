@@ -1845,22 +1845,14 @@ prealpha(uint32_t p)
 void
 geticonprop(Client *c)
 {
-	int format;
-	unsigned long n, extra, *p = NULL, *bstp = NULL;
+	unsigned long n, *p = NULL, *bstp = NULL;
 	unsigned int iconsize = drw->fonts->h; /* icon same height as font */
 	uint32_t w, h, sz;
-	Atom real;
 
 	c->icon = None;
 
-	if (XGetWindowProperty(dpy, c->win, netatom[NetWMIcon], 0L, LONG_MAX, False, AnyPropertyType,
-	    &real, &format, &n, &extra, (unsigned char **)&p) != Success)
+	if (!(n = getatom(c->win, netatom[NetWMIcon], LONG_MAX, AnyPropertyType, (unsigned char **)&p)))
 		return;
-
-	if (n == 0 || format != 32) {
-		XFree(p);
-		return;
-	}
 
 	{
 		unsigned long *i;
