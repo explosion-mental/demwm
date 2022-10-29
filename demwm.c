@@ -1872,7 +1872,7 @@ geticonprop(Client *c)
 			}
 			if ((sz = w * h) > end - i)
 				break;
-			if ((m = w > h ? w : h) >= iconsize && (d = m - iconsize) < bstd) {
+			if ((m = MAX(w, h)) >= iconsize && (d = m - iconsize) < bstd) {
 				bstd = d;
 				bstp = i;
 			}
@@ -1885,45 +1885,33 @@ geticonprop(Client *c)
 				}
 				if ((sz = w * h) > end - i)
 					break;
-				if ((d = iconsize - (w > h ? w : h)) < bstd) {
+				if ((d = iconsize - MAX(w, h)) < bstd) {
 					bstd = d;
 					bstp = i;
 				}
 			}
 		}
-		if (!bstp) {
-			XFree(p);
-			return;
-		}
 	}
 
-	if ((w = *(bstp - 2)) == 0 || (h = *(bstp - 1)) == 0) {
+	if (!bstp || (w = *(bstp - 2)) == 0 || (h = *(bstp - 1)) == 0) {
 		XFree(p);
 		return;
 	}
 
-	uint32_t icw, ich;
+	/* Picture width and height */
 	if (w <= h) {
-		ich = iconsize;
-		icw = w * drw->fonts->h / h;
-		if (icw == 0)
-			icw = 1;
+		c->ich = iconsize;
+		c->icw = MAX(w * drw->fonts->h / h, 1);
 	} else {
-		icw = iconsize;
-		ich = h * drw->fonts->h / w;
-		if (ich == 0)
-			ich = 1;
+		c->ich = MAX(h * drw->fonts->h / w, 1);
+		c->icw = iconsize;
 	}
 
-	/* Picture width and height */
-	c->icw = icw;
-	c->ich = ich;
-
-	uint32_t i, *bstp32 = (uint32_t *)bstp;
-	for (sz = w * h, i = 0; i < sz; i++)
+	uint32_t i = 0, *bstp32 = (uint32_t *)bstp;
+	for (sz = w * h; i < sz; i++)
 		bstp32[i] = prealpha(bstp[i]);
 
-	c->icon = drw_picture_create_resized(drw, (char *)bstp, w, h, icw, ich);
+	c->icon = drw_picture_create_resized(drw, (char *)bstp, w, h, c->icw, c->ich);
 	XFree(p);
 }
 void
