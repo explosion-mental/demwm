@@ -290,7 +290,7 @@ static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 #ifdef ICONS
 static uint32_t prealpha(uint32_t p);
-static Picture geticonprop(Window w, unsigned int *icw, unsigned int *ich);
+static void geticonprop(Client *c);
 static void freeicon(Client *c);
 static void updateicon(Client *c);
 #endif /* ICONS */
@@ -1840,8 +1840,8 @@ prealpha(uint32_t p)
 	uint32_t g = (a * (p & 0x00FF00u)) >> 8u;
 	return (rb & 0xFF00FFu) | (g & 0x00FF00u) | (a << 24u);
 }
-Picture
-geticonprop(Window win, unsigned int *picw, unsigned int *pich)
+void
+geticonprop(Client *c)
 {
 	int format;
 	unsigned long n, extra, *p = NULL, *bstp = NULL;
@@ -1849,13 +1849,15 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 	uint32_t w, h, sz;
 	Atom real;
 
-	if (XGetWindowProperty(dpy, win, netatom[NetWMIcon], 0L, LONG_MAX, False, AnyPropertyType,
+	c->icon = None;
+
+	if (XGetWindowProperty(dpy, c->win, netatom[NetWMIcon], 0L, LONG_MAX, False, AnyPropertyType,
 	    &real, &format, &n, &extra, (unsigned char **)&p) != Success)
-		return None;
+		return;
 
 	if (n == 0 || format != 32) {
 		XFree(p);
-		return None;
+		return;
 	}
 
 	{
@@ -1866,7 +1868,7 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 		for (i = p; i < end - 1; i += sz) {
 			if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) {
 				XFree(p);
-				return None;
+				return;
 			}
 			if ((sz = w * h) > end - i)
 				break;
@@ -1879,7 +1881,7 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 			for (i = p; i < end - 1; i += sz) {
 				if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) {
 					XFree(p);
-					return None;
+					return;
 				}
 				if ((sz = w * h) > end - i)
 					break;
@@ -1891,13 +1893,13 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 		}
 		if (!bstp) {
 			XFree(p);
-			return None;
+			return;
 		}
 	}
 
 	if ((w = *(bstp - 2)) == 0 || (h = *(bstp - 1)) == 0) {
 		XFree(p);
-		return None;
+		return;
 	}
 
 	uint32_t icw, ich;
@@ -1913,17 +1915,16 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 			ich = 1;
 	}
 
-	*picw = icw;
-	*pich = ich;
+	/* Picture width and height */
+	c->icw = icw;
+	c->ich = ich;
 
 	uint32_t i, *bstp32 = (uint32_t *)bstp;
 	for (sz = w * h, i = 0; i < sz; i++)
 		bstp32[i] = prealpha(bstp[i]);
 
-	Picture ret = drw_picture_create_resized(drw, (char *)bstp, w, h, icw, ich);
+	c->icon = drw_picture_create_resized(drw, (char *)bstp, w, h, icw, ich);
 	XFree(p);
-
-	return ret;
 }
 void
 freeicon(Client *c)
@@ -1937,7 +1938,7 @@ void
 updateicon(Client *c)
 {
 	freeicon(c);
-	c->icon = geticonprop(c->win, &c->icw, &c->ich);
+	geticonprop(c);
 }
 #endif /* ICONS */
 
