@@ -1558,11 +1558,13 @@ getatom(Window w, Atom prop, long size, Atom req, unsigned char **p)
 	unsigned long n, extra;
 	Atom real;
 
+	/* harcoded 32bits format only */
 	if (XGetWindowProperty(dpy, w, prop, 0L, size, False, req,
-	    &real, &format, &n, &extra, p) != Success)
-		return 0;
+	    &real, &format, &n, &extra, p) == Success && format == 32 && n)
+		return n;
 
-	return n;
+	XFree(&p);
+	return 0;
 }
 
 int
