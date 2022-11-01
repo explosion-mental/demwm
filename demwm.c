@@ -1563,7 +1563,7 @@ getatom(Window w, Atom prop, long size, Atom req, unsigned char **p)
 	    &real, &format, &n, &extra, p) == Success && format == 32 && n)
 		return n;
 
-	XFree(&p);
+	XFree(*p);
 	return 0;
 }
 
