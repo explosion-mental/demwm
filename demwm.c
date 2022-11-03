@@ -319,8 +319,8 @@ static void resizeclient(Client *c, int x, int y, int w, int h);
 static void restack(Monitor *m);
 static void run(void);
 static void scan(void);
-#ifdef SYSTRAY
 static void resizebarwin(Monitor *m);
+#ifdef SYSTRAY
 static Atom getatomprop(Client *c, Atom prop);
 static unsigned long getatom(Window w, Atom prop, long size, Atom req, unsigned char **p);
 static void removesystrayicon(Client *i);
@@ -1063,9 +1063,7 @@ configurenotify(XEvent *e)
 				for (c = m->clients; c; c = c->next)
 					if (c->f & FS && c->fakefullscreen != 1)
 						resizeclient(c, m->mx, m->my, m->mw, m->mh);
-			#ifdef SYSTRAY
 				resizebarwin(m);
-			#endif /* SYSTRAY */
 			}
 			focus(NULL);
 			arrange(NULL);
