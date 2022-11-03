@@ -1578,12 +1578,12 @@ getrootptr(int *x, int *y)
 long
 getstate(Window w)
 {
-	long result = -1;
 	unsigned char *p = NULL;
-	unsigned long n;
 
-	if ((n = getatom(w, wmatom[WMState], 2L, wmatom[WMState], &p)) != 0)
-		result = *p;
+	if (!getatom(w, wmatom[WMState], 2L, wmatom[WMState], &p))
+		return -1;
+
+	long result = *p;
 	XFree(p);
 	return result;
 }
