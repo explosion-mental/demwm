@@ -540,9 +540,9 @@ static const Button buttons[] = {
 //	{ ClkLtSymbol,          0,              Button5,        focusstack,	{.i = -1} },
 
 	{ ClkWinTitle,          0,    Button1,	SHCMD("maim -usDq ~/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
-	{ ClkWinTitle,          0,              Button2,	zoomswap,       {0} },
-	{ ClkWinTitle,          0,              Button2,	killclient,	{0} },
-	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -us -e 'mv $f ~/Downloads'") },
+//	{ ClkWinTitle,          0,              Button2,	zoomswap,       {0} },
+//	{ ClkWinTitle,          0,              Button2,	killclient,	{0} },
+	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -us -e 'mv $f ~/Downloads && notify-send --icon=~/Downloads/$f ScreenShot_Taken $f'") },
 	{ ClkWinTitle,          0,              Button4,        focusstack,	{.i = +1 } },
 	{ ClkWinTitle,          0,              Button5,        focusstack,	{.i = -1 } },
 
