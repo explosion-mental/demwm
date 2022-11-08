@@ -5,19 +5,18 @@
 _nice screenshots [here](https://explosion-mental.codeberg.page/p/demwm.html#Screenshots)_
 
 # Requirements
-- In order to build demwm you need the Xlib header files.
-- Xcb header files for the `swallow patch`.
-- Any(?) C99 compiler (gcc and tcc tested)
+- Xlib header files.
+- XCB header files for the `swallow` functionality.
+- C99 compiler.
 ## Optional
 - [pywal](https://github.com/dylanaraps/pywal)
 	* if not installed it will set colors to a fallback one defined in config.h
-- [libxft-bgra](https://github.com/uditkarode/libxft-bgra)
-	* There are emojis on config.h, replacing the unicode characters to
-	  non-unicode will make independant of libxft-bgra.
+- [libxft-bgra](https://github.com/uditkarode/libxft-bgra) or a
+  [recent version of libxft](https://gitlab.freedesktop.org/xorg/lib/libxft/-/blob/libXft-2.3.5/NEWS)
+	* emojis are used in config.h, for a workaround just removing these should work.
 - xwallpaper, dunst, glava, etc
 	* There is a script that calls these programs, nothing will crash if
-	  not installed, please take a look and modify
-	  [demwm_random_wall](#demwm_random_wall)
+	  not installed, please take a look and modify [demwm_random_wall](#demwm_random_wall)
 
 # Suggestions
 - Refer to the man page
