@@ -64,28 +64,11 @@ compiled in if you don't need it).
 
 Edit `config.mk` and uncomment the necesary lines to enable them.
 
-## Icons
-Window icons on the title bar, if the program has one to offer.
-
-Uncomment the line with `#ICONS`
-**requires imlib2**
-
-## Systray
-System Tray. Blueman, screenkeys, obs, etc on your bar. You should use this if
-you expect bar functionality like a Destop Enviroment.
-e.g
-- `nm-applet` will display NetworkManager systemtray
-- `pasystray` will display PulseAudio systemtray
-
-
-Uncomment the line with `#SYSTRAY`
-
-## Tag Previews
-Hover your mouse over a tag (you need to have it viewed first) and look the
-contents of it.
-
-Uncomment the line with `#TAG_PREVIEW`
-**requires imlib2**
+Feature      | Description
+-|-
+Icons        | Window icons on the title bar, if the program has one to offer. **requires imlib2**
+Tag Previews | Hover your mouse over a tag (you need to have it viewed first) and look the contents of it. **requires imlib2**
+Systray      | A system tray in the bar (e.g. `nm-applet`, `pasystray` ...).
 
 # demwm_random_wall
 This is a little script chooses a random file from the `img_dir` directory
