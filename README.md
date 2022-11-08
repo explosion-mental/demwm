@@ -11,8 +11,7 @@ _nice screenshots [here](https://explosion-mental.codeberg.page/p/demwm.html#Scr
 ## Optional
 - [pywal](https://github.com/dylanaraps/pywal)
 	* if not installed it will set colors to a fallback one defined in config.h
-- [libxft-bgra](https://github.com/uditkarode/libxft-bgra) or a
-  [recent version of libxft](https://gitlab.freedesktop.org/xorg/lib/libxft/-/blob/libXft-2.3.5/NEWS)
+- [libxft 2.3.5 or later](https://gitlab.freedesktop.org/xorg/lib/libxft/-/blob/libXft-2.3.5/NEWS) or [libxft-bgra](https://github.com/uditkarode/libxft-bgra) or
 	* emojis are used in config.h, for a workaround just removing these should work.
 - xwallpaper, dunst, glava, etc
 	* There is a script that calls these programs, nothing will crash if
