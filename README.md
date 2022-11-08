@@ -22,8 +22,6 @@ _nice screenshots [here](https://explosion-mental.codeberg.page/p/demwm.html#Scr
   [online](https://explosion-mental.codeberg.page/topics/demwm-man.html) or in
   this repo
 - To redirect error mesagges to a file `exec demwm 2> "$HOME/.cache/demwm.log"`
-- edit `config.mk` and change `CC = cc`, I have it default to `tcc` since it's
-  very very fast and I can make changes in the go.
 - edit `demwm_random_wall` to suit you
 - If you are looking for Workspaces, then use [dusk](https://github.com/bakkeby/dusk)
 - On `xinitrc` you should call `demwm_random_wall` or `xrdb` or any other
