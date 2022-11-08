@@ -90,13 +90,13 @@ Uncomment the line with `#TAG_PREVIEW`
 # demwm_random_wall
 This is a little script chooses a random file from the `img_dir` directory
 variable, runs **pywal** with the chosen image and symlinks to `bgloc`. Then
-makes the current `demwm` instance execute `xrdb` to refresh the colors, by
-calling `xsetroot -name xrdb`.
+calls `demwm xrdb` to refresh the colors.
 
-The script is copied/deleted to `${PREFIX}/bin` by default, `PREFIX` path can
+The script is copied/deleted to `${PREFIX}/bin` by default (by `make`), `PREFIX` path can
 be changed in config.mk.
 
-This script is not a dependecy.
+**This script is not a dependecy and can be viewed as a script to demostrate
+`demwm` cli functionality.**
 
 # Patches branch
 My little collection of patches, which aren't necessarily applied to this.
