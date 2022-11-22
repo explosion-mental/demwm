@@ -164,7 +164,7 @@ static XClassHint previewclass = { "demwm-preview", "demwm-preview" };
  * tagsalt: Used if hidevacants is enabled
  * taglayouts: Index that indicates which layouts[] use */
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
-static const int taglayouts[] = {    0,   2,    0,   0,    2,    0,    0,    0,    2 };
+static const int taglayouts[] = {    0,   1,    0,   0,    1,    0,    0,    0,    1 };
 static const char *tagsalt[]  = { "I", "2", "III", "4", "V", "6", "VII", "8", "IX" };
 static const unsigned int alltagslayout = 0; /* the '~0' (all tags) tag */
 
@@ -257,9 +257,9 @@ CUI movefloat   = 22;            /* used in movfh_setmfact and movfv_pushstack *
 static const Layout layouts[] = {
       /* symbol  arrange  gaps */
  	{ "[]=", tile },               /* master on left, slaves on right */
- //	{ "||=", tilewide },               /* master on left, slaves on right */
- 	{ "🧐" , monocle },            /* all windows on top of eachother */
- 	{ "{}" , alphamonocle },       /* monocle but windows aren't stacked */
+//	{ "||=", tilewide },               /* master on left, slaves on right */
+//	{ "🧐" , monocle },            /* all windows on top of eachother */
+ 	{ "🔍" , alphamonocle },       /* monocle but windows aren't stacked */
 //	{ "TTT", bstack },             /* master on top, slaves on bottom */
 //	{ "🐚" , spiral },             /* fibonacci spiral */
 //	{ "[\\]",dwindle },            /* decreasing in size right and leftward */
@@ -304,6 +304,9 @@ static const Layout layouts[] = {
 #define NOTES		"-e", "nvim", "+$", "+startinsert!" /* last line in insert mode */
 #define FURSIZE		"90x25"
 #define FURFONT		"Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true"
+#define VOL(Q)		SHCMD("wpctl set-volume @DEFAULT_AUDIO_SINK@ " Q /*5%-+*/ "; demwm updateblock 8")
+#define MUTE /*toggle mute*/ SHCMD("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; demwm updateblock 8")
+#define V(var)		spawn, { .v = var }
 
 /* commands */
 static const char *dmenucmd[]  = { "dmenu_run_i", DMENUARGS, NULL };
@@ -311,6 +314,7 @@ static const char *dmenuipc[]  = { "dmenu_dwmc", DMENUARGS, NULL };
 static const char *samedmenu[] = { "samedirmenu", DMENUARGS, NULL };
 static const char *clip[]      = { "clipmenu", "-i", "-l", "25", "-mon", "-1", DMENUARGS, NULL };
 static const char *random_wall[] = { "demwm_random_wall", NULL };
+static const char *rofcalc[]   = { "rofi", "-show", "calc", "-modi", "calc", "-no-show-match", "-no-sort", NULL };
 
 /* scratchpads */
 static const char *scratchpads[][32] = {
@@ -341,7 +345,7 @@ static const Key keys[] = {
 	SPKEYS(MOD,		XK_s,	/* terminal	*/	Sp1)
 	SPKEYS(MOD,		XK_e,	/* notes	*/	Sp2)
 	SPKEYS(MOD|Ctrl,	XK_x,	/* calculator	*/	Sp3)
-	{ MOD,			XK_x,	SHCMD("rofi -show calc -modi calc -no-show-match -no-sort") },
+	{ MOD,			XK_x,	V(rofcalc) },
 	SPKEYS(MOD|Ctrl,	XK_s,	/* uni		*/	Sp4)
 	SPKEYS(MOD,		XK_n,	/* music	*/	Sp5)
 	{ MOD|Shift,		XK_p,	updateblock,	{ .ui = 8 }	},
@@ -455,9 +459,10 @@ static const Key keys[] = {
 	{ MOD|Shift,		XK_equal,	CMD("mpc", "volume", "+3")	},
 	{ MOD|Shift,		XK_bracketleft,	CMD("mpc", "seek", "-10")	},
 	{ MOD|Shift,		XK_bracketright,CMD("mpc", "seek", "+10")	},
-	{ MOD,			XK_minus,	SHCMD("pamixer -d 3; demwm updateblock 8")},
-	{ MOD,			XK_equal,	SHCMD("pamixer --allow-boost -i 3; demwm updateblock 8")},
-	{ MOD,			XK_BackSpace,	SHCMD("pamixer -t; demwm updateblock 8")},
+	//{ MOD,			XK_minus,	SHCMD("pamixer -d 3; demwm updateblock 8")},
+	{ MOD,			XK_minus,	VOL("3%-")	},
+	{ MOD,			XK_equal,	VOL("3%+")	},
+	{ MOD,			XK_BackSpace,	MUTE },
 	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev && mpdnoti 900; demwm updateblock 11")	},
 	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next && mpdnoti 900; demwm updateblock 11")	},
 	{ MOD,			XK_p,	SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
@@ -465,9 +470,9 @@ static const Key keys[] = {
 	{ MOD,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 900; demwm updateblock 11")	},
 	{ MOD,	XK_bracketright,	SHCMD("mpc next && mpdnoti 900; demwm updateblock 11")	},
 	{ MOD|Ctrl,	XK_p,		CMD("mpdnoti")		},
-	{ 0, XF86XK_AudioLowerVolume,	SHCMD("pamixer -d 2; demwm updateblock 8")},
-	{ 0, XF86XK_AudioRaiseVolume,	SHCMD("pamixer --allow-boost -i 2; demwm updateblock 8")},
-	{ 0, XF86XK_AudioMute,		SHCMD("pamixer -t; demwm updateblock 8")	},
+	{ 0, XF86XK_AudioLowerVolume,	VOL("2%-")	},
+	{ 0, XF86XK_AudioRaiseVolume,	VOL("2%+")	},
+	{ 0, XF86XK_AudioMute,		MUTE },
 //	{ 0, XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
 //	{ 0, XF86XK_ScreenSaver,	SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
 //	{ 0, XF86XK_AudioStop,		SHCMD("mpc toggle)		},
