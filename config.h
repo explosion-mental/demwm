@@ -57,7 +57,6 @@ static char *xrescolors[][2] = {
 	{ bg_wal,	"background" },
 	{ fg_wal,	"foreground" },
 };
-
 static const char *colors[][2] = {
 			/* fg		bg           description         */
 	[SchemeNorm]   = { fg_wal,	color0 }, /* normal tags section */
@@ -164,9 +163,39 @@ static XClassHint previewclass = { "demwm-preview", "demwm-preview" };
  * tagsalt: Used if hidevacants is enabled
  * taglayouts: Index that indicates which layouts[] use */
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
-static const int taglayouts[] = {    0,   1,    0,   0,    1,    0,    0,    0,    1 };
+static const int taglayouts[] = {    1,   1,    0,   0,    1,    0,    0,    0,    1 };
 static const char *tagsalt[]  = { "I", "2", "III", "4", "V", "6", "VII", "8", "IX" };
 static const unsigned int alltagslayout = 0; /* the '~0' (all tags) tag */
+
+/* layout(s) */
+static const Layout layouts[] = {
+      /* symbol  arrange  gaps */
+ 	{ "[]=", tile },               /* master on left, slaves on right */
+//	{ "||=", tilewide },               /* master on left, slaves on right */
+//	{ "🧐" , monocle },            /* all windows on top of eachother */
+ 	{ "🔍" , alphamonocle },       /* monocle but windows aren't stacked */
+//	{ "TTT", bstack },             /* master on top, slaves on bottom */
+//	{ "🐚" , spiral },             /* fibonacci spiral */
+//	{ "[\\]",dwindle },            /* decreasing in size right and leftward */
+	{ "[D]", deck },               /* master on left, slaves in monocle mode on right */
+//	{ ">M>", centeredfloatmaster}, /* centermaster but master floats */
+//	{ "|M|", centeredmaster },     /* master in middle, slaves on sides */
+//	{ "===", bstackhoriz },        /* bstack but slaves stacked "monocle"-like */
+//	{ "HHH", grid },               /* windows in a grid */
+	{ "###", nrowgrid },           /* gaplessgrid with no gaps, but not equal size */
+//	{ "#v#", vsplitnrowgrid },     /* nrowgrid: force two clients to always split vertically */
+//	{ "---", horizgrid },          /* gaplessgrid but with horizontal order */
+//	{ ":::", gaplessgrid },        /* another grid like layout variant */
+	{ "🥏", NULL },                /* no layout function means floating behavior */
+	{ "[ ]", clear },              /* hides all visible clients, enjoy your nice wallpaper */
+};
+
+/* misc */
+static const float mfact = 0.55; /* factor of master area size [0.05..0.95] */
+CUI nmaster     = 1;             /* number of clients in master area */
+CUI resizehints = 0;             /* 1 means respect size hints in tiled resizals */
+CUI floathints  = 0;             /* 1 means respect size hints if the window is floating */
+CUI movefloat   = 22;            /* used in movfh_setmfact and movfv_pushstack */
 
 static const Rule rules[] = {
 	/*
@@ -223,7 +252,6 @@ static const Rule rules[] = {
 	RULE(.instance = "mpvfloat",	.tags = SPTAG(Sp9), .flags = Float)
 	RULE(.title = "noswallow",	.flags = NoSwallow)
 
-
 	/* scratchpads */
 	RULE(.instance = "term",	.tags = SPTAG(Sp1), .flags = Float | Terminal)
 	RULE(.instance = "notes",	.tags = SPTAG(Sp2), .flags = Float)
@@ -247,36 +275,7 @@ static const int scrollargs[4][2] = {
 	{ 0, 			+scrollsensetivity },
 };
 
-/* layout(s) */
-static const float mfact = 0.55; /* factor of master area size [0.05..0.95] */
-CUI nmaster     = 1;             /* number of clients in master area */
-CUI resizehints = 0;             /* 1 means respect size hints in tiled resizals */
-CUI floathints  = 0;             /* 1 means respect size hints if the window is floating */
-CUI movefloat   = 22;            /* used in movfh_setmfact and movfv_pushstack */
-
-static const Layout layouts[] = {
-      /* symbol  arrange  gaps */
- 	{ "[]=", tile },               /* master on left, slaves on right */
-//	{ "||=", tilewide },               /* master on left, slaves on right */
-//	{ "🧐" , monocle },            /* all windows on top of eachother */
- 	{ "🔍" , alphamonocle },       /* monocle but windows aren't stacked */
-//	{ "TTT", bstack },             /* master on top, slaves on bottom */
-//	{ "🐚" , spiral },             /* fibonacci spiral */
-//	{ "[\\]",dwindle },            /* decreasing in size right and leftward */
-	{ "[D]", deck },               /* master on left, slaves in monocle mode on right */
-//	{ ">M>", centeredfloatmaster}, /* centermaster but master floats */
-//	{ "|M|", centeredmaster },     /* master in middle, slaves on sides */
-//	{ "===", bstackhoriz },        /* bstack but slaves stacked "monocle"-like */
-//	{ "HHH", grid },               /* windows in a grid */
-	{ "###", nrowgrid },           /* gaplessgrid with no gaps, but not equal size */
-//	{ "#v#", vsplitnrowgrid },     /* nrowgrid: force two clients to always split vertically */
-//	{ "---", horizgrid },          /* gaplessgrid but with horizontal order */
-//	{ ":::", gaplessgrid },        /* another grid like layout variant */
-	{ "🥏", NULL },                /* no layout function means floating behavior */
-	{ "[ ]", clear },              /* hides all visible clients, enjoy your nice wallpaper */
-};
-
-/* key definitions */
+/* key definitions, some lines below are avaliable modifiers */
 #define MOD Super
 
 #define TAGKEYS(KEY,TAG) /* keys from 1 to 9 */ \
@@ -329,8 +328,8 @@ static const char *scratchpads[][32] = {
 [Sp9] = { "st", "-n", "mpvfloat", "-g", "115x30" , NULL }, /* terminal */
 };
 
-/* modifier(s) can be: Alt, AltGr, Ctrl, Shift, ShiftGr, Super (or MOD)
- * See the man page for a description of every function and it's argument */
+/* modifier(s) can be: Alt, AltGr, Ctrl, Shift, ShiftGr, Super, or MOD
+ * See the man page for a description of the functions and arguments */
 static const Key keys[] = {
 	/* modifier(s)		key	function	argument */
 
