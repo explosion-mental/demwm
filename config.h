@@ -2,8 +2,9 @@
 
 #define CI	static const int
 #define CUI	static const unsigned int
+#define CF	static const float
 
-/* appearance */
+/* misc */
 CUI systraypinning = 0; /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 CUI systraypinningfailfirst = 1; /* 1: if pinning fails, display systray on the first monitor, 0: display systray on the last monitor*/
 CI  barh         = 9;      /* 1 or more/less means bar height */
@@ -22,6 +23,11 @@ CUI scalepreview = 4;      /* tag previews scaling (scalepreview / screensize) *
 CUI swallowfloat = 0;      /* 1 means swallow floating windows by default */
 CUI swallowffs   = 1;      /* 1 means swallow fullscreen windows by default */
 CUI underlntitle = 1;      /* 1 means an underline on the title */
+CF  mfact        = 0.55;   /* factor of master area size [0.05..0.95] */
+CUI nmaster      = 1;      /* number of clients in master area */
+CUI resizehints  = 0;      /* 1 means respect size hints in tiled resizals */
+CUI floathints   = 0;      /* 1 means respect size hints if the window is floating */
+CUI movefloat    = 22;     /* used in movfh_setmfact and movfv_pushstack */
 static int smartgaps  = 0; /* 1 means no outer gap when there is only one window */
 static int showbar    = 1; /* 0 means no bar */
 static int showstatus = 1; /* 0 means no status text */
@@ -149,7 +155,7 @@ static const Block blocks[] = {
 
 /* 0 means render blocks left to right, the default, 1 to start from right to left */
 #define INVERSED		1
-/* max number of characters that one block command output can contain */
+/* max number of characters bits that one block command output can contain */
 #define CMDLENGTH		65
 /* delimeter between block comand outputs */
 static const char delimiter[] = " ";
@@ -189,13 +195,6 @@ static const Layout layouts[] = {
 	{ "🥏", NULL },                /* no layout function means floating behavior */
 	{ "[ ]", clear },              /* hides all visible clients, enjoy your nice wallpaper */
 };
-
-/* misc */
-static const float mfact = 0.55; /* factor of master area size [0.05..0.95] */
-CUI nmaster     = 1;             /* number of clients in master area */
-CUI resizehints = 0;             /* 1 means respect size hints in tiled resizals */
-CUI floathints  = 0;             /* 1 means respect size hints if the window is floating */
-CUI movefloat   = 22;            /* used in movfh_setmfact and movfv_pushstack */
 
 static const Rule rules[] = {
 	/*
@@ -265,16 +264,6 @@ static const Rule rules[] = {
 	//RULE(.instance = "emacsfloat",	.tags = SPTAG(8), .isfloating = 1)
 };
 
-/* 1 means resize window by 1 pixel for each scroll event on resizemousescroll */
-#define scrollsensetivity	18
-static const int scrollargs[4][2] = {
-	/* width change         height change */
-	{ -scrollsensetivity,	0 },
-	{ +scrollsensetivity,	0 },
-	{ 0, 			-scrollsensetivity },
-	{ 0, 			+scrollsensetivity },
-};
-
 /* key definitions, some lines below are avaliable modifiers */
 #define MOD Super
 
@@ -298,13 +287,18 @@ static const int scrollargs[4][2] = {
 /* helper for spawning shell commands in scratchpads */
 #define SH(cmd)		{ "/bin/sh", "-c", cmd, NULL }
 
-/* personal macros for common comand line arguments */
+/* personal macros to not repeat myself */
 #define DMENUARGS	"-nb", color0, "-nf", color8, "-sb", color2, "-sf", color0
 #define NOTES		"-e", "nvim", "+$", "+startinsert!" /* last line in insert mode */
 #define FURSIZE		"90x25"
 #define FURFONT		"Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true"
 #define VOL(Q)		SHCMD("wpctl set-volume @DEFAULT_AUDIO_SINK@ " Q /*5%-+*/ "; demwm updateblock 8")
 #define MUTE /*toggle mute*/ SHCMD("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; demwm updateblock 8")
+#define SHOT		SHCMD("scrot -us -e 'mv $f ~/Downloads && notify-send --icon=~/Downloads/$f ScreenShot_Taken $f'")
+#define MPCVOL(Q)	CMD("mpc", "volume", Q)
+#define MPCNEXT		SHCMD("mpc next && mpdnoti 900; demwm updateblock 11")
+#define MPCPREV		SHCMD("mpc prev && mpdnoti 900; demwm updateblock 11")
+#define LIGHT(Q)	SHCMD("sudo brightnessctl -q set " Q)
 #define V(var)		spawn, { .v = var }
 
 /* commands */
@@ -327,7 +321,6 @@ static const char *scratchpads[][32] = {
 [Sp8] = { "st", "-n", "testi", "-g", FURSIZE, "-f", FURFONT, NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
 [Sp9] = { "st", "-n", "mpvfloat", "-g", "115x30" , NULL }, /* terminal */
 };
-
 /* modifier(s) can be: Alt, AltGr, Ctrl, Shift, ShiftGr, Super, or MOD
  * See the man page for a description of the functions and arguments */
 static const Key keys[] = {
@@ -452,36 +445,33 @@ static const Key keys[] = {
 	{ MOD|Ctrl,		XK_a,	defaultgaps,		{0}	},
 	{ MOD|Ctrl|Shift,	XK_a,	togglesmartgaps,	{0}	},
 
-			/* Custom bindings (may be better using shkd) */
+			/* Custom bindings (maybe use shkd) */
 					/* Media */
-	{ MOD|Shift,		XK_minus,	CMD("mpc", "volume", "-3")	},
-	{ MOD|Shift,		XK_equal,	CMD("mpc", "volume", "+3")	},
+	{ MOD|Shift,		XK_minus,	MPCVOL("-3")	},
+	{ MOD|Shift,		XK_equal,	MPCVOL("+3")	},
 	{ MOD|Shift,		XK_bracketleft,	CMD("mpc", "seek", "-10")	},
 	{ MOD|Shift,		XK_bracketright,CMD("mpc", "seek", "+10")	},
-	//{ MOD,			XK_minus,	SHCMD("pamixer -d 3; demwm updateblock 8")},
 	{ MOD,			XK_minus,	VOL("3%-")	},
 	{ MOD,			XK_equal,	VOL("3%+")	},
 	{ MOD,			XK_BackSpace,	MUTE },
-	{ 0,	XF86XK_AudioPrev,		SHCMD("mpc prev && mpdnoti 900; demwm updateblock 11")	},
-	{ 0,	XF86XK_AudioNext,		SHCMD("mpc next && mpdnoti 900; demwm updateblock 11")	},
+	{ 0,	XF86XK_AudioPrev,		MPCNEXT	},
+	{ 0,	XF86XK_AudioNext,		MPCPREV	},
 	{ MOD,			XK_p,	SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
 			{ mpc play && mpdnoti 2000 ;} || mpc pause; demwm updateblock 11")	},
-	{ MOD,	XK_bracketleft,		SHCMD("mpc prev && mpdnoti 900; demwm updateblock 11")	},
-	{ MOD,	XK_bracketright,	SHCMD("mpc next && mpdnoti 900; demwm updateblock 11")	},
-	{ MOD|Ctrl,	XK_p,		CMD("mpdnoti")		},
+	{ MOD,			XK_bracketleft,	 MPCNEXT	},
+	{ MOD,			XK_bracketright, MPCPREV	},
+	{ MOD|Ctrl,		XK_p,            CMD("mpdnoti")	},
 	{ 0, XF86XK_AudioLowerVolume,	VOL("2%-")	},
 	{ 0, XF86XK_AudioRaiseVolume,	VOL("2%+")	},
 	{ 0, XF86XK_AudioMute,		MUTE },
 //	{ 0, XF86XK_Calculator,		SHCMD("sleep 0.2 ; scrot -se 'mv $f ~/Downloads'") },
-//	{ 0, XF86XK_ScreenSaver,	SHCMD("slock & xset dpms force off; mpc pause; pauseallmpv") },
-//	{ 0, XF86XK_AudioStop,		SHCMD("mpc toggle)		},
-//	{ 0, XF86XK_Sleep,		SHCMD("sudo zzz")		},
 	{ 0, XF86XK_ScreenSaver,	CMD("xset", "dpms", "force", "off")	},
-	{ 0, XF86XK_MonBrightnessUp,	SHCMD("sudo brightnessctl -q set +1%")	},
-	{ 0, XF86XK_MonBrightnessDown,	SHCMD("sudo brightnessctl -q set 1%-")	},
+	{ 0, XF86XK_MonBrightnessUp,	LIGHT("+1%")	},
+	{ 0, XF86XK_MonBrightnessDown,	LIGHT("1%-")	},
 	{ 0, XF86XK_AudioPlay,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
 			{ mpc play && mpdnoti 2000 ;} || mpc pause; demwm updateblock 11")	},
-				/* one shooters */
+
+		 			/* one shooters */
 	{ MOD,		   XK_Return,	CMD("st")			},
 	{ MOD|Shift,	   XK_Return,	CMD("samedir")			},
 	{ MOD,			XK_m,	CMD("st", "-e", "vifmrun")	},
@@ -510,7 +500,7 @@ static const Key keys[] = {
 //	{ MOD,		 	XK_F4,	SHCMD("syncthing & kill -55 $(pidof dwmblocks)") },
 //	{ MOD,	         	XK_F6,	SHCMD("dmenumount")	},
 //	{ MOD,		 	XK_F7,	SHCMD("dmenumountq")	},
-	{ MOD,		 	XK_F8,	SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
+//	{ MOD,		 	XK_F8,	SHCMD("sleep 0.2 ; xdotool key Caps_Lock") },
 	/* remove black bars on the screenshot (90% percent accuracy) */
 	{ MOD,			XK_Print,CMD("dmenurecord")	},
 				/* miscelaneous */
@@ -518,12 +508,23 @@ static const Key keys[] = {
 	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
 	{ Shift,	XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
 	magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
-	{ 0,	XK_Print,	SHCMD("maim ~/Downloads/$(date +'%d-%m_%H_%M_%S').png")	},
+	{ 0,			XK_Print,	SHOT },
 /* panic key */ { MOD, XK_Delete, SHCMD("mpv '/home/faber/Media/Videos/Fight the Power!.mkv' --loop-file=inf --fs") },
 };
 
-/* button definitions
- * click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
+/* mouse button definitions */
+
+/* 1 means resize window by 1 pixel for each scroll event on resizemousescroll */
+#define scrollsensetivity	18
+static const int scrollargs[4][2] = {
+	/* width change         height change */
+	{ -scrollsensetivity,	0 },
+	{ +scrollsensetivity,	0 },
+	{ 0, 			-scrollsensetivity },
+	{ 0, 			+scrollsensetivity },
+};
+
+/* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static const Button buttons[] = {
 	/* click                modifier(s)      button          function        argument */
 	{ ClkTagBar,            0,		Button1,        view,           {0} },
@@ -546,7 +547,7 @@ static const Button buttons[] = {
 	{ ClkWinTitle,          0,    Button1,	SHCMD("maim -usDq ~/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
 //	{ ClkWinTitle,          0,              Button2,	zoomswap,       {0} },
 //	{ ClkWinTitle,          0,              Button2,	killclient,	{0} },
-	{ ClkWinTitle,		0,		Button3,	SHCMD("scrot -us -e 'mv $f ~/Downloads && notify-send --icon=~/Downloads/$f ScreenShot_Taken $f'") },
+	{ ClkWinTitle,		0,		Button3,	SHOT },
 	{ ClkWinTitle,          0,              Button4,        focusstack,	{.i = +1 } },
 	{ ClkWinTitle,          0,              Button5,        focusstack,	{.i = -1 } },
 
