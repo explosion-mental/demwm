@@ -340,7 +340,6 @@ static void setclientprop(Client *c);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setup(void);
-static void setupx11(void);
 static void setsignal(int sig, void (*sahandler)(int sig));
 static void seturgent(Client *c, int urg);
 static void shift(unsigned int *tag, int i);
@@ -3343,14 +3342,13 @@ updatenumlockmask(void)
 {
 	unsigned int i;
 	int j;
-	XModifierKeymap *modmap;
-
+	XModifierKeymap *modmap = XGetModifierMapping(dpy);
 	numlockmask = 0;
-	modmap = XGetModifierMapping(dpy);
+
 	for (i = 0; i < 8; i++)
 		for (j = 0; j < modmap->max_keypermod; j++)
 			if (modmap->modifiermap[i * modmap->max_keypermod + j]
-				== XKeysymToKeycode(dpy, XK_Num_Lock))
+			    == XKeysymToKeycode(dpy, XK_Num_Lock))
 				numlockmask = (1 << i);
 	XFreeModifiermap(modmap);
 }
@@ -3420,37 +3418,40 @@ updatetitle(Client *c)
 void
 updatewmhints(Client *c)
 {
-	XWMHints *wmh;
+	XWMHints *wmh = XGetWMHints(dpy, c->win);
 
-	if ((wmh = XGetWMHints(dpy, c->win))) {
-		if (c == selmon->sel && wmh->flags & XUrgencyHint) {
+	if (!wmh)
+		return;
+
+	if (wmh->flags & XUrgencyHint) {
+		if (c == selmon->sel) {
 			wmh->flags &= ~XUrgencyHint;
 			XSetWMHints(dpy, c->win, wmh);
 		} else {
-			if (wmh->flags & XUrgencyHint) {
-				c->f |= Urg;
-				XSetWindowBorder(dpy, c->win, scheme[BorderUrg][ColFg].pixel);
-			} else
-				c->f &= ~Urg;
+			c->f |= Urg;
+			XSetWindowBorder(dpy, c->win, scheme[BorderUrg][ColFg].pixel);
 		}
-		if (wmh->flags & InputHint)
-			SETVAL(c, NeverFocus, !wmh->input);
-		else
-			c->f &= ~NeverFocus;
-		XFree(wmh);
-	}
+	} else
+		c->f &= ~Urg;
+
+	if (wmh->flags & InputHint)
+		SETVAL(c, NeverFocus, !wmh->input);
+	else
+		c->f &= ~NeverFocus;
+
+	XFree(wmh);
 }
 
 pid_t
 winpid(Window w)
 {
-	pid_t result = 0;
+	pid_t ret = 0;
 	unsigned char *p = NULL;
 
 	if (getatom(w, netatom[NetWMPid], 1L, AnyPropertyType, &p)) {
-		result = *(pid_t *)p;
+		ret = *(pid_t *)p;
 		XFree(p);
-		return result;
+		return ret;
 	}
 
 #ifdef __linux__
@@ -3475,19 +3476,19 @@ winpid(Window w)
 	for (; i.rem; xcb_res_client_id_value_next(&i)) {
 		spec = i.data->spec;
 		if (spec.mask & _XPID) {
-			result = *xcb_res_client_id_value_value(i.data);
+			ret = *xcb_res_client_id_value_value(i.data);
 			break;
 		}
 	}
 
 	free(r);
 
-	if (result == (pid_t) - 1)
-		result = 0;
+	if (ret == (pid_t) - 1)
+		ret = 0;
 
 #endif /* __linux__ */
 
-	return result;
+	return ret;
 }
 
 pid_t
