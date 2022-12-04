@@ -352,6 +352,7 @@ static const Key keys[] = {
 //	{ MOD|Ctrl,          	XK_v,	scratchpad_remove,	{0} },
 
 				/* Navigation */
+	{ MOD,		        XK_c,	swapfocus, 	{0} },
 	{ MOD,			XK_j,	focusstack,	{ .i = -1 }	},
 //	{ MOD|Shift,		XK_j,	movefloatvert,	{ .i = 1 }	},
 //	{ MOD|Shift,		XK_j,	pushstack,	{ .i = 1 }	},
@@ -479,7 +480,7 @@ static const Key keys[] = {
 	{ MOD|Ctrl,		XK_m,	SHCMD("maim -usDq ${HOME}/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
 	{ MOD,			XK_b,	CMD("Books001")		},
 	{ MOD|Shift,		XK_u,	CMD("bookmenu")		},
-	{ MOD,		        XK_c,	CMD("st", "-f", FURFONT, "-e", "calcurse")},
+	{ MOD,		        XK_r,	CMD("st", "-f", FURFONT, "-e", "calcurse")},
 	{ MOD,	         	XK_z,	CMD("redyt", "-r")		},
 	{ MOD|Shift,	      	XK_z,	CMD("waldl")		},
 	{ MOD,		    XK_grave,	CMD("dmenuunicode")		},
@@ -492,7 +493,7 @@ static const Key keys[] = {
 	{ MOD,			XK_t,	CMD("testi")			},
 	{ MOD,		   XK_Escape,	CMD("sysfunctions")	},
 //	{ MOD,			XK_e,	SHCMD("st -t New-e newsboat -q; pkill -RTMIN+6 dwmblocks") },
-	{ MOD,			XK_r,	SHCMD("st -t NewsBoat -e newsboat -q") },
+//	{ MOD,			XK_r,	SHCMD("st -t NewsBoat -e newsboat -q") },
 //	{ MOD,			XK_F2,	SHCMD("dmenu_man")	},
 //	{ MOD,	         	XK_F3,	SHCMD("dmenumount")	},
 	{ MOD,	         	XK_F3,	CMD("dmenumount")	},

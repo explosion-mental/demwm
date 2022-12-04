@@ -1241,4 +1241,15 @@ shiftpreview(const Arg *arg)
 	#endif /* TAG_PREVIEW */
 }
 
+void
+swapfocus()
+{
+	Client *c = selmon->clients;
 
+	for (; c && c != prevclient; c = c->next);
+
+	if (c == prevclient) {
+		focus(prevclient);
+		restack(prevclient->mon);
+	}
+}

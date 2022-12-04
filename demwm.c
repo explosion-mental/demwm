@@ -443,6 +443,7 @@ static void incrihgaps(const Arg *arg);	/* horizontal inner gaps */
 static void incrogaps(const Arg *arg);	/* outter gaps (horiz + vert) */
 static void incrohgaps(const Arg *arg);	/* vertcal outter gaps */
 static void incrovgaps(const Arg *arg);	/* horizontal outter gaps */
+static void swapfocus(const Arg *arg);
 /* Customs */
 static void togglealwaysontop(const Arg *arg);
 static void movefloathorz(const Arg *arg);
@@ -540,6 +541,7 @@ static unsigned int sysw = 1; /* systray width */
 static Atom wmatom[WMLast], netatom[NetLast];
 static Cur *cursor[CurLast];
 static Client *scratchpad_last_showed = NULL;
+static Client *prevclient = NULL;
 static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
@@ -3091,6 +3093,8 @@ unfocus(Client *c, int setfocus)
 {
 	if (!c)
 		return;
+
+	prevclient = c;
 	grabbuttons(c, 0);
 	XSetWindowBorder(dpy, c->win, scheme[BorderNorm][ColFg].pixel);
 	if (setfocus) {
