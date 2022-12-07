@@ -1249,6 +1249,7 @@ swapfocus()
 	for (; c && c != prevclient; c = c->next);
 
 	if (c == prevclient) {
+		view(&((Arg){.ui = prevclient->tags & TAGMASK}));
 		focus(prevclient);
 		restack(prevclient->mon);
 	}
