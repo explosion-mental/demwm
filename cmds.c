@@ -1242,7 +1242,7 @@ shiftpreview(const Arg *arg)
 }
 
 void
-swapfocus()
+swapfocus(const Arg *arg)
 {
 	Client *c = selmon->clients;
 
