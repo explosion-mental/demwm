@@ -338,11 +338,11 @@ static const Key keys[] = {
 	SPKEYS(MOD,		XK_e,	/* notes	*/	Sp2)
 	SPKEYS(MOD|Ctrl,	XK_x,	/* calculator	*/	Sp3)
 	{ MOD,			XK_x,	V(rofcalc) },
-	SPKEYS(MOD|Ctrl,	XK_s,	/* uni		*/	Sp4)
+	//SPKEYS(MOD|Ctrl,	XK_s,	/* uni		*/	Sp4)
+	SPKEYS(MOD|Ctrl,	XK_s,	/* samedir	*/	Sp7)
 	SPKEYS(MOD,		XK_n,	/* music	*/	Sp5)
 	{ MOD|Shift,		XK_p,	updateblock,	{ .ui = 8 }	},
 	SPKEYS(MOD|Shift,	XK_p,	/* pulsemixer	*/	Sp6)
-	SPKEYS(MOD|Shift,	XK_s,	/* samedir	*/	Sp7)
 	SPKEYS(MOD|Ctrl,	XK_e,	/* notes - is	*/	Sp8)
 	SPKEYS(MOD|Shift,	XK_n,	/* notes - is	*/	Sp9)
 			/* dynamic scratchpads */
@@ -419,7 +419,7 @@ static const Key keys[] = {
 	{ MOD|Shift,         XK_space,	togglefloating,		{0}	},
 	{ MOD,		XK_semicolon,	incnmaster,	{ .i = +1 }	},
 	{ MOD|Shift,	XK_semicolon,	incnmaster,	{ .i = -1 }	},
-	{ MOD|Ctrl,	    XK_grave,	togglebar,		{0}	},
+	{ MOD|Ctrl,	    XK_grave,	toggletagbar,		{0}	},
 	{ MOD,			XK_F1,	togglefullscreen,	{0}	},
 	{ MOD|Ctrl,        	XK_F1,	togglefakefullscreen,	{0}	},
 	{ MOD|Shift,		XK_F5,	quit,           	{0}	},
