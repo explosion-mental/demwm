@@ -234,6 +234,7 @@ static const Rule rules[] = {
 	RULE(.class = "firefox",	.tags = 1 << 1, .flags = FakeFS)
 	RULE(.class = "LibreWolf",	.tags = 1 << 1, .flags = FakeFS)
 	RULE(.class = "Brave-browser",	.tags = 1 << 4, .flags = FakeFS)
+	RULE(.class = "discord",	.tags = 1 << 7, .flags = FakeFS)
 	RULE(.class = "St",		.flags = Terminal)
 	RULE(.title = "Event Tester",	.flags = NoSwallow) /* xev */
 	/* floating */
@@ -420,6 +421,7 @@ static const Key keys[] = {
 	{ MOD,		XK_semicolon,	incnmaster,	{ .i = +1 }	},
 	{ MOD|Shift,	XK_semicolon,	incnmaster,	{ .i = -1 }	},
 	{ MOD|Ctrl,	    XK_grave,	toggletagbar,		{0}	},
+//	{ MOD|Ctrl,	    XK_grave,	togglebar,		{0}	},
 	{ MOD,			XK_F1,	togglefullscreen,	{0}	},
 	{ MOD|Ctrl,        	XK_F1,	togglefakefullscreen,	{0}	},
 	{ MOD|Shift,		XK_F5,	quit,           	{0}	},
@@ -455,12 +457,12 @@ static const Key keys[] = {
 	{ MOD,			XK_minus,	VOL("3%-")	},
 	{ MOD,			XK_equal,	VOL("3%+")	},
 	{ MOD,			XK_BackSpace,	MUTE },
-	{ 0,	XF86XK_AudioPrev,		MPCNEXT	},
-	{ 0,	XF86XK_AudioNext,		MPCPREV	},
+	{ 0,	XF86XK_AudioPrev,		MPCPREV	},
+	{ 0,	XF86XK_AudioNext,		MPCNEXT	},
 	{ MOD,			XK_p,	SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
 			{ mpc play && mpdnoti 2000 ;} || mpc pause; demwm updateblock 11")	},
-	{ MOD,			XK_bracketleft,	 MPCNEXT	},
-	{ MOD,			XK_bracketright, MPCPREV	},
+	{ MOD,			XK_bracketleft,	 MPCPREV	},
+	{ MOD,			XK_bracketright, MPCNEXT	},
 	{ MOD|Ctrl,		XK_p,            CMD("mpdnoti")	},
 	{ 0, XF86XK_AudioLowerVolume,	VOL("2%-")	},
 	{ 0, XF86XK_AudioRaiseVolume,	VOL("2%+")	},
@@ -471,6 +473,8 @@ static const Key keys[] = {
 	{ 0, XF86XK_MonBrightnessDown,	LIGHT("1%-")	},
 	{ 0, XF86XK_AudioPlay,		SHCMD("[ $(mpc status '%state%') = 'paused' ] && \
 			{ mpc play && mpdnoti 2000 ;} || mpc pause; demwm updateblock 11")	},
+	//{ 0, XF86RFKill,	LIGHT("1%-")	},
+
 
 		 			/* one shooters */
 	{ MOD,		   XK_Return,	CMD("st")			},
