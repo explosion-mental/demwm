@@ -2937,8 +2937,8 @@ setup(void)
 
 	if (!visual) {
 		visual = DefaultVisual(dpy, screen);
-		depth = DefaultDepth(dpy, screen);
-		cmap = DefaultColormap(dpy, screen);
+		depth  = DefaultDepth(dpy, screen);
+		cmap   = DefaultColormap(dpy, screen);
 	}
 
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
@@ -2947,7 +2947,7 @@ setup(void)
 		showbar = 0;
 	}
 	lrpad = drw->fonts->h;
-	bh = drw->fonts->h + barh; /* prevent barh being < than font size */
+	bh    = drw->fonts->h + barh; /* prevent barh being < than font size */
 	updategeom();
 
 	/* init atoms */
