@@ -1480,7 +1480,10 @@ focus(Client *c)
 		detachstack(c);
 		attachstack(c);
 		grabbuttons(c, 1);
+		/* set new focused border first to avoid flickering */
 		XSetWindowBorder(dpy, c->win, scheme[c->f & Float ? BorderFloat : BorderSel][ColFg].pixel);
+		if (prevclient)
+			XSetWindowBorder(dpy, prevclient->win, scheme[BorderNorm][ColFg].pixel);
 		setfocus(c);
 		if (c->mon->lt->arrange) {
 			/* Move the currently focused client above the bar window */
@@ -3106,7 +3109,7 @@ unfocus(Client *c, int setfocus)
 
 	prevclient = c;
 	grabbuttons(c, 0);
-	XSetWindowBorder(dpy, c->win, scheme[BorderNorm][ColFg].pixel);
+	//XSetWindowBorder(dpy, c->win, scheme[BorderNorm][ColFg].pixel);
 	if (setfocus) {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
@@ -3151,6 +3154,10 @@ unmanage(Client *c, int destroyed)
 	}
 	if (scratchpad_last_showed == c)
 		scratchpad_last_showed = NULL;
+
+	if (prevclient == c)
+		prevclient = NULL;
+
 	free(c);
 
 	if (!s) {
