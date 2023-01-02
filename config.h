@@ -236,6 +236,7 @@ static const Rule rules[] = {
 	RULE(.class = "Brave-browser",	.tags = 1 << 4, .flags = FakeFS)
 	RULE(.class = "discord",	.tags = 1 << 7, .flags = FakeFS)
 	RULE(.class = "St",		.flags = Terminal)
+	RULE(.class = "Alacritty",	.flags = Terminal)
 	RULE(.title = "Event Tester",	.flags = NoSwallow) /* xev */
 	/* floating */
 	RULE(.class = "Pavucontrol",	.flags = Float)
@@ -549,7 +550,7 @@ static const Button buttons[] = {
 //	{ ClkLtSymbol,          0,              Button4,        focusstack,	{.i = +1} },
 //	{ ClkLtSymbol,          0,              Button5,        focusstack,	{.i = -1} },
 
-	{ ClkWinTitle,          0,    Button1,	SHCMD("maim -usDq ~/Downloads/$(date +'%d-%m_%H_%M_%S').png") },
+	{ ClkWinTitle,          0,    Button1,	SHCMD("maim -usDq ~/Downloads/$(date +'%d-%m_%H:%M:%S_%g').png") },
 //	{ ClkWinTitle,          0,              Button2,	zoomswap,       {0} },
 //	{ ClkWinTitle,          0,              Button2,	killclient,	{0} },
 	{ ClkWinTitle,		0,		Button3,	SHOT },
