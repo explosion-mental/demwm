@@ -556,6 +556,7 @@ static int (*xerrorxlib)(Display *, XErrorEvent *); /* x11 error func */
 static unsigned int numlockmask = 0;
 static unsigned int sleepinterval = 0, maxinterval = 0;
 static int running = 0; /* -1 restart, 0 quit, 1 running */
+static int swapfs = -1;
 
 /* various layouts to use on the config */
 #include "layouts.c"

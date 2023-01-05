@@ -1244,13 +1244,17 @@ shiftpreview(const Arg *arg)
 void
 swapfocus(const Arg *arg)
 {
-	Client *c = selmon->clients;
+	//Client *c = selmon->clients;
 
-	for (; c && c != prevclient; c = c->next);
+	//for (; c && c != prevclient; c = c->next);
 
-	if (c == prevclient && prevclient) {
-		view(&((Arg){.ui = prevclient->tags & TAGMASK}));
-		focus(prevclient);
-		restack(prevclient->mon);
-	}
+	//if (c == prevclient && prevclient) {
+	//	if (c->tags && ((c->tags & TAGMASK) != selmon->seltags))
+	//		view(&((Arg){.ui = c->tags & TAGMASK}));
+	//	focus(c);
+	//	restack(c->mon);
+	//}
+	/// Workaround in edge cases with scratchpads..
+	swapfs = !swapfs;
+	focusstack(&((Arg){.i = swapfs}));
 }
