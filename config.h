@@ -296,7 +296,7 @@ static const Rule rules[] = {
 #define FURFONT		"Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true"
 #define VOL(Q)		SHCMD("wpctl set-volume @DEFAULT_AUDIO_SINK@ " Q /*5%-+*/ "; demwm updateblock 8")
 #define MUTE /*toggle mute*/ SHCMD("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; demwm updateblock 8")
-#define SHOT		SHCMD("scrot -us -e 'mv $f ~/Downloads && notify-send --icon=~/Downloads/$f ScreenShot_Taken $f'")
+#define SHOT		SHCMD("scrot -us -e 'mv $f ~/Downloads && notify-send --icon=~/Downloads/$f ScreenShot_Taken $f -t 1000'")
 #define MPCVOL(Q)	CMD("mpc", "volume", Q)
 #define MPCNEXT		SHCMD("mpc next && mpdnoti 900; demwm updateblock 11")
 #define MPCPREV		SHCMD("mpc prev && mpdnoti 900; demwm updateblock 11")
