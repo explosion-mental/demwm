@@ -296,11 +296,11 @@ static const Rule rules[] = {
 #define FURFONT		"Monofur Nerd Font:pixelsize=20:antialias=true:autohint=true"
 #define VOL(Q)		SHCMD("wpctl set-volume @DEFAULT_AUDIO_SINK@ " Q /*5%-+*/ "; demwm updateblock 8")
 #define MUTE /*toggle mute*/ SHCMD("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; demwm updateblock 8")
-#define SHOT		SHCMD("scrot -us -e 'mv $f ~/Downloads && notify-send --icon=~/Downloads/$f ScreenShot_Taken $f -t 1000'")
+#define SHOT(FLAGS)	CMD("scrot", FLAGS, "-e", "'mv $f ~/Downloads && notify-send --icon=~/Downloads/$f ScreenShot_Taken $f -t 1000'")
 #define MPCVOL(Q)	CMD("mpc", "volume", Q)
 #define MPCNEXT		SHCMD("mpc next && mpdnoti 900; demwm updateblock 11")
 #define MPCPREV		SHCMD("mpc prev && mpdnoti 900; demwm updateblock 11")
-#define LIGHT(Q)	SHCMD("brightnessctl -q set " Q)
+#define LIGHT(Q)	CMD("brightnessctl", "-q", "set", Q)
 #define V(var)		spawn, { .v = var }
 
 /* commands */
@@ -512,9 +512,10 @@ static const Key keys[] = {
 				/* miscelaneous */
 	{ MOD|Shift,    XK_apostrophe,	SHCMD("clipctl disable && passmenu -i \
 	-l 25 -p 'Passmenu:' && notify-send 'Password will be deleted on 45 seconds❌' ; clipctl enable")},
-	{ Shift,	XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads && \
-	magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") },
-	{ 0,			XK_Print,	SHOT },
+	{ Shift,	XK_Print,	SHOT("-us") },
+	/*{ Shift,	XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads &&
+	magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") }, */
+	{ 0,			XK_Print,	SHOT("-us") },
 /* panic key */ { MOD, XK_Delete, SHCMD("mpv '/home/faber/Media/Videos/Fight the Power!.mkv' --loop-file=inf --fs") },
 };
 
@@ -553,7 +554,7 @@ static const Button buttons[] = {
 	{ ClkWinTitle,          0,    Button1,	SHCMD("maim -usDq ~/Downloads/$(date +'%d-%m_%H:%M:%S_%g').png") },
 //	{ ClkWinTitle,          0,              Button2,	zoomswap,       {0} },
 //	{ ClkWinTitle,          0,              Button2,	killclient,	{0} },
-	{ ClkWinTitle,		0,		Button3,	SHOT },
+	{ ClkWinTitle,		0,		Button3,	SHOT("-us") },
 	{ ClkWinTitle,          0,              Button4,        focusstack,	{.i = +1 } },
 	{ ClkWinTitle,          0,              Button5,        focusstack,	{.i = -1 } },
 
