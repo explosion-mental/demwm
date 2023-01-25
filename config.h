@@ -300,7 +300,7 @@ static const Rule rules[] = {
 #define MPCVOL(Q)	CMD("mpc", "volume", Q)
 #define MPCNEXT		SHCMD("mpc next && mpdnoti 900; demwm updateblock 11")
 #define MPCPREV		SHCMD("mpc prev && mpdnoti 900; demwm updateblock 11")
-#define LIGHT(Q)	SHCMD("sudo brightnessctl -q set " Q)
+#define LIGHT(Q)	SHCMD("brightnessctl -q set " Q)
 #define V(var)		spawn, { .v = var }
 
 /* commands */
