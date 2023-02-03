@@ -559,7 +559,6 @@ static int (*xerrorxlib)(Display *, XErrorEvent *); /* x11 error func */
 static unsigned int numlockmask = 0;
 static unsigned int sleepinterval = 0, maxinterval = 0;
 static int running = 0; /* -1 restart, 0 quit, 1 running */
-static void (*attach)(Client *);
 
 /* various layouts to use on the config */
 #include "layouts.c"
@@ -2366,7 +2365,7 @@ void
 pop(Client *c)
 {
 	detach(c);
-	attach(c);
+	attachdefault(c);
 	focus(c);
 	arrange(c->mon);
 }
@@ -2938,7 +2937,6 @@ setup(void)
 	int nitems, depth, screen;
 	unsigned int i;
 	int sw, sh;
-	attach = attachdefault;
 
 	#ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1)
@@ -3355,7 +3353,7 @@ updategeom(void)
 					m->clients = c->next;
 					detachstack(c);
 					c->mon = mons;
-					attach(c);
+					attachdefault(c);
 					attachstack(c);
 				}
 				if (m == selmon)

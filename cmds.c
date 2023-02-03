@@ -159,7 +159,7 @@ pushstack(const Arg *arg)
 			c->next = sel;
 		} else { /* move to the front */
 			detach(sel);
-			attach(sel);
+			attachdefault(sel);
 		}
 	} else { /* pushup */
 		if ((c = prevtiled(sel)) && c != nexttiled(selmon->clients)) {
@@ -1024,7 +1024,7 @@ zoomswap(const Arg *arg)
 	if (c != cold && !at)
 		at = findbefore(c);
 	detach(c);
-	attach(c);
+	attachdefault(c);
 	/* swap windows instead of pushing the previous one down */
 	if (c != cold && at) {
 		p = cold;

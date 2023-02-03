@@ -31,6 +31,7 @@ CUI movefloat    = 22;     /* used in movfh_setmfact and movfv_pushstack */
 static int smartgaps  = 0; /* 1 means no outer gap when there is only one window */
 static int showbar    = 1; /* 0 means no bar */
 static int showstatus = 1; /* 0 means no status text */
+static void (*attach)(Client *) = attachabove; /* attachabove - attachdefault */
 #define baralpha     120   /* bar opacity from 0 to 255 (Solid) */
 
 static const char *fonts[] = {
