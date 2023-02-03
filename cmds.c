@@ -1263,20 +1263,25 @@ swapfocus(const Arg *arg)
 void /* change attach */
 attachwhere(const Arg *arg)
 {
-	switch (arg->i) {
-	case 1:
-		attach = attachdefault;
-	case 2:
-		attach = attachabove;
-	}
+	attach = (a*)(Client *)arg->v;
 }
 
-void /* TODO cycle properly */
-attachcycle(const Arg *arg)
+void
+cycleattach(const Arg *arg)
 {
-	if (attach == attachdefault) {
-		attach = attachabove;
-	} else if (attach == attachabove) {
-		attach = attachdefault;
+	unsigned int idx = 0;
+
+	if (arg->i > 0) {
+		if (idx < LENGTH(attachmodes) - 1)
+			idx += arg->i;
+		else
+			idx = 0;
+	} else {
+		if (idx > 0)
+			idx += arg->i;
+		else
+			idx = LENGTH(attachmodes) - 1;
 	}
+
+	attach = attachmodes[idx];
 }
