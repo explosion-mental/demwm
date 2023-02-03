@@ -1,8 +1,15 @@
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
-    const exe = b.addExecutable("demwm", null);
-    const libs: []const u8 = &.{
+    const features = [_][]const u8{
+        "-DXINERAMA",
+        "-DICONS",
+        "-DSYSTRAY",
+        //"-TAG_PREVIEWS",
+        //"-DDEBUG",
+    };
+
+    const libs = [_][]const u8{
         "imlib2",
         "x11-xcb",
         "xcb",
@@ -13,7 +20,26 @@ pub fn build(b: *std.build.Builder) void {
         "Xrender",
         "Xinerama",
     };
-    exe.addCSourceFiles(&.{ "demwm.c", "util.c", "drw.c" }, &.{ "-Wall", "-DVERSION=\"1.0\"" });
+
+    const args = features ++ [_][]const u8{
+        "-D_POSIX_C_SOURCE=200809L",
+        "-DVERSION=\"1.0\"",
+        "-std=c99",
+        "-pedantic",
+        "-Wall",
+        "-Wno-unused-function",
+        "-Wno-unused-variable",
+        "-march=native",
+        "-Ofast",
+        "-flto=auto",
+        //debug
+        //"-Wextra",
+        //"-flto",
+        //"-fsanitize=address,undefined,leak",
+    };
+    const exe = b.addExecutable("demwm", null);
+
+    exe.addCSourceFiles(&.{ "demwm.c", "util.c", "drw.c" }, &args);
     exe.linkLibC();
 
     // INCS = -I${X11INC} -I${FREETYPEINC}
