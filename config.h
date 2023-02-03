@@ -173,13 +173,14 @@ static const int taglayouts[] = {    1,   1,    0,   0,    1,    0,    0,    0, 
 static const char *tagsalt[]  = { "I", "2", "III", "4", "V", "6", "VII", "8", "IX" };
 static const unsigned int alltagslayout = 0; /* the '~0' (all tags) tag */
 
-/* attach */
+/* attach methods: these make reference to the position in which a new window
+ *                 will take place. */
 static void (*attachmodes[])(Client *) = {
-	attachabove,
-	attachdefault,
+	attachabove,	/* new clients above the selected client (Xmonad) */
+	attachdefault,	/* new clients become the new master (default dwm) */
 };
 
-/* layout(s) */
+/* layouts */
 static const Layout layouts[] = {
       /* symbol  arrange  gaps */
  	{ "[]=", tile },               /* master on left, slaves on right */
