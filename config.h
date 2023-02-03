@@ -237,7 +237,7 @@ static const Rule rules[] = {
 	RULE(.class = "discord",	.tags = 1 << 7, .flags = FakeFS)
 	RULE(.class = "St",		.flags = Terminal)
 	RULE(.class = "Alacritty",	.flags = Terminal)
-	RULE(.title = "Event Tester",	.flags = NoSwallow) /* xev */
+	RULE(.title = "Event Tester",	.flags = NoSwallow | Float) /* xev */
 	/* floating */
 	RULE(.class = "Pavucontrol",	.flags = Float)
 	RULE(.class = "Pcmanfm",	.flags = Float)
@@ -314,13 +314,15 @@ static const char *rofcalc[]   = { "rofi", "-show", "calc", "-modi", "calc", "-n
 /* scratchpads */
 static const char *scratchpads[][32] = {
 [Sp1] = { "st", "-n", "term", "-g", "115x30" , NULL }, /* terminal */
-[Sp2] = { "st", "-n", "notes", "-g", FURSIZE, "-f", FURFONT, NOTES, "/home/faber/Docs/testi/notes", NULL }, /* notes */
+//[Sp2] = { "st", "-n", "notes", "-g", FURSIZE, "-f", FURFONT, NOTES, "/home/faber/Docs/testi/notes.md", NULL }, /* notes */
+[Sp2] = { "neovide", "--x11-wm-class-instance", "notes", "--geometry", "70x25", "/home/faber/Docs/testi/notes.md", NULL }, /* notes */
 [Sp3] = { "st", "-n", "calc", "-f", "monospace:size=16", "-g", "50x20", "-e", "bc", "-lq", NULL }, /* calculator */
 [Sp4] = { "st", "-n", "pre", "-g", "70x25", NOTES, "/home/faber/Docs/testi/testi-is", NULL }, /* uni */
 [Sp5] = { "st", "-n", "music", "-g", "105x27", "-f", FURFONT, "-e", "ncmpcpp", "-q", NULL }, /* music */
 [Sp6] = SH("st -n pulsemixer -g 100x25 -f 'SauceCodePro Nerd Font: style=Mono Regular:size=12' -e pulsemixer"), /* pulsepad */
 [Sp7] = { "samedir", "-n", "samedir", "-g", "115x30", NULL }, /* samedir */
-[Sp8] = { "st", "-n", "testi", "-g", FURSIZE, "-f", FURFONT, NOTES, "/home/faber/Docs/testi/testi", NULL }, /* notes */
+//[Sp8] = { "st", "-n", "testi", "-g", FURSIZE, "-f", FURFONT, NOTES, "/home/faber/Docs/testi/testi.md", NULL }, /* notes */
+[Sp8] = { "neovide", "--x11-wm-class-instance", "testi", "--geometry", "70x25", "/home/faber/Docs/testi/testi.md", NULL }, /* notes */
 [Sp9] = { "st", "-n", "mpvfloat", "-g", "115x30" , NULL }, /* terminal */
 };
 /* modifier(s) can be: Alt, AltGr, Ctrl, Shift, ShiftGr, Super, or MOD
