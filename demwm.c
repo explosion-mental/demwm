@@ -263,8 +263,11 @@ static void applyrules(Client *c);
 static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
 static void arrange(Monitor *m);
 static void arrangemon(Monitor *m);
-static void attach(Client *c);
+static void attachdefault(Client *c);
+static void attachabove(Client *c);
 static void attachstack(Client *c);
+static void attachcycle(const Arg *arg);
+static void attachwhere(const Arg *arg);
 static void buttonpress(XEvent *e);
 static void checkotherwm(void);
 static void cleanup(void);
@@ -556,7 +559,7 @@ static int (*xerrorxlib)(Display *, XErrorEvent *); /* x11 error func */
 static unsigned int numlockmask = 0;
 static unsigned int sleepinterval = 0, maxinterval = 0;
 static int running = 0; /* -1 restart, 0 quit, 1 running */
-static int swapfs = -1;
+static void (*attach)(Client *);
 
 /* various layouts to use on the config */
 #include "layouts.c"
@@ -713,11 +716,31 @@ arrangemon(Monitor *m)
 		m->lt->arrange(m);
 }
 
+//void
+//attach(Client *c)
+//{
+//	c->next = c->mon->clients;
+//	c->mon->clients = c;
+//}
+
 void
-attach(Client *c)
+attachdefault(Client *c)
 {
 	c->next = c->mon->clients;
 	c->mon->clients = c;
+}
+
+void
+attachabove(Client *c)
+{
+	Client *at;
+	if (!(c->mon->sel == NULL || c->mon->sel == c->mon->clients || (c->f & Float))) {
+		for (at = c->mon->clients; at->next != c->mon->sel; at = at->next);
+		c->next = at->next;
+		at->next = c;
+		return;
+	}
+	attachdefault(c);
 }
 
 void
@@ -2915,6 +2938,7 @@ setup(void)
 	int nitems, depth, screen;
 	unsigned int i;
 	int sw, sh;
+	attach = attachdefault;
 
 	#ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1)
