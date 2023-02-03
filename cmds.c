@@ -1263,7 +1263,7 @@ swapfocus(const Arg *arg)
 void /* change attach */
 attachwhere(const Arg *arg)
 {
-	attach = (a*)(Client *)arg->v;
+	attach = (void *)arg->v;
 }
 
 void
