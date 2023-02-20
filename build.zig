@@ -9,18 +9,6 @@ pub fn build(b: *std.build.Builder) void {
         //"-DDEBUG",
     };
 
-    const libs = [_][]const u8{
-        "imlib2",
-        "x11-xcb",
-        "xcb",
-        "xcb-res",
-        "fontconfig",
-        "X11",
-        "Xft",
-        "Xrender",
-        "Xinerama",
-    };
-
     const args = features ++ [_][]const u8{
         "-D_POSIX_C_SOURCE=200809L",
         "-DVERSION=\"1.0\"",
@@ -37,6 +25,19 @@ pub fn build(b: *std.build.Builder) void {
         //"-flto",
         //"-fsanitize=address,undefined,leak",
     };
+
+    const libs = [_][]const u8{
+        "imlib2",
+        "x11-xcb",
+        "xcb",
+        "xcb-res",
+        "fontconfig",
+        "X11",
+        "Xft",
+        "Xrender",
+        "Xinerama",
+    };
+
     const exe = b.addExecutable("demwm", null);
 
     exe.addCSourceFiles(&.{ "demwm.c", "util.c", "drw.c" }, &args);
