@@ -9,6 +9,8 @@ pub fn build(b: *std.build.Builder) void {
         //"-DDEBUG",
     };
 
+    const debug = false;
+
     const args = features ++ [_][]const u8{
         "-D_POSIX_C_SOURCE=200809L",
         "-DVERSION=\"1.0\"",
@@ -17,14 +19,25 @@ pub fn build(b: *std.build.Builder) void {
         "-Wall",
         "-Wno-unused-function",
         "-Wno-unused-variable",
+    };
+
+    const debugflags = [_][]const u8{
+        "-Wextra",
+        "-flto",
+        "-fsanitize=address,undefined,leak",
+    };
+
+    const opt = [_][]const u8{
         "-march=native",
         "-Ofast",
         "-flto=auto",
-        //debug
-        //"-Wextra",
-        //"-flto",
-        //"-fsanitize=address,undefined,leak",
     };
+
+    if (debug) {
+        _ = args ++ debugflags;
+    } else {
+        _ = args ++ opt;
+    }
 
     const libs = [_][]const u8{
         "imlib2",
