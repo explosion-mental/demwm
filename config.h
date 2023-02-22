@@ -364,6 +364,7 @@ static const Key keys[] = {
 
 				/* Navigation */
 	{ MOD,		        XK_c,	swapfocus, 	{0} },
+	{ MOD,		        XK_Tab,	swapfocus, 	{0} },
 	{ MOD,			XK_j,	focusstack,	{ .i = -1 }	},
 //	{ MOD|Shift,		XK_j,	movefloatvert,	{ .i = 1 }	},
 //	{ MOD|Shift,		XK_j,	pushstack,	{ .i = 1 }	},
@@ -404,7 +405,7 @@ static const Key keys[] = {
 	{ MOD|Shift,		XK_0,	tag,		{.ui = ~SPTAGMASK } },
 	{ MOD|Ctrl,		XK_0,	view,		{.ui = ~0 }	},
 //	{ MOD|Ctrl,		XK_0,	tag,		{.ui = ~0 }	},
-	{ MOD,			XK_Tab,	view,			{0}	},
+	//{ MOD,			XK_Tab,	view,			{0}	},
 	{ MOD,			XK_space,view,			{0}	},
 	{ MOD,			XK_w,	zoomswap,		{0}	},
 	{ MOD|Shift,		XK_w,	focusmaster,		{0}	},
