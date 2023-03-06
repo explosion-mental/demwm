@@ -3697,13 +3697,8 @@ scratchpad_show_client(Client *c)
 void
 scratchpad_show_first(void)
 {
-	Client *c;
-	for (c = selmon->clients; c; c = c->next) {
-		if (c->tags == SCRATCHPAD_MASK) {
-			scratchpad_show_client(c);
-			break;
-		}
-	}
+	for (Client *c = selmon->clients; c && c->tags == SCRATCHPAD_MASK; c = c->next)
+		scratchpad_show_client(c);
 }
 
 int
