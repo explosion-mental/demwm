@@ -52,8 +52,10 @@ pub fn build(b: *std.build.Builder) void {
     };
 
     const exe = b.addExecutable("demwm", null);
+    const mode = b.standardReleaseOptions();
 
     exe.addCSourceFiles(&.{ "demwm.c", "util.c", "drw.c" }, &args);
+    exe.setBuildMode(mode);
     exe.linkLibC();
 
     // INCS = -I${X11INC} -I${FREETYPEINC}
