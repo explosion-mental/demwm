@@ -2555,6 +2555,7 @@ restack(Monitor *m)
 void
 run(void)
 {
+	//TODO make blocks move right by a char if they are bigger than CMDLENGTH
 	int i, bt, oldflags;
 	XEvent ev;
 	enum { XFD = LENGTH(blocks) };
