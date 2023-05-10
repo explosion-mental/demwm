@@ -4,27 +4,20 @@
 
 img_dir="${HOME}/Media/Pictures/Wallpapers"
 img_lock="${XDG_DATA_HOME:-$HOME/.local/share}/bg"
-backend=wal		# colorz - schemer2 - wal - haishoku - colorthief
+#backend=wal		# colorz - schemer2 - wal - haishoku - colorthief
 
 # post run hooks, everything here runs in the background
 postrun() {
 	xwallpaper --zoom "$img_lock"
-	killall --quiet glava && glava 1>/dev/null
+	#killall --quiet glava && glava 1>/dev/null
 	#killall --quiet -9 dunst && dunst
-	ln -sf "${HOME}/.cache/wal/dunstrc"		"${HOME}/.config/dunst/dunstrc"
-	ln -sf "${HOME}/.cache/wal/zathurarc"		"${HOME}/.config/zathura/zathurarc"
-	ln -sf "${HOME}/.cache/wal/glava_bars.glsl"	"${HOME}/.config/glava/bars.glsl"
-	ln -sf "${HOME}/.cache/wal/glava_circle.glsl"	"${HOME}/.config/glava/circle.glsl"
-	ln -sf "${HOME}/.cache/wal/glava_graph.glsl"	"${HOME}/.config/glava/graph.glsl"
-	ln -sf "${HOME}/.cache/wal/glava_main.glsl"	"${HOME}/.config/glava/rc.glsl"
-	ln -sf "${HOME}/.cache/wal/glava_radial.glsl"	"${HOME}/.config/glava/radial.glsl"
-	ln -sf "${HOME}/.cache/wal/glava_wave.glsl"	"${HOME}/.config/glava/wave.glsl"
 }
 
 random_img="$(fd . "$img_dir" -e jpg -e jpeg -e png --type f | shuf -n 1)"
 #randomimg="$(find "$img_path" -iregex '.*.\(jpg\|jpeg\|png\)' -type f | shuf -n 1)"
 
-wal -i "$random_img" --backend $backend -qnt && demwm xrdb
+#wal -i "$random_img" --backend $backend -qnt && demwm xrdb
+wallust -q "$random_img" && xrdb -merge -quiet ~/.config/Xresources && demwm xrdb
 
 ln -sf "$random_img" "$img_lock"
 
