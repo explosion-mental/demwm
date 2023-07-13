@@ -69,7 +69,7 @@ static const char *colors[][2] = {
 	[SchemeSel]    = { color0,	color1 }, /* selected tag */
 	[SchemeUrgent] = { color0,	fg_wal }, /* urgent tag */
 	[SchemeLt]     = { fg_wal,	color0 }, /* layout */
-	[SchemeTitle]  = { color0,	color2 }, /* window title */
+	[SchemeTitle]  = { color0,	color1 }, /* window title */
 	[SchemeStatus] = { fg_wal,	color0 }, /* status text */
 	[SchemeDelim]  = { fg_wal,	color0 }, /* delimiter */
 	[SchemeSys]    = { color2,	color2 }, /* system tray */
@@ -525,7 +525,7 @@ static const Key keys[] = {
 	{ Shift,	XK_Print,	SHOT("--focused --select") },
 	/*{ Shift,	XK_Print,	SHCMD("scrot -u -se 'mv $f ~/Downloads &&
 	magick mogrify -fuzz 4% -define trim:percent-background=0% -trim +repage -format png ~/Downloads/$f'") }, */
-	{ 0,			XK_Print,	SHOT("--focused --select") },
+	{ 0,			XK_Print,	SHOT("--focused") },
 /* panic key */ { MOD, XK_Delete, SHCMD("mpv '/home/faber/Media/Videos/Fight the Power!.mkv' --loop-file=inf --fs") },
 };
 
