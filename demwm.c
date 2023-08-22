@@ -553,6 +553,7 @@ static const char broken[] = "broken";
 static unsigned int stsw = 0; /* status width */
 static unsigned int blocknum; /* blocks idx in mouse click */
 static int combo = 0;         /* combo flag */
+static int sw, sh;            /* X display screen geometry width, height */
 static int bh;                /* bar height */
 static int lrpad;             /* sum of left and right padding for text */
 static int (*xerrorxlib)(Display *, XErrorEvent *); /* x11 error func */
@@ -636,10 +637,10 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 	*w = MAX(1, *w);
 	*h = MAX(1, *h);
 	if (interact) {
-		if (*x > drw->w)
-			*x = drw->w - WIDTH(c);
-		if (*y > drw->h)
-			*y = drw->h - HEIGHT(c);
+		if (*x > sw)
+			*x = sw - WIDTH(c);
+		if (*y > sh)
+			*y = sh - HEIGHT(c);
 		if (*x + *w + 2 * c->bw < 0)
 			*x = 0;
 		if (*y + *h + 2 * c->bw < 0)
@@ -1073,8 +1074,6 @@ configurenotify(XEvent *e)
 	Client *c;
 	XConfigureEvent *ev = &e->xconfigure;
 	int dirty;
-	int sw = DisplayWidth(dpy, drw->screen);
-	int sh = DisplayHeight(dpy, drw->screen);
 
 	/* TODO: updategeom handling sucks, needs to be simplified */
 	if (ev->window == root) {
@@ -1529,7 +1528,7 @@ focus(Client *c)
 		}
 
 		if (c->f & UnCursor) /* put the cursor in the bottom right */
-			XWarpPointer(dpy, None, root, 0, 0, 0, 0, drw->w, drw->h);
+			XWarpPointer(dpy, None, root, 0, 0, 0, 0, sw, sh);
 	} else {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
@@ -1645,7 +1644,7 @@ getpreview(void)
 		//XMoveWindow(dpy, selmon->tagwin, -selmon->mx, -selmon->my + bh);
 		//XFlush(dpy);
 
-		if (!(image = imlib_create_image(drw->w, drw->h))) {
+		if (!(image = imlib_create_image(sw, sh))) {
 			LOG("imlib: failed to create image, skipping.");
 			continue;
 		}
@@ -2938,7 +2937,6 @@ setup(void)
 	const char wm[] = "demwm";
 	int nitems, depth, screen;
 	unsigned int i;
-	int sw, sh;
 	attach = attachmodes[0];
 
 	#ifdef __OpenBSD__
@@ -3370,10 +3368,10 @@ updategeom(void)
 	{ /* default monitor setup */
 		if (!mons)
 			mons = createmon();
-		if (mons->mw != drw->w || mons->mh != drw->h) {
+		if (mons->mw != sw || mons->mh != sh) {
 			dirty = 1;
-			mons->mw = mons->ww = drw->w;
-			mons->mh = mons->wh = drw->h;
+			mons->mw = mons->ww = sw;
+			mons->mh = mons->wh = sh;
 			updatebarpos(mons);
 		}
 	}
