@@ -364,7 +364,8 @@ static const Key keys[] = {
 
 				/* Navigation */
 	{ MOD,		        XK_c,	swapfocus, 	{0} },
-	{ MOD,		        XK_Tab,	swapfocus, 	{0} },
+	//{ MOD,		        XK_Tab,	swapfocus, 	{0} },
+	{ MOD,			XK_Tab,	focusstack,	{ .i = -1 }	},
 	{ MOD,			XK_j,	focusstack,	{ .i = -1 }	},
 //	{ MOD|Shift,		XK_j,	movefloatvert,	{ .i = 1 }	},
 //	{ MOD|Shift,		XK_j,	pushstack,	{ .i = 1 }	},

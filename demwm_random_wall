@@ -9,7 +9,7 @@ img_lock="${XDG_DATA_HOME:-$HOME/.local/share}/bg"
 # post run hooks, everything here runs in the background
 postrun() {
 	xwallpaper --zoom "$img_lock"
-	#killall --quiet glava && glava 1>/dev/null
+	killall --quiet glava && glava 1>/dev/null
 	#killall --quiet -9 dunst && dunst
 }
 
