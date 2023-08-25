@@ -169,7 +169,7 @@ static XClassHint previewclass = { "demwm-preview", "demwm-preview" };
  * tagsalt: Used if hidevacants is enabled
  * taglayouts: Index that indicates which layouts[] use */
 static const char *tags[]     = { "📖", "", "💼", "", "🔬", "🎹", "📺", "💻", "🐧" };
-static const int taglayouts[] = {    1,   1,    0,   0,    1,    0,    0,    0,    1 };
+static const int taglayouts[] = {    0,   0,    0,   0,    1,    0,    0,    0,    1 };
 static const char *tagsalt[]  = { "I", "2", "III", "4", "V", "6", "VII", "8", "IX" };
 static const unsigned int alltagslayout = 0; /* the '~0' (all tags) tag */
 
@@ -241,6 +241,7 @@ static const Rule rules[] = {
 	RULE(.class = "firefox",	.tags = 1 << 1, .flags = FakeFS)
 	RULE(.class = "LibreWolf",	.tags = 1 << 1, .flags = FakeFS)
 	RULE(.class = "Brave-browser",	.tags = 1 << 4, .flags = FakeFS)
+	RULE(.class = "Opera",		.tags = 1 << 4, .flags = FakeFS)
 	RULE(.class = "discord",	.tags = 1 << 7, .flags = FakeFS)
 	RULE(.class = "St",		.flags = Terminal)
 	RULE(.class = "Alacritty",	.flags = Terminal)
